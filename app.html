@@ -456,23 +456,32 @@ td{padding:10px 14px;vertical-align:middle}
 
       <!-- 转派 -->
       <div class="tab-panel" id="tab-assign">
-        <div class="bold txtsm" style="margin-bottom:10px">转派至其他BU</div>
+        <div class="bold txtsm" style="margin-bottom:10px">指派给成员</div>
         <div class="panel-box">
           <div class="form-row">
-            <label class="label">转派至</label>
-            <select class="fc" id="a-to">
-              <option value="税务">税务BU</option>
-              <option value="法律">法律BU</option>
-              <option value="资本市场">资本市场BU</option>
-            </select>
+            <label class="label">指派类型</label>
+            <div style="display:flex;gap:16px;font-size:13px;padding:4px 0">
+              <label style="cursor:pointer;display:flex;align-items:center;gap:6px">
+                <input type="radio" name="a-type" value="internal" checked onchange="renderAssignTarget('internal')">
+                本BU内部协助
+              </label>
+              <label style="cursor:pointer;display:flex;align-items:center;gap:6px">
+                <input type="radio" name="a-type" value="cross" onchange="renderAssignTarget('cross')">
+                转派其他BU
+              </label>
+            </div>
           </div>
           <div class="form-row">
-            <label class="label">转派原因 *</label>
-            <textarea class="fc" id="a-reason" rows="3" placeholder="说明转派原因…"></textarea>
+            <label class="label">指派给 *</label>
+            <select class="fc" id="a-to-user"></select>
           </div>
-          <button class="btn btn-sm btn-warn" onclick="submitAssign()">确认转派</button>
+          <div class="form-row">
+            <label class="label">说明 *</label>
+            <textarea class="fc" id="a-reason" rows="3" placeholder="说明原因或需要协助的内容…"></textarea>
+          </div>
+          <button class="btn btn-sm btn-warn" onclick="submitAssign()">确认指派</button>
         </div>
-        <div class="mt12 bold txtsm" style="margin-bottom:8px">转派历史</div>
+        <div class="mt12 bold txtsm" style="margin-bottom:8px">指派历史</div>
         <div id="a-history"></div>
       </div>
 
@@ -496,7 +505,7 @@ const S = {
   drawer:null, drawerOriginal:{},
   comments:[], suggestions:[], assignments:[],
   tab:'edit', xlsxParsed:[],
-  pendApprIds:[]
+  pendApprIds:[], profiles:[]
 }
 
 // ── Label maps ───────────────────────────────────────────────
@@ -574,7 +583,7 @@ function showApp(){
     el('nav-import').style.display='flex'
     el('nav-members').style.display='flex'
   }
-  loadBatches(); loadPPs(); setupRealtime()
+  loadBatches(); loadPPs(); loadProfiles(); setupRealtime()
 }
 
 // ── Data ─────────────────────────────────────────────────────
@@ -867,38 +876,112 @@ function renderSuggs(){
     </div>`).join('')
 }
 
+// ── Profiles (人员缓存) ───────────────────────────────────────
+async function loadProfiles(){
+  const {data}=await sb.from('profiles').select('*').order('bu')
+  S.profiles=data||[]
+}
+
 // ── Assignments ───────────────────────────────────────────────
 async function loadAssigns(ppId){
   const {data}=await sb.from('assignments').select('*')
     .eq('pain_point_id',ppId).order('created_at',{ascending:false})
-  S.assignments=data||[]; renderAssigns()
+  S.assignments=data||[]
+  renderAssigns()
+  renderAssignTarget(document.querySelector('input[name="a-type"]:checked')?.value||'internal')
 }
+
 function renderAssigns(){
   el('a-history').innerHTML=S.assignments.length?S.assignments.map(a=>`
     <div class="assign-item">
       <span class="badge bu-${a.from_bu}">${a.from_bu}</span>
       <span class="arr">→</span>
-      <span class="badge bu-${a.to_bu}">${a.to_bu}</span>
-      <span class="txt2 txtsm" style="flex:1">${esc(a.reason||'')}</span>
+      ${a.assigned_to_user_name
+        ?`<span class="bold txtsm">${esc(a.assigned_to_user_name)}</span>
+          <span class="badge bu-${a.to_bu}" style="font-size:10px;margin-left:2px">${a.to_bu}</span>`
+        :`<span class="badge bu-${a.to_bu}">${a.to_bu}</span>`}
+      <span class="txt2 txtsm" style="flex:1;margin-left:4px">${esc(a.reason||'')}</span>
       <span class="txt2 txtsm">${fmtTime(a.created_at)}</span>
     </div>`).join('')
-    :'<div class="txt2 txtsm">暂无转派记录</div>'
+    :'<div class="txt2 txtsm">暂无指派记录</div>'
 }
+
+function renderAssignTarget(type){
+  const sel=el('a-to-user')
+  if(!sel) return
+  sel.innerHTML=''
+  const myBU=S.profile?.bu
+  if(type==='internal'){
+    const same=S.profiles.filter(p=>p.bu===myBU&&p.id!==S.user?.id)
+    if(!same.length){sel.innerHTML='<option value="">本BU暂无其他成员</option>';return}
+    const leads=same.filter(p=>p.role==='bu_lead')
+    const others=same.filter(p=>p.role!=='bu_lead')
+    if(leads.length){
+      const og=document.createElement('optgroup'); og.label='BU负责人'
+      leads.forEach(p=>{const o=document.createElement('option');o.value=p.id;
+        o.textContent=p.name;o.dataset.bu=p.bu;o.dataset.name=p.name;og.appendChild(o)})
+      sel.appendChild(og)
+    }
+    if(others.length){
+      const og=document.createElement('optgroup'); og.label='其他成员'
+      others.forEach(p=>{const o=document.createElement('option');o.value=p.id;
+        o.textContent=p.name;o.dataset.bu=p.bu;o.dataset.name=p.name;og.appendChild(o)})
+      sel.appendChild(og)
+    }
+  } else {
+    const others=S.profiles.filter(p=>p.bu!==myBU&&p.bu!=='管理员')
+    const byBU={}
+    others.forEach(p=>{if(!byBU[p.bu])byBU[p.bu]=[];byBU[p.bu].push(p)})
+    Object.entries(byBU).forEach(([bu,members])=>{
+      const og=document.createElement('optgroup'); og.label=bu+'BU'
+      members.forEach(p=>{const o=document.createElement('option');o.value=p.id;
+        o.textContent=p.name+(p.role==='bu_lead'?' (负责人)':'');
+        o.dataset.bu=p.bu;o.dataset.name=p.name;og.appendChild(o)})
+      sel.appendChild(og)
+    })
+    if(!sel.options.length){sel.innerHTML='<option value="">其他BU暂无成员</option>'}
+  }
+}
+
 async function submitAssign(){
   if(!S.drawer) return
-  const toBU=v('a-to'), reason=v('a-reason').trim()
-  if(!reason){toast('请填写转派原因','err');return}
-  if(toBU===S.drawer.bu){toast('目标BU与当前相同','err');return}
+  const reason=v('a-reason').trim()
+  if(!reason){toast('请填写说明','err');return}
+  const sel=el('a-to-user')
+  if(!sel.value){toast('请选择指派对象','err');return}
+  const opt=sel.options[sel.selectedIndex]
+  const toUserId=sel.value
+  const toUserName=opt.dataset.name||opt.textContent.replace(' (负责人)','')
+  const toBU=opt.dataset.bu||S.profile?.bu
+  const isCross=document.querySelector('input[name="a-type"]:checked')?.value==='cross'
+
   await sb.from('assignments').insert({
     pain_point_id:S.drawer.id, from_bu:S.drawer.bu, to_bu:toBU,
-    reason, created_by:S.user.id, created_by_name:S.profile.name
+    reason, created_by:S.user.id, created_by_name:S.profile.name,
+    assigned_to_user_id:toUserId, assigned_to_user_name:toUserName
   })
-  await sb.from('pain_points').update({bu:toBU, status:'cross_bu'}).eq('id',S.drawer.id)
-  S.drawer.bu=toBU; S.drawer.status='cross_bu'
-  el('d-bu').textContent=toBU; el('d-bu').className=`badge bu-${toBU}`
-  el('d-status').textContent=statusLabel(S.drawer); el('d-status').className=`badge s-cross_bu`
-  renderStatusActions(S.drawer)
-  el('a-reason').value=''; toast(`已转派至 ${toBU}`,'ok')
+
+  if(isCross){
+    await sb.from('pain_points').update({
+      bu:toBU, status:'cross_bu',
+      assigned_to_user_id:toUserId, assigned_to_user_name:toUserName
+    }).eq('id',S.drawer.id)
+    S.drawer.bu=toBU; S.drawer.status='cross_bu'
+    el('d-bu').textContent=toBU; el('d-bu').className=`badge bu-${toBU}`
+    el('d-status').textContent=statusLabel(S.drawer); el('d-status').className=`badge s-cross_bu`
+    renderStatusActions(S.drawer)
+    toast(`已转派至 ${toBU} · ${toUserName}`,'ok')
+  } else {
+    await sb.from('pain_points').update({
+      status:'in_review',
+      assigned_to_user_id:toUserId, assigned_to_user_name:toUserName
+    }).eq('id',S.drawer.id)
+    S.drawer.status='in_review'
+    el('d-status').textContent=statusLabel(S.drawer); el('d-status').className=`badge s-in_review`
+    renderStatusActions(S.drawer)
+    toast(`已请求 ${toUserName} 协助审阅`,'ok')
+  }
+  el('a-reason').value=''
   await Promise.all([loadPPs(),loadAssigns(S.drawer.id)])
 }
 
@@ -1155,7 +1238,7 @@ async function doImport(){
     if(exMap[pp.pid]){ const {status,...rest}=record; updRows.push(rest) }
     else{ record.status='pending_review'; newRows.push(record) }
   })
-  let inserted=0,updated=0
+  let inserted=0,updated=0,autoDeleted=0
   for(let i=0;i<newRows.length;i+=50){
     const {error}=await sb.from('pain_points').insert(newRows.slice(i,i+50))
     if(!error) inserted+=Math.min(50,newRows.length-i)
@@ -1165,7 +1248,15 @@ async function doImport(){
     await sb.from('pain_points').update(upd).eq('pid',pid)
     updated++
   }
-  toast(`同步完成：新增 ${inserted} · 更新 ${updated}`,'ok')
+  // 自动检测删除：Excel 里没有但 Supabase 有的 pid → 标记 deleted
+  const excelPids=new Set(S.xlsxParsed.map(p=>p.pid))
+  const toDelete=(exPPs||[]).filter(p=>!excelPids.has(p.pid)&&p.status!=='deleted')
+  for(const p of toDelete){
+    await sb.from('pain_points').update({status:'deleted'}).eq('id',p.id)
+    autoDeleted++
+  }
+  const msg=`同步完成：新增 ${inserted} · 更新 ${updated}`+(autoDeleted?` · 自动标记删除 ${autoDeleted}`:'')
+  toast(msg,'ok')
   el('imp-preview').innerHTML=''; el('imp-confirm').disabled=true; S.xlsxParsed=[]
   el('file-input').value=''
   await Promise.all([loadBatches(),loadPPs()]); go('list')
@@ -1194,21 +1285,39 @@ async function exportPPs(){
 
 // ── Members ───────────────────────────────────────────────────
 async function loadMembers(){
-  const {data}=await sb.from('profiles').select('*').order('created_at')
+  const {data}=await sb.from('profiles').select('*').order('bu')
+  const isAdmin=S.profile?.role==='admin'
+  const roleLabel=r=>r==='admin'?'管理员':r==='bu_lead'?'BU负责人':'审阅员'
   el('members-body').innerHTML=data?.length?`
     <div class="members-grid">${data.map(m=>`
-      <div class="member-card">
-        <div class="m-avatar">${(m.name||'?').charAt(0).toUpperCase()}</div>
-        <div>
-          <div class="m-name">${esc(m.name)}</div>
-          <div class="m-role">
-            <span class="badge bu-${m.bu}">${m.bu}</span>
-            <span class="txt2 txtsm"> ${m.role==='admin'?'管理员':m.role==='bu_lead'?'负责人':'审阅员'}</span>
+      <div class="member-card" style="flex-direction:column;align-items:flex-start;gap:10px">
+        <div style="display:flex;align-items:center;gap:12px;width:100%">
+          <div class="m-avatar">${(m.name||'?').charAt(0).toUpperCase()}</div>
+          <div style="flex:1">
+            <div class="m-name">${esc(m.name)}</div>
+            <div class="m-role" style="display:flex;align-items:center;gap:5px;margin-top:3px">
+              <span class="badge bu-${m.bu}">${m.bu}</span>
+              <span class="txt2 txtsm">${roleLabel(m.role)}</span>
+            </div>
           </div>
         </div>
+        ${isAdmin&&m.id!==S.user?.id?`
+          <div style="display:flex;gap:5px;flex-wrap:wrap">
+            ${m.role!=='bu_lead'?`<button class="btn btn-sm btn-outline" onclick="setMemberRole('${m.id}','bu_lead')">设为BU负责人</button>`:''}
+            ${m.role!=='reviewer'?`<button class="btn btn-sm btn-outline" onclick="setMemberRole('${m.id}','reviewer')">设为审阅员</button>`:''}
+            ${m.role!=='admin'?`<button class="btn btn-sm btn-outline" onclick="setMemberRole('${m.id}','admin')">设为管理员</button>`:''}
+          </div>`:''}
       </div>`).join('')}
     </div>`
     :'<div class="empty"><div>暂无成员</div></div>'
+}
+
+async function setMemberRole(userId,role){
+  const {error}=await sb.from('profiles').update({role}).eq('id',userId)
+  if(error){toast('更新失败: '+error.message,'err');return}
+  const label=role==='admin'?'管理员':role==='bu_lead'?'BU负责人':'审阅员'
+  toast(`角色已更新为：${label}`,'ok')
+  await loadMembers(); await loadProfiles()
 }
 
 // ── Navigation ────────────────────────────────────────────────
