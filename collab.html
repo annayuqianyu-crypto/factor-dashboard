@@ -427,7 +427,7 @@ td{padding:10px 14px;vertical-align:middle}
       <div class="drw-tab" data-tab="comments" onclick="switchTab('comments')">
         评论<span id="c-cnt"></span>
       </div>
-      <div class="drw-tab" data-tab="assign" onclick="switchTab('assign')">转派</div>
+      <div class="drw-tab" id="tab-btn-assign" data-tab="assign" onclick="switchTab('assign')">转派</div>
     </div>
     <div class="drw-body">
 
@@ -647,9 +647,6 @@ async function openDrawer(id){
   el('d-batch').textContent=batch?`批次：${batch.name}`:''
   renderEditFields(pp)
   renderStatusActions(pp)
-  // 非本BU成员隐藏「转派」tab
-  const assignTabBtn=document.querySelector('.drw-tab[data-tab="assign"]')
-  if(assignTabBtn) assignTabBtn.style.display=canEdit(pp)?'':'none'
   await Promise.all([loadComments(id),loadSuggs(id),loadAssigns(id)])
   el('drawer').classList.add('open'); el('main').classList.add('drawer-open')
   switchTab('edit'); renderList()
@@ -712,19 +709,45 @@ function renderEditFields(pp){
   })
 
   const editable=canEdit(pp)
-  const ro=editable?'':'readonly'
-  const roStyle=editable?'':'background:#f9fafb;color:#4b5563;cursor:default'
-
   let html=''
 
-  // 非本BU：顶部提示横幅
   if(!editable){
+    // ── 只读视图：纯文本展示，无任何输入控件 ──────────────────
     html+=`<div style="background:#fef3c7;border-radius:8px;padding:10px 13px;
       margin-bottom:14px;font-size:12px;color:#92400e;border-left:3px solid #f59e0b">
-      ⚠️ 此痛点属于 <strong>${esc(pp.bu)}</strong>，仅可查看。
-      如需修改请通过<strong>转派</strong>获得编辑权限。
+      ⚠️ 此痛点属于 <strong>${esc(pp.bu)}</strong>，仅供查看，不可修改。
     </div>`
+    EDIT_FIELDS.forEach(f=>{
+      const val=pp[f.k]||''
+      if(f.pair){
+        const pv=pp[f.pair.k]||''
+        html+=`<div class="edit-field-block">
+          <div style="display:grid;grid-template-columns:1fr 96px;gap:8px">
+            <div><div class="f-label">${f.l}</div>
+              <div class="f-val">${val?esc(val):'<span class="f-empty">—</span>'}</div></div>
+            <div><div class="f-label">${f.pair.l}</div>
+              <div class="f-val">${pv?esc(pv):'<span class="f-empty">—</span>'}</div></div>
+          </div></div>`
+        if(f.k==='tag3') html+=TAG_NOTE
+      } else {
+        html+=`<div class="edit-field-block">
+          <div class="f-label${f.dim?' dim-label':''}">${f.l}</div>
+          <div class="f-val">${val?esc(val):'<span class="f-empty">—</span>'}</div>
+        </div>`
+      }
+    })
+    el('d-edit-fields').innerHTML=html
+    el('edit-submit-bar').style.cssText='display:none!important'
+    // 隐藏转派tab
+    const btn=el('tab-btn-assign')
+    if(btn) btn.style.display='none'
+    return
   }
+
+  // ── 可编辑视图 ────────────────────────────────────────────────
+  // 显示转派tab
+  const btn=el('tab-btn-assign')
+  if(btn) btn.style.display=''
 
   EDIT_FIELDS.forEach(f=>{
     const val=pp[f.k]||''
@@ -734,16 +757,16 @@ function renderEditFields(pp){
         <div style="display:grid;grid-template-columns:1fr 96px;gap:8px">
           <div>
             <div class="f-label">${f.l}</div>
-            <textarea class="edit-ta" id="ef-${f.k}" rows="1" style="min-height:38px;${roStyle}"
-              oninput="onFieldEdit('${f.k}')" ${ro}>${esc(val)}</textarea>
+            <textarea class="edit-ta" id="ef-${f.k}" rows="1" style="min-height:38px"
+              oninput="onFieldEdit('${f.k}')">${esc(val)}</textarea>
             <div class="orig-block" id="orig-${f.k}"></div>
           </div>
           <div>
             <div class="f-label">${f.pair.l}</div>
             <input type="text" class="edit-ta" id="ef-${f.pair.k}"
-              style="height:38px;min-height:unset;resize:none;${roStyle}"
+              style="height:38px;min-height:unset;resize:none"
               oninput="onFieldEdit('${f.pair.k}')"
-              value="${esc(pv)}" placeholder="留空/A/B/C" ${ro}>
+              value="${esc(pv)}" placeholder="留空/A/B/C">
             <div class="orig-block" id="orig-${f.pair.k}"></div>
           </div>
         </div>
@@ -753,14 +776,14 @@ function renderEditFields(pp){
       html+=`<div class="edit-field-block">
         <div class="f-label${f.dim?' dim-label':''}">${f.l}</div>
         <textarea class="edit-ta" id="ef-${f.k}" rows="${val.length>80?4:2}"
-          style="${roStyle}" oninput="onFieldEdit('${f.k}')" ${ro}>${esc(val)}</textarea>
+          oninput="onFieldEdit('${f.k}')">${esc(val)}</textarea>
         <div class="orig-block" id="orig-${f.k}"></div>
       </div>`
     }
   })
 
   el('d-edit-fields').innerHTML=html
-  el('edit-submit-bar').style.display='none'
+  el('edit-submit-bar').style.cssText='display:none'
 }
 
 function onFieldEdit(key){
