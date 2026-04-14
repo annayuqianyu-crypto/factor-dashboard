@@ -950,7 +950,7 @@ function renderAssignTarget(){
   all.forEach(p=>{
     const o=document.createElement('option')
     o.value=p.id
-    o.textContent=`${p.bu}-${p.name}`+(p.role==='bu_lead'?' (负责人)':'')
+    o.textContent=`${p.bu}-${p.name}`
     o.dataset.bu=p.bu; o.dataset.name=p.name
     sel.appendChild(o)
   })
