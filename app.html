@@ -459,30 +459,17 @@ td{padding:10px 14px;vertical-align:middle}
 
       <!-- 转派 -->
       <div class="tab-panel" id="tab-assign">
-        <div class="bold txtsm" style="margin-bottom:10px">指派给成员</div>
+        <div class="bold txtsm" style="margin-bottom:10px">转派给成员</div>
         <div class="panel-box">
           <div class="form-row">
-            <label class="label">指派类型</label>
-            <div style="display:flex;gap:16px;font-size:13px;padding:4px 0">
-              <label style="cursor:pointer;display:flex;align-items:center;gap:6px">
-                <input type="radio" name="a-type" value="internal" checked onchange="renderAssignTarget('internal')">
-                本BU内部协助
-              </label>
-              <label style="cursor:pointer;display:flex;align-items:center;gap:6px">
-                <input type="radio" name="a-type" value="cross" onchange="renderAssignTarget('cross')">
-                转派其他BU
-              </label>
-            </div>
-          </div>
-          <div class="form-row">
-            <label class="label">指派给 *</label>
+            <label class="label">转派给 *</label>
             <select class="fc" id="a-to-user"></select>
           </div>
           <div class="form-row">
             <label class="label">说明 *</label>
-            <textarea class="fc" id="a-reason" rows="3" placeholder="说明原因或需要协助的内容…"></textarea>
+            <textarea class="fc" id="a-reason" rows="3" placeholder="说明转派原因…"></textarea>
           </div>
-          <button class="btn btn-sm btn-warn" onclick="submitAssign()">确认指派</button>
+          <button class="btn btn-sm btn-warn" onclick="submitAssign()">确认转派</button>
         </div>
         <div class="mt12 bold txtsm" style="margin-bottom:8px">指派历史</div>
         <div id="a-history"></div>
@@ -936,7 +923,7 @@ async function loadAssigns(ppId){
     .eq('pain_point_id',ppId).order('created_at',{ascending:false})
   S.assignments=data||[]
   renderAssigns()
-  renderAssignTarget(document.querySelector('input[name="a-type"]:checked')?.value||'internal')
+  renderAssignTarget()
 }
 
 function renderAssigns(){
@@ -954,54 +941,32 @@ function renderAssigns(){
     :'<div class="txt2 txtsm">暂无指派记录</div>'
 }
 
-function renderAssignTarget(type){
+function renderAssignTarget(){
   const sel=el('a-to-user')
   if(!sel) return
   sel.innerHTML=''
-  const myBU=S.profile?.bu
-  if(type==='internal'){
-    const same=S.profiles.filter(p=>p.bu===myBU&&p.id!==S.user?.id)
-    if(!same.length){sel.innerHTML='<option value="">本BU暂无其他成员</option>';return}
-    const leads=same.filter(p=>p.role==='bu_lead')
-    const others=same.filter(p=>p.role!=='bu_lead')
-    if(leads.length){
-      const og=document.createElement('optgroup'); og.label='BU负责人'
-      leads.forEach(p=>{const o=document.createElement('option');o.value=p.id;
-        o.textContent=`${p.bu}-${p.name}`;o.dataset.bu=p.bu;o.dataset.name=p.name;og.appendChild(o)})
-      sel.appendChild(og)
-    }
-    if(others.length){
-      const og=document.createElement('optgroup'); og.label='其他成员'
-      others.forEach(p=>{const o=document.createElement('option');o.value=p.id;
-        o.textContent=`${p.bu}-${p.name}`;o.dataset.bu=p.bu;o.dataset.name=p.name;og.appendChild(o)})
-      sel.appendChild(og)
-    }
-  } else {
-    const others=S.profiles.filter(p=>p.bu!==myBU&&p.bu!=='管理员')
-    const byBU={}
-    others.forEach(p=>{if(!byBU[p.bu])byBU[p.bu]=[];byBU[p.bu].push(p)})
-    Object.entries(byBU).forEach(([bu,members])=>{
-      const og=document.createElement('optgroup'); og.label=bu
-      members.forEach(p=>{const o=document.createElement('option');o.value=p.id;
-        o.textContent=`${p.bu}-${p.name}`+(p.role==='bu_lead'?' (负责人)':'');
-        o.dataset.bu=p.bu;o.dataset.name=p.name;og.appendChild(o)})
-      sel.appendChild(og)
-    })
-    if(!sel.options.length){sel.innerHTML='<option value="">其他BU暂无成员</option>'}
-  }
+  const all=S.profiles.filter(p=>p.id!==S.user?.id&&p.bu!=='管理员')
+  if(!all.length){sel.innerHTML='<option value="">暂无其他成员</option>';return}
+  all.forEach(p=>{
+    const o=document.createElement('option')
+    o.value=p.id
+    o.textContent=`${p.bu}-${p.name}`+(p.role==='bu_lead'?' (负责人)':'')
+    o.dataset.bu=p.bu; o.dataset.name=p.name
+    sel.appendChild(o)
+  })
 }
 
 async function submitAssign(){
   if(!S.drawer) return
   const reason=v('a-reason').trim()
-  if(!reason){toast('请填写说明','err');return}
+  if(!reason){toast('请填写转派原因','err');return}
   const sel=el('a-to-user')
-  if(!sel.value){toast('请选择指派对象','err');return}
+  if(!sel.value){toast('请选择转派对象','err');return}
   const opt=sel.options[sel.selectedIndex]
   const toUserId=sel.value
-  const toUserName=opt.dataset.name||opt.textContent.replace(' (负责人)','')
-  const toBU=opt.dataset.bu||S.profile?.bu
-  const isCross=document.querySelector('input[name="a-type"]:checked')?.value==='cross'
+  const toUserName=opt.dataset.name||opt.textContent
+  const toBU=opt.dataset.bu||S.drawer.bu
+  const isCross=toBU!==S.drawer.bu
 
   await sb.from('assignments').insert({
     pain_point_id:S.drawer.id, from_bu:S.drawer.bu, to_bu:toBU,
@@ -1009,26 +974,17 @@ async function submitAssign(){
     assigned_to_user_id:toUserId, assigned_to_user_name:toUserName
   })
 
-  if(isCross){
-    await sb.from('pain_points').update({
-      bu:toBU, status:'cross_bu',
-      assigned_to_user_id:toUserId, assigned_to_user_name:toUserName
-    }).eq('id',S.drawer.id)
-    S.drawer.bu=toBU; S.drawer.status='cross_bu'
-    el('d-bu').textContent=toBU; el('d-bu').className=`badge bu-${toBU}`
-    el('d-status').textContent=statusLabel(S.drawer); el('d-status').className=`badge s-cross_bu`
-    renderStatusActions(S.drawer)
-    toast(`已转派至 ${toBU} · ${toUserName}`,'ok')
-  } else {
-    await sb.from('pain_points').update({
-      status:'in_review',
-      assigned_to_user_id:toUserId, assigned_to_user_name:toUserName
-    }).eq('id',S.drawer.id)
-    S.drawer.status='in_review'
-    el('d-status').textContent=statusLabel(S.drawer); el('d-status').className=`badge s-in_review`
-    renderStatusActions(S.drawer)
-    toast(`已请求 ${toUserName} 协助审阅`,'ok')
-  }
+  const newStatus=isCross?'cross_bu':'in_review'
+  await sb.from('pain_points').update({
+    bu:toBU, status:newStatus,
+    assigned_to_user_id:toUserId, assigned_to_user_name:toUserName
+  }).eq('id',S.drawer.id)
+
+  S.drawer.bu=toBU; S.drawer.status=newStatus
+  el('d-bu').textContent=toBU; el('d-bu').className=`badge bu-${toBU}`
+  el('d-status').textContent=statusLabel(S.drawer); el('d-status').className=`badge s-${newStatus}`
+  renderStatusActions(S.drawer)
+  toast(`已转派给 ${toBU}-${toUserName}`,'ok')
   el('a-reason').value=''
   await Promise.all([loadPPs(),loadAssigns(S.drawer.id)])
 }
