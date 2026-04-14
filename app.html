@@ -1,24 +1,22 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>朝曦家办 · 痛点协作平台</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --primary:#1a56db;--primary-light:#e8effd;--primary-dark:#1649c0;
   --text:#1a1a2e;--text-2:#6b7280;--border:#e5e7eb;
   --bg:#f9fafb;--white:#fff;
-  --sidebar:200px;--drawer:460px;
+  --sidebar:200px;--drawer:480px;
   --s-pending:#f59e0b;--s-review:#3b82f6;--s-cross:#ef4444;
   --s-approval:#f97316;--s-confirmed:#10b981;--s-deleted:#9ca3af;
 }
 body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;
   background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
-
-/* ── Buttons ── */
 .btn{padding:8px 16px;border:none;border-radius:7px;font-size:13px;font-weight:500;
   cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
 .btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark)}
@@ -28,8 +26,6 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;
 .btn-warn{background:#d97706;color:#fff}.btn-warn:hover{background:#b45309}
 .btn-sm{padding:5px 11px;font-size:12px;border-radius:6px}
 .btn:disabled{opacity:.5;cursor:not-allowed}
-
-/* ── Forms ── */
 .fc{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:7px;
   font-size:13px;font-family:inherit;outline:none;background:#fff;transition:border .15s}
 .fc:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,86,219,.1)}
@@ -37,8 +33,6 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;
 .form-row{margin-bottom:14px}
 .form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .error-msg{color:#dc2626;font-size:12px;margin-top:6px}
-
-/* ── BU & Status badges ── */
 .badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:12px;
   font-size:11px;font-weight:600;white-space:nowrap}
 .bu-税务{background:#ede9fe;color:#6d28d9}
@@ -51,16 +45,12 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;
 .s-pending_approval{background:#ffedd5;color:#9a3412}
 .s-confirmed{background:#d1fae5;color:#065f46}
 .s-deleted{background:#f3f4f6;color:#6b7280}
-
-/* ── Login ── */
 #login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;
   background:linear-gradient(135deg,#f0f4ff,#fafbff)}
 .login-card{background:#fff;border-radius:16px;padding:40px;width:380px;
   box-shadow:0 4px 32px rgba(0,0,0,.09)}
 .login-logo{font-size:20px;font-weight:800;color:var(--primary);margin-bottom:4px}
 .login-sub{font-size:13px;color:var(--text-2);margin-bottom:30px}
-
-/* ── Setup Overlay ── */
 #setup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);
   z-index:500;align-items:center;justify-content:center}
 #setup-overlay.show{display:flex}
@@ -68,10 +58,7 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;
   box-shadow:0 8px 40px rgba(0,0,0,.15)}
 .setup-card h2{font-size:18px;font-weight:700;margin-bottom:6px}
 .setup-card p{font-size:13px;color:var(--text-2);margin-bottom:24px}
-
-/* ── App Shell ── */
 #app{display:none;min-height:100vh}
-
 .topbar{position:fixed;top:0;left:0;right:0;height:54px;background:#fff;
   border-bottom:1px solid var(--border);display:flex;align-items:center;
   padding:0 18px;z-index:100;gap:14px}
@@ -83,7 +70,6 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;
 .topbar-user{display:flex;align-items:center;gap:9px;font-size:13px}
 .avatar{width:30px;height:30px;border-radius:50%;background:var(--primary);color:#fff;
   display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
-
 .sidebar{position:fixed;top:54px;left:0;bottom:0;width:var(--sidebar);background:#fff;
   border-right:1px solid var(--border);padding:14px 8px;overflow-y:auto;z-index:50}
 .nav-sec-title{font-size:10px;font-weight:700;color:var(--text-2);text-transform:uppercase;
@@ -94,21 +80,15 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;
 .nav-item.active{background:var(--primary-light);color:var(--primary)}
 .nav-badge{margin-left:auto;background:#ef4444;color:#fff;border-radius:10px;
   padding:1px 6px;font-size:10px;font-weight:700}
-
 .main{margin-left:var(--sidebar);padding-top:54px;min-height:100vh;transition:margin-right .3s}
 .main.drawer-open{margin-right:var(--drawer)}
 .page{padding:22px;display:none}.page.active{display:block}
-.page-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.page-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px}
 .page-title{font-size:18px;font-weight:700}
-
-/* ── Filters ── */
 .filters{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
 .filter-sel,.search-in{padding:7px 10px;border:1px solid var(--border);border-radius:7px;
   font-size:13px;background:#fff;outline:none}
-.filter-sel:focus,.search-in:focus{border-color:var(--primary)}
 .search-in{width:200px}
-
-/* ── Table ── */
 .table-wrap{background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden}
 table{width:100%;border-collapse:collapse}
 thead th{background:#f8fafc;padding:9px 14px;text-align:left;font-size:11px;
@@ -120,16 +100,13 @@ tbody tr:hover{background:#f8fafc}
 tbody tr.sel{background:var(--primary-light)}
 td{padding:10px 14px;vertical-align:middle}
 .td-pid{font-weight:700;color:var(--primary);font-size:12px;white-space:nowrap;width:65px}
-.td-desc{max-width:280px}
+.td-desc{max-width:300px}
 .td-clamp{overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .td-tags{margin-top:4px;display:flex;gap:3px;flex-wrap:wrap}
 .tag{background:var(--primary-light);color:var(--primary);padding:1px 7px;
   border-radius:10px;font-size:10px;font-weight:500}
 .td-meta{white-space:nowrap;color:var(--text-2);font-size:12px}
-.count-badge{display:inline-flex;align-items:center;gap:3px;
-  color:var(--text-2);font-size:12px}
-
-/* ── Drawer ── */
+/* Drawer */
 .drawer{position:fixed;top:54px;right:0;bottom:0;width:var(--drawer);background:#fff;
   border-left:1px solid var(--border);display:flex;flex-direction:column;
   transform:translateX(100%);transition:transform .3s ease;z-index:60}
@@ -143,30 +120,39 @@ td{padding:10px 14px;vertical-align:middle}
 .drw-close{width:28px;height:28px;border:none;background:var(--bg);border-radius:6px;
   cursor:pointer;font-size:15px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .drw-close:hover{background:var(--border)}
-
 .drw-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 18px;overflow-x:auto}
 .drw-tab{padding:10px 14px;font-size:13px;font-weight:500;color:var(--text-2);
   border-bottom:2px solid transparent;cursor:pointer;transition:all .15s;white-space:nowrap}
 .drw-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
 .drw-tab:hover:not(.active){color:var(--text)}
-.drw-body{flex:1;overflow-y:auto;padding:18px}
-.tab-panel{display:none}.tab-panel.active{display:block}
-
-/* ── Detail fields ── */
-.field-grid{display:grid;gap:14px}
+.drw-body{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column}
+.tab-panel{display:none}.tab-panel.active{display:flex;flex-direction:column;flex:1}
+/* Editable fields */
+.edit-field-block{margin-bottom:15px}
 .f-label{font-size:10px;font-weight:700;color:var(--text-2);text-transform:uppercase;
-  letter-spacing:.6px;margin-bottom:4px}
+  letter-spacing:.6px;margin-bottom:5px}
+.f-label.dim-label{color:var(--primary);opacity:.8}
+.edit-ta{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;
+  font-size:13px;font-family:inherit;resize:vertical;min-height:56px;outline:none;
+  line-height:1.55;transition:border .15s;background:#fff}
+.edit-ta:focus{border-color:var(--primary)}
+.edit-ta.changed{border-color:#f59e0b;background:#fffdf0}
+.orig-block{margin-top:4px;padding:5px 8px;background:#fee2e2;border-radius:5px;
+  font-size:12px;color:#991b1b;line-height:1.5;word-break:break-all;
+  text-decoration:line-through;display:none}
+.edit-submit-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--border);
+  padding:10px 0;display:none;gap:8px;align-items:center;margin-top:auto}
+.sugg-history-sec{margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+.sugg-history-title{font-size:12px;font-weight:700;color:var(--text-2);margin-bottom:10px}
+/* Detail non-edit */
 .f-val{font-size:13px;line-height:1.65;color:var(--text);white-space:pre-wrap}
 .f-empty{font-size:13px;color:var(--text-2);font-style:italic}
-.dim-label{color:var(--primary);opacity:.8}
 .dim-val{font-size:12px;color:var(--text-2);background:var(--primary-light);
-  padding:4px 8px;border-radius:6px;font-family:monospace}
+  padding:4px 8px;border-radius:6px;font-family:monospace;display:inline-block}
 .status-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px;padding-top:14px;
   border-top:1px solid var(--border);align-items:center}
-
-/* ── Suggest / Comment / Assign ── */
+/* Suggest/Comment/Assign */
 .panel-box{background:var(--bg);border-radius:8px;padding:14px;margin-bottom:12px}
-.panel-box .label{color:var(--text);margin-bottom:5px}
 .suggestion-item{background:#fff;border:1px solid var(--border);border-radius:8px;
   padding:12px;margin-bottom:8px}
 .sugg-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
@@ -175,7 +161,6 @@ td{padding:10px 14px;vertical-align:middle}
   text-decoration:line-through;font-size:13px;margin-bottom:4px;word-break:break-all}
 .diff-new{background:#d1fae5;color:#065f46;padding:4px 8px;border-radius:5px;
   font-size:13px;word-break:break-all}
-
 .comment-item{background:var(--bg);border-radius:8px;padding:11px;margin-bottom:8px}
 .c-meta{display:flex;align-items:center;gap:6px;margin-bottom:5px;flex-wrap:wrap}
 .c-author{font-weight:700;font-size:13px}
@@ -185,12 +170,10 @@ td{padding:10px 14px;vertical-align:middle}
   font-size:13px;font-family:inherit;resize:none;outline:none;min-height:78px}
 .c-form textarea:focus{border-color:var(--primary)}
 .c-form-actions{display:flex;justify-content:flex-end;margin-top:7px}
-
 .assign-item{display:flex;align-items:center;gap:8px;padding:10px;background:#fff;
   border:1px solid var(--border);border-radius:8px;margin-bottom:8px;font-size:13px;flex-wrap:wrap}
 .arr{color:var(--text-2);font-size:16px}
-
-/* ── Approval ── */
+/* Approval */
 .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
 .stat-card{background:#fff;border:1px solid var(--border);border-radius:10px;
   padding:16px;text-align:center}
@@ -208,23 +191,23 @@ td{padding:10px 14px;vertical-align:middle}
 .note-in{flex:1;min-width:120px;padding:5px 9px;border:1px solid var(--border);
   border-radius:6px;font-size:12px;outline:none}
 .note-in:focus{border-color:var(--primary)}
-
-/* ── Import ── */
+/* Import */
 .import-card{background:#fff;border:1px solid var(--border);border-radius:10px;
-  padding:24px;max-width:740px}
-.import-card h3{font-size:15px;font-weight:700;margin-bottom:16px}
-.paste-area{width:100%;min-height:190px;padding:12px;border:1px solid var(--border);
-  border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;outline:none}
-.paste-area:focus{border-color:var(--primary)}
+  padding:24px;max-width:680px}
+.import-card h3{font-size:15px;font-weight:700;margin-bottom:6px}
+.import-card p{font-size:13px;color:var(--text-2);margin-bottom:16px}
+.file-drop{border:2px dashed var(--border);border-radius:10px;padding:32px;
+  text-align:center;cursor:pointer;transition:border .15s;background:#fafbff}
+.file-drop:hover,.file-drop.drag{border-color:var(--primary);background:var(--primary-light)}
+.file-drop-icon{font-size:32px;margin-bottom:8px}
+.file-drop p{font-size:13px;color:var(--text-2)}
 .preview-box{background:var(--bg);border-radius:8px;padding:14px;margin-top:14px}
 .preview-box h4{font-size:13px;font-weight:700;margin-bottom:10px}
 .preview-item{background:#fff;border:1px solid var(--border);border-radius:7px;
   padding:11px;margin-bottom:7px}
 .prev-pid{font-weight:700;color:var(--primary);font-size:11px;margin-bottom:3px}
 .prev-desc{font-size:13px;line-height:1.5;font-weight:600}
-.prev-sub{font-size:12px;color:var(--text-2);margin-top:3px}
-
-/* ── Members ── */
+/* Members */
 .members-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
 .member-card{background:#fff;border:1px solid var(--border);border-radius:10px;
   padding:15px;display:flex;align-items:center;gap:12px}
@@ -232,8 +215,6 @@ td{padding:10px 14px;vertical-align:middle}
   display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0}
 .m-name{font-weight:700;font-size:14px}
 .m-role{font-size:11px;color:var(--text-2);margin-top:3px}
-
-/* ── Utilities ── */
 .divider{border:none;border-top:1px solid var(--border);margin:14px 0}
 .loading{display:flex;align-items:center;justify-content:center;padding:48px;color:var(--text-2)}
 .spin{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--primary);
@@ -244,15 +225,12 @@ td{padding:10px 14px;vertical-align:middle}
 .txt2{color:var(--text-2)}.txtsm{font-size:12px}.bold{font-weight:700}
 .mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
 .flex{display:flex}.fc-row{display:flex;align-items:center;gap:8px}
-
-/* ── Toast ── */
 #toast-wrap{position:fixed;bottom:22px;right:22px;z-index:999;display:flex;
   flex-direction:column;gap:7px}
 .toast{background:#1a1a2e;color:#fff;padding:11px 18px;border-radius:8px;font-size:13px;
   box-shadow:0 4px 14px rgba(0,0,0,.18);animation:slideup .25s ease;max-width:300px}
 .toast.ok{background:#065f46}.toast.err{background:#991b1b}
 @keyframes slideup{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
-
 @media(max-width:768px){
   :root{--sidebar:0px;--drawer:100vw}
   .sidebar{display:none}
@@ -333,7 +311,7 @@ td{padding:10px 14px;vertical-align:middle}
       🔄 变更中心 <span class="nav-badge" id="appr-badge" style="display:none">0</span>
     </div>
     <div class="nav-sec-title" style="margin-top:8px">管理</div>
-    <div class="nav-item" id="nav-import" onclick="go('import')" style="display:none">🤖 AI 导入</div>
+    <div class="nav-item" id="nav-import" onclick="go('import')" style="display:none">📥 Excel 同步</div>
     <div class="nav-item" id="nav-members" onclick="go('members')" style="display:none">👥 成员管理</div>
   </div>
 
@@ -344,7 +322,10 @@ td{padding:10px 14px;vertical-align:middle}
     <div class="page active" id="page-list">
       <div class="page-hdr">
         <div class="page-title">痛点库</div>
-        <button class="btn btn-sm btn-outline" onclick="loadPPs()">↻ 刷新</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sm btn-outline" onclick="exportPPs()">↓ 导出已确认</button>
+          <button class="btn btn-sm btn-outline" onclick="loadPPs()">↻ 刷新</button>
+        </div>
       </div>
       <div class="filters">
         <input class="search-in" id="f-search" placeholder="🔍 搜索痛点…" oninput="filterPPs()">
@@ -356,10 +337,9 @@ td{padding:10px 14px;vertical-align:middle}
         </select>
         <select class="filter-sel" id="f-status" onchange="filterPPs()">
           <option value="">所有状态</option>
-          <option value="pending_review">待初审</option>
-          <option value="in_review">审阅中</option>
-          <option value="cross_bu">跨BU待议</option>
-          <option value="pending_approval">待审批</option>
+          <option value="pending_review">待BU审核</option>
+          <option value="cross_bu">待转派BU审核</option>
+          <option value="pending_approval">待产品中心审批</option>
           <option value="confirmed">已确认</option>
         </select>
       </div>
@@ -377,29 +357,30 @@ td{padding:10px 14px;vertical-align:middle}
       <div id="appr-body"><div class="loading"><div class="spin"></div>加载中…</div></div>
     </div>
 
-    <!-- AI 导入 -->
+    <!-- Excel 同步 -->
     <div class="page" id="page-import">
-      <div class="page-hdr"><div class="page-title">AI 导入</div></div>
+      <div class="page-hdr"><div class="page-title">Excel 同步</div></div>
       <div class="import-card">
-        <h3>新建批次 · 粘贴 AI 输出</h3>
-        <div class="form-grid-2" style="margin-bottom:14px">
-          <div><label class="label">批次名称 *</label>
-            <input class="fc" id="imp-batch" placeholder="如：境外架构场景"></div>
-          <div><label class="label">主责 BU *</label>
-            <select class="fc" id="imp-bu">
-              <option value="税务">税务BU</option>
-              <option value="法律">法律BU</option>
-              <option value="资本市场">资本市场BU</option>
-            </select></div>
+        <h3>从本地 Excel 同步痛点</h3>
+        <p>选择 <code>痛点库20260410-最新.xlsx</code>，自动解析并与 Supabase 同步（新增或更新，不覆盖状态）</p>
+        <div class="file-drop" id="file-drop" onclick="el('file-input').click()"
+          ondragover="event.preventDefault();this.classList.add('drag')"
+          ondragleave="this.classList.remove('drag')"
+          ondrop="event.preventDefault();this.classList.remove('drag');handleFileDrop(event)">
+          <div class="file-drop-icon">📂</div>
+          <p>点击选择或拖拽 Excel 文件</p>
+          <p style="font-size:11px;margin-top:4px">.xlsx / .xls</p>
         </div>
-        <label class="label">粘贴 Minimax / AI 输出内容 *
-          <span class="txt2 txtsm" style="font-weight:400">（支持自由格式，自动逐条解析）</span>
-        </label>
-        <textarea class="paste-area" id="imp-paste" style="margin:6px 0 10px"
-          placeholder="直接粘贴AI生成内容，例如：&#10;&#10;1. 痛点描述：企业主未设立境外架构，面临双重征税风险&#10;   痛点说明：当前政策下…&#10;   标签：境外架构、税务合规&#10;   权重：85&#10;   核心冲突：xxx&#10;   解决方案：xxx&#10;&#10;2. 痛点描述：…"></textarea>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-sm btn-outline" onclick="parseImp()">🔍 解析预览</button>
-          <button class="btn btn-sm btn-primary" id="imp-confirm" onclick="doImport()" disabled>✓ 确认导入</button>
+        <input type="file" id="file-input" accept=".xlsx,.xls" style="display:none"
+          onchange="handleFileSelect(this)">
+        <div style="margin-top:14px;display:flex;align-items:center;gap:10px">
+          <div style="flex:1">
+            <label class="label">批次名称（留空则使用「痛点库-正式版」）</label>
+            <input class="fc" id="imp-batch" placeholder="痛点库-正式版">
+          </div>
+          <div style="padding-top:18px">
+            <button class="btn btn-sm btn-primary" id="imp-confirm" onclick="doImport()" disabled>✓ 确认同步</button>
+          </div>
         </div>
         <div id="imp-preview"></div>
       </div>
@@ -415,7 +396,7 @@ td{padding:10px 14px;vertical-align:middle}
           在 Supabase Dashboard → Authentication → Users → Invite user 邀请成员邮箱。<br>
           成员点击邮件链接注册后，在下方列表中可修改其 BU 和角色。
         </p>
-        <div style="font-size:13px;color:var(--primary)">
+        <div style="font-size:13px">
           → <a href="https://supabase.com/dashboard" target="_blank" style="color:var(--primary)">打开 Supabase Dashboard</a>
         </div>
       </div>
@@ -439,8 +420,7 @@ td{padding:10px 14px;vertical-align:middle}
       <button class="drw-close" onclick="closeDrawer()">✕</button>
     </div>
     <div class="drw-tabs">
-      <div class="drw-tab active" data-tab="detail" onclick="switchTab('detail')">详情</div>
-      <div class="drw-tab" data-tab="suggest" onclick="switchTab('suggest')">修改建议</div>
+      <div class="drw-tab active" data-tab="edit" onclick="switchTab('edit')">详情与修改</div>
       <div class="drw-tab" data-tab="comments" onclick="switchTab('comments')">
         评论<span id="c-cnt"></span>
       </div>
@@ -448,37 +428,18 @@ td{padding:10px 14px;vertical-align:middle}
     </div>
     <div class="drw-body">
 
-      <!-- 详情 -->
-      <div class="tab-panel active" id="tab-detail">
-        <div class="field-grid" id="d-fields"></div>
+      <!-- 详情与修改 -->
+      <div class="tab-panel active" id="tab-edit">
+        <div id="d-edit-fields"></div>
+        <div class="edit-submit-bar" id="edit-submit-bar">
+          <button class="btn btn-sm btn-primary" onclick="submitAllEdits()">提交修改建议</button>
+          <button class="btn btn-sm btn-outline" onclick="resetEdits()">撤销修改</button>
+          <span class="txt2 txtsm" id="edit-changed-hint"></span>
+        </div>
         <div id="d-status-actions"></div>
-      </div>
-
-      <!-- 修改建议 -->
-      <div class="tab-panel" id="tab-suggest">
-        <div id="sugg-list"></div>
-        <hr class="divider">
-        <div class="bold txtsm" style="margin-bottom:10px">提交修改建议</div>
-        <div class="panel-box">
-          <div class="form-row">
-            <label class="label">修改字段</label>
-            <select class="fc" id="sugg-field">
-              <option value="description">痛点描述</option>
-              <option value="explanation">痛点说明</option>
-              <option value="tags">标签</option>
-              <option value="weight">权重</option>
-              <option value="sku">SKU匹配</option>
-              <option value="core_conflict">核心冲突</option>
-              <option value="risks">潜在风险</option>
-              <option value="solution">解决方案</option>
-              <option value="expected_effect">预期效果</option>
-            </select>
-          </div>
-          <div class="form-row">
-            <label class="label">建议修改为</label>
-            <textarea class="fc" id="sugg-val" rows="4" placeholder="输入你建议的内容…"></textarea>
-          </div>
-          <button class="btn btn-sm btn-primary" onclick="submitSugg()">提交建议</button>
+        <div class="sugg-history-sec" id="sugg-history-sec" style="display:none">
+          <div class="sugg-history-title">📝 历史修改建议</div>
+          <div id="sugg-list"></div>
         </div>
       </div>
 
@@ -532,19 +493,31 @@ const S = {
   user:null, profile:null,
   batches:[], pps:[], filtered:[],
   batchId:'', page:'list',
-  drawer:null, comments:[], suggestions:[], assignments:[],
-  tab:'detail', parsed:[]
+  drawer:null, drawerOriginal:{},
+  comments:[], suggestions:[], assignments:[],
+  tab:'edit', xlsxParsed:[],
+  pendApprIds:[]
 }
 
 // ── Label maps ───────────────────────────────────────────────
-const SL = {
-  pending_review:'待初审', in_review:'审阅中', cross_bu:'跨BU待议',
-  pending_approval:'待审批', confirmed:'已确认', deleted:'已删除'
-}
 const FL = {
-  description:'痛点描述', explanation:'痛点说明', factor_chain:'因子链路',
-  tags:'标签', weight:'权重', sku:'SKU匹配', core_conflict:'核心冲突',
-  risks:'潜在风险', solution:'解决方案', expected_effect:'预期效果'
+  description:'痛点描述', explanation:'痛点说明',
+  scene_category:'场景分类', factor_chain:'因子组合', core_elements:'核心要素',
+  core_conflict:'核心冲突', legal_refs:'相关法律法规',
+  sku:'SKU匹配', risks:'潜在风险', solution:'解决方案', expected_effect:'预期效果'
+}
+
+function statusLabel(pp){
+  if(!pp) return ''
+  switch(pp.status){
+    case 'pending_review': return `待${pp.bu}审核`
+    case 'in_review':      return '审阅中'
+    case 'cross_bu':       return `待${pp.bu}审核`
+    case 'pending_approval': return '待产品中心审批'
+    case 'confirmed':      return '已确认'
+    case 'deleted':        return '已删除'
+    default:               return pp.status
+  }
 }
 
 // ── Auth ─────────────────────────────────────────────────────
@@ -597,7 +570,6 @@ function showApp(){
   el('t-name').textContent=n
   el('t-avatar').textContent=n.charAt(0).toUpperCase()
   el('t-bu').textContent=p.bu; el('t-bu').className=`badge bu-${p.bu}`
-  // 变更中心对所有人开放
   if(p.role==='admin'){
     el('nav-import').style.display='flex'
     el('nav-members').style.display='flex'
@@ -622,11 +594,9 @@ async function loadPPs(){
   if(S.batchId) q=q.eq('batch_id',S.batchId)
   const {data}=await q
   S.pps=data||[]; filterPPs()
-  // approval badge
-  if(S.profile?.role==='admin'){
-    const n=S.pps.filter(p=>p.status==='pending_approval').length
-    el('appr-badge').textContent=n; el('appr-badge').style.display=n?'inline':'none'
-  }
+  // approval badge: pending suggestions + pending_approval items
+  const n=(S.pps.filter(p=>p.status==='pending_approval').length)
+  el('appr-badge').textContent=n; el('appr-badge').style.display=n?'inline':'none'
 }
 
 function filterPPs(){
@@ -642,10 +612,10 @@ function onBatchChange(){ S.batchId=v('batch-sel'); loadPPs() }
 
 // ── Render List ───────────────────────────────────────────────
 function renderList(){
-  const el_=el('list-body')
+  const eb=el('list-body')
   if(!S.filtered.length){
-    el_.innerHTML=`<div class="empty"><div class="empty-icon">📭</div>
-      <div>暂无痛点<br><span class="txt2 txtsm">通过 AI 导入添加第一批</span></div></div>`; return
+    eb.innerHTML=`<div class="empty"><div class="empty-icon">📭</div>
+      <div>暂无痛点</div></div>`; return
   }
   const rows=S.filtered.map(p=>`
     <tr onclick="openDrawer('${p.id}')" ${S.drawer?.id===p.id?'class="sel"':''}>
@@ -655,14 +625,13 @@ function renderList(){
         ${p.tags?.length?`<div class="td-tags">${p.tags.slice(0,3).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>`:''}
       </td>
       <td><span class="badge bu-${p.bu}">${p.bu}</span></td>
-      <td><span class="badge s-${p.status}">${SL[p.status]||p.status}</span></td>
-      <td class="td-meta">${p.weight?`${p.weight}分`:''}</td>
+      <td><span class="badge s-${p.status}">${statusLabel(p)}</span></td>
       <td class="td-meta">${fmtTime(p.updated_at)}</td>
     </tr>`).join('')
-  el_.innerHTML=`
+  eb.innerHTML=`
     <div class="txtsm txt2" style="margin-bottom:7px">共 ${S.filtered.length} 条</div>
     <div class="table-wrap"><table>
-      <thead><tr><th>编号</th><th>痛点描述</th><th>BU</th><th>状态</th><th>权重</th><th>更新</th></tr></thead>
+      <thead><tr><th>编号</th><th>痛点描述</th><th>BU</th><th>状态</th><th>更新</th></tr></thead>
       <tbody>${rows}</tbody>
     </table></div>`
 }
@@ -673,14 +642,15 @@ async function openDrawer(id){
   S.drawer=pp
   el('d-pid').textContent=pp.pid||''
   el('d-title').textContent=pp.description||'（无描述）'
-  const se=el('d-status'); se.textContent=SL[pp.status]; se.className=`badge s-${pp.status}`
+  const se=el('d-status'); se.textContent=statusLabel(pp); se.className=`badge s-${pp.status}`
   const be=el('d-bu'); be.textContent=pp.bu; be.className=`badge bu-${pp.bu}`
   const batch=S.batches.find(b=>b.id===pp.batch_id)
   el('d-batch').textContent=batch?`批次：${batch.name}`:''
-  renderDFields(pp); renderStatusActions(pp)
+  renderEditFields(pp)
+  renderStatusActions(pp)
   await Promise.all([loadComments(id),loadSuggs(id),loadAssigns(id)])
   el('drawer').classList.add('open'); el('main').classList.add('drawer-open')
-  switchTab('detail'); renderList()
+  switchTab('edit'); renderList()
 }
 
 function closeDrawer(){
@@ -689,68 +659,148 @@ function closeDrawer(){
   renderList()
 }
 
-function renderDFields(pp){
-  // 字段顺序对齐 痛点库20260410-最新.xlsx + 三个新增列
-  // 如有新增字段，在此末尾追加 {k:'字段名',l:'显示标签'} 即可
-  const fields=[
-    {k:'description',   l:'痛点描述'},
-    {k:'explanation',   l:'痛点说明'},
-    {k:'scene_category',l:'场景分类', dim:true},
-    {k:'factor_chain',  l:'因子组合', dim:true},
-    {k:'core_elements', l:'核心要素', dim:true},
-    {k:'core_conflict', l:'核心冲突'},
-    {k:'legal_refs',    l:'相关法律法规'},
-    // Tags（展示 tag1/2/3 带权重）
-    {k:'_tags_detail',  l:'Tags', special:'tags'},
-    {k:'sku',           l:'SKU 匹配'},
-    {k:'risks',         l:'潜在风险'},
-    {k:'solution',      l:'解决方案'},
-    {k:'expected_effect',l:'预期效果'},
-    // 如有新增字段，在此追加：
-    // {k:'new_field', l:'新字段名'},
-  ]
-  el('d-fields').innerHTML=fields.map(f=>{
-    // 特殊渲染：tags with weights
-    if(f.special==='tags'){
-      const pairs=[[pp.tag1,pp.tag1_weight],[pp.tag2,pp.tag2_weight],[pp.tag3,pp.tag3_weight]]
-        .filter(([t])=>t)
-      if(!pairs.length) return ''
-      return `<div><div class="f-label">Tags</div>
-        <div class="td-tags">${pairs.map(([t,w])=>
-          `<span class="tag">${esc(t)}${w?` <span style="opacity:.7">${esc(w)}</span>`:''}</span>`
-        ).join('')}</div></div>`
-    }
-    const val=pp[f.k]
-    if(f.dim&&!val) return ''   // 跳过空的标注字段
-    let html=''
-    if(Array.isArray(val)&&val.length)
-      html=`<div class="td-tags">${val.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>`
-    else if(val) html=`<div class="f-val${f.dim?' dim-val':''}">${esc(String(val))}</div>`
-    else html=`<div class="f-empty">未填写</div>`
-    return `<div><div class="f-label${f.dim?' dim-label':''}">${f.l}</div>${html}</div>`
-  }).filter(Boolean).join('')
+// ── Editable Fields ───────────────────────────────────────────
+const EDIT_FIELDS=[
+  {k:'description',   l:'痛点描述'},
+  {k:'explanation',   l:'痛点说明'},
+  {k:'scene_category',l:'场景分类', dim:true},
+  {k:'factor_chain',  l:'因子组合', dim:true},
+  {k:'core_elements', l:'核心要素', dim:true},
+  {k:'core_conflict', l:'核心冲突'},
+  {k:'legal_refs',    l:'相关法律法规'},
+  {k:'sku',           l:'SKU 匹配'},
+  {k:'risks',         l:'潜在风险'},
+  {k:'solution',      l:'解决方案'},
+  {k:'expected_effect',l:'预期效果'},
+]
+
+function renderEditFields(pp){
+  S.drawerOriginal={}
+  EDIT_FIELDS.forEach(f=>{ S.drawerOriginal[f.k]=pp[f.k]||'' })
+
+  const fieldsHtml=EDIT_FIELDS.map(f=>{
+    const val=pp[f.k]||''
+    return `<div class="edit-field-block">
+      <div class="f-label${f.dim?' dim-label':''}">${f.l}</div>
+      <textarea class="edit-ta" id="ef-${f.k}" rows="${val.length>80?4:2}"
+        oninput="onFieldEdit('${f.k}')">${esc(val)}</textarea>
+      <div class="orig-block" id="orig-${f.k}"></div>
+    </div>`
+  }).join('')
+
+  // Tags: read-only display
+  const tagPairs=[[pp.tag1,pp.tag1_weight],[pp.tag2,pp.tag2_weight],[pp.tag3,pp.tag3_weight]].filter(([t])=>t)
+  const tagsHtml=tagPairs.length?`<div class="edit-field-block">
+    <div class="f-label">Tags</div>
+    <div class="td-tags">${tagPairs.map(([t,w])=>
+      `<span class="tag">${esc(t)}${w?` <span style="opacity:.7">${esc(w)}</span>`:''}</span>`).join('')}
+    </div>
+  </div>`:''
+
+  el('d-edit-fields').innerHTML=fieldsHtml+tagsHtml
+  el('edit-submit-bar').style.display='none'
 }
 
+function onFieldEdit(key){
+  const ta=el(`ef-${key}`)
+  const orig=S.drawerOriginal[key]||''
+  const cur=ta.value
+  const origBlock=el(`orig-${key}`)
+  if(cur!==orig){
+    ta.classList.add('changed')
+    origBlock.style.display='block'
+    origBlock.textContent=orig||'（原为空）'
+  } else {
+    ta.classList.remove('changed')
+    origBlock.style.display='none'
+  }
+  // show/hide submit bar
+  const anyChanged=EDIT_FIELDS.some(f=>{
+    const t=el(`ef-${f.k}`); return t&&t.value!==(S.drawerOriginal[f.k]||'')
+  })
+  const bar=el('edit-submit-bar')
+  bar.style.display=anyChanged?'flex':'none'
+  const cnt=EDIT_FIELDS.filter(f=>{const t=el(`ef-${f.k}`);return t&&t.value!==(S.drawerOriginal[f.k]||'')}).length
+  el('edit-changed-hint').textContent=anyChanged?`${cnt} 个字段已修改`:''
+}
+
+async function submitAllEdits(){
+  if(!S.drawer) return
+  const changed=EDIT_FIELDS.filter(f=>{
+    const t=el(`ef-${f.k}`); return t&&t.value!==(S.drawerOriginal[f.k]||'')
+  })
+  if(!changed.length){toast('没有修改内容','err');return}
+  for(const f of changed){
+    const ta=el(`ef-${f.k}`)
+    const newVal=ta.value.trim()
+    const oldVal=S.drawerOriginal[f.k]||null
+    await sb.from('change_suggestions').insert({
+      pain_point_id:S.drawer.id, user_id:S.user.id,
+      user_name:S.profile.name, user_bu:S.profile.bu,
+      field_name:f.k, field_label:f.l,
+      old_value:oldVal, new_value:newVal
+    })
+  }
+  toast(`已提交 ${changed.length} 个字段的修改建议`,'ok')
+  await loadSuggs(S.drawer.id)
+  el('edit-submit-bar').style.display='none'
+  changed.forEach(f=>{
+    const t=el(`ef-${f.k}`); if(t){t.classList.remove('changed');el(`orig-${f.k}`).style.display='none'}
+  })
+  if(!['pending_approval','confirmed'].includes(S.drawer.status))
+    await updStatus(S.drawer.id,'pending_approval')
+}
+
+function resetEdits(){
+  EDIT_FIELDS.forEach(f=>{
+    const t=el(`ef-${f.k}`)
+    if(t){
+      t.value=S.drawerOriginal[f.k]||''
+      t.classList.remove('changed')
+      const ob=el(`orig-${f.k}`); if(ob) ob.style.display='none'
+    }
+  })
+  el('edit-submit-bar').style.display='none'
+}
+
+// ── Status Actions ────────────────────────────────────────────
 function renderStatusActions(pp){
   const e=el('d-status-actions')
-  if(S.profile?.role!=='admin'){e.innerHTML='';return}
-  const statuses=[
-    {v:'pending_review',l:'待初审'},{v:'in_review',l:'审阅中'},{v:'cross_bu',l:'跨BU待议'},
-    {v:'pending_approval',l:'待审批'},{v:'confirmed',l:'已确认'},{v:'deleted',l:'删除'}
-  ]
-  e.innerHTML=`<div class="status-row"><span class="txt2 txtsm">状态推进：</span>
-    ${statuses.filter(s=>s.v!==pp.status).map(s=>
-      `<button class="btn btn-sm btn-outline" onclick="updStatus('${pp.id}','${s.v}')">→ ${s.l}</button>`
-    ).join('')}</div>`
+  const isAdmin=S.profile?.role==='admin'
+  const isBuMember=S.profile?.bu===pp.bu
+  let html=''
+
+  // BU member can submit to product center when cross_bu
+  if(pp.status==='cross_bu'&&(isBuMember||isAdmin)){
+    html+=`<div class="status-row">
+      <button class="btn btn-sm btn-primary" onclick="updStatus('${pp.id}','pending_approval')">
+        ✓ 完成BU审核 → 待产品中心审批
+      </button>
+    </div>`
+  }
+
+  // Admin: full status control
+  if(isAdmin){
+    const statuses=[
+      {v:'pending_review',l:'待初审'},{v:'in_review',l:'审阅中'},{v:'cross_bu',l:'跨BU待议'},
+      {v:'pending_approval',l:'待产品中心审批'},{v:'confirmed',l:'已确认'},{v:'deleted',l:'删除'}
+    ]
+    html+=`<div class="status-row"><span class="txt2 txtsm">状态推进：</span>
+      ${statuses.filter(s=>s.v!==pp.status).map(s=>
+        `<button class="btn btn-sm btn-outline" onclick="updStatus('${pp.id}','${s.v}')">→ ${s.l}</button>`
+      ).join('')}
+    </div>`
+  }
+  e.innerHTML=html
 }
 
 async function updStatus(id,ns){
   await sb.from('pain_points').update({status:ns}).eq('id',id)
-  toast(`状态已更新：${SL[ns]}`)
+  toast(`状态已更新：${statusLabel({status:ns,bu:S.drawer?.bu||''})}`)
   await loadPPs()
   if(S.drawer?.id===id){
     S.drawer.status=ns
-    const se=el('d-status'); se.textContent=SL[ns]; se.className=`badge s-${ns}`
+    const se=el('d-status'); se.textContent=statusLabel(S.drawer); se.className=`badge s-${ns}`
     renderStatusActions(S.drawer)
   }
 }
@@ -800,7 +850,10 @@ async function loadSuggs(ppId){
   S.suggestions=data||[]; renderSuggs()
 }
 function renderSuggs(){
-  el('sugg-list').innerHTML=S.suggestions.length?S.suggestions.map(s=>`
+  const sec=el('sugg-history-sec')
+  if(!S.suggestions.length){sec.style.display='none';return}
+  sec.style.display='block'
+  el('sugg-list').innerHTML=S.suggestions.map(s=>`
     <div class="suggestion-item">
       <div class="sugg-hdr">
         <span class="bold txtsm">${FL[s.field_name]||s.field_name}</span>
@@ -812,22 +865,6 @@ function renderSuggs(){
       <div class="diff-new">${esc(s.new_value)}</div>
       ${s.admin_note?`<div class="txt2 txtsm" style="margin-top:6px">备注：${esc(s.admin_note)}</div>`:''}
     </div>`).join('')
-    :'<div class="txt2 txtsm" style="margin-bottom:8px">暂无修改建议</div>'
-}
-async function submitSugg(){
-  if(!S.drawer) return
-  const field=v('sugg-field'), newVal=v('sugg-val').trim()
-  if(!newVal){toast('请填写建议内容','err');return}
-  const old=S.drawer[field]
-  await sb.from('change_suggestions').insert({
-    pain_point_id:S.drawer.id, user_id:S.user.id,
-    user_name:S.profile.name, user_bu:S.profile.bu,
-    field_name:field, field_label:FL[field], old_value:old?String(old):null, new_value:newVal
-  })
-  el('sugg-val').value=''; toast('建议已提交，等待管理员审批','ok')
-  await loadSuggs(S.drawer.id)
-  if(!['pending_approval','confirmed'].includes(S.drawer.status))
-    await updStatus(S.drawer.id,'pending_approval')
 }
 
 // ── Assignments ───────────────────────────────────────────────
@@ -856,9 +893,11 @@ async function submitAssign(){
     pain_point_id:S.drawer.id, from_bu:S.drawer.bu, to_bu:toBU,
     reason, created_by:S.user.id, created_by_name:S.profile.name
   })
-  await sb.from('pain_points').update({bu:toBU}).eq('id',S.drawer.id)
-  S.drawer.bu=toBU
+  await sb.from('pain_points').update({bu:toBU, status:'cross_bu'}).eq('id',S.drawer.id)
+  S.drawer.bu=toBU; S.drawer.status='cross_bu'
   el('d-bu').textContent=toBU; el('d-bu').className=`badge bu-${toBU}`
+  el('d-status').textContent=statusLabel(S.drawer); el('d-status').className=`badge s-cross_bu`
+  renderStatusActions(S.drawer)
   el('a-reason').value=''; toast(`已转派至 ${toBU}`,'ok')
   await Promise.all([loadPPs(),loadAssigns(S.drawer.id)])
 }
@@ -867,7 +906,6 @@ async function submitAssign(){
 async function loadApproval(){
   el('appr-body').innerHTML='<div class="loading"><div class="spin"></div>加载中…</div>'
   const isAdmin=S.profile?.role==='admin'
-  // 角色提示
   const hint=el('appr-role-hint')
   if(hint) hint.textContent=isAdmin?'（管理员视图：可审批）':'（所有成员均可查看）'
   const [{data:suggs},{data:crossBU},{data:pendAppr},{data:recentAll}]=await Promise.all([
@@ -875,25 +913,23 @@ async function loadApproval(){
       .eq('status','pending').order('created_at'),
     sb.from('pain_points').select('*').eq('status','cross_bu'),
     sb.from('pain_points').select('*').eq('status','pending_approval'),
-    // 所有人可见：最近已处理的变更记录
     sb.from('change_suggestions').select('*,pain_points(pid,description,bu)')
       .in('status',['approved','rejected']).order('reviewed_at',{ascending:false}).limit(20)
   ])
+  S.pendApprIds=(pendAppr||[]).map(p=>p.id)
   renderApproval(suggs||[],crossBU||[],pendAppr||[],recentAll||[])
 }
 
 function renderApproval(suggs,crossBU,pendAppr,recentAll){
   const isAdmin=S.profile?.role==='admin'
-
   const stats=`<div class="stat-row">
     <div class="stat-card"><div class="stat-num">${suggs.length}</div><div class="stat-lbl">待审修改建议</div></div>
     <div class="stat-card"><div class="stat-num">${crossBU.length}</div><div class="stat-lbl">跨BU待议</div></div>
-    <div class="stat-card"><div class="stat-num">${pendAppr.length}</div><div class="stat-lbl">待审批痛点</div></div>
+    <div class="stat-card"><div class="stat-num">${pendAppr.length}</div><div class="stat-lbl">待产品中心审批</div></div>
   </div>`
-
   let html=stats
 
-  // ── 待审修改建议（管理员可操作，所有人可查看）
+  // 待审修改建议
   if(suggs.length){
     const items=suggs.map(s=>`
       <div class="appr-item">
@@ -921,21 +957,21 @@ function renderApproval(suggs,crossBU,pendAppr,recentAll){
       ${items}</div>`
   }
 
-  // ── 跨BU待议
+  // 跨BU待议
   if(crossBU.length){
     const items=crossBU.map(p=>`
       <div class="appr-item">
         <div class="appr-ref">
           <span class="bold txtsm">${p.pid||''}</span>
           <span class="badge bu-${p.bu}">${p.bu}</span>
-          <span class="badge s-cross_bu">跨BU待议</span>
+          <span class="badge s-cross_bu">待${p.bu}审核</span>
         </div>
         <div class="txtsm" style="margin-bottom:8px">${esc((p.description||'').slice(0,80))}…</div>
         <div class="appr-actions">
           <button class="btn btn-sm btn-outline" onclick="go('list');openDrawer('${p.id}')">查看 & 评论</button>
           ${isAdmin?`
           <button class="btn btn-sm btn-success" onclick="updStatus('${p.id}','confirmed');loadApproval()">直接确认</button>
-          <button class="btn btn-sm btn-warn" onclick="updStatus('${p.id}','in_review');loadApproval()">退回审阅</button>
+          <button class="btn btn-sm btn-warn" onclick="updStatus('${p.id}','in_review');loadApproval()">退回</button>
           `:''}
         </div>
       </div>`).join('')
@@ -944,30 +980,34 @@ function renderApproval(suggs,crossBU,pendAppr,recentAll){
       ${items}</div>`
   }
 
-  // ── 待审批确认
+  // 待产品中心审批
   if(pendAppr.length){
+    const batchBtn=isAdmin?`<button class="btn btn-sm btn-success" onclick="batchApproveAll()">批量全部通过</button>`:''
     const items=pendAppr.map(p=>`
       <div class="appr-item">
         <div class="appr-ref">
           <span class="bold txtsm">${p.pid||''}</span>
           <span class="badge bu-${p.bu}">${p.bu}</span>
-          <span class="badge s-pending_approval">待审批</span>
+          <span class="badge s-pending_approval">待产品中心审批</span>
         </div>
         <div class="txtsm" style="margin-bottom:8px">${esc((p.description||'').slice(0,80))}…</div>
         <div class="appr-actions">
           <button class="btn btn-sm btn-outline" onclick="go('list');openDrawer('${p.id}')">查看详情</button>
           ${isAdmin?`
           <button class="btn btn-sm btn-success" onclick="updStatus('${p.id}','confirmed');loadApproval()">确认通过</button>
-          <button class="btn btn-sm btn-outline" onclick="updStatus('${p.id}','in_review');loadApproval()">退回修改</button>
-          `:'<span class="txt2 txtsm">等待管理员确认</span>'}
+          <button class="btn btn-sm btn-outline" onclick="updStatus('${p.id}','cross_bu');loadApproval()">退回BU</button>
+          `:'<span class="txt2 txtsm">等待产品中心确认</span>'}
         </div>
       </div>`).join('')
     html+=`<div class="appr-section">
-      <div class="appr-sec-hdr">待审批确认 <span style="color:#f97316">${pendAppr.length}条</span></div>
+      <div class="appr-sec-hdr">
+        <span>待产品中心审批 <span style="color:#f97316">${pendAppr.length}条</span></span>
+        ${batchBtn}
+      </div>
       ${items}</div>`
   }
 
-  // ── 所有人可见：近期已处理记录
+  // 近期已处理
   if(recentAll?.length){
     const items=recentAll.map(s=>`
       <div class="appr-item">
@@ -1017,78 +1057,139 @@ async function rejectS(sid,btn){
   toast('已拒绝'); loadApproval()
 }
 
-// ── Import ────────────────────────────────────────────────────
-function parseImp(){
-  const text=v('imp-paste').trim()
-  if(!text){toast('请先粘贴内容','err');return}
-  const blocks=text.split(/(?=\n\d+[.、\s])|\n{2,}/).filter(b=>b.trim())
-  const parsed=[]
-  const get=(b,keys)=>{
-    for(const k of keys){
-      const m=b.match(new RegExp(k+'[：:]\\s*([^\\n]+(?:\\n(?![^\\n]*[：:])[^\\n]+)*)','i'))
-      if(m) return m[1].trim()
-    }; return null
+async function batchApproveAll(){
+  if(!S.pendApprIds.length){toast('暂无待审批痛点');return}
+  for(const id of S.pendApprIds){
+    await sb.from('pain_points').update({status:'confirmed'}).eq('id',id)
   }
-  blocks.forEach((b,i)=>{
-    const desc=get(b,['痛点描述','描述'])||b.replace(/^\d+[.、]\s*/,'').split('\n')[0].trim()
-    if(!desc) return
-    const pp={
-      _i:i+1, description:desc,
-      explanation:get(b,['痛点说明','说明','背景']),
-      factor_chain:get(b,['因子链路','链路']),
-      core_conflict:get(b,['核心冲突','冲突']),
-      risks:get(b,['潜在风险','风险']),
-      solution:get(b,['解决方案','方案']),
-      expected_effect:get(b,['预期效果','效果']),
-      sku:get(b,['SKU','sku','产品匹配']),
-    }
-    const wm=b.match(/权重[：:]\s*(\d+(?:\.\d+)?)/); pp.weight=wm?parseFloat(wm[1]):null
-    const tm=b.match(/标签[：:]\s*([^\n]+)/)
-    pp.tags=tm?tm[1].split(/[,，、]/).map(t=>t.trim()).filter(Boolean):[]
-    parsed.push(pp)
-  })
-  S.parsed=parsed
-  if(!parsed.length){
-    el('imp-preview').innerHTML='<div class="error-msg" style="margin-top:10px">未能解析，请检查格式</div>'
-    el('imp-confirm').disabled=true; return
-  }
-  el('imp-preview').innerHTML=`<div class="preview-box">
-    <h4>解析结果：识别到 ${parsed.length} 条痛点</h4>
-    ${parsed.map(p=>`<div class="preview-item">
-      <div class="prev-pid">#${p._i}</div>
-      <div class="prev-desc">${esc(p.description)}</div>
-      ${p.explanation?`<div class="prev-sub">${esc(p.explanation.slice(0,80))}…</div>`:''}
-      ${p.tags?.length?`<div class="td-tags" style="margin-top:5px">${p.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>`:''}
-    </div>`).join('')}
-  </div>`
-  el('imp-confirm').disabled=false
-  toast(`解析完成，${parsed.length} 条痛点`)
+  toast(`${S.pendApprIds.length} 条已批量确认通过`,'ok')
+  S.pendApprIds=[]; loadApproval(); loadPPs()
 }
 
+// ── Import (Excel) ────────────────────────────────────────────
+const FC={pid:0,bu_raw:1,description:2,explanation:3,legal_refs:4,
+  tag1:5,tag1_weight:6,tag2:7,tag2_weight:8,tag3:9,tag3_weight:10,
+  sku:11,core_conflict:12,risks:13,solution:14,expected_effect:15}
+const BU_MAP={CM:'资本市场',Law:'法律',Tax:'税务'}
+const DYN_HDR={'场景分类':'scene_category','因子组合':'factor_chain','核心要素':'core_elements'}
+const TARGET_SHEET='主表2-平铺版本-严格映射主表1'
+
+function handleFileDrop(e){
+  const file=e.dataTransfer.files[0]; if(file) parseXlsx(file)
+}
+function handleFileSelect(input){
+  const file=input.files[0]; if(file) parseXlsx(file)
+}
+
+function parseXlsx(file){
+  const reader=new FileReader()
+  reader.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'array'})
+      const sheetName=wb.SheetNames.includes(TARGET_SHEET)?TARGET_SHEET:wb.SheetNames[0]
+      const ws=wb.Sheets[sheetName]
+      const data=XLSX.utils.sheet_to_json(ws,{header:1,defval:null})
+      if(data.length<2){toast('文件为空或格式有误','err');return}
+      const headers=data[0].map(h=>h?String(h).trim():'')
+      const dynCols={}
+      Object.entries(DYN_HDR).forEach(([h,f])=>{
+        const i=headers.indexOf(h); if(i>=0) dynCols[f]=i
+      })
+      S.xlsxParsed=[]
+      for(let i=1;i<data.length;i++){
+        const row=data[i]
+        const pid=row[FC.pid]; if(!pid) continue
+        const buRaw=row[FC.bu_raw]?String(row[FC.bu_raw]).trim():''
+        const bu=BU_MAP[buRaw]||buRaw
+        const tags=[row[FC.tag1],row[FC.tag2],row[FC.tag3]].map(t=>t?String(t).trim():null).filter(Boolean)
+        const record={
+          pid:String(pid).trim(), bu,
+          description:xs(row[FC.description]), explanation:xs(row[FC.explanation]),
+          legal_refs:xs(row[FC.legal_refs]),
+          tag1:xs(row[FC.tag1]), tag1_weight:xs(row[FC.tag1_weight]),
+          tag2:xs(row[FC.tag2]), tag2_weight:xs(row[FC.tag2_weight]),
+          tag3:xs(row[FC.tag3]), tag3_weight:xs(row[FC.tag3_weight]),
+          tags, sku:xs(row[FC.sku]), core_conflict:xs(row[FC.core_conflict]),
+          risks:xs(row[FC.risks]), solution:xs(row[FC.solution]),
+          expected_effect:xs(row[FC.expected_effect])
+        }
+        Object.entries(dynCols).forEach(([f,ci])=>{ if(ci<row.length) record[f]=xs(row[ci]) })
+        S.xlsxParsed.push(record)
+      }
+      const dist={}; S.xlsxParsed.forEach(r=>dist[r.bu]=(dist[r.bu]||0)+1)
+      const distStr=Object.entries(dist).map(([b,n])=>`${b}:${n}`).join(' · ')
+      el('imp-preview').innerHTML=`<div class="preview-box">
+        <h4>解析完成：${S.xlsxParsed.length} 条（Sheet: ${sheetName}）</h4>
+        <div class="txt2 txtsm">BU分布：${distStr}</div>
+        <div class="txt2 txtsm" style="margin-top:6px">前3条预览：</div>
+        ${S.xlsxParsed.slice(0,3).map(p=>`<div class="preview-item">
+          <div class="prev-pid">${p.pid} · ${p.bu}</div>
+          <div class="prev-desc">${esc(p.description||'')}</div>
+        </div>`).join('')}
+      </div>`
+      el('imp-confirm').disabled=false
+      toast(`解析完成，${S.xlsxParsed.length} 条痛点`)
+    }catch(err){toast('解析失败: '+err.message,'err')}
+  }
+  reader.readAsArrayBuffer(file)
+}
+function xs(val){if(val==null)return null;const s=String(val).trim();return s||null}
+
 async function doImport(){
-  const bname=v('imp-batch').trim(), bu=v('imp-bu')
-  if(!bname){toast('请填写批次名称','err');return}
-  if(!S.parsed.length){toast('请先解析','err');return}
-  const {data:batch,error:be}=await sb.from('batches')
-    .insert({name:bname,primary_bu:bu,created_by:S.user.id}).select().single()
-  if(be){toast('创建批次失败','err');return}
-  // Get next PID number
-  const {data:last}=await sb.from('pain_points').select('pid').order('pid',{ascending:false}).limit(1)
-  let pidN=1
-  if(last?.length&&last[0].pid){const m=last[0].pid.match(/\d+/); if(m) pidN=parseInt(m[0])+1}
-  const rows=S.parsed.map((p,i)=>({
-    pid:`P-${String(pidN+i).padStart(3,'0')}`, batch_id:batch.id, bu,
-    description:p.description, explanation:p.explanation, factor_chain:p.factor_chain,
-    tags:p.tags||[], weight:p.weight, sku:p.sku,
-    core_conflict:p.core_conflict, risks:p.risks,
-    solution:p.solution, expected_effect:p.expected_effect, status:'pending_review'
-  }))
-  const {error:ie}=await sb.from('pain_points').insert(rows)
-  if(ie){toast('导入失败: '+ie.message,'err');return}
-  toast(`成功导入 ${rows.length} 条 → 批次「${bname}」`,'ok')
-  el('imp-batch').value=''; el('imp-paste').value=''
-  el('imp-preview').innerHTML=''; el('imp-confirm').disabled=true; S.parsed=[]
+  if(!S.xlsxParsed.length){toast('请先选择文件','err');return}
+  const bname=(v('imp-batch')||'').trim()||'痛点库-正式版'
+  el('imp-confirm').disabled=true
+  let batchId
+  const {data:exBatch}=await sb.from('batches').select('id').eq('name',bname).limit(1)
+  if(exBatch?.length){
+    batchId=exBatch[0].id
+  } else {
+    const {data:nb}=await sb.from('batches').insert({name:bname,status:'active'}).select().single()
+    batchId=nb.id
+  }
+  const {data:exPPs}=await sb.from('pain_points').select('id,pid,status').limit(10000)
+  const exMap={}; (exPPs||[]).forEach(p=>exMap[p.pid]=p)
+  const newRows=[],updRows=[]
+  S.xlsxParsed.forEach(pp=>{
+    const record={...pp,batch_id:batchId}
+    if(exMap[pp.pid]){ const {status,...rest}=record; updRows.push(rest) }
+    else{ record.status='pending_review'; newRows.push(record) }
+  })
+  let inserted=0,updated=0
+  for(let i=0;i<newRows.length;i+=50){
+    const {error}=await sb.from('pain_points').insert(newRows.slice(i,i+50))
+    if(!error) inserted+=Math.min(50,newRows.length-i)
+  }
+  for(const rec of updRows){
+    const {pid,...upd}=rec
+    await sb.from('pain_points').update(upd).eq('pid',pid)
+    updated++
+  }
+  toast(`同步完成：新增 ${inserted} · 更新 ${updated}`,'ok')
+  el('imp-preview').innerHTML=''; el('imp-confirm').disabled=true; S.xlsxParsed=[]
+  el('file-input').value=''
   await Promise.all([loadBatches(),loadPPs()]); go('list')
+}
+
+// ── Export ────────────────────────────────────────────────────
+async function exportPPs(){
+  toast('正在导出…')
+  const {data}=await sb.from('pain_points').select('*').eq('status','confirmed').order('pid')
+  if(!data?.length){toast('暂无已确认痛点','err');return}
+  const headers=['编号','BU','痛点描述','痛点说明','场景分类','因子组合','核心要素',
+    '核心冲突','相关法律法规','Tag1','Tag1权重','Tag2','Tag2权重','Tag3','Tag3权重',
+    'SKU','潜在风险','解决方案','预期效果']
+  const rows=[headers,...data.map(p=>[
+    p.pid,p.bu,p.description,p.explanation,p.scene_category,
+    p.factor_chain,p.core_elements,p.core_conflict,p.legal_refs,
+    p.tag1,p.tag1_weight,p.tag2,p.tag2_weight,p.tag3,p.tag3_weight,
+    p.sku,p.risks,p.solution,p.expected_effect
+  ])]
+  const ws=XLSX.utils.aoa_to_sheet(rows)
+  const wb=XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb,ws,'已确认痛点')
+  XLSX.writeFile(wb,`痛点库-已确认-${new Date().toISOString().slice(0,10)}.xlsx`)
+  toast(`已导出 ${data.length} 条已确认痛点`,'ok')
 }
 
 // ── Members ───────────────────────────────────────────────────
