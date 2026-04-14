@@ -551,7 +551,7 @@ async function boot(user){
   S.user=user
   const {data:prof}=await sb.from('profiles').select('*').eq('id',user.id).single()
   S.profile=prof
-  if(!prof){
+  if(!prof || !prof.name){
     el('login-page').style.display='none'
     el('setup-overlay').classList.add('show')
     return
@@ -562,7 +562,7 @@ async function boot(user){
 async function saveProfile(){
   const name=v('setup-name').trim(), bu=v('setup-bu'), err=el('setup-err')
   if(!name){err.textContent='请填写姓名';err.style.display='block';return}
-  const {error}=await sb.from('profiles').insert({
+  const {error}=await sb.from('profiles').upsert({
     id:S.user.id, name, bu, role: bu==='管理员'?'admin':'reviewer'
   })
   if(error){err.textContent='保存失败: '+error.message;err.style.display='block';return}
