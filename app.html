@@ -677,96 +677,141 @@ const EDIT_FIELDS=[
   {k:'core_elements', l:'核心要素', dim:true},
   {k:'core_conflict', l:'核心冲突'},
   {k:'legal_refs',    l:'相关法律法规'},
+  {k:'tag1', l:'Tag 1', rows:1, pair:{k:'tag1_weight', l:'权重'}},
+  {k:'tag2', l:'Tag 2', rows:1, pair:{k:'tag2_weight', l:'权重'}},
+  {k:'tag3', l:'Tag 3', rows:1, pair:{k:'tag3_weight', l:'权重'}},
   {k:'sku',           l:'SKU 匹配'},
   {k:'risks',         l:'潜在风险'},
   {k:'solution',      l:'解决方案'},
   {k:'expected_effect',l:'预期效果'},
 ]
 
+const TAG_NOTE=`<div style="background:#f0f4ff;border-radius:7px;padding:10px 13px;
+  margin-bottom:14px;font-size:11.5px;color:#4b5563;line-height:1.9;border-left:3px solid #1a56db">
+  <div style="font-weight:700;color:#1a56db;margin-bottom:3px">📌 Tag 与权重说明</div>
+  <div>① Tag 的组合表示适合该痛点的<strong>客户画像组合</strong></div>
+  <div>② 权重<strong>留空</strong> → 分值=1，通用画像要素</div>
+  <div>③ 权重=<strong>A</strong> → 分值=2，低重要度要件</div>
+  <div>④ 权重=<strong>B</strong> → 分值=3，中等重要度，能定位某类客户状态</div>
+  <div>⑤ 权重=<strong>C</strong> → 分值=4，高重要度，能精准定位对应客群</div>
+</div>`
+
+// 获取所有需要追踪变更的字段 key（含 pair 字段）
+function trackedKeys(){
+  const keys=[]
+  EDIT_FIELDS.forEach(f=>{keys.push(f.k);if(f.pair)keys.push(f.pair.k)})
+  return keys
+}
+// 根据 key 查找显示标签
+function fieldLabel(k){
+  for(const f of EDIT_FIELDS){
+    if(f.k===k) return f.l
+    if(f.pair&&f.pair.k===k) return f.pair.l
+  }
+  return FL[k]||k
+}
+
 function renderEditFields(pp){
   S.drawerOriginal={}
-  EDIT_FIELDS.forEach(f=>{ S.drawerOriginal[f.k]=pp[f.k]||'' })
+  EDIT_FIELDS.forEach(f=>{
+    S.drawerOriginal[f.k]=pp[f.k]||''
+    if(f.pair) S.drawerOriginal[f.pair.k]=pp[f.pair.k]||''
+  })
 
-  const fieldsHtml=EDIT_FIELDS.map(f=>{
+  let html=''
+  EDIT_FIELDS.forEach(f=>{
     const val=pp[f.k]||''
-    return `<div class="edit-field-block">
-      <div class="f-label${f.dim?' dim-label':''}">${f.l}</div>
-      <textarea class="edit-ta" id="ef-${f.k}" rows="${val.length>80?4:2}"
-        oninput="onFieldEdit('${f.k}')">${esc(val)}</textarea>
-      <div class="orig-block" id="orig-${f.k}"></div>
-    </div>`
-  }).join('')
+    if(f.pair){
+      // Tag + 权重 并排双列
+      const pv=pp[f.pair.k]||''
+      html+=`<div class="edit-field-block">
+        <div style="display:grid;grid-template-columns:1fr 96px;gap:8px">
+          <div>
+            <div class="f-label">${f.l}</div>
+            <textarea class="edit-ta" id="ef-${f.k}" rows="1" style="min-height:38px"
+              oninput="onFieldEdit('${f.k}')">${esc(val)}</textarea>
+            <div class="orig-block" id="orig-${f.k}"></div>
+          </div>
+          <div>
+            <div class="f-label">${f.pair.l}</div>
+            <input type="text" class="edit-ta" id="ef-${f.pair.k}"
+              style="height:38px;min-height:unset;resize:none"
+              oninput="onFieldEdit('${f.pair.k}')"
+              value="${esc(pv)}" placeholder="留空/A/B/C">
+            <div class="orig-block" id="orig-${f.pair.k}"></div>
+          </div>
+        </div>
+      </div>`
+      // 在 tag3 后插入说明
+      if(f.k==='tag3') html+=TAG_NOTE
+    } else {
+      html+=`<div class="edit-field-block">
+        <div class="f-label${f.dim?' dim-label':''}">${f.l}</div>
+        <textarea class="edit-ta" id="ef-${f.k}" rows="${val.length>80?4:2}"
+          oninput="onFieldEdit('${f.k}')">${esc(val)}</textarea>
+        <div class="orig-block" id="orig-${f.k}"></div>
+      </div>`
+    }
+  })
 
-  // Tags: read-only display
-  const tagPairs=[[pp.tag1,pp.tag1_weight],[pp.tag2,pp.tag2_weight],[pp.tag3,pp.tag3_weight]].filter(([t])=>t)
-  const tagsHtml=tagPairs.length?`<div class="edit-field-block">
-    <div class="f-label">Tags</div>
-    <div class="td-tags">${tagPairs.map(([t,w])=>
-      `<span class="tag">${esc(t)}${w?` <span style="opacity:.7">${esc(w)}</span>`:''}</span>`).join('')}
-    </div>
-  </div>`:''
-
-  el('d-edit-fields').innerHTML=fieldsHtml+tagsHtml
+  el('d-edit-fields').innerHTML=html
   el('edit-submit-bar').style.display='none'
 }
 
 function onFieldEdit(key){
   const ta=el(`ef-${key}`)
+  if(!ta) return
   const orig=S.drawerOriginal[key]||''
   const cur=ta.value
-  const origBlock=el(`orig-${key}`)
+  const ob=el(`orig-${key}`)
   if(cur!==orig){
     ta.classList.add('changed')
-    origBlock.style.display='block'
-    origBlock.textContent=orig||'（原为空）'
+    if(ob){ob.style.display='block';ob.textContent=orig||'（原为空）'}
   } else {
     ta.classList.remove('changed')
-    origBlock.style.display='none'
+    if(ob) ob.style.display='none'
   }
-  // show/hide submit bar
-  const anyChanged=EDIT_FIELDS.some(f=>{
-    const t=el(`ef-${f.k}`); return t&&t.value!==(S.drawerOriginal[f.k]||'')
-  })
-  const bar=el('edit-submit-bar')
-  bar.style.display=anyChanged?'flex':'none'
-  const cnt=EDIT_FIELDS.filter(f=>{const t=el(`ef-${f.k}`);return t&&t.value!==(S.drawerOriginal[f.k]||'')}).length
+  const all=trackedKeys()
+  const anyChanged=all.some(k=>{const t=el(`ef-${k}`);return t&&t.value!==(S.drawerOriginal[k]||'')})
+  el('edit-submit-bar').style.display=anyChanged?'flex':'none'
+  const cnt=all.filter(k=>{const t=el(`ef-${k}`);return t&&t.value!==(S.drawerOriginal[k]||'')}).length
   el('edit-changed-hint').textContent=anyChanged?`${cnt} 个字段已修改`:''
 }
 
 async function submitAllEdits(){
   if(!S.drawer) return
-  const changed=EDIT_FIELDS.filter(f=>{
-    const t=el(`ef-${f.k}`); return t&&t.value!==(S.drawerOriginal[f.k]||'')
-  })
-  if(!changed.length){toast('没有修改内容','err');return}
-  for(const f of changed){
-    const ta=el(`ef-${f.k}`)
+  const all=trackedKeys()
+  const changedKeys=all.filter(k=>{const t=el(`ef-${k}`);return t&&t.value!==(S.drawerOriginal[k]||'')})
+  if(!changedKeys.length){toast('没有修改内容','err');return}
+  for(const k of changedKeys){
+    const ta=el(`ef-${k}`)
     const newVal=ta.value.trim()
-    const oldVal=S.drawerOriginal[f.k]||null
+    const oldVal=S.drawerOriginal[k]||null
     await sb.from('change_suggestions').insert({
       pain_point_id:S.drawer.id, user_id:S.user.id,
       user_name:S.profile.name, user_bu:S.profile.bu,
-      field_name:f.k, field_label:f.l,
+      field_name:k, field_label:fieldLabel(k),
       old_value:oldVal, new_value:newVal
     })
   }
-  toast(`已提交 ${changed.length} 个字段的修改建议`,'ok')
+  toast(`已提交 ${changedKeys.length} 个字段的修改建议`,'ok')
   await loadSuggs(S.drawer.id)
   el('edit-submit-bar').style.display='none'
-  changed.forEach(f=>{
-    const t=el(`ef-${f.k}`); if(t){t.classList.remove('changed');el(`orig-${f.k}`).style.display='none'}
+  changedKeys.forEach(k=>{
+    const t=el(`ef-${k}`);if(t)t.classList.remove('changed')
+    const ob=el(`orig-${k}`);if(ob)ob.style.display='none'
   })
   if(!['pending_approval','confirmed'].includes(S.drawer.status))
     await updStatus(S.drawer.id,'pending_approval')
 }
 
 function resetEdits(){
-  EDIT_FIELDS.forEach(f=>{
-    const t=el(`ef-${f.k}`)
+  trackedKeys().forEach(k=>{
+    const t=el(`ef-${k}`)
     if(t){
-      t.value=S.drawerOriginal[f.k]||''
+      t.value=S.drawerOriginal[k]||''
       t.classList.remove('changed')
-      const ob=el(`orig-${f.k}`); if(ob) ob.style.display='none'
+      const ob=el(`orig-${k}`);if(ob)ob.style.display='none'
     }
   })
   el('edit-submit-bar').style.display='none'
