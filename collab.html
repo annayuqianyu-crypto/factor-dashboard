@@ -647,6 +647,9 @@ async function openDrawer(id){
   el('d-batch').textContent=batch?`批次：${batch.name}`:''
   renderEditFields(pp)
   renderStatusActions(pp)
+  // 非本BU成员隐藏「转派」tab
+  const assignTabBtn=document.querySelector('.drw-tab[data-tab="assign"]')
+  if(assignTabBtn) assignTabBtn.style.display=canEdit(pp)?'':'none'
   await Promise.all([loadComments(id),loadSuggs(id),loadAssigns(id)])
   el('drawer').classList.add('open'); el('main').classList.add('drawer-open')
   switchTab('edit'); renderList()
@@ -782,6 +785,7 @@ function onFieldEdit(key){
 
 async function submitAllEdits(){
   if(!S.drawer) return
+  if(!canEdit(S.drawer)){toast('无权修改此部门痛点','err');return}
   const all=trackedKeys()
   const changedKeys=all.filter(k=>{const t=el(`ef-${k}`);return t&&t.value!==(S.drawerOriginal[k]||'')})
   if(!changedKeys.length){toast('没有修改内容','err');return}
@@ -977,6 +981,7 @@ function renderAssignTarget(){
 
 async function submitAssign(){
   if(!S.drawer) return
+  if(!canEdit(S.drawer)){toast('无权转派此部门痛点','err');return}
   const reason=v('a-reason').trim()
   if(!reason){toast('请填写转派原因','err');return}
   const sel=el('a-to-user')
