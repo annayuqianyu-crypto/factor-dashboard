@@ -967,13 +967,13 @@ function renderAssignTarget(type){
     if(leads.length){
       const og=document.createElement('optgroup'); og.label='BU负责人'
       leads.forEach(p=>{const o=document.createElement('option');o.value=p.id;
-        o.textContent=p.name;o.dataset.bu=p.bu;o.dataset.name=p.name;og.appendChild(o)})
+        o.textContent=`${p.bu}-${p.name}`;o.dataset.bu=p.bu;o.dataset.name=p.name;og.appendChild(o)})
       sel.appendChild(og)
     }
     if(others.length){
       const og=document.createElement('optgroup'); og.label='其他成员'
       others.forEach(p=>{const o=document.createElement('option');o.value=p.id;
-        o.textContent=p.name;o.dataset.bu=p.bu;o.dataset.name=p.name;og.appendChild(o)})
+        o.textContent=`${p.bu}-${p.name}`;o.dataset.bu=p.bu;o.dataset.name=p.name;og.appendChild(o)})
       sel.appendChild(og)
     }
   } else {
@@ -981,9 +981,9 @@ function renderAssignTarget(type){
     const byBU={}
     others.forEach(p=>{if(!byBU[p.bu])byBU[p.bu]=[];byBU[p.bu].push(p)})
     Object.entries(byBU).forEach(([bu,members])=>{
-      const og=document.createElement('optgroup'); og.label=bu+'BU'
+      const og=document.createElement('optgroup'); og.label=bu
       members.forEach(p=>{const o=document.createElement('option');o.value=p.id;
-        o.textContent=p.name+(p.role==='bu_lead'?' (负责人)':'');
+        o.textContent=`${p.bu}-${p.name}`+(p.role==='bu_lead'?' (负责人)':'');
         o.dataset.bu=p.bu;o.dataset.name=p.name;og.appendChild(o)})
       sel.appendChild(og)
     })
