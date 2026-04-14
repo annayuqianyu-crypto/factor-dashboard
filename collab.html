@@ -1403,6 +1403,11 @@ function setupRealtime(){
   sb.channel('rt-pps').on('postgres_changes',{
     event:'UPDATE',schema:'public',table:'pain_points'
   },()=>loadPPs()).subscribe()
+  sb.channel('rt-suggs').on('postgres_changes',{
+    event:'UPDATE',schema:'public',table:'change_suggestions'
+  },p=>{
+    if(S.drawer&&p.new.pain_point_id===S.drawer.id) loadSuggs(S.drawer.id)
+  }).subscribe()
 }
 
 // ── Utils ─────────────────────────────────────────────────────
