@@ -291,8 +291,9 @@ td{padding:10px 14px;vertical-align:middle}
     <div class="topbar-logo">朝曦家办 · 痛点协作</div>
     <div class="topbar-sep"></div>
     <div class="topbar-batch">
+      <span style="font-size:12px;color:#6b7280;margin-right:4px">库：</span>
       <select id="batch-sel" onchange="onBatchChange()">
-        <option value="">全部批次</option>
+        <option value="">全部库</option>
       </select>
     </div>
     <div class="topbar-space"></div>
@@ -363,7 +364,44 @@ td{padding:10px 14px;vertical-align:middle}
       <div class="page-hdr"><div class="page-title">Excel 同步</div></div>
       <div class="import-card">
         <h3>从本地 Excel 同步痛点</h3>
-        <p>选择 <code>痛点库20260410-最新.xlsx</code>，自动解析并与 Supabase 同步（新增或更新，不覆盖状态）</p>
+        <p>上传 Excel 文件，解析后同步至 Supabase。不同来源的痛点建议建立独立库，互不干扰。</p>
+
+        <!-- 第一步：选择库模式 -->
+        <div style="margin-bottom:16px">
+          <div class="label" style="margin-bottom:8px">① 选择目标库</div>
+          <div style="display:flex;gap:12px;padding:12px 14px;background:#f8fafc;
+            border:1px solid var(--border);border-radius:8px">
+            <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;font-weight:600">
+              <input type="radio" name="lib-mode" value="new" checked onchange="onLibModeChange()">
+              🆕 新建库
+            </label>
+            <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;font-weight:600">
+              <input type="radio" name="lib-mode" value="existing" onchange="onLibModeChange()">
+              📂 写入已有库
+            </label>
+          </div>
+        </div>
+
+        <!-- 新建库 -->
+        <div id="lib-new-wrap" style="margin-bottom:14px">
+          <label class="label">库名称</label>
+          <input class="fc" id="imp-batch" placeholder="痛点库+20260415">
+          <div class="txt2 txtsm" style="margin-top:5px">
+            示例：主库 · 保险公司专项库 · 证券公司调研库
+          </div>
+        </div>
+
+        <!-- 写入已有库 -->
+        <div id="lib-existing-wrap" style="display:none;margin-bottom:14px">
+          <label class="label">选择目标库</label>
+          <select class="fc" id="imp-lib-sel"></select>
+          <div class="txt2 txtsm" style="margin-top:5px;color:#d97706">
+            ⚠️ 仅在该库内新增或更新条目，不影响其他库的数据
+          </div>
+        </div>
+
+        <!-- 第二步：上传文件 -->
+        <div class="label" style="margin-bottom:8px">② 上传 Excel 文件</div>
         <div class="file-drop" id="file-drop" onclick="el('file-input').click()"
           ondragover="event.preventDefault();this.classList.add('drag')"
           ondragleave="this.classList.remove('drag')"
@@ -374,16 +412,17 @@ td{padding:10px 14px;vertical-align:middle}
         </div>
         <input type="file" id="file-input" accept=".xlsx,.xls" style="display:none"
           onchange="handleFileSelect(this)">
-        <div style="margin-top:14px;display:flex;align-items:center;gap:10px">
-          <div style="flex:1">
-            <label class="label">批次名称（留空则使用「痛点库-正式版」）</label>
-            <input class="fc" id="imp-batch" placeholder="痛点库-正式版">
-          </div>
-          <div style="padding-top:18px">
-            <button class="btn btn-sm btn-primary" id="imp-confirm" onclick="doImport()" disabled>✓ 确认同步</button>
-          </div>
+
+        <div style="margin-top:14px;display:flex;justify-content:flex-end">
+          <button class="btn btn-sm btn-primary" id="imp-confirm" onclick="doImport()" disabled>✓ 确认同步</button>
         </div>
         <div id="imp-preview"></div>
+
+        <!-- 已有库列表 -->
+        <div id="lib-list-wrap" style="margin-top:24px;border-top:1px solid var(--border);padding-top:16px">
+          <div class="bold txtsm" style="margin-bottom:10px">现有库</div>
+          <div id="lib-list"></div>
+        </div>
       </div>
     </div>
 
@@ -576,13 +615,50 @@ function showApp(){
 
 // ── Data ─────────────────────────────────────────────────────
 async function loadBatches(){
-  const {data}=await sb.from('batches').select('*').order('created_at',{ascending:false})
-  S.batches=data||[]
+  // 同时拿各库的痛点数量
+  const [{data:batches},{data:counts}]=await Promise.all([
+    sb.from('batches').select('*').order('created_at',{ascending:false}),
+    sb.from('pain_points').select('batch_id').neq('status','deleted')
+  ])
+  S.batches=batches||[]
+  // 统计各库数量
+  const cntMap={}
+  ;(counts||[]).forEach(p=>{ cntMap[p.batch_id]=(cntMap[p.batch_id]||0)+1 })
+
+  // 顶栏切换库
   const sel=el('batch-sel')
-  sel.innerHTML='<option value="">全部批次</option>'
+  sel.innerHTML='<option value="">全部库</option>'
   S.batches.forEach(b=>{
-    const o=document.createElement('option'); o.value=b.id; o.textContent=b.name; sel.appendChild(o)
+    const o=document.createElement('option')
+    o.value=b.id
+    o.textContent=`${b.name}（${cntMap[b.id]||0}条）`
+    sel.appendChild(o)
   })
+
+  // Import → 写入已有库 下拉
+  const libSel=el('imp-lib-sel')
+  if(libSel){
+    libSel.innerHTML=S.batches.length
+      ? S.batches.map(b=>`<option value="${b.id}">${b.name}（${cntMap[b.id]||0}条）</option>`).join('')
+      : '<option value="">暂无已有库</option>'
+  }
+
+  // Import → 现有库列表
+  const libList=el('lib-list')
+  if(libList){
+    libList.innerHTML=S.batches.length
+      ? S.batches.map(b=>`
+        <div style="display:flex;align-items:center;justify-content:space-between;
+          padding:8px 12px;border:1px solid var(--border);border-radius:7px;margin-bottom:6px;
+          background:#fff">
+          <div>
+            <span class="bold txtsm">${esc(b.name)}</span>
+            <span class="txt2 txtsm" style="margin-left:8px">${cntMap[b.id]||0} 条痛点</span>
+          </div>
+          <button class="btn btn-sm btn-outline" onclick="switchToLib('${b.id}')">进入该库</button>
+        </div>`).join('')
+      : '<div class="txt2 txtsm">暂无库，请通过 Excel 同步新建</div>'
+  }
 }
 
 async function loadPPs(){
@@ -606,6 +682,18 @@ function filterPPs(){
 }
 
 function onBatchChange(){ S.batchId=v('batch-sel'); loadPPs() }
+
+function switchToLib(batchId){
+  S.batchId=batchId
+  const sel=el('batch-sel'); if(sel) sel.value=batchId
+  go('list'); loadPPs()
+}
+
+function onLibModeChange(){
+  const mode=document.querySelector('input[name="lib-mode"]:checked')?.value||'new'
+  el('lib-new-wrap').style.display=mode==='new'?'':'none'
+  el('lib-existing-wrap').style.display=mode==='existing'?'':'none'
+}
 
 // ── Render List ───────────────────────────────────────────────
 function renderList(){
@@ -642,7 +730,7 @@ async function openDrawer(id){
   const se=el('d-status'); se.textContent=statusLabel(pp); se.className=`badge s-${pp.status}`
   const be=el('d-bu'); be.textContent=pp.bu; be.className=`badge bu-${pp.bu}`
   const batch=S.batches.find(b=>b.id===pp.batch_id)
-  el('d-batch').textContent=batch?`批次：${batch.name}`:''
+  el('d-batch').textContent=batch?`库：${batch.name}`:''
   renderEditFields(pp)
   renderStatusActions(pp)
   await Promise.all([loadComments(id),loadSuggs(id),loadAssigns(id)])
@@ -1283,17 +1371,25 @@ function xs(val){if(val==null)return null;const s=String(val).trim();return s||n
 
 async function doImport(){
   if(!S.xlsxParsed.length){toast('请先选择文件','err');return}
-  const bname=(v('imp-batch')||'').trim()||'痛点库-正式版'
   el('imp-confirm').disabled=true
+  const mode=document.querySelector('input[name="lib-mode"]:checked')?.value||'new'
   let batchId
-  const {data:exBatch}=await sb.from('batches').select('id').eq('name',bname).limit(1)
-  if(exBatch?.length){
-    batchId=exBatch[0].id
+  if(mode==='new'){
+    const bname=(v('imp-batch')||'').trim()||'痛点库-正式版'
+    const {data:exBatch}=await sb.from('batches').select('id').eq('name',bname).limit(1)
+    if(exBatch?.length){
+      batchId=exBatch[0].id
+    } else {
+      const {data:nb}=await sb.from('batches').insert({name:bname,status:'active'}).select().single()
+      batchId=nb.id
+    }
   } else {
-    const {data:nb}=await sb.from('batches').insert({name:bname,status:'active'}).select().single()
-    batchId=nb.id
+    batchId=v('imp-lib-sel')
+    if(!batchId){toast('请先选择目标库','err');el('imp-confirm').disabled=false;return}
   }
-  const {data:exPPs}=await sb.from('pain_points').select('id,pid,status').limit(10000)
+  // ── 仅在当前库内比对，防止跨库干扰 ──────────────────────────
+  const {data:exPPs}=await sb.from('pain_points').select('id,pid,status')
+    .eq('batch_id',batchId).limit(10000)
   const exMap={}; (exPPs||[]).forEach(p=>exMap[p.pid]=p)
   const newRows=[],updRows=[]
   S.xlsxParsed.forEach(pp=>{
