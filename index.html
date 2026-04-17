@@ -197,6 +197,23 @@ tr:hover td { background: #fafafa; }
   padding:6px 12px; background:#f1f5f9; border-radius:6px;
   border-left:3px solid #6366f1; display:flex; align-items:center; gap:6px;
 }
+/* 触发原因折叠区 */
+.pred-trigger { margin-top:10px; border-top:1px dashed #e5e7eb; padding-top:8px; }
+.pred-trigger summary {
+  font-size:11.5px; color:#6366f1; font-weight:600; cursor:pointer;
+  list-style:none; display:flex; align-items:center; gap:5px; user-select:none;
+}
+.pred-trigger summary::-webkit-details-marker { display:none; }
+.pred-trigger summary .tri { font-size:9px; transition:transform .2s; display:inline-block; }
+.pred-trigger[open] summary .tri { transform:rotate(90deg); }
+.trigger-links { margin-top:8px; padding:10px 12px; background:#f8fafc;
+  border:1px solid #e0e7ff; border-radius:7px; }
+.trigger-links .tl-label { font-size:10px; color:#6366f1; font-weight:700;
+  text-transform:uppercase; letter-spacing:.5px; margin:8px 0 4px; }
+.trigger-links .tl-label:first-child { margin-top:0; }
+.trigger-links a { display:block; font-size:11.5px; color:#2563eb; text-decoration:none;
+  padding:2px 0; line-height:1.6; }
+.trigger-links a:hover { text-decoration:underline; color:#1d4ed8; }
 
 /* ── 优先级列表 ── */
 .priority-list { list-style: none; }
@@ -916,7 +933,7 @@ tr:hover td { background: #fafafa; }
   <div class="card">
     <div class="card-title">重点预测场景详解</div>
 
-    <div class="pred-section-title">📌 已识别场景（持续深化）</div>
+    <div class="pred-section-title">📁 因子库现有场景 · 已纳入研究与建模</div>
     <div class="prediction-grid">
 
       <div class="pred-card">
@@ -998,6 +1015,17 @@ tr:hover td { background: #fafafa; }
           <div class="angle-item"><span class="angle-tag legal">法律</span>开曼/BVI经济实质法修订收紧，信托架构受托人须满足新设主要商业活动要求，违规面临罚款及注销风险</div>
           <div class="angle-item"><span class="angle-tag capital">资本市场</span>离岸持股的上市公司有效税率重估，Pre-IPO阶段清理冗余离岸层的时间窗口收窄，架构调整触发资本利得税</div>
         </div>
+        <details class="pred-trigger">
+          <summary><span class="tri">▶</span> 触发原因 · 政策与热点来源</summary>
+          <div class="trigger-links">
+            <div class="tl-label">官方政策文件</div>
+            <a href="https://www.oecd.org/tax/beps/pillar-two/" target="_blank">📄 OECD — Pillar Two GloBE Rules 官方页面</a>
+            <a href="https://www.mof.gov.cn/zhengwuxinxi/caizhengxinwen/" target="_blank">📄 中国财政部 — 税收政策动态（全球最低税）</a>
+            <div class="tl-label">司法区落地进展</div>
+            <a href="https://www.ird.gov.hk/eng/tax/bus_glmtr.htm" target="_blank">🔗 香港税务局 — 全球最低税落地安排</a>
+            <a href="https://www.iras.gov.sg/taxes/corporate-income-tax/specific-topics/multinational-enterprise-(mne)-top-up-tax" target="_blank">🔗 新加坡 IRAS — MNE Top-up Tax 说明</a>
+          </div>
+        </details>
         <div class="pred-badge"><span class="tag tag-high">高价值</span> <span class="tag tag-new">覆盖缺口大</span></div>
       </div>
 
@@ -1009,6 +1037,18 @@ tr:hover td { background: #fafafa; }
           <div class="angle-item"><span class="angle-tag legal">法律</span>税务刑事责任风险评估（逃税罪认定标准），主动披露豁免的法律前提，境外账户涉及代持的权属证明</div>
           <div class="angle-item"><span class="angle-tag capital">资本市场</span>离岸账户持有上市股权收益申报链路梳理；境外经纪账户持仓信息触发报送后的持股架构调整</div>
         </div>
+        <details class="pred-trigger">
+          <summary><span class="tri">▶</span> 触发原因 · 政策与热点来源</summary>
+          <div class="trigger-links">
+            <div class="tl-label">CRS 国际框架</div>
+            <a href="https://www.oecd.org/tax/automatic-exchange/common-reporting-standard/" target="_blank">📄 OECD — CRS 共同申报准则官方说明</a>
+            <div class="tl-label">中国执行口径</div>
+            <a href="https://www.chinatax.gov.cn/chinatax/n810341/n810755/index.html" target="_blank">📄 国家税务总局 — 非居民金融账户涉税信息尽职调查</a>
+            <a href="https://www.safe.gov.cn/safe/ywzn/index.html" target="_blank">🔗 国家外汇管理局 — 境外投资备案（37号文相关）</a>
+            <div class="tl-label">典型稽查案例参考</div>
+            <a href="https://www.chinatax.gov.cn/chinatax/n810219/n810744/index.html" target="_blank">🔗 国家税务总局 — 税收违法案例公告</a>
+          </div>
+        </details>
         <div class="pred-badge"><span class="tag tag-high">高价值</span> <span class="tag tag-new">覆盖缺口大</span></div>
       </div>
 
@@ -1020,6 +1060,17 @@ tr:hover td { background: #fafafa; }
           <div class="angle-item"><span class="angle-tag legal">法律</span>FO设立最低资产规模与实质人员要求，受托人/基金经理牌照合规边界，实质运营文件留存要求</div>
           <div class="angle-item"><span class="angle-tag capital">资本市场</span>资产向港/新集中配置的再平衡逻辑，利用VCC（可变资本公司）架构灵活切换资产类别</div>
         </div>
+        <details class="pred-trigger">
+          <summary><span class="tri">▶</span> 触发原因 · 政策与热点来源</summary>
+          <div class="trigger-links">
+            <div class="tl-label">香港政策</div>
+            <a href="https://www.ird.gov.hk/eng/tax/bus_fos.htm" target="_blank">📄 香港税务局 — 单一家族办公室税务豁免制度说明</a>
+            <a href="https://www.invest.gov.hk/en/set-up-in-hong-kong/family-office/" target="_blank">🔗 InvestHK — 香港家族办公室落地指引</a>
+            <div class="tl-label">新加坡政策</div>
+            <a href="https://www.mas.gov.sg/development/family-offices" target="_blank">📄 MAS — 新加坡家族办公室发展政策</a>
+            <a href="https://www.iras.gov.sg/taxes/corporate-income-tax/specific-topics/tax-exemption-scheme-for-funds-(section-13o-and-13u)" target="_blank">🔗 IRAS — 13O/13U 基金税务豁免说明</a>
+          </div>
+        </details>
         <div class="pred-badge"><span class="tag tag-high">高价值</span> <span class="tag tag-expand">部分覆盖</span></div>
       </div>
 
@@ -1031,6 +1082,17 @@ tr:hover td { background: #fafafa; }
           <div class="angle-item"><span class="angle-tag legal">法律</span>上市前信托架构须满足证监会穿透披露要求，控股股东认定与一致行动人协议，上市后锁定期与信托受益权转让限制</div>
           <div class="angle-item"><span class="angle-tag capital">资本市场</span>北交所做市商制度下流动性管理，上市后减持计划与大宗交易安排，持股平台减持税务优化路径</div>
         </div>
+        <details class="pred-trigger">
+          <summary><span class="tri">▶</span> 触发原因 · 政策与热点来源</summary>
+          <div class="trigger-links">
+            <div class="tl-label">北交所与专精特新政策</div>
+            <a href="https://www.bse.cn/" target="_blank">📄 北京证券交易所官网 — 上市规则与公告</a>
+            <a href="https://www.miit.gov.cn/jgsj/zbes/znxqy/index.html" target="_blank">📄 工信部 — 专精特新"小巨人"企业名单与政策</a>
+            <div class="tl-label">IPO与股权传承监管</div>
+            <a href="https://www.csrc.gov.cn/csrc/c100028/c100271/index.shtml" target="_blank">🔗 中国证监会 — IPO相关规则与信息披露要求</a>
+            <a href="https://www.sse.com.cn/lawandrules/sserules/listing/sci/" target="_blank">🔗 上交所 — 科创板股票上市规则</a>
+          </div>
+        </details>
         <div class="pred-badge"><span class="tag tag-high">高价值</span> <span class="tag tag-expand">部分覆盖</span></div>
       </div>
 
@@ -1042,6 +1104,17 @@ tr:hover td { background: #fafafa; }
           <div class="angle-item"><span class="angle-tag legal">法律</span>个人破产申请资格与豁免财产范围，企业债务不蔓延至个人资产的隔离机制，破产撤销权对前期资产转移的追溯风险</div>
           <div class="angle-item"><span class="angle-tag capital">资本市场</span>上市公司控股股东股权被司法冻结/强制减持对股价冲击，债务重组期间股票质押平仓风险管理</div>
         </div>
+        <details class="pred-trigger">
+          <summary><span class="tri">▶</span> 触发原因 · 政策与热点来源</summary>
+          <div class="trigger-links">
+            <div class="tl-label">深圳个人破产试点立法</div>
+            <a href="https://www.szrd.gov.cn/szrd/gc_rdyw/gc_zyfb/202108/t20210820_24151249.htm" target="_blank">📄 深圳市人大 — 《深圳经济特区个人破产条例》全文</a>
+            <a href="http://szzy.court.gov.cn/" target="_blank">🔗 深圳中级人民法院 — 个人破产典型案例</a>
+            <div class="tl-label">全国推进动态</div>
+            <a href="https://www.npc.gov.cn/npc/c30834/202004/ec3ec7d32fa74f79b83a8df7e7289d8e.shtml" target="_blank">📄 全国人大 — 企业破产法修订与个人破产立法研究进展</a>
+            <a href="https://www.court.gov.cn/zixun.html" target="_blank">🔗 最高人民法院 — 破产审判工作动态</a>
+          </div>
+        </details>
         <div class="pred-badge"><span class="tag tag-mid">中价值</span> <span class="tag tag-new">覆盖缺口大</span></div>
       </div>
 
@@ -1053,6 +1126,18 @@ tr:hover td { background: #fafafa; }
           <div class="angle-item"><span class="angle-tag legal">法律</span>跨境离婚管辖权争议与准据法选择，离岸信托/公司能否被穿透认定为夫妻共同财产，婚前股权隔离协议的跨境效力</div>
           <div class="angle-item"><span class="angle-tag capital">资本市场</span>上市公司股权在离婚程序中的权益变动信息披露义务，持股比例变化触发举牌/减持规则合规应对</div>
         </div>
+        <details class="pred-trigger">
+          <summary><span class="tri">▶</span> 触发原因 · 政策与热点来源</summary>
+          <div class="trigger-links">
+            <div class="tl-label">婚姻家庭法律依据</div>
+            <a href="https://www.court.gov.cn/zixun-xiangqing-280741.html" target="_blank">📄 最高人民法院 — 婚姻家庭编司法解释（一）</a>
+            <a href="http://www.npc.gov.cn/npc/c30834/201011/cc5e63e222b14e39a5b9e42c0e23218b.shtml" target="_blank">📄 全国人大 — 涉外民事关系法律适用法（管辖与准据法）</a>
+            <div class="tl-label">上市公司股权披露要求</div>
+            <a href="https://www.csrc.gov.cn/csrc/c100028/c100271/index.shtml" target="_blank">🔗 证监会 — 上市公司权益变动信息披露规则</a>
+            <div class="tl-label">行业现象参考</div>
+            <a href="https://www.court.gov.cn/zixun.html" target="_blank">🔗 最高人民法院 — 涉外婚姻财产典型案例公告</a>
+          </div>
+        </details>
         <div class="pred-badge"><span class="tag tag-high">高价值</span> <span class="tag tag-new">覆盖缺口大</span></div>
       </div>
 
