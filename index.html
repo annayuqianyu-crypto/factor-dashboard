@@ -172,14 +172,30 @@ tr:hover td { background: #fafafa; }
   background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
   padding: 14px 16px;
 }
+.pred-card.pred-new {
+  border-color: #c7d2fe; background: linear-gradient(135deg,#fafaff 0%,#fff 100%);
+}
 .pred-card .pred-title {
   font-size: 14px; font-weight: 600; margin-bottom: 6px;
 }
 .pred-card .pred-meta {
-  font-size: 12px; color: #6b7280; line-height: 1.6;
+  font-size: 12px; color: #6b7280; line-height: 1.6; margin-bottom: 8px;
 }
 .pred-card .pred-badge {
   margin-top: 8px;
+}
+/* 三角视角 */
+.pred-angles { display: flex; flex-direction: column; gap: 5px; margin: 8px 0; }
+.angle-item  { display: flex; gap: 7px; align-items: flex-start; font-size: 11.5px; color: #374151; line-height: 1.55; }
+.angle-tag   { flex-shrink:0; font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; margin-top:1px; white-space:nowrap; }
+.angle-tag.tax     { background:#fef3c7; color:#92400e; }
+.angle-tag.legal   { background:#dbeafe; color:#1e40af; }
+.angle-tag.capital { background:#d1fae5; color:#065f46; }
+/* 分组标题 */
+.pred-section-title {
+  font-size:13px; font-weight:700; color:#374151; margin:20px 0 10px;
+  padding:6px 12px; background:#f1f5f9; border-radius:6px;
+  border-left:3px solid #6366f1; display:flex; align-items:center; gap:6px;
 }
 
 /* ── 优先级列表 ── */
@@ -889,65 +905,157 @@ tr:hover td { background: #fafafa; }
 <div id="page-forecast" class="page">
   <div class="page-header">
     <h2>🔭 未来场景预测</h2>
-    <p>基于市场趋势与客户需求变化的增量场景预测</p>
+    <p>基于市场趋势、政策动向与客户需求变化的增量场景预测；新兴场景均标注法律·税务·资本市场三角视角</p>
   </div>
 
   <div class="card">
     <div class="card-title">业务价值 vs 覆盖缺口分析</div>
-    <div id="chart-bubble" class="chart-box" style="height:360px;"></div>
+    <div id="chart-bubble" class="chart-box" style="height:400px;"></div>
   </div>
 
   <div class="card">
     <div class="card-title">重点预测场景详解</div>
+
+    <div class="pred-section-title">📌 已识别场景（持续深化）</div>
     <div class="prediction-grid">
+
       <div class="pred-card">
         <div class="pred-title">大湾区跨境财富管理</div>
-        <div class="pred-meta">
-          港澳内地三地身份互认政策深化、跨境理财通扩容、数字人民币跨境试点<br/>
-          预估新增场景：30-40条
+        <div class="pred-meta">港澳内地三地身份互认政策深化、跨境理财通扩容、数字人民币跨境试点 · 预估新增场景：30-40条</div>
+        <div class="pred-angles">
+          <div class="angle-item"><span class="angle-tag tax">税务</span>三地税务居民身份认定、跨境所得申报及双边税收协定适用，避免双重征税</div>
+          <div class="angle-item"><span class="angle-tag legal">法律</span>跨境持股架构合法性审查、遗产继承跨境适用不同法域规则的协调问题</div>
+          <div class="angle-item"><span class="angle-tag capital">资本市场</span>理财通额度内北向资金资产配置，港股通南向持股减持通道选择</div>
         </div>
         <div class="pred-badge"><span class="tag tag-high">高价值</span> <span class="tag tag-new">覆盖缺口大</span></div>
       </div>
+
       <div class="pred-card">
         <div class="pred-title">AI/科技独角兽上市潮</div>
-        <div class="pred-meta">
-          2026-2028年AI企业密集上市，创始人/高管RSU、ESOP税务规划需求激增<br/>
-          预估新增场景：25-35条
+        <div class="pred-meta">2026-2028年AI企业密集上市，创始人/高管RSU、ESOP税务规划需求激增 · 预估新增场景：25-35条</div>
+        <div class="pred-angles">
+          <div class="angle-item"><span class="angle-tag tax">税务</span>ESOP行权/归属时点个税确认，跨境RSU的源泉扣缴与申报义务</div>
+          <div class="angle-item"><span class="angle-tag legal">法律</span>股权激励协议约束条款、竞业限制与归属安排，离职/上市前期的期权纠纷</div>
+          <div class="angle-item"><span class="angle-tag capital">资本市场</span>上市前员工持股平台清理穿透，锁定期结束减持窗口与大宗交易安排</div>
         </div>
         <div class="pred-badge"><span class="tag tag-high">高价值</span> <span class="tag tag-expand">部分覆盖</span></div>
       </div>
+
       <div class="pred-card">
         <div class="pred-title">数字资产合规持有</div>
-        <div class="pred-meta">
-          加密货币监管框架逐步明确，香港/新加坡持牌交易所兴起，合规需求上升<br/>
-          预估新增场景：15-20条
+        <div class="pred-meta">加密货币监管框架逐步明确，香港/新加坡持牌交易所兴起，合规需求上升 · 预估新增场景：15-20条</div>
+        <div class="pred-angles">
+          <div class="angle-item"><span class="angle-tag tax">税务</span>数字资产处置所得定性（资本利得 vs. 普通所得），CRS框架下加密账户信息交换</div>
+          <div class="angle-item"><span class="angle-tag legal">法律</span>持牌交易所注册要求，数字资产信托持有的法律框架，遗产规划中私钥传承</div>
+          <div class="angle-item"><span class="angle-tag capital">资本市场</span>比特币ETF配置比例，稳定币在跨境支付中的合规通道与外汇管理边界</div>
         </div>
         <div class="pred-badge"><span class="tag tag-mid">中价值</span> <span class="tag tag-new">覆盖缺口大</span></div>
       </div>
+
       <div class="pred-card">
         <div class="pred-title">REITs资产配置规划</div>
-        <div class="pred-meta">
-          境内公募REITs扩容 + 境外REITs税务规划，高净值客户不动产替代配置需求<br/>
-          预估新增场景：12-18条
+        <div class="pred-meta">境内公募REITs扩容 + 境外REITs税务规划，高净值客户不动产替代配置需求 · 预估新增场景：12-18条</div>
+        <div class="pred-angles">
+          <div class="angle-item"><span class="angle-tag tax">税务</span>境内公募REITs分红所得税优惠，境外REITs持有中的预提税与税收协定适用</div>
+          <div class="angle-item"><span class="angle-tag legal">法律</span>REITs份额质押融资的合规要求，底层不动产交割中的权属瑕疵识别</div>
+          <div class="angle-item"><span class="angle-tag capital">资本市场</span>不动产替代性配置逻辑，REITs与物业直持组合比例的流动性管理</div>
         </div>
         <div class="pred-badge"><span class="tag tag-mid">中价值</span> <span class="tag tag-new">覆盖缺口大</span></div>
       </div>
+
       <div class="pred-card">
         <div class="pred-title">中东/东南亚新兴身份</div>
-        <div class="pred-meta">
-          阿联酋黄金签证、泰国精英签证、马来西亚MM2H等新兴目的地需求增长<br/>
-          预估新增场景：20-25条
+        <div class="pred-meta">阿联酋黄金签证、泰国精英签证、马来西亚MM2H等新兴目的地需求增长 · 预估新增场景：20-25条</div>
+        <div class="pred-angles">
+          <div class="angle-item"><span class="angle-tag tax">税务</span>UAE零个税税率结合居民身份获取，利用新加坡/马来税收协定降低全球所得税负</div>
+          <div class="angle-item"><span class="angle-tag legal">法律</span>双重国籍/永居对国内上市公司持股信披的影响，境外居留证件的境内企业合规</div>
+          <div class="angle-item"><span class="angle-tag capital">资本市场</span>海湾国家主权基金LP机会，马来/泰国本地资本市场准入及离岸资产配置通道</div>
         </div>
         <div class="pred-badge"><span class="tag tag-mid">中价值</span> <span class="tag tag-expand">部分覆盖</span></div>
       </div>
+
       <div class="pred-card">
         <div class="pred-title">ESG/可持续投资传承</div>
-        <div class="pred-meta">
-          家族下一代主导ESG投资理念，慈善信托与绿色金融结合的传承架构<br/>
-          预估新增场景：10-15条
+        <div class="pred-meta">家族下一代主导ESG投资理念，慈善信托与绿色金融结合的传承架构 · 预估新增场景：10-15条</div>
+        <div class="pred-angles">
+          <div class="angle-item"><span class="angle-tag tax">税务</span>慈善捐赠抵税上限规则，境外DAF（Donor-Advised Fund）税务优惠的适用条件</div>
+          <div class="angle-item"><span class="angle-tag legal">法律</span>ESG信托中受益人利益与环境目标的法律冲突，私人基金会治理文件起草</div>
+          <div class="angle-item"><span class="angle-tag capital">资本市场</span>绿色债券/碳汇资产配置，ESG评级提升对上市公司市值的正向反馈路径</div>
         </div>
         <div class="pred-badge"><span class="tag tag-low">低价值</span> <span class="tag tag-new">覆盖缺口大</span></div>
       </div>
+
+    </div>
+
+    <div class="pred-section-title">🆕 2026 新兴场景建议（待纳入因子库）</div>
+    <div class="prediction-grid">
+
+      <div class="pred-card pred-new">
+        <div class="pred-title">Pillar 2全球最低税率冲击</div>
+        <div class="pred-meta">OECD GloBE规则于主要司法区落地，BVI/开曼空壳持股公司面临补缴至15%压力，离岸架构重构需求爆发 · 预估新增场景：35-45条</div>
+        <div class="pred-angles">
+          <div class="angle-item"><span class="angle-tag tax">税务</span>集团顶层收入合并计算触发UTPR/STTR补税，空壳公司需证明实质经营否则补足差额；转移定价文档要求大幅上升</div>
+          <div class="angle-item"><span class="angle-tag legal">法律</span>开曼/BVI经济实质法修订收紧，信托架构受托人须满足新设主要商业活动要求，违规面临罚款及注销风险</div>
+          <div class="angle-item"><span class="angle-tag capital">资本市场</span>离岸持股的上市公司有效税率重估，Pre-IPO阶段清理冗余离岸层的时间窗口收窄，架构调整触发资本利得税</div>
+        </div>
+        <div class="pred-badge"><span class="tag tag-high">高价值</span> <span class="tag tag-new">覆盖缺口大</span></div>
+      </div>
+
+      <div class="pred-card pred-new">
+        <div class="pred-title">境外所得CRS稽查强化</div>
+        <div class="pred-meta">CRS金融账户信息交换机制成熟运行，税务机关主动匹配境外账户与未申报所得，稽查案例快速增加 · 预估新增场景：30-40条</div>
+        <div class="pred-angles">
+          <div class="angle-item"><span class="angle-tag tax">税务</span>境外红利、利息、股权转让所得漏报补报路径；自愿披露计划税罚减免条件；CRS触发稽查的应对预案</div>
+          <div class="angle-item"><span class="angle-tag legal">法律</span>税务刑事责任风险评估（逃税罪认定标准），主动披露豁免的法律前提，境外账户涉及代持的权属证明</div>
+          <div class="angle-item"><span class="angle-tag capital">资本市场</span>离岸账户持有上市股权收益申报链路梳理；境外经纪账户持仓信息触发报送后的持股架构调整</div>
+        </div>
+        <div class="pred-badge"><span class="tag tag-high">高价值</span> <span class="tag tag-new">覆盖缺口大</span></div>
+      </div>
+
+      <div class="pred-card pred-new">
+        <div class="pred-title">港/新单一家族办公室税务豁免</div>
+        <div class="pred-meta">香港2023年单一家族办公室税务豁免框架落地，新加坡13O/13U scheme持续优化，吸引超高净值资产聚集 · 预估新增场景：20-28条</div>
+        <div class="pred-angles">
+          <div class="angle-item"><span class="angle-tag tax">税务</span>FO适用豁免的资产类别扩容，特定附带权益收入税务处理；满足门槛后的全球收入税效优化路径</div>
+          <div class="angle-item"><span class="angle-tag legal">法律</span>FO设立最低资产规模与实质人员要求，受托人/基金经理牌照合规边界，实质运营文件留存要求</div>
+          <div class="angle-item"><span class="angle-tag capital">资本市场</span>资产向港/新集中配置的再平衡逻辑，利用VCC（可变资本公司）架构灵活切换资产类别</div>
+        </div>
+        <div class="pred-badge"><span class="tag tag-high">高价值</span> <span class="tag tag-expand">部分覆盖</span></div>
+      </div>
+
+      <div class="pred-card pred-new">
+        <div class="pred-title">北交所/科创板Pre-IPO传承窗口</div>
+        <div class="pred-meta">专精特新企业密集排队上市，上市前是信托/持股平台搭建估值最低、税务成本最小的黄金窗口 · 预估新增场景：20-28条</div>
+        <div class="pred-angles">
+          <div class="angle-item"><span class="angle-tag tax">税务</span>Pre-IPO低估值阶段完成股权装入信托/有限合伙，锁定传承税基；上市后赠与/继承触发大幅溢价个税的对比测算</div>
+          <div class="angle-item"><span class="angle-tag legal">法律</span>上市前信托架构须满足证监会穿透披露要求，控股股东认定与一致行动人协议，上市后锁定期与信托受益权转让限制</div>
+          <div class="angle-item"><span class="angle-tag capital">资本市场</span>北交所做市商制度下流动性管理，上市后减持计划与大宗交易安排，持股平台减持税务优化路径</div>
+        </div>
+        <div class="pred-badge"><span class="tag tag-high">高价值</span> <span class="tag tag-expand">部分覆盖</span></div>
+      </div>
+
+      <div class="pred-card pred-new">
+        <div class="pred-title">个人破产与高净值债务重组</div>
+        <div class="pred-meta">深圳个人破产试点扩展，高净值企业主企业债务与个人资产隔离需求凸显，债务重组架构规划前置化 · 预估新增场景：18-25条</div>
+        <div class="pred-angles">
+          <div class="angle-item"><span class="angle-tag tax">税务</span>债务豁免产生的应税收入认定，破产程序中资产强制处置触发资产转让个税的计算基础</div>
+          <div class="angle-item"><span class="angle-tag legal">法律</span>个人破产申请资格与豁免财产范围，企业债务不蔓延至个人资产的隔离机制，破产撤销权对前期资产转移的追溯风险</div>
+          <div class="angle-item"><span class="angle-tag capital">资本市场</span>上市公司控股股东股权被司法冻结/强制减持对股价冲击，债务重组期间股票质押平仓风险管理</div>
+        </div>
+        <div class="pred-badge"><span class="tag tag-mid">中价值</span> <span class="tag tag-new">覆盖缺口大</span></div>
+      </div>
+
+      <div class="pred-card pred-new">
+        <div class="pred-title">跨境婚姻离婚股权保护</div>
+        <div class="pred-meta">高净值涉外婚姻增加，外籍/港澳台配偶的跨境离婚涉及不同法域股权分割规则，事前保护架构需求迫切 · 预估新增场景：22-30条</div>
+        <div class="pred-angles">
+          <div class="angle-item"><span class="angle-tag tax">税务</span>离婚股权分割是否触发个税（直接分割 vs. 变现分割的税务差异），境内外不同法域对股权转让定价的认定规则差异</div>
+          <div class="angle-item"><span class="angle-tag legal">法律</span>跨境离婚管辖权争议与准据法选择，离岸信托/公司能否被穿透认定为夫妻共同财产，婚前股权隔离协议的跨境效力</div>
+          <div class="angle-item"><span class="angle-tag capital">资本市场</span>上市公司股权在离婚程序中的权益变动信息披露义务，持股比例变化触发举牌/减持规则合规应对</div>
+        </div>
+        <div class="pred-badge"><span class="tag tag-high">高价值</span> <span class="tag tag-new">覆盖缺口大</span></div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -1295,8 +1403,8 @@ function initForecastCharts() {
   const chart = echarts.init(el);
   chartInstances['forecast-bubble'] = chart;
 
-  // [业务价值, 覆盖缺口, 预估场景数, 名称]
-  const bubbleData = [
+  // [业务价值, 覆盖缺口, 预估场景数, 名称, isNew]
+  const existing = [
     [9, 8, 40, '大湾区跨境财富管理'],
     [9, 7, 35, 'AI/科技独角兽上市'],
     [7, 9, 20, '数字资产合规持有'],
@@ -1307,13 +1415,26 @@ function initForecastCharts() {
     [6, 6, 20, '二代教育传承'],
     [7, 4, 20, '家族治理架构'],
   ];
+  const emerging = [
+    [9, 9, 40, 'Pillar2最低税率冲击'],
+    [9, 8, 35, '境外所得CRS稽查'],
+    [8, 7, 24, '港/新FO税务豁免'],
+    [8, 6, 24, '北交所Pre-IPO传承'],
+    [7, 9, 22, '个人破产债务重组'],
+    [8, 8, 26, '跨境离婚股权保护'],
+  ];
 
   chart.setOption({
     tooltip: {
       formatter: p => {
-        const d = p.data;
-        return `<b>${d[3]}</b><br/>业务价值：${d[0]}/10<br/>覆盖缺口：${d[1]}/10<br/>预估场景：${d[2]} 条`;
+        const d = p.data.value;
+        const tag = p.seriesName === '2026新兴场景' ? ' 🆕' : '';
+        return `<b>${d[3]}${tag}</b><br/>业务价值：${d[0]}/10<br/>覆盖缺口：${d[1]}/10<br/>预估场景：${d[2]} 条`;
       }
+    },
+    legend: {
+      data: ['已识别场景', '2026新兴场景'],
+      top: 8, right: 12, textStyle: { fontSize: 11 }
     },
     xAxis: {
       name: '业务价值', nameLocation: 'middle', nameGap: 30,
@@ -1325,21 +1446,32 @@ function initForecastCharts() {
       min: 3, max: 10,
       axisLabel: { formatter: v => v + '/10' }
     },
-    series: [{
-      type: 'scatter',
-      symbolSize: d => d[2] * 2.5,
-      data: bubbleData.map((d, i) => ({
-        value: d,
-        itemStyle: { color: COLORS[i % COLORS.length], opacity: .8 },
-        label: {
-          show: true,
-          formatter: d => d.data[3],
-          fontSize: 11,
-          position: 'top'
-        }
-      })),
-      label: { show: true }
-    }]
+    series: [
+      {
+        name: '已识别场景',
+        type: 'scatter',
+        symbolSize: d => d[2] * 2.2,
+        data: existing.map((d, i) => ({
+          value: d,
+          itemStyle: { color: COLORS[i % COLORS.length], opacity: .75 },
+          label: { show: true, formatter: p => p.data.value[3], fontSize: 10, position: 'top' }
+        })),
+        label: { show: true }
+      },
+      {
+        name: '2026新兴场景',
+        type: 'scatter',
+        symbol: 'diamond',
+        symbolSize: d => d[2] * 2.2,
+        data: emerging.map(d => ({
+          value: d,
+          itemStyle: { color: '#6366f1', opacity: .85, borderColor: '#4f46e5', borderWidth: 2 },
+          label: { show: true, formatter: p => p.data.value[3], fontSize: 10, position: 'top',
+                    color: '#4f46e5', fontWeight: 'bold' }
+        })),
+        label: { show: true }
+      }
+    ]
   });
 }
 
