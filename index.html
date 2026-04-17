@@ -296,7 +296,7 @@ tr:hover td { background: #fafafa; }
     <span class="icon">✨</span>本次扩库详情
   </div>
   <div class="nav-item" onclick="showPage('suggestions')">
-    <span class="icon">💡</span>后续更新建议
+    <span class="icon">🔧</span>后续迭代建议
   </div>
 
   <div class="nav-section-title" style="margin-top:12px;">链路与场景</div>
@@ -672,70 +672,97 @@ tr:hover td { background: #fafafa; }
 
 
 <!-- ══════════════════════════════════════
-     PAGE 5: 后续更新建议
+     PAGE 5: 后续迭代建议
 ═══════════════════════════════════════ -->
 <div id="page-suggestions" class="page">
   <div class="page-header">
-    <h2>💡 后续更新建议</h2>
-    <p>基于当前因子库状态的优先级排序建议</p>
+    <h2>🔧 后续迭代建议</h2>
+    <p>针对因子库现有架构、逻辑、比例与质量的优化方向——新场景扩库建议详见「未来场景预测」</p>
   </div>
+
   <div class="card">
-    <div class="card-title">优先级建议列表</div>
+    <div class="card-title">架构与比例问题</div>
     <ul class="priority-list">
       <li>
         <span class="tag tag-high">高优先</span>
         <div>
-          <div class="pl-text">L1.1B 家庭角色进一步补充（当前55行，目标80+）</div>
-          <div class="pl-sub">婚前/婚后财产约定场景、境外不同身份配偶分类、多段婚姻子女传承等细分角色仍存在缺口</div>
+          <div class="pl-text">三维比例严重失衡——"发生了什么"一枝独秀</div>
+          <div class="pl-sub">当前占比：谁（15%）· 有什么（21%）· 发生了什么（62%）。"发生了什么"是"谁"的 4 倍，但链路生成中"谁"的精度对痛点定向至关重要。建议将 L1.1A/B 合计扩至 250 行以上，使三维比例趋近 20%·25%·55%</div>
         </div>
       </li>
       <li>
         <span class="tag tag-high">高优先</span>
         <div>
-          <div class="pl-text">AI/科技企业股权激励 × 海外上市专项场景因子补充</div>
-          <div class="pl-sub">当前科技企业创始人/高管的RSU、ESOP、期权池等因子与港股/美股双重上市路径的组合覆盖不足，是朝曦最核心客户群体</div>
+          <div class="pl-text">L6.3 身份规划单维度过重（431 行，占"发生了什么"的 50%）</div>
+          <div class="pl-sub">L6.3 行数是 L6.4 架构搭建（122行）的 3.5 倍、L6.1 资本动作（110行）的 4 倍。建议审查 L6.3 内部颗粒度是否过细，将通用条目适度上移合并，同时重点补充 L6.4 和 L6.7 两个业务强相关维度</div>
+        </div>
+      </li>
+      <li>
+        <span class="tag tag-high">高优先</span>
+        <div>
+          <div class="pl-text">L4.1 / L4.2 分层标准不清晰（13 行 vs 160 行，差距 12 倍）</div>
+          <div class="pl-sub">一级财富标的（L4.1）仅 13 行，二级财富标的（L4.2）却有 160 行，说明两级分类标准不统一。建议将 L4.1 重定义为"大类资产"（股权 / 不动产 / 金融资产 / 另类 / 现金类），L4.2 作为大类下的具体品种，形成清晰树状结构，防止后续扩库分类混用</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">数量与深度不足</div>
+    <ul class="priority-list">
+      <li>
+        <span class="tag tag-high">高优先</span>
+        <div>
+          <div class="pl-text">L6.7 法律风险动作严重偏少（13 行，全库最薄弱维度）</div>
+          <div class="pl-sub">法律业务是朝曦核心收入线之一，但 L6.7 法律风险动作仅 13 行。诉讼保全、股权冻结、刑事合规、合同纠纷等高频法律场景几乎空白。建议专项扩充至 60 行以上，与税务（139行）、身份规划（431行）量级更为匹配</div>
         </div>
       </li>
       <li>
         <span class="tag tag-mid">中优先</span>
         <div>
-          <div class="pl-text">L6.6 健康状况场景细化（结合业务线，32行→60+行）</div>
-          <div class="pl-sub">现有健康维度偏宏观，建议细化重疾保险与信托结合、境外医疗资源配置、家族成员心理健康支持与财产安排等子场景</div>
+          <div class="pl-text">L1.1B 家庭角色颗粒度不足（55 行，缺乏涉外与多段婚姻细分）</div>
+          <div class="pl-sub">现有家庭角色以中国内地标准家庭结构为主，缺少境外配偶、离婚再婚子女、家族委员会成员等因子，导致涉外家事链路覆盖薄弱。建议扩至 80 行以上，重点补充跨境婚姻与二代多元身份场景</div>
         </div>
       </li>
       <li>
         <span class="tag tag-mid">中优先</span>
         <div>
-          <div class="pl-text">L4.x 财富标的精细化（L4.1/L4.2 分层逻辑梳理）</div>
-          <div class="pl-sub">当前 L4.1（13行）与 L4.2（160行）存在分层标准不统一问题，建议建立明确的资产分类树，避免后续扩库时分类混用</div>
+          <div class="pl-text">L6.5 成长动作维度近乎空白（12 行，全库行数最少）</div>
+          <div class="pl-sub">成长类场景（海外留学规划、二代接班机制、家族企业治理升级、子女职业路径安排等）是高净值家庭全生命周期服务的重要组成，当前 12 行且场景单一，与其业务重要性极不匹配。建议系统扩充至 40 行以上</div>
         </div>
       </li>
       <li>
         <span class="tag tag-mid">中优先</span>
         <div>
-          <div class="pl-text">大湾区跨境场景专项因子包</div>
-          <div class="pl-sub">港澳内地跨境资产配置、大湾区人才政策、跨境税务居民身份等是高频增量场景，建议作为专项维度补充</div>
+          <div class="pl-text">L6.6 健康状况场景过于宏观（32 行，子场景缺失）</div>
+          <div class="pl-sub">现有健康维度偏宏观，缺少重疾保险与信托联动设计、境外医疗资源配置安排、家族成员心理健康支持下的财产安排等具体子场景。建议结合业务线扩充至 60 行</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">质量与治理机制</div>
+    <ul class="priority-list">
+      <li>
+        <span class="tag tag-mid">中优先</span>
+        <div>
+          <div class="pl-text">缺乏因子去重与相似性检验机制</div>
+          <div class="pl-sub">随着因子库从 1357 行扩展至 2000+ 行，同义 / 近义因子的重复风险显著上升，目前无系统性核查流程。建议每轮扩库后运行文本向量相似度检验，对余弦相似度 &gt; 0.85 的因子对进行人工复核，确认是否合并或保留细分</div>
         </div>
       </li>
       <li>
         <span class="tag tag-low">低优先</span>
         <div>
-          <div class="pl-text">慈善公益场景深化（当前8条偏少）</div>
-          <div class="pl-sub">国内慈善基金会设立、境外DAF（公益捐赠基金）、ESG投资与慈善传承等场景，长期来看需要补充</div>
+          <div class="pl-text">编码体系缺乏扩展性规划（L2.x 维度空缺，未来插入存在风险）</div>
+          <div class="pl-sub">当前 L 编码从 L1 跳至 L3，L2.x 留空；若未来需要插入"身份过渡期"等新维度，将面临全库编号重排。建议提前在文档中规划各 L 层的定位边界与预留区间，避免后续大规模重编</div>
         </div>
       </li>
       <li>
         <span class="tag tag-low">低优先</span>
         <div>
-          <div class="pl-text">L6.5 成长动作扩充（当前12行，相对薄弱）</div>
-          <div class="pl-sub">海外留学身份规划、子女回国就业政策利用、家族企业二代接班机制等成长类场景可进一步细化</div>
-        </div>
-      </li>
-      <li>
-        <span class="tag tag-low">低优先</span>
-        <div>
-          <div class="pl-text">数字资产/加密资产场景因子试点</div>
-          <div class="pl-sub">随着监管环境变化，部分高净值客户开始关注加密资产的合规持有与税务处理，可先建立10-15条试点因子</div>
+          <div class="pl-text">颜色标注规范跨版本不一致</div>
+          <div class="pl-sub">现有 Excel 文件中颜色标注存在多版本混用问题：部分因子无颜色、部分颜色含义在不同版本间语义不同，影响协作识别效率。建议建立颜色标注标准文档，并在下次全库整理时统一修复</div>
         </div>
       </li>
     </ul>
@@ -926,8 +953,12 @@ tr:hover td { background: #fafafa; }
   </div>
 
   <div class="card">
-    <div class="card-title">业务价值 vs 覆盖缺口分析</div>
-    <div id="chart-bubble" class="chart-box" style="height:400px;"></div>
+    <div class="card-title">各场景预估可新增因子条数</div>
+    <div style="display:flex;gap:16px;align-items:center;margin-bottom:8px;font-size:12px;color:#6b7280;">
+      <span style="display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#3b82f6;"></span>已识别场景（扩充中）</span>
+      <span style="display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#6366f1;"></span>2026新兴场景（待纳入）</span>
+    </div>
+    <div id="chart-bubble" class="chart-box" style="height:420px;"></div>
   </div>
 
   <div class="card">
@@ -1487,75 +1518,67 @@ function initForecastCharts() {
   const chart = echarts.init(el);
   chartInstances['forecast-bubble'] = chart;
 
-  // [业务价值, 覆盖缺口, 预估场景数, 名称, isNew]
-  const existing = [
-    [9, 8, 40, '大湾区跨境财富管理'],
-    [9, 7, 35, 'AI/科技独角兽上市'],
-    [7, 9, 20, '数字资产合规持有'],
-    [6, 8, 18, 'REITs资产配置'],
-    [7, 6, 25, '中东/东南亚身份'],
-    [5, 7, 15, 'ESG/可持续投资'],
-    [8, 5, 30, '健康传承结合场景'],
-    [6, 6, 20, '二代教育传承'],
-    [7, 4, 20, '家族治理架构'],
-  ];
-  const emerging = [
-    [9, 9, 40, 'Pillar2最低税率冲击'],
-    [9, 8, 35, '境外所得CRS稽查'],
-    [8, 7, 24, '港/新FO税务豁免'],
-    [8, 6, 24, '北交所Pre-IPO传承'],
-    [7, 9, 22, '个人破产债务重组'],
-    [8, 8, 26, '跨境离婚股权保护'],
+  // 按预估新增条数升序排列（ECharts 横向条形图从下往上渲染，升序使最大值显示在顶部）
+  const items = [
+    { n: 'ESG/可持续传承',       v: 13, isNew: false },
+    { n: 'REITs资产配置',         v: 15, isNew: false },
+    { n: '数字资产合规持有',       v: 18, isNew: false },
+    { n: '个人破产债务重组',       v: 22, isNew: true  },
+    { n: '中东/东南亚新兴身份',    v: 22, isNew: false },
+    { n: '港/新FO税务豁免',       v: 24, isNew: true  },
+    { n: '北交所Pre-IPO传承',     v: 24, isNew: true  },
+    { n: '跨境婚姻离婚股权',       v: 26, isNew: true  },
+    { n: 'AI/科技独角兽上市潮',   v: 30, isNew: false },
+    { n: '境外CRS稽查强化',       v: 35, isNew: true  },
+    { n: '大湾区跨境财富管理',     v: 35, isNew: false },
+    { n: 'Pillar2最低税率冲击',   v: 40, isNew: true  },
   ];
 
   chart.setOption({
     tooltip: {
-      formatter: p => {
-        const d = p.data.value;
-        const tag = p.seriesName === '2026新兴场景' ? ' 🆕' : '';
-        return `<b>${d[3]}${tag}</b><br/>业务价值：${d[0]}/10<br/>覆盖缺口：${d[1]}/10<br/>预估场景：${d[2]} 条`;
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+      formatter: ps => {
+        const it = items[ps[0].dataIndex];
+        const badge = it.isNew ? '🆕 2026新兴场景' : '✅ 已识别场景';
+        return `<b>${it.n}</b> &nbsp;<span style="font-size:11px;color:#6b7280">${badge}</span>`
+             + `<br/>预估可新增因子：<b style="color:${it.isNew?'#6366f1':'#3b82f6'};font-size:14px">${it.v} 条</b>`;
       }
     },
-    legend: {
-      data: ['已识别场景', '2026新兴场景'],
-      top: 8, right: 12, textStyle: { fontSize: 11 }
-    },
+    grid: { left: 16, right: 56, top: 10, bottom: 28, containLabel: true },
     xAxis: {
-      name: '业务价值', nameLocation: 'middle', nameGap: 30,
-      min: 3, max: 10,
-      axisLabel: { formatter: v => v + '/10' }
+      type: 'value',
+      max: 46,
+      axisLabel: { fontSize: 10, color: '#9ca3af' },
+      splitLine: { lineStyle: { type: 'dashed', color: '#f0f0f0' } }
     },
     yAxis: {
-      name: '覆盖缺口', nameLocation: 'middle', nameGap: 40,
-      min: 3, max: 10,
-      axisLabel: { formatter: v => v + '/10' }
+      type: 'category',
+      data: items.map(d => d.n),
+      axisLabel: { fontSize: 11.5, color: '#374151' },
+      axisTick: { show: false },
+      axisLine: { lineStyle: { color: '#e5e7eb' } }
     },
-    series: [
-      {
-        name: '已识别场景',
-        type: 'scatter',
-        symbolSize: d => d[2] * 2.2,
-        data: existing.map((d, i) => ({
-          value: d,
-          itemStyle: { color: COLORS[i % COLORS.length], opacity: .75 },
-          label: { show: true, formatter: p => p.data.value[3], fontSize: 10, position: 'top' }
-        })),
-        label: { show: true }
-      },
-      {
-        name: '2026新兴场景',
-        type: 'scatter',
-        symbol: 'diamond',
-        symbolSize: d => d[2] * 2.2,
-        data: emerging.map(d => ({
-          value: d,
-          itemStyle: { color: '#6366f1', opacity: .85, borderColor: '#4f46e5', borderWidth: 2 },
-          label: { show: true, formatter: p => p.data.value[3], fontSize: 10, position: 'top',
-                    color: '#4f46e5', fontWeight: 'bold' }
-        })),
-        label: { show: true }
+    series: [{
+      type: 'bar',
+      barMaxWidth: 20,
+      data: items.map(d => ({
+        value: d.v,
+        itemStyle: {
+          color: d.isNew ? '#6366f1' : '#3b82f6',
+          borderRadius: [0, 6, 6, 0],
+          opacity: d.isNew ? 1 : 0.82
+        }
+      })),
+      label: {
+        show: true,
+        position: 'right',
+        fontSize: 11,
+        fontWeight: 600,
+        color: '#374151',
+        formatter: p => items[p.dataIndex].v + ' 条'
       }
-    ]
+    }]
   });
 }
 
