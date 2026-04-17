@@ -287,6 +287,9 @@ tr:hover td { background: #fafafa; }
   <div class="nav-item" onclick="showPage('dimensions')">
     <span class="icon">🔍</span>维度详细说明
   </div>
+  <div class="nav-item" onclick="showPage('business')">
+    <span class="icon">🏢</span>业务契合分析
+  </div>
 
   <div class="nav-section-title" style="margin-top:12px;">版本与更新</div>
   <div class="nav-item" onclick="showPage('history')">
@@ -310,10 +313,6 @@ tr:hover td { background: #fafafa; }
     <span class="icon">🔭</span>未来场景预测
   </div>
 
-  <div class="nav-section-title" style="margin-top:12px;">业务</div>
-  <div class="nav-item" onclick="showPage('business')">
-    <span class="icon">🏢</span>业务契合分析
-  </div>
 </nav>
 
 <!-- 内容区 -->
@@ -953,15 +952,6 @@ tr:hover td { background: #fafafa; }
   </div>
 
   <div class="card">
-    <div class="card-title">各场景预估可新增因子条数</div>
-    <div style="display:flex;gap:16px;align-items:center;margin-bottom:8px;font-size:12px;color:#6b7280;">
-      <span style="display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#3b82f6;"></span>已识别场景（扩充中）</span>
-      <span style="display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#6366f1;"></span>2026新兴场景（待纳入）</span>
-    </div>
-    <div id="chart-bubble" class="chart-box" style="height:420px;"></div>
-  </div>
-
-  <div class="card">
     <div class="card-title">重点预测场景详解</div>
 
     <div class="pred-section-title">📁 因子库现有场景 · 已纳入研究与建模</div>
@@ -1196,45 +1186,6 @@ tr:hover td { background: #fafafa; }
     </div>
   </div>
 
-  <div class="card">
-    <div class="card-title">弱覆盖业务方向分析</div>
-    <table>
-      <thead>
-        <tr>
-          <th>业务方向</th>
-          <th>当前覆盖情况</th>
-          <th>主要缺口</th>
-          <th>建议行动</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><strong>健康管理</strong></td>
-          <td><span class="tag tag-mid">6/10</span></td>
-          <td>重疾与传承结合场景、心理健康财务影响场景覆盖较少</td>
-          <td>L6.6 扩充至60+行，增加与L5.1（信托）的交叉场景</td>
-        </tr>
-        <tr>
-          <td><strong>家族治理</strong></td>
-          <td><span class="tag tag-mid">6/10</span></td>
-          <td>家族宪章、家族委员会架构、家族成员利益分配机制缺乏专项因子</td>
-          <td>新增 L7.x 家族治理维度（建议中长期规划）</td>
-        </tr>
-        <tr>
-          <td><strong>慈善公益</strong></td>
-          <td><span class="tag tag-low">4/10</span></td>
-          <td>仅8条场景，境外DAF、私人基金会、慈善信托等专项覆盖严重不足</td>
-          <td>短期：在L6.4架构搭建下增加慈善专项；长期：独立L6.8慈善维度</td>
-        </tr>
-        <tr>
-          <td><strong>数字资产</strong></td>
-          <td><span class="tag" style="background:#fee2e2;color:#991b1b;">2/10</span></td>
-          <td>完全缺乏加密货币、NFT、数字稳定币等相关因子</td>
-          <td>2026年Q3试点，新增15条数字资产因子，纳入L4.2扩展</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
 </div>
 
 </main>
