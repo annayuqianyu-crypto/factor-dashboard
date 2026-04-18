@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=1200"/>
 <title>朝曦家办 · 因子库数据驾驶舱</title>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -2092,24 +2093,61 @@ async function pgStartGenerate() {
      <div style="color:#374151;font-weight:600;font-size:15px;">AI 正在生成痛点…</div>
      <div style="color:#9ca3af;font-size:13px;margin-top:6px;">${scenes.length} 个场景 · ${total} 个痛点 · 模型 ${model}</div></div>`;
 
-  // 构造 Prompt（SKU 只传 ID 和名称，控制长度）
+  // 构造 Prompt
   const sceneLines = scenes.map(n => `- ${n}（生成 ${pgState.counts[n]||3} 个）`).join('\n');
   const skuLines   = SKU_DB.map(s => `${s.id}:${s.name}`).join('\n');
 
-  const userPrompt = `你是朝曦家办的资深业务顾问。朝曦服务金融机构高净值客户，核心业务涵盖家族架构、税务规划、法律咨询、财富传承。
+  const userPrompt = `你是朝曦家办的资深业务顾问，专长跨境财富规划、企业股权架构、税务合规、家族传承、上市公司治理、法律事务。
 
 请基于三维链路方法论（谁×有什么×发生了什么），为以下场景各生成指定数量的痛点：
 ${sceneLines}
 
-每个痛点输出 JSON 对象，所有痛点合并为一个 JSON 数组：
-{"scene":"场景名称（与上方完全一致）","title":"痛点标题（10字以内）","desc":"痛点说明（约40字，解释制度性必然逻辑）","tags":[{"label":"标签短语","dim":"主体|资产|动作|约束","weight":"C|B|A"}],"skus":["匹配的SKU_ID"]}
+整体输出格式为一个 JSON 对象：{"points":[...],"new_skus":[...]}
+
+【points 数组】每个痛点字段说明：
+{
+  "scene":"场景名称（与上方完全一致）",
+  "title":"痛点标题（10字以内，精炼表达）",
+  "desc":"痛点说明（约40字，解释制度性必然原因和逻辑）",
+  "factors":{
+    "who":"谁的因子（从L1维度取，如：上市公司实控人、境外移民申请人、家族企业二代）",
+    "what":"有什么因子（从L3-L5维度取，如：境外持股架构、ESOP股权激励、境内不动产）",
+    "event":"发生了什么因子（从L6维度取，如：申请身份移民L6.3、跨境税务申报L6.2、股权减持L6.1）"
+  },
+  "tags":[{"label":"标签短语","dim":"主体|资产|动作|约束","weight":"C|B|A"}],
+  "skus":["匹配的SKU_ID"],
+  "conflict":"核心冲突（≤25字，格式：[客户诉求]与[客观约束/风险]之间的矛盾）",
+  "risk":"潜在风险（若不解决最坏情况，100字内，具体化风险后果，体现专业壁垒）",
+  "solution":"解决方案（结合已匹配SKU服务，专业行动建议，120字内，分步骤，平实语言，不含营销用语）",
+  "effect":"预期效果（成功实施后正面价值，80字内，平实语言，不拔高）"
+}
 
 标签规则：dim 必须是 主体/资产/动作/约束 之一；weight C=核心 B=中等 A=弱；每痛点4-6个标签覆盖多维度。
 
-SKU知识库（选2-4个最相关ID，无合适则skus为[]）：
+四步分析合规要求：
+- 资本市场痛点：禁止出现 结构化/委托贷款/QFLP/NOTES/资金入境/资金出境 等敏感词
+- 税务痛点：禁止使用 筹划/避税/减税/节税；可用 税务合规/税负管理/架构设计；不出现无来源的具体税率
+- 法律痛点：不引用具体法典法条，说清法律逻辑即可
+- 通用：禁用 完全解决/保证/一定/帮助/陪伴/助力/护航 等绝对化或营销词；四部分总字数不超过300字
+
+【new_skus 数组】根据以上痛点，分析现有SKU知识库的覆盖缺口，建议新增SKU（可为空数组）：
+{
+  "id":"建议编号（如New-Legal-001、New-Tax-001、New-CM-001）",
+  "name":"SKU名称",
+  "reason":"为何现有知识库中无合适SKU（50字内）",
+  "category":"服务类别描述（100字内）",
+  "summary":"服务流程摘要（80字内）",
+  "highlights":"核心亮点（50字内）",
+  "scenarios":"适用渠道或场景",
+  "preconditions":"适用前提（50字内）",
+  "keywords":"关键词（逗号分隔）",
+  "use_case":"不适用情形（50字内）"
+}
+
+SKU知识库（从中为每个痛点选2-4个最相关ID；new_skus只建议库内确实没有覆盖的需求）：
 ${skuLines}
 
-只输出JSON数组，不输出任何其他内容。`;
+严格只输出JSON对象，不输出任何其他文字。`;
 
   try {
     const resp = await fetch(base + '/chat/completions', {
@@ -2118,7 +2156,7 @@ ${skuLines}
       body: JSON.stringify({
         model,
         messages: [{ role: 'user', content: userPrompt }],
-        max_tokens: 8000,
+        max_tokens: 14000,
         temperature: 0.35,
       })
     });
@@ -2134,16 +2172,20 @@ ${skuLines}
     const data = await resp.json();
     const raw  = data.choices?.[0]?.message?.content || '';
 
-    let results;
+    let points, newSkus;
     try {
-      const m = raw.match(/\[[\s\S]*\]/);
-      if (!m) throw new Error('模型未返回 JSON 数组\n\n原始输出：' + raw.slice(0, 500));
-      results = JSON.parse(m[0]);
+      // 优先匹配完整对象 {points:[...],new_skus:[...]}
+      const objM = raw.match(/\{[\s\S]*\}/);
+      if (!objM) throw new Error('模型未返回 JSON\n\n原始输出：' + raw.slice(0, 500));
+      const parsed = JSON.parse(objM[0]);
+      points  = parsed.points  || parsed;          // 兼容旧格式纯数组
+      newSkus = parsed.new_skus || [];
+      if (!Array.isArray(points)) throw new Error('points 不是数组');
     } catch(e) {
       throw new Error('JSON 解析失败：' + e.message + '\n\n原始输出：' + raw.slice(0, 500));
     }
 
-    pgRenderResults(results);
+    pgRenderResults(points, newSkus);
 
   } catch (err) {
     const isCors = err.message.toLowerCase().includes('fetch') ||
@@ -2175,23 +2217,39 @@ const DIM_STYLE = {
   '约束': { bg:'#fef3c7', color:'#92400e' },
 };
 
-function pgRenderResults(results) {
+// 缓存供导出使用
+let _pgLastPoints  = [];
+let _pgLastNewSkus = [];
+
+function pgRenderResults(results, newSkus) {
+  newSkus = newSkus || [];
+  _pgLastPoints  = results || [];
+  _pgLastNewSkus = newSkus;
+
   if (!results?.length) {
     document.getElementById('pgResultsContent').innerHTML =
       '<div class="gen-empty">未生成任何痛点，请检查场景配置后重试</div>';
     return;
   }
 
-  // 按场景分组
-  const byScene = {};
+  const byScene   = {};
   results.forEach(r => { (byScene[r.scene] = byScene[r.scene] || []).push(r); });
+  const sceneCnt  = Object.keys(byScene).length;
 
-  const sceneCnt = Object.keys(byScene).length;
-  let html = `<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:22px;">
-    <span style="font-size:20px;font-weight:700;color:#111827;">生成结果</span>
-    <span style="font-size:13px;color:#6b7280;">${sceneCnt} 个场景 · ${results.length} 个痛点</span>
+  // ── 顶部工具栏 ──
+  let html = `
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+    <div>
+      <span style="font-size:20px;font-weight:700;color:#111827;">生成结果</span>
+      <span style="font-size:13px;color:#6b7280;margin-left:10px;">${sceneCnt} 个场景 · ${results.length} 个痛点</span>
+    </div>
+    <button onclick="pgExportExcel()"
+      style="padding:8px 16px;background:#16a34a;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;">
+      📥 导出痛点结果 Excel
+    </button>
   </div>`;
 
+  // ── 痛点卡片 ──
   for (const [sceneName, points] of Object.entries(byScene)) {
     html += `<div style="margin-bottom:28px;">
       <div class="pred-section-title">📌 ${sceneName}
@@ -2199,38 +2257,113 @@ function pgRenderResults(results) {
       </div>`;
 
     points.forEach((p, idx) => {
-      // 标签
+      // 因子链路
+      const f = p.factors || {};
+      const factorHtml = (f.who || f.what || f.event) ? `
+        <div style="font-size:10.5px;font-weight:600;color:#9ca3af;letter-spacing:.5px;margin-bottom:7px;">因子链路</div>
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:14px;">
+          ${f.who   ? `<span style="padding:4px 10px;border-radius:20px;font-size:12px;background:#ede9fe;color:#5b21b6;">谁&nbsp;${f.who}</span><span style="color:#d1d5db;font-size:14px;">→</span>` : ''}
+          ${f.what  ? `<span style="padding:4px 10px;border-radius:20px;font-size:12px;background:#dcfce7;color:#166534;">有什么&nbsp;${f.what}</span><span style="color:#d1d5db;font-size:14px;">→</span>` : ''}
+          ${f.event ? `<span style="padding:4px 10px;border-radius:20px;font-size:12px;background:#dbeafe;color:#1e40af;">发生了什么&nbsp;${f.event}</span>` : ''}
+        </div>` : '';
+
+      // 客户画像标签
       const tagsHtml = (p.tags || []).map(t => {
         const s = DIM_STYLE[t.dim] || { bg:'#f3f4f6', color:'#374151' };
-        return `<span style="display:inline-flex;align-items:center;gap:3px;padding:3px 9px 3px 7px;
-          border-radius:12px;font-size:12px;background:${s.bg};color:${s.color};margin:2px;">
-          <span style="font-size:9.5px;opacity:.65;font-weight:600;">${t.dim}</span>
+        return `<span style="display:inline-flex;align-items:center;gap:3px;padding:3px 9px 3px 7px;border-radius:12px;font-size:12px;background:${s.bg};color:${s.color};margin:2px;">
+          <span style="font-size:9.5px;opacity:.6;font-weight:600;">${t.dim}</span>
           <span>${t.label}</span>
-          <span style="font-size:9px;font-weight:700;padding:1px 4px;border-radius:4px;
-            background:rgba(0,0,0,.1);">${t.weight || ''}</span>
+          <span style="font-size:9px;font-weight:700;padding:1px 4px;border-radius:4px;background:rgba(0,0,0,.1);">${t.weight||''}</span>
         </span>`;
       }).join('');
 
-      // SKU
+      // 适配SKU
       const skusHtml = (p.skus || []).map(id => {
         const sku = SKU_DB.find(s => s.id === id);
-        return `<span style="padding:3px 9px;background:#f9fafb;border:1px solid #e5e7eb;
-          border-radius:6px;font-size:12px;color:#374151;">${sku ? sku.name : id}</span>`;
+        return `<span style="padding:3px 9px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;color:#374151;">${sku ? sku.name : id}</span>`;
       }).join('');
+
+      // 四步分析
+      const steps = [
+        { key:'conflict', label:'核心冲突', bg:'#fef2f2', border:'#fecaca', color:'#991b1b', icon:'⚡' },
+        { key:'risk',     label:'潜在风险', bg:'#fff7ed', border:'#fed7aa', color:'#9a3412', icon:'⚠️' },
+        { key:'solution', label:'解决方案', bg:'#f0fdf4', border:'#bbf7d0', color:'#166534', icon:'🔧' },
+        { key:'effect',   label:'预期效果', bg:'#eff6ff', border:'#bfdbfe', color:'#1e40af', icon:'✅' },
+      ];
+      const analysisHtml = steps.filter(s => p[s.key]).map(s =>
+        `<div style="padding:10px 14px;background:${s.bg};border:1px solid ${s.border};border-radius:8px;margin-bottom:8px;">
+          <div style="font-size:11px;font-weight:700;color:${s.color};margin-bottom:4px;">${s.icon} ${s.label}</div>
+          <div style="font-size:13px;color:#374151;line-height:1.65;">${p[s.key]}</div>
+        </div>`
+      ).join('');
 
       html += `<div class="pr-card">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
-          <div style="font-size:17px;font-weight:700;color:#111827;line-height:1.3;flex:1;">${p.title || ''}</div>
+          <div style="font-size:17px;font-weight:700;color:#111827;line-height:1.3;flex:1;">${p.title||''}</div>
           <span style="font-size:11px;color:#d1d5db;margin-left:12px;white-space:nowrap;margin-top:3px;">#${idx+1}</span>
         </div>
-        <div style="font-size:13.5px;color:#4b5563;line-height:1.7;margin-bottom:14px;">${p.desc || ''}</div>
-        <div style="font-size:10.5px;font-weight:600;color:#9ca3af;letter-spacing:.6px;text-transform:uppercase;margin-bottom:7px;">核心客户画像</div>
-        <div style="margin-bottom:${skusHtml ? 14 : 0}px;">${tagsHtml || '<span style="color:#d1d5db;font-size:12px;">暂无标签</span>'}</div>
-        ${skusHtml ? `<div style="font-size:10.5px;font-weight:600;color:#9ca3af;letter-spacing:.6px;text-transform:uppercase;margin-bottom:7px;">适配 SKU</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;">${skusHtml}</div>` : ''}
+        <div style="font-size:13.5px;color:#4b5563;line-height:1.7;margin-bottom:14px;">${p.desc||''}</div>
+
+        ${factorHtml}
+
+        <div style="font-size:10.5px;font-weight:600;color:#9ca3af;letter-spacing:.5px;margin-bottom:7px;">核心客户画像</div>
+        <div style="margin-bottom:${skusHtml?14:8}px;">${tagsHtml||'<span style="color:#d1d5db;font-size:12px;">暂无标签</span>'}</div>
+
+        ${skusHtml ? `<div style="font-size:10.5px;font-weight:600;color:#9ca3af;letter-spacing:.5px;margin-bottom:7px;">适配 SKU</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">${skusHtml}</div>` : ''}
+
+        ${analysisHtml ? `<div style="margin-top:4px;">${analysisHtml}</div>` : ''}
       </div>`;
     });
     html += '</div>';
+  }
+
+  // ── 建议新增 SKU ──
+  if (newSkus.length) {
+    html += `
+    <div style="margin-top:8px;margin-bottom:4px;">
+      <div class="pred-section-title" style="border-left-color:#f59e0b;">
+        💡 建议新增 SKU（${newSkus.length} 个）
+        <button onclick="pgExportSkuExcel()"
+          style="margin-left:auto;padding:5px 12px;background:#f59e0b;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">
+          📥 导出知识卡片 Excel
+        </button>
+      </div>`;
+
+    newSkus.forEach((s, i) => {
+      html += `<div class="pr-card" style="border-left:3px solid #f59e0b;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <span style="font-size:11px;font-weight:700;padding:2px 8px;background:#fef3c7;color:#92400e;border-radius:10px;">${s.id||'New-'+(i+1)}</span>
+          <span style="font-size:16px;font-weight:700;color:#111827;">${s.name||''}</span>
+        </div>
+        <div style="font-size:12.5px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 12px;margin-bottom:12px;">
+          <b>建议原因：</b>${s.reason||''}
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12.5px;">
+          ${[
+            ['服务类别', s.category],['服务流程', s.summary],
+            ['核心亮点', s.highlights],['适用渠道', s.scenarios],
+            ['适用前提', s.preconditions],['不适用情形', s.use_case],
+          ].filter(([,v])=>v).map(([l,v])=>
+            `<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:8px 10px;">
+              <div style="font-size:10px;font-weight:700;color:#9ca3af;margin-bottom:3px;">${l}</div>
+              <div style="color:#374151;line-height:1.6;">${v}</div>
+            </div>`
+          ).join('')}
+          ${s.keywords ? `<div style="grid-column:1/-1;background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:8px 10px;">
+            <div style="font-size:10px;font-weight:700;color:#9ca3af;margin-bottom:4px;">关键词</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;">${s.keywords.split(/[,，]/).map(k=>
+              `<span style="padding:2px 8px;background:#dbeafe;color:#1e40af;border-radius:10px;font-size:11.5px;">${k.trim()}</span>`
+            ).join('')}</div>
+          </div>` : ''}
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  } else {
+    html += `<div style="padding:16px 20px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#6b7280;margin-top:8px;">
+      💡 建议新增 SKU：当前痛点均可被现有 SKU 知识库覆盖，无需新增。
+    </div>`;
   }
 
   document.getElementById('pgResultsContent').innerHTML = html;
@@ -2312,6 +2445,78 @@ async function pgTestConnection() {
       statusEl.innerHTML = `<span style="color:#dc2626;">❌ ${e.message}</span>`;
     }
   }
+}
+
+// ── 导出痛点结果 Excel ────────────────────────────────────────
+function pgExportExcel() {
+  if (!_pgLastPoints.length) { alert('暂无数据，请先生成痛点'); return; }
+
+  const rows = [];
+  _pgLastPoints.forEach(p => {
+    const tags = p.tags || [];
+    const row = {
+      '场景':   p.scene  || '',
+      '痛点标题': p.title  || '',
+      '痛点说明': p.desc   || '',
+      '因子·谁':       (p.factors||{}).who   || '',
+      '因子·有什么':   (p.factors||{}).what  || '',
+      '因子·发生了什么': (p.factors||{}).event || '',
+    };
+    // 最多 6 个 Tag
+    for (let i = 0; i < 6; i++) {
+      const t = tags[i];
+      row[`Tag${i+1}`]       = t ? `[${t.dim}] ${t.label}` : '';
+      row[`Tag${i+1}权重`]   = t ? (t.weight || '') : '';
+    }
+    row['适配SKU'] = (p.skus || []).map(id => {
+      const s = SKU_DB.find(x => x.id === id);
+      return s ? s.name : id;
+    }).join(' / ');
+    row['核心冲突'] = p.conflict || '';
+    row['潜在风险'] = p.risk     || '';
+    row['解决方案'] = p.solution || '';
+    row['预期效果'] = p.effect   || '';
+    rows.push(row);
+  });
+
+  const ws = XLSX.utils.json_to_sheet(rows);
+  // 设置列宽
+  ws['!cols'] = [
+    {wch:12},{wch:16},{wch:40},{wch:18},{wch:22},{wch:22},
+    {wch:20},{wch:6},{wch:20},{wch:6},{wch:20},{wch:6},
+    {wch:20},{wch:6},{wch:20},{wch:6},{wch:20},{wch:6},
+    {wch:30},{wch:28},{wch:50},{wch:50},{wch:40},
+  ];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '痛点结果');
+  XLSX.writeFile(wb, `痛点生成结果_${new Date().toLocaleDateString('zh-CN').replace(/\//g,'-')}.xlsx`);
+}
+
+// ── 导出新增 SKU 知识卡片 Excel ───────────────────────────────
+function pgExportSkuExcel() {
+  if (!_pgLastNewSkus.length) { alert('本次生成未建议新增 SKU'); return; }
+
+  const rows = _pgLastNewSkus.map(s => ({
+    '建议编号':   s.id           || '',
+    'SKU名称':    s.name         || '',
+    '建议原因':   s.reason       || '',
+    '服务类别描述': s.category   || '',
+    '服务流程摘要': s.summary    || '',
+    '核心亮点':   s.highlights   || '',
+    '适用渠道/场景': s.scenarios || '',
+    '适用前提':   s.preconditions || '',
+    '关键词':     s.keywords     || '',
+    '不适用情形': s.use_case     || '',
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [
+    {wch:16},{wch:24},{wch:40},{wch:45},{wch:40},
+    {wch:30},{wch:24},{wch:30},{wch:36},{wch:30},
+  ];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '新增SKU知识卡片');
+  XLSX.writeFile(wb, `建议新增SKU_${new Date().toLocaleDateString('zh-CN').replace(/\//g,'-')}.xlsx`);
 }
 
 // ── 注册页面初始化 ───────────────────────────────────────────
