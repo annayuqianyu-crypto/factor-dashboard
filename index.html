@@ -395,9 +395,9 @@ tr:hover td { background: #fafafa; }
       <div class="kpi-sub">覆盖 L1 / L3–L6 层</div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-value">62.9亿</div>
-      <div class="kpi-label">四维组合数</div>
-      <div class="kpi-sub">204×287×707×152</div>
+      <div class="kpi-value">~1,860万</div>
+      <div class="kpi-label">有效四维组合</div>
+      <div class="kpi-sub">经相似性筛查+业务有效性过滤</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-value">359</div>
@@ -837,31 +837,61 @@ tr:hover td { background: #fafafa; }
 <div id="page-logic" class="page">
   <div class="page-header">
     <h2>🔗 链路逻辑说明</h2>
-    <p>三维因子组合方法论与链路生成示例</p>
+    <p>四维因子组合方法论与链路生成示例</p>
   </div>
 
   <div class="card">
-    <div class="card-title">三维方法论框架</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:20px;">
-      <div style="background:#ede9fe;border-radius:10px;padding:18px 20px;text-align:center;">
-        <div style="font-size:28px;margin-bottom:8px;">👤</div>
-        <div style="font-size:16px;font-weight:700;color:#5b21b6;margin-bottom:6px;">谁</div>
-        <div style="font-size:13px;color:#4b5563;line-height:1.6;">L1.1A 商业/职业身份<br/>L1.1B 家庭角色<br/><strong>204 行</strong></div>
+    <div class="card-title">四维方法论框架</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;">
+      <div style="background:#ede9fe;border-radius:10px;padding:16px 18px;text-align:center;">
+        <div style="font-size:26px;margin-bottom:6px;">🧑</div>
+        <div style="font-size:15px;font-weight:700;color:#5b21b6;margin-bottom:6px;">主体</div>
+        <div style="font-size:12.5px;color:#4b5563;line-height:1.7;">L1.1A 商业/职业身份<br/>L1.1B 家庭角色<br/><strong>204 行</strong></div>
       </div>
-      <div style="background:#dcfce7;border-radius:10px;padding:18px 20px;text-align:center;">
-        <div style="font-size:28px;margin-bottom:8px;">💰</div>
-        <div style="font-size:16px;font-weight:700;color:#166534;margin-bottom:6px;">有什么</div>
-        <div style="font-size:13px;color:#4b5563;line-height:1.6;">L3.1 / L4.1 / L4.2<br/>L4.3 / L5.1 / L5.2<br/><strong>287 行</strong></div>
+      <div style="background:#dcfce7;border-radius:10px;padding:16px 18px;text-align:center;">
+        <div style="font-size:26px;margin-bottom:6px;">💰</div>
+        <div style="font-size:15px;font-weight:700;color:#166534;margin-bottom:6px;">资产</div>
+        <div style="font-size:12.5px;color:#4b5563;line-height:1.7;">L3.1 / L4.1 / L4.2<br/>L4.3 / L5.1 / L5.2<br/><strong>287 行</strong></div>
       </div>
-      <div style="background:#dbeafe;border-radius:10px;padding:18px 20px;text-align:center;">
-        <div style="font-size:28px;margin-bottom:8px;">⚡</div>
-        <div style="font-size:16px;font-weight:700;color:#1e40af;margin-bottom:6px;">发生了什么</div>
-        <div style="font-size:13px;color:#4b5563;line-height:1.6;">L6.1 / L6.2 / L6.3<br/>L6.4 / L6.5 / L6.6 / L6.7<br/><strong>859 行</strong></div>
+      <div style="background:#dbeafe;border-radius:10px;padding:16px 18px;text-align:center;">
+        <div style="font-size:26px;margin-bottom:6px;">⚡</div>
+        <div style="font-size:15px;font-weight:700;color:#1e40af;margin-bottom:6px;">动作</div>
+        <div style="font-size:12.5px;color:#4b5563;line-height:1.7;">L6.1 / L6.3 / L6.4<br/>L6.5 / L6.6<br/><strong>707 行</strong></div>
+      </div>
+      <div style="background:#fef3c7;border-radius:10px;padding:16px 18px;text-align:center;">
+        <div style="font-size:26px;margin-bottom:6px;">🔒</div>
+        <div style="font-size:15px;font-weight:700;color:#92400e;margin-bottom:6px;">约束</div>
+        <div style="font-size:12.5px;color:#4b5563;line-height:1.7;">L6.2 税务合规<br/>L6.7 法律风险动作<br/><strong>152 行</strong></div>
       </div>
     </div>
-    <div style="background:#f9fafb;border-radius:8px;padding:14px 20px;text-align:center;">
-      <span style="font-size:14px;color:#374151;">三维组合公式：</span>
-      <span style="font-size:16px;font-weight:700;color:#1a56db;margin-left:8px;">204 × 287 × 859 ≈ <span style="font-size:22px;">5,027万</span> 种链路组合</span>
+    <div style="background:#f9fafb;border-radius:8px;padding:14px 20px;">
+      <div style="text-align:center;margin-bottom:14px;">
+        <span style="font-size:14px;color:#374151;">四维理论全排列：</span>
+        <span style="font-size:16px;font-weight:700;color:#6b7280;margin-left:8px;">204 × 287 × 707 × 152 = <span style="font-size:20px;">62.9亿</span></span>
+        <span style="font-size:12px;color:#9ca3af;margin-left:8px;">→ 需经多步筛查还原有效组合</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;font-size:12.5px;">
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;">
+          <div style="font-weight:700;color:#374151;margin-bottom:4px;">① 理论全排列</div>
+          <div style="font-size:18px;font-weight:700;color:#6b7280;">62.9亿</div>
+          <div style="color:#9ca3af;margin-top:3px;">204×287×707×152</div>
+        </div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;">
+          <div style="font-weight:700;color:#374151;margin-bottom:4px;">② 相似性筛查</div>
+          <div style="font-size:18px;font-weight:700;color:#6b7280;">15.1亿</div>
+          <div style="color:#9ca3af;margin-top:3px;">去除余弦相似度>0.85近义因子，各维度保留约70%有效因子</div>
+        </div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;">
+          <div style="font-weight:700;color:#374151;margin-bottom:4px;">③ 业务有效性</div>
+          <div style="font-size:18px;font-weight:700;color:#6b7280;">1.81亿</div>
+          <div style="color:#9ca3af;margin-top:3px;">朝曦HNW业务场景下跨四维语义协同率约12%</div>
+        </div>
+        <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:10px 12px;">
+          <div style="font-weight:700;color:#92400e;margin-bottom:4px;">④ 有效组合（结果）</div>
+          <div style="font-size:18px;font-weight:700;color:#1a56db;">~1,860万</div>
+          <div style="color:#9ca3af;margin-top:3px;">维度协同过滤后（四维同时语义一致率约10%）</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -870,50 +900,65 @@ tr:hover td { background: #fafafa; }
 
     <div class="chain-example">
       <div class="chain-title">示例1：港股上市前股权激励税务规划</div>
-      <span class="chain-pill" style="background:#ede9fe;color:#5b21b6;">A股创业公司创始人 (L1.1A)</span>
+      <span class="chain-pill" style="background:#ede9fe;color:#5b21b6;">主体：A股创业公司创始人 (L1.1A)</span>
       <span class="chain-arrow">×</span>
-      <span class="chain-pill" style="background:#dcfce7;color:#166534;">Pre-IPO期权池股权 (L3.1 × L4.2)</span>
+      <span class="chain-pill" style="background:#dcfce7;color:#166534;">资产：Pre-IPO期权池股权 (L3.1 × L4.2)</span>
       <span class="chain-arrow">×</span>
-      <span class="chain-pill" style="background:#dbeafe;color:#1e40af;">港股上市 + 个税筹划 + 离岸架构 (L6.1 × L6.2 × L6.4)</span>
+      <span class="chain-pill" style="background:#dbeafe;color:#1e40af;">动作：港股上市 + 离岸架构 (L6.1 × L6.4)</span>
+      <span class="chain-arrow">×</span>
+      <span class="chain-pill" style="background:#fef3c7;color:#92400e;">约束：个税合规 (L6.2)</span>
       <div style="margin-top:10px;font-size:13px;color:#6b7280;">→ 痛点：H股上市前如何通过开曼架构持股 + 税务居民迁移实现合规最优税负</div>
     </div>
 
     <div class="chain-example">
       <div class="chain-title">示例2：高管配偶身份规划 + 资产保护</div>
-      <span class="chain-pill" style="background:#ede9fe;color:#5b21b6;">上市公司高管配偶 (L1.1B)</span>
+      <span class="chain-pill" style="background:#ede9fe;color:#5b21b6;">主体：上市公司高管配偶 (L1.1B)</span>
       <span class="chain-arrow">×</span>
-      <span class="chain-pill" style="background:#dcfce7;color:#166534;">境内房产 + 家族信托架构 (L4.2 × L5.1)</span>
+      <span class="chain-pill" style="background:#dcfce7;color:#166534;">资产：境内房产 + 家族信托架构 (L4.2 × L5.1)</span>
       <span class="chain-arrow">×</span>
-      <span class="chain-pill" style="background:#dbeafe;color:#1e40af;">香港移民 + 资产保护信托 (L6.3 × L6.4)</span>
+      <span class="chain-pill" style="background:#dbeafe;color:#1e40af;">动作：香港移民 + 资产保护信托 (L6.3 × L6.4)</span>
+      <span class="chain-arrow">×</span>
+      <span class="chain-pill" style="background:#fef3c7;color:#92400e;">约束：婚姻/调查法律风险 (L6.7)</span>
       <div style="margin-top:10px;font-size:13px;color:#6b7280;">→ 痛点：高管被调查/婚姻风险下如何提前隔离境内资产并配置境外身份</div>
     </div>
 
     <div class="chain-example">
       <div class="chain-title">示例3：家族二代传承 + 健康保障</div>
-      <span class="chain-pill" style="background:#ede9fe;color:#5b21b6;">家族企业实控人子女 (L1.1B)</span>
+      <span class="chain-pill" style="background:#ede9fe;color:#5b21b6;">主体：家族企业实控人子女 (L1.1B)</span>
       <span class="chain-arrow">×</span>
-      <span class="chain-pill" style="background:#dcfce7;color:#166534;">境外家族信托受益权 (L5.1 × L4.2)</span>
+      <span class="chain-pill" style="background:#dcfce7;color:#166534;">资产：境外家族信托受益权 (L5.1 × L4.2)</span>
       <span class="chain-arrow">×</span>
-      <span class="chain-pill" style="background:#dbeafe;color:#1e40af;">二代留学身份 + 重疾保障 + 传承架构 (L6.3 × L6.5 × L6.6)</span>
+      <span class="chain-pill" style="background:#dbeafe;color:#1e40af;">动作：二代留学身份 + 重疾保障 + 传承架构 (L6.3 × L6.5 × L6.6)</span>
+      <span class="chain-arrow">×</span>
+      <span class="chain-pill" style="background:#fef3c7;color:#92400e;">约束：跨境税务申报合规 (L6.2)</span>
       <div style="margin-top:10px;font-size:13px;color:#6b7280;">→ 痛点：二代海外留学期间的健康保障安排与未来信托受益权过渡规划</div>
     </div>
   </div>
 
   <div class="card">
     <div class="card-title">链路覆盖量说明</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px;">
       <div style="background:#f9fafb;border-radius:8px;padding:14px 16px;text-align:center;">
-        <div style="font-size:28px;font-weight:700;color:#1a56db;">359</div>
-        <div style="font-size:13px;color:#6b7280;margin-top:4px;">已梳理痛点场景</div>
+        <div style="font-size:26px;font-weight:700;color:#1a56db;">359</div>
+        <div style="font-size:12.5px;color:#6b7280;margin-top:4px;">已梳理痛点场景</div>
       </div>
       <div style="background:#f9fafb;border-radius:8px;padding:14px 16px;text-align:center;">
-        <div style="font-size:28px;font-weight:700;color:#1a56db;">≈3条</div>
-        <div style="font-size:13px;color:#6b7280;margin-top:4px;">每个痛点平均链路数</div>
+        <div style="font-size:26px;font-weight:700;color:#1a56db;">≈3条</div>
+        <div style="font-size:12.5px;color:#6b7280;margin-top:4px;">每个痛点平均链路数</div>
       </div>
       <div style="background:#f9fafb;border-radius:8px;padding:14px 16px;text-align:center;">
-        <div style="font-size:28px;font-weight:700;color:#1a56db;">≈1,077</div>
-        <div style="font-size:13px;color:#6b7280;margin-top:4px;">已覆盖链路总数</div>
+        <div style="font-size:26px;font-weight:700;color:#1a56db;">≈1,077</div>
+        <div style="font-size:12.5px;color:#6b7280;margin-top:4px;">已覆盖链路总数</div>
       </div>
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px 16px;text-align:center;">
+        <div style="font-size:26px;font-weight:700;color:#1a56db;">0.006%</div>
+        <div style="font-size:12.5px;color:#6b7280;margin-top:4px;">当前覆盖率（1,077/1,860万）</div>
+      </div>
+    </div>
+    <div style="font-size:12.5px;color:#6b7280;background:#f9fafb;border-radius:8px;padding:12px 16px;line-height:1.8;">
+      <strong style="color:#374151;">扩库空间提示：</strong>
+      当前1,077条已标注链路仅覆盖有效四维组合空间的约0.006%，说明朝曦因子库仍有极大扩展潜力。
+      建议以每季度新增50-100条痛点的节奏持续补充，重点围绕<span style="color:#1a56db;font-weight:600;">约束维度（152行，当前最薄弱）</span>和高频客户身份组合优先扩充。
     </div>
   </div>
 </div>
