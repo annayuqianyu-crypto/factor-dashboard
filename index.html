@@ -1444,7 +1444,7 @@ tr:hover td { background: #fafafa; }
   <div class="card">
     <div class="card-title">① 上传痛点 Excel</div>
     <div style="font-size:12px;color:#9ca3af;margin-bottom:14px;margin-top:-6px;">
-      支持 .xlsx / .xls 格式，每次最多处理 <strong>30条</strong> 痛点。至少需包含「痛点标题」列；「场景」「说明」列可选。
+      支持 .xlsx / .xls 格式，数量不限（自动分批处理，每批20条）。至少需包含「痛点标题」列；「场景」「说明」列可选。
     </div>
 
     <!-- Drop zone -->
@@ -3726,7 +3726,7 @@ function pgRenderResults(results, newSkus, bu) {
   const sceneCnt  = Object.keys(byScene).length;
 
   // ── 顶部工具栏 ──
-  let html = `
+  let html = failNote + `
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
     <div>
       <span style="font-size:20px;font-weight:700;color:#111827;">生成结果</span>
@@ -4096,11 +4096,11 @@ function piHandleFile(file) {
       if (data.length < 2) { piError('Excel 内容为空或只有表头'); return; }
 
       _piHeaders  = data[0].map(h => String(h).trim());
-      _piRawRows  = data.slice(1).filter(row => row.some(v => String(v).trim())).slice(0, 30);
+      _piRawRows  = data.slice(1).filter(row => row.some(v => String(v).trim()));
 
       zone.innerHTML = `<div style="font-size:24px;margin-bottom:6px;">✅</div>
         <div style="font-size:13px;font-weight:600;color:#16a34a;">${file.name}</div>
-        <div style="font-size:12px;color:#9ca3af;margin-top:4px;">检测到 ${_piHeaders.length} 列 · ${_piRawRows.length} 行数据（最多处理30行）</div>
+        <div style="font-size:12px;color:#9ca3af;margin-top:4px;">检测到 ${_piHeaders.length} 列 · ${_piRawRows.length} 行痛点数据</div>
         <div style="margin-top:8px;"><button onclick="document.getElementById('piFileInput').click()"
           style="font-size:12px;color:#6b7280;background:none;border:1px solid #e5e7eb;border-radius:5px;padding:4px 10px;cursor:pointer;">更换文件</button></div>`;
 
@@ -4177,7 +4177,9 @@ function piRenderMapping() {
   if (bDesc)  selDesc.value  = bDesc;
 }
 
-// ── AI 补全 ─────────────────────────────────────────────────
+// ── AI 补全（自动分批）────────────────────────────────────
+const PI_BATCH_SIZE = 20;  // 每批条数（可调整）
+
 async function piStartEnrich() {
   if (!_piRawRows.length) { alert('请先上传 Excel 文件'); return; }
 
@@ -4194,42 +4196,66 @@ async function piStartEnrich() {
     showPage('pain-generate'); return;
   }
 
-  // Build input list
   const idxScene = colScene ? _piHeaders.indexOf(colScene) : -1;
   const idxTitle = _piHeaders.indexOf(colTitle);
   const idxDesc  = colDesc  ? _piHeaders.indexOf(colDesc)  : -1;
 
-  const points = _piRawRows.map(row => ({
-    scene:  idxScene >= 0 ? String(row[idxScene] || '').trim() || '外部导入' : '外部导入',
-    title:  String(row[idxTitle] || '').trim(),
-    desc:   idxDesc  >= 0 ? String(row[idxDesc]  || '').trim() : '',
+  const allPoints = _piRawRows.map(row => ({
+    scene: idxScene >= 0 ? String(row[idxScene] || '').trim() || '外部导入' : '外部导入',
+    title: String(row[idxTitle] || '').trim(),
+    desc:  idxDesc  >= 0 ? String(row[idxDesc]  || '').trim() : '',
   })).filter(p => p.title);
 
-  if (!points.length) { alert('未能从所选列中提取到有效痛点标题'); return; }
+  if (!allPoints.length) { alert('未能从所选列中提取到有效痛点标题'); return; }
 
-  // Disable button
+  const total      = allPoints.length;
+  const batchCount = Math.ceil(total / PI_BATCH_SIZE);
+
   const btn = document.getElementById('piEnrichBtn');
-  btn.disabled = true; btn.textContent = '⏳ 分析中…';
+  btn.disabled = true;
   document.getElementById('piEnrichStatus').textContent = '';
 
-  document.getElementById('piResultsContent').innerHTML =
-    `<div class="gen-loading"><div class="spinner"></div>
-     <div style="color:#374151;font-weight:600;font-size:15px;">AI 正在补全 ${points.length} 条痛点…</div>
-     <div style="color:#9ca3af;font-size:13px;margin-top:6px;">BU: ${bu} · 模型 ${model}</div></div>`;
+  // 进度显示
+  const progressHtml = () => `
+    <div style="padding:32px 24px;text-align:center;" id="piProgressBox">
+      <div class="spinner" style="margin:0 auto 16px;"></div>
+      <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:8px;" id="piProgressTitle">
+        正在处理…</div>
+      <div style="max-width:400px;margin:0 auto 10px;">
+        <div style="background:#e5e7eb;border-radius:99px;height:8px;overflow:hidden;">
+          <div id="piProgressBar" style="height:100%;background:#1a56db;border-radius:99px;transition:width .4s;width:0%;"></div>
+        </div>
+      </div>
+      <div style="font-size:13px;color:#6b7280;" id="piProgressSub"></div>
+      <div style="font-size:12px;color:#9ca3af;margin-top:6px;" id="piProgressEst"></div>
+    </div>`;
 
-  const skuLines       = SKU_DB.map(s => `${s.id}:${s.name}`).join('\n');
+  document.getElementById('piResultsContent').innerHTML = progressHtml();
+
+  const setProgress = (done, total, batchDone, batchTotal, eta) => {
+    const pct = Math.round(done / total * 100);
+    const bar = document.getElementById('piProgressBar');
+    const title = document.getElementById('piProgressTitle');
+    const sub   = document.getElementById('piProgressSub');
+    const est   = document.getElementById('piProgressEst');
+    if (bar)   bar.style.width   = pct + '%';
+    if (title) title.textContent = `AI 正在补全：已完成 ${done} / ${total} 条`;
+    if (sub)   sub.textContent   = `第 ${batchDone} / ${batchTotal} 批 · BU: ${bu} · 模型 ${model}`;
+    if (est && eta > 0) est.textContent = `预计剩余时间：约 ${eta} 分钟`;
+  };
+
+  const skuLines        = SKU_DB.map(s => `${s.id}:${s.name}`).join('\n');
   const factorPathsText = FACTOR_PATHS.join('\n');
-
-  const buInstructions = {
+  const buInstructions  = {
     'CM':             '【BU约束：CM资本市场】补全分析请聚焦资本市场相关内容：股权架构/IPO/减持/股权激励/并购等。禁止出现 结构化/委托贷款/QFLP/资金入境/资金出境 等敏感词。',
     'Tax':            '【BU约束：Tax税务】补全分析请聚焦税务合规内容。禁止使用 筹划/避税/减税/节税；可用 税务合规/税负管理/架构设计；不出现无来源的具体税率。',
     'Legal':          '【BU约束：Legal法律】补全分析请聚焦法律风险与合规内容。不引用具体法典法条，说清法律逻辑即可。',
     'All Department': '',
   }[bu] || '';
 
-  const pointsJson = JSON.stringify(points.map((p, i) => ({id: i+1, ...p})), null, 2);
-
-  const userPrompt = `你是朝曦家办的资深业务顾问，专长跨境财富规划、企业股权架构、税务合规、家族传承。
+  const buildPrompt = (batch, batchIdx) => {
+    const pointsJson = JSON.stringify(batch.map((p, i) => ({id: batchIdx * PI_BATCH_SIZE + i + 1, ...p})), null, 2);
+    return `你是朝曦家办的资深业务顾问，专长跨境财富规划、企业股权架构、税务合规、家族传承。
 ${buInstructions ? '\n' + buInstructions + '\n' : ''}
 以下是已有痛点数据，请为每条痛点补全标准化分析字段，保持原始 title 不变，若原 desc 内容不足约40字可适当完善。
 
@@ -4243,22 +4269,17 @@ ${pointsJson}
   "scene":"原场景名称（不变）",
   "title":"原痛点标题（完全保持不变）",
   "desc":"原说明（保持或完善至约40字）",
-  "factors_chain":"【重要】从下方【因子库路径表】中精确选取3条与该痛点最匹配的完整路径，用中文分号「；」拼接。路径必须与因子库中完全一致，禁止自行编造或修改路径内容。三条路径分别代表：①谁（商业/职业身份或家庭角色起头）②有什么/发生了什么（资产/动作类路径）③约束（外部监管触发或税务/法律类路径）",
+  "factors_chain":"【重要】从下方【因子库路径表】中精确选取3条完整路径，用中文分号「；」拼接，路径必须与库中完全一致不可修改。①谁（商业/职业身份或家庭角色起头）②有什么/发生了什么（资产/动作类路径）③约束（税务/法律/监管类路径）",
   "tags":[{"label":"标签短语","dim":"主体|资产|动作|约束","weight":"C|B|A"}],
   "skus":["匹配的SKU_ID"],
-  "conflict":"核心冲突（≤25字，格式：[客户诉求]与[客观约束/风险]之间的矛盾）",
-  "risk":"潜在风险（若不解决最坏情况，100字内，具体化风险后果）",
-  "solution":"解决方案（结合已匹配SKU，专业行动建议，120字内，分步骤，平实语言，不含营销用语）",
-  "effect":"预期效果（成功实施后正面价值，80字内，平实语言）"
+  "conflict":"核心冲突（≤25字，[客户诉求]与[客观约束/风险]之间的矛盾）",
+  "risk":"潜在风险（100字内，具体化风险后果）",
+  "solution":"解决方案（120字内，分步骤，平实语言，不含营销用语）",
+  "effect":"预期效果（80字内，平实语言）"
 }
 
 标签规则：dim 必须是 主体/资产/动作/约束 之一；weight C=核心 B=中等 A=弱；每痛点4-6个标签。
-
-四步分析合规要求：
-- 资本市场痛点：禁止出现 结构化/委托贷款/QFLP/NOTES/资金入境/资金出境 等敏感词
-- 税务痛点：禁止使用 筹划/避税/减税/节税；可用 税务合规/税负管理/架构设计
-- 法律痛点：不引用具体法典法条，说清法律逻辑即可
-- 通用：禁用 完全解决/保证/一定/帮助/陪伴/助力/护航 等绝对化或营销词；四部分总字数不超过300字
+合规要求：禁止 结构化/委托贷款/QFLP/筹划/避税/减税/节税/完全解决/保证/一定/帮助/陪伴/助力/护航；不引用具体法条。
 
 【new_skus 数组】根据以上痛点，建议新增 SKU（可为空数组）：
 {"id":"New-XXX-001","name":"...","reason":"...（50字内）","category":"...","summary":"...","highlights":"...","scenarios":"...","preconditions":"...","keywords":"...","use_case":"..."}
@@ -4266,63 +4287,93 @@ ${pointsJson}
 SKU知识库（从中为每个痛点选2-4个最相关ID）：
 ${skuLines}
 
-【因子库路径表】（共${FACTOR_PATHS.length}条，为每个痛点的factors_chain从此表精确选取3条完整路径，复制原文不可修改）：
+【因子库路径表】（共${FACTOR_PATHS.length}条，factors_chain 必须从此精确选取3条完整路径）：
 ${factorPathsText}
 
 严格只输出JSON对象，不输出任何其他文字。`;
+  };
 
-  try {
-    const resp = await fetch(base + '/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
-      body: JSON.stringify({ model, messages: [{ role: 'user', content: userPrompt }], max_tokens: 16000, temperature: 0.3 })
-    });
+  // ── 分批处理 ─────────────────────────────────────────────
+  const allEnriched = [];
+  const allNewSkus  = [];
+  const errors      = [];
+  const batchTimes  = [];
 
-    if (!resp.ok) {
-      const txt = await resp.text();
-      throw new Error(`API 返回 ${resp.status}\n${txt.slice(0, 300)}`);
-    }
+  for (let i = 0; i < batchCount; i++) {
+    const batch = allPoints.slice(i * PI_BATCH_SIZE, (i + 1) * PI_BATCH_SIZE);
+    const batchStart = Date.now();
 
-    const data = await resp.json();
-    const raw  = data.choices?.[0]?.message?.content || '';
+    // 估算剩余时间
+    const avgMs = batchTimes.length ? batchTimes.reduce((a,b)=>a+b,0)/batchTimes.length : 30000;
+    const remainingBatches = batchCount - i;
+    const etaMins = Math.round(avgMs * remainingBatches / 60000);
+    setProgress(allEnriched.length, total, i + 1, batchCount, i > 0 ? etaMins : 0);
 
-    let enrichedPoints, newSkus;
     try {
+      const resp = await fetch(base + '/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: 'user', content: buildPrompt(batch, i) }],
+          max_tokens: 16000,
+          temperature: 0.3,
+        })
+      });
+
+      if (!resp.ok) {
+        const txt = await resp.text();
+        throw new Error(`API ${resp.status}: ${txt.slice(0, 200)}`);
+      }
+
+      const data = await resp.json();
+      const raw  = data.choices?.[0]?.message?.content || '';
+
       const m = raw.match(/\{[\s\S]*\}/);
-      if (!m) throw new Error('未返回 JSON\n原始输出：' + raw.slice(0, 400));
+      if (!m) throw new Error('批次 ' + (i+1) + ' 未返回 JSON');
       const parsed = JSON.parse(m[0]);
-      enrichedPoints = parsed.points || [];
-      newSkus        = parsed.new_skus || [];
-      if (!enrichedPoints.length) throw new Error('points 数组为空');
-    } catch(e) {
-      throw new Error('JSON 解析失败：' + e.message + '\n原始输出：' + raw.slice(0, 400));
+      allEnriched.push(...(parsed.points  || []));
+      allNewSkus.push( ...(parsed.new_skus || []));
+      batchTimes.push(Date.now() - batchStart);
+
+    } catch(err) {
+      // 记录失败批次，继续处理后续批次
+      errors.push({ batch: i + 1, from: i * PI_BATCH_SIZE + 1, to: Math.min((i+1)*PI_BATCH_SIZE, total), msg: err.message });
+      batchTimes.push(Date.now() - batchStart);
     }
+  }
 
-    _piLastPoints  = enrichedPoints;
-    _piLastNewSkus = newSkus;
-    _piLastBu      = bu;
+  btn.disabled = false;
+  btn.textContent = '🤖 AI 补全分析';
 
-    piRenderResults(enrichedPoints, newSkus, bu);
-    document.getElementById('piEnrichStatus').textContent = `✅ 已补全 ${enrichedPoints.length} 条`;
-
-  } catch(err) {
-    const isCors = err.message.toLowerCase().includes('fetch') || err.message.toLowerCase().includes('failed to');
+  if (!allEnriched.length) {
     document.getElementById('piResultsContent').innerHTML =
       `<div style="padding:32px 24px;text-align:center;">
         <div style="font-size:32px;margin-bottom:10px;">⚠️</div>
-        <div style="font-size:15px;font-weight:700;color:#dc2626;margin-bottom:8px;">补全失败</div>
-        <div style="font-size:13px;color:#374151;white-space:pre-wrap;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px;line-height:1.7;text-align:left;">${err.message}</div>
-        ${isCors ? '<div style="margin-top:10px;font-size:12px;color:#92400e;background:#fef3c7;padding:8px 14px;border-radius:6px;">⚠️ 疑似 CORS 拦截，请确认 Base URL 支持跨域（wolfai.top 已支持）</div>' : ''}
+        <div style="font-size:15px;font-weight:700;color:#dc2626;margin-bottom:8px;">全部批次处理失败</div>
+        <div style="font-size:13px;color:#374151;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px;text-align:left;white-space:pre-wrap;">${errors.map(e=>`批次${e.batch}（第${e.from}-${e.to}条）：${e.msg}`).join('\n')}</div>
       </div>`;
     document.getElementById('piEnrichStatus').textContent = '';
-  } finally {
-    btn.disabled = false; btn.textContent = '🤖 AI 补全分析';
+    return;
   }
+
+  _piLastPoints  = allEnriched;
+  _piLastNewSkus = allNewSkus;
+  _piLastBu      = bu;
+
+  const failNote = errors.length
+    ? `<div style="padding:10px 16px;background:#fef3c7;border:1px solid #fde68a;border-radius:8px;font-size:12.5px;color:#92400e;margin-bottom:16px;">
+        ⚠️ ${errors.length} 个批次处理失败（第 ${errors.map(e=>e.from+'-'+e.to).join('、')} 条），其余已完成。可重新上传这些行单独处理。
+       </div>` : '';
+
+  piRenderResults(allEnriched, allNewSkus, bu, failNote);
+  document.getElementById('piEnrichStatus').textContent =
+    `✅ 已补全 ${allEnriched.length} / ${total} 条${errors.length ? `（${errors.length}批失败）` : ''}`;
 }
 
 // ── 渲染结果（复用 pgRenderResults 逻辑，但导出用 pi 缓存）─
-function piRenderResults(results, newSkus, bu) {
-  newSkus = newSkus || []; bu = bu || 'All Department';
+function piRenderResults(results, newSkus, bu, failNote) {
+  newSkus = newSkus || []; bu = bu || 'All Department'; failNote = failNote || '';
   if (!results?.length) {
     document.getElementById('piResultsContent').innerHTML =
       '<div class="gen-empty">未补全任何痛点，请检查配置后重试</div>'; return;
