@@ -1257,16 +1257,18 @@ tr:hover td { background: #fafafa; }
     <div class="card-title" style="margin-bottom:10px;">🔑 API 配置</div>
     <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
       <input id="apiKeyInput" type="password"
-        placeholder="输入 API Key（兼容 OpenAI 格式）"
-        value="sk-QO1VXL9AO0KTjmTZ90ljRfaCydKcoxzUCbQKlPnKIev7Zrga"
-        style="flex:1;min-width:280px;padding:8px 12px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;">
+        placeholder="输入 API Key，保存后仅存于本地浏览器"
+        style="flex:1;min-width:280px;padding:8px 12px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;"
+        oninput="pgSaveKey()">
       <select id="apiBaseSelect"
-        style="padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;background:#fff;">
+        style="padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;background:#fff;"
+        onchange="pgSaveKey()">
         <option value="https://wolfai.top/v1">wolfai.top 代理</option>
         <option value="https://api.anthropic.com/v1">Anthropic 官方</option>
       </select>
-      <span style="font-size:12px;color:#92400e;">Key 仅在本地使用，不会上传</span>
+      <button onclick="pgClearKey()" style="padding:7px 12px;border:1px solid #fca5a5;border-radius:6px;font-size:12px;color:#dc2626;background:#fff;cursor:pointer;">清除 Key</button>
     </div>
+    <div style="font-size:12px;color:#92400e;margin-top:8px;">🔒 Key 仅保存在你自己的浏览器本地（localStorage），不写入源码，其他人看不到</div>
   </div>
 
   <!-- 从预测场景中选择 -->
@@ -2194,8 +2196,35 @@ function pgRenderResults(results) {
   document.getElementById('pgResultsContent').innerHTML = html;
 }
 
+// ── API Key 本地存储 ─────────────────────────────────────────
+function pgSaveKey() {
+  const key  = document.getElementById('apiKeyInput')?.value || '';
+  const base = document.getElementById('apiBaseSelect')?.value || '';
+  if (key)  localStorage.setItem('pg_api_key',  key);
+  if (base) localStorage.setItem('pg_api_base', base);
+}
+
+function pgClearKey() {
+  localStorage.removeItem('pg_api_key');
+  localStorage.removeItem('pg_api_base');
+  const inp = document.getElementById('apiKeyInput');
+  if (inp) inp.value = '';
+}
+
+function pgLoadKey() {
+  const key  = localStorage.getItem('pg_api_key');
+  const base = localStorage.getItem('pg_api_base');
+  const inp  = document.getElementById('apiKeyInput');
+  const sel  = document.getElementById('apiBaseSelect');
+  if (inp && key)  inp.value = key;
+  if (sel && base) sel.value = base;
+}
+
 // ── 注册页面初始化 ───────────────────────────────────────────
-PAGE_INIT_MAP['pain-generate'] = initPainGeneratePage;
+PAGE_INIT_MAP['pain-generate'] = function() {
+  initPainGeneratePage();
+  pgLoadKey();
+};
 </script>
 </body>
 </html>
