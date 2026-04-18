@@ -267,6 +267,52 @@ tr:hover td { background: #fafafa; }
 .page-header p {
   font-size: 14px; color: #6b7280; margin-top: 4px;
 }
+
+/* ── 痛点生成 ── */
+.scene-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.scene-chip {
+  padding: 7px 14px; border: 1.5px solid #e5e7eb; border-radius: 20px;
+  font-size: 13px; cursor: pointer; transition: all .15s; user-select: none;
+  background: #fff; color: #374151;
+}
+.scene-chip:hover { border-color: #1a56db; color: #1a56db; background: #eff6ff; }
+.scene-chip.selected { background: #1a56db; color: #fff; border-color: #1a56db; }
+
+.config-scene-row {
+  display: flex; align-items: center; padding: 9px 0;
+  border-bottom: 1px solid #f3f4f6; gap: 10px;
+}
+.config-scene-row:last-child { border-bottom: none; }
+.config-scene-name { flex: 1; font-size: 13.5px; color: #374151; }
+.count-input {
+  width: 64px; padding: 5px 8px; border: 1px solid #e5e7eb;
+  border-radius: 6px; font-size: 13px; text-align: center;
+}
+.count-input:focus { outline: none; border-color: #1a56db; }
+.remove-btn { font-size: 18px; color: #d1d5db; cursor: pointer; line-height: 1; }
+.remove-btn:hover { color: #ef4444; }
+
+.gen-btn {
+  padding: 10px 24px; background: #1a56db; color: #fff;
+  border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all .15s; display: inline-flex; align-items: center; gap: 7px;
+}
+.gen-btn:hover { background: #1e40af; }
+.gen-btn:disabled { background: #9ca3af; cursor: not-allowed; }
+
+.pr-card {
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;
+  padding: 18px 20px; margin-bottom: 14px;
+}
+
+.gen-loading { text-align: center; padding: 70px 0; }
+.spinner {
+  width: 36px; height: 36px; border: 3px solid #e5e7eb;
+  border-top-color: #1a56db; border-radius: 50%;
+  animation: dashSpin 1s linear infinite; margin: 0 auto 16px;
+}
+@keyframes dashSpin { to { transform: rotate(360deg); } }
+.gen-empty { text-align: center; padding: 60px 0; color: #9ca3af; font-size: 14px; }
 </style>
 </head>
 <body>
@@ -311,6 +357,14 @@ tr:hover td { background: #fafafa; }
   </div>
   <div class="nav-item" onclick="showPage('forecast')">
     <span class="icon">🔭</span>未来场景预测
+  </div>
+
+  <div class="nav-section-title" style="margin-top:12px;">痛点生成</div>
+  <div class="nav-item" onclick="showPage('pain-generate')">
+    <span class="icon">✨</span>场景选择
+  </div>
+  <div class="nav-item" onclick="showPage('pain-results')">
+    <span class="icon">📋</span>痛点结果
   </div>
 
 </nav>
@@ -1188,6 +1242,80 @@ tr:hover td { background: #fafafa; }
 
 </div>
 
+
+<!-- ══════════════════════════════════════
+     PAGE 10: 场景选择
+═══════════════════════════════════════ -->
+<div id="page-pain-generate" class="page">
+  <div class="page-header">
+    <h2>✨ 场景选择</h2>
+    <p>从预测场景中点选，或手动输入自定义场景；配置每个场景的生成数量后一键生成标准化痛点</p>
+  </div>
+
+  <!-- API 配置 -->
+  <div class="card" style="background:#fffbeb;border-color:#fcd34d;margin-bottom:16px;">
+    <div class="card-title" style="margin-bottom:10px;">🔑 API 配置</div>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+      <input id="apiKeyInput" type="password"
+        placeholder="输入 API Key（兼容 OpenAI 格式）"
+        value="sk-QO1VXL9AO0KTjmTZ90ljRfaCydKcoxzUCbQKlPnKIev7Zrga"
+        style="flex:1;min-width:280px;padding:8px 12px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;">
+      <select id="apiBaseSelect"
+        style="padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;background:#fff;">
+        <option value="https://wolfai.top/v1">wolfai.top 代理</option>
+        <option value="https://api.anthropic.com/v1">Anthropic 官方</option>
+      </select>
+      <span style="font-size:12px;color:#92400e;">Key 仅在本地使用，不会上传</span>
+    </div>
+  </div>
+
+  <!-- 从预测场景中选择 -->
+  <div class="card">
+    <div class="card-title">🔭 从未来场景预测中选择（可多选）</div>
+    <div class="scene-chips" id="forecastChips"></div>
+  </div>
+
+  <!-- 手动输入场景 -->
+  <div class="card">
+    <div class="card-title">✍️ 手动输入其他场景</div>
+    <textarea id="manualScenesInput" rows="4"
+      placeholder="每行输入一个场景名称，例如：&#10;家族企业二代接班架构搭建&#10;境外子女留学期间税务规划&#10;企业主破产重组资产隔离"
+      style="width:100%;padding:10px 12px;border:1px solid #e5e7eb;border-radius:6px;font-size:13.5px;resize:vertical;line-height:1.65;color:#374151;"
+      oninput="updateConfigPanel()"></textarea>
+  </div>
+
+  <!-- 生成配置（动态显示） -->
+  <div class="card" id="pgConfigPanel" style="display:none;">
+    <div class="card-title">⚙️ 生成配置</div>
+    <div style="font-size:12px;color:#9ca3af;margin-bottom:12px;margin-top:-8px;">每个场景独立设置希望生成的痛点数量（1–10）</div>
+    <div id="pgConfigList"></div>
+    <div style="margin-top:18px;display:flex;align-items:center;gap:14px;justify-content:flex-end;border-top:1px solid #f3f4f6;padding-top:16px;">
+      <span style="font-size:13px;color:#6b7280;" id="pgGenSummary"></span>
+      <button class="gen-btn" id="pgGenBtn" onclick="pgStartGenerate()">
+        <span>⚡ 生成痛点</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     PAGE 11: 痛点结果
+═══════════════════════════════════════ -->
+<div id="page-pain-results" class="page">
+  <div class="page-header">
+    <h2>📋 痛点结果</h2>
+    <p>AI 生成的标准化痛点 · 含核心客户画像标签（主体 · 资产 · 动作 · 约束）与适配 SKU</p>
+  </div>
+  <div id="pgResultsContent">
+    <div class="gen-empty">
+      <div style="font-size:48px;margin-bottom:14px;">⚡</div>
+      <div style="font-weight:600;font-size:15px;color:#6b7280;margin-bottom:6px;">尚未生成痛点</div>
+      <div style="font-size:13px;">请先在「场景选择」中配置场景并点击生成</div>
+    </div>
+  </div>
+</div>
+
 </main>
 
 <script>
@@ -1613,6 +1741,461 @@ window.showPage = function(pageId) {
   origShowPage.call(this, pageId);
   if (PAGE_INIT_MAP[pageId]) PAGE_INIT_MAP[pageId]();
 };
+
+// ============================================================
+// 痛点生成 · PAGE 10 & 11
+// ============================================================
+
+const FORECAST_SCENES = [
+  '大湾区跨境财富管理','AI/科技独角兽上市潮','数字资产合规持有',
+  'REITs资产配置规划','中东/东南亚新兴身份','ESG/可持续投资传承',
+  'Pillar 2全球最低税率冲击','境外所得CRS稽查强化',
+  '港/新单一家族办公室税务豁免','北交所/科创板Pre-IPO传承窗口',
+  '个人破产与高净值债务重组','跨境婚姻离婚股权保护'
+];
+
+const SKU_DB = [
+  {id:"Legal-2603",name:"股权融资（一人公司）"},{id:"Legal-2604",name:"股权融资（补充流动资金）"},
+  {id:"Legal-2605",name:"股权融资（无投资人企业拟引入产业投资人）"},{id:"Legal-2606",name:"股权融资（有投资人企业引入产业投资人）"},
+  {id:"Legal-2607",name:"股权融资（拟上市公司引入产业投资人）"},{id:"Legal-2608",name:"股权融资（现金流不充沛）"},
+  {id:"Legal-2609",name:"股权融资（不考虑投资人）"},{id:"Legal-2610",name:"拟上市公司改制合规事项（整体改制）"},
+  {id:"Legal-2611",name:"拟上市公司改制合规事项（部分改制）"},{id:"Legal-2612",name:"拟上市公司改制合规事项（直接变更）"},
+  {id:"Legal-2613",name:"拟上市公司辅导期（合规事项）"},{id:"Legal-2614",name:"股权代持及应对（无法还原到被代持人名下）"},
+  {id:"Legal-2615",name:"股权代持及应对（可以还原到被代持人名下）"},{id:"Legal-2616",name:"境内股权激励总览（无投资人非上市公司）"},
+  {id:"Legal-2617",name:"境内股权激励总览（有投资人不盈利非上市公司）"},{id:"Legal-2618",name:"境内股权激励总览（有投资人正常盈利非上市公司）"},
+  {id:"Legal-2619",name:"境内股权激励总览（拟上市公司）"},{id:"Legal-2620",name:"境内股权激励总览（一人公司）"},
+  {id:"Legal-2621",name:"股权激励（上市公司）"},{id:"Legal-2622",name:"股权激励（拟上市公司）"},
+  {id:"Legal-2623",name:"股权激励（非上市公司）"},{id:"Legal-2624",name:"非货币增资法律文件"},
+  {id:"Legal-2625",name:"FA服务"},{id:"Legal-2626",name:"权力过渡安排（独生子女接班，生前股权转让）"},
+  {id:"Legal-2627",name:"权力过渡安排（独生子女接班，生前股权不转让）"},{id:"Legal-2628",name:"权力过渡安排（多子女接班）"},
+  {id:"Legal-2629",name:"权力过渡安排（职业经理人管理，子女持股权）"},{id:"Legal-2630",name:"权力过渡安排（职业经理人管理，子女不持股权）"},
+  {id:"Legal-2631",name:"权力过渡安排（未确定接班方式）"},{id:"Legal-2632",name:"遗嘱及遗产管理人（无代持无股权）"},
+  {id:"Legal-2633",name:"遗嘱及遗产管理人（无代持，企业实控人，家族后代交接班）"},{id:"Legal-2634",name:"遗嘱及遗产管理人（无代持，企业实控人，职业经理人管理）"},
+  {id:"Legal-2635",name:"遗嘱及遗产管理人（无代持，企业实控人，未确定交接班方式）"},{id:"Legal-2636",name:"遗嘱及遗产管理人（无代持，非企业实控人，家族后代交接班）"},
+  {id:"Legal-2637",name:"遗嘱及遗产管理人（无代持，非企业实控人，职业经理人管理）"},{id:"Legal-2638",name:"遗嘱及遗产管理人（无代持，非企业实控人，未确定交接班方式）"},
+  {id:"Legal-2639",name:"遗嘱及遗产管理人（有代持无股权有协议，无法直接还原，与代持人亲密但不健康）"},
+  {id:"Legal-2640",name:"遗嘱及遗产管理人（有代持无股权有协议，无法直接还原，与代持人不亲密且不健康）"},
+  {id:"Legal-2641",name:"遗嘱及遗产管理人（有代持无股权有协议，无法直接还原，与代持人亲密且健康）"},
+  {id:"Legal-2642",name:"遗嘱及遗产管理人（有代持无股权有协议，可以直接还原，与代持人亲密但不健康）"},
+  {id:"Legal-2643",name:"遗嘱及遗产管理人（有代持无股权有协议，可以直接还原，与代持人不亲密且不健康）"},
+  {id:"Legal-2644",name:"遗嘱及遗产管理人（有代持无股权有协议，可以直接还原，与代持人亲密且健康）"},
+  {id:"Legal-2645",name:"遗嘱及遗产管理人（有代持无股权无协议，无法直接还原，与代持人亲密但不健康）"},
+  {id:"Legal-2646",name:"遗嘱及遗产管理人（有代持无股权无协议，无法直接还原，与代持人不亲密且不健康）"},
+  {id:"Legal-2647",name:"遗嘱及遗产管理人（有代持无股权无协议，无法直接还原，与代持人亲密且健康）"},
+  {id:"Legal-2648",name:"遗嘱及遗产管理人（有代持无股权无协议，可以直接还原，与代持人亲密但不健康）"},
+  {id:"Legal-2649",name:"遗嘱及遗产管理人（有代持无股权无协议，可以直接还原，与代持不亲密且不健康）"},
+  {id:"Legal-2650",name:"遗嘱及遗产管理人（有代持有股权无协议，无法直接还原，与代持人亲密但不健康）"},
+  {id:"Legal-2651",name:"遗嘱及遗产管理人（有代持有股权无协议，可以直接还原，与代持人亲密且健康）"},
+  {id:"Legal-2652",name:"遗嘱及遗产管理人（有代持有股权无协议，无法直接还原，与代持人不亲密且不健康）"},
+  {id:"Legal-2653",name:"遗嘱及遗产管理人（有代持有股权无协议，无法直接还原，与代持人亲密且健康）"},
+  {id:"Legal-2654",name:"遗嘱及遗产管理人（有代持，对继承人不在意）"},{id:"Legal-2655",name:"析产协议"},
+  {id:"Legal-2656",name:"婚前财产安排"},{id:"Legal-2657",name:"婚内财产分割"},{id:"Legal-2658",name:"意定监护人"},
+  {id:"Legal-2659",name:"不动产传承信托（有代持，限购，有代持协议，独生子女）"},
+  {id:"Legal-2660",name:"不动产传承信托（有代持，限购，无代持协议，独生子女）"},
+  {id:"Legal-2661",name:"不动产传承信托（有代持，不限购，独生子女）"},
+  {id:"Legal-2662",name:"不动产传承信托（有代持，限购，有代持协议，多子女，已做好分配）"},
+  {id:"Legal-2663",name:"不动产传承信托（有代持，限购，有代持协议，多子女，未做好分配）"},
+  {id:"Legal-2664",name:"不动产传承信托（有代持，限购，无代持协议，多子女，已做好分配）"},
+  {id:"Legal-2665",name:"不动产传承信托（有代持，限购，无代持协议，多子女，未做好分配）"},
+  {id:"Legal-2666",name:"不动产传承信托（有代持，不限购，多子女）"},
+  {id:"Legal-2667",name:"不动产传承信托（无代持，限购，独生子女）"},
+  {id:"Legal-2668",name:"不动产传承信托（无代持，不限购，独生子女）"},
+  {id:"Legal-2669",name:"不动产传承信托（无代持，限购，多子女，已做好分配）"},
+  {id:"Legal-2670",name:"不动产传承信托（无代持，限购，多子女，未做好分配）"},
+  {id:"Legal-2671",name:"不动产传承信托（无代持，不限购，多子女）"},
+  {id:"Legal-2672",name:"诉讼"},{id:"Legal-2673",name:"仲裁"},
+  {id:"Legal-2674",name:"境内FGT的法律文件"},{id:"Legal-2675",name:"境外FGT的法律文件"},
+  {id:"Legal-2676",name:"境内NRT的法律文件"},{id:"Legal-2677",name:"境外NRT的法律文件"},
+  {id:"CM2335",name:"境内-上市公司股票员工持股信托"},{id:"CM2336",name:"境内-拟上市公司员工持股信托"},
+  {id:"CM2337",name:"境内-非上市公司员工持股信托"},{id:"CM2338",name:"境内-股权信托-境内PREIPO信托"},
+  {id:"CM2339",name:"境内-不动产信托"},{id:"CM-2341",name:"境内-家族信托金融产品投资"},
+  {id:"CM2342",name:"境内-慈善信托+基金会"},{id:"CM2343",name:"境内-FGT"},{id:"CM2344",name:"境内-NRT信托"},
+  {id:"CM2345",name:"境内-股权信托-股票合伙份额"},{id:"CM-2355",name:"境内大额保单-终身寿"},
+  {id:"CM2356",name:"境内大额保单-年金"},{id:"CM2357",name:"境内高端医疗-个险"},{id:"CM-2358",name:"境内高端医疗-团险"},
+  {id:"CM-2359",name:"离岸大额保单-Whole Life终身寿"},{id:"CM-2360",name:"离岸大额保单-传统UL"},
+  {id:"CM-2361",name:"离岸大额保单-IUL"},{id:"CM2362",name:"离岸大额保单-储蓄"},
+  {id:"CM2363",name:"离岸大额保单-重疾"},{id:"CM2364",name:"美国大额保单-IUL"},
+  {id:"CM-2365",name:"美国大额保单-年金"},{id:"CM2366",name:"离岸保单结构-PPLI"},
+  {id:"CM-2367",name:"QFLP"},{id:"CM-2368",name:"NOTES+QFLP"},{id:"CM2369",name:"QFII"},
+  {id:"CM2370",name:"NOTES+QFII"},{id:"CM2371",name:"券商-两融融资买入（竞价）"},
+  {id:"CM2373",name:"券商-衍生品"},{id:"CM2374",name:"夹层-类结构化信托"},
+  {id:"CM2375",name:"夹层-结构化合伙"},{id:"CM2378",name:"夹层-A+B信托收益互换"},
+  {id:"CM2379",name:"保险资管-结构化配资"},{id:"CM-2380",name:"券商-流通股股质"},
+  {id:"CM-2381",name:"券商-限售股股质"},{id:"CM2382",name:"银行-流通股股质"},
+  {id:"CM-2383",name:"银行-限售股股质"},{id:"CM2384",name:"银行-并购贷"},
+  {id:"CM2385",name:"夹层-场外质押"},{id:"CM2386",name:"股票收益权信托"},
+  {id:"CM-2389",name:"股票-竞价代卖"},{id:"CM2390",name:"股票-锁定大宗买断"},
+  {id:"CM2391",name:"股票-锁定大宗后端分成"},{id:"CM2392",name:"股票-非锁大宗（境内）"},
+  {id:"CM2393",name:"股票-协转买断"},{id:"CM2394",name:"股票-协转买断+后端"},
+  {id:"CM2330",name:"境内-股权信托（已有标的公司）"},{id:"CM2331",name:"境内-股权信托（拟设标的公司）"},
+  {id:"CM2332",name:"境内-家族信托委贷"},{id:"CM2333",name:"境内-上市公司股票信托（一致行动）"},
+  {id:"CM2334",name:"境内-双层合伙外部借款投资信托"},{id:"CM2346",name:"离岸信托-非上市资产"},
+  {id:"CM2347",name:"离岸信托-Pre-IPO Trust"},{id:"CM2348",name:"离岸信托-EBT"},
+  {id:"CM2349",name:"离岸信托-FGT"},{id:"CM2350",name:"离岸信托-NRT"},
+  {id:"CM2351",name:"美国信托-ILIT信托"},{id:"CM2352",name:"美国信托-Standby信托"},
+  {id:"CM2353",name:"美国信托-IDGT"},{id:"CM2354",name:"美国信托-GRAT"},
+  {id:"Tax-2395",name:"跨境转让定价咨询-货物贸易类"},{id:"Tax-2396",name:"跨境转让定价咨询-服务类"},
+  {id:"Tax-2397",name:"跨境转让定价咨询-无形资产类"},{id:"Tax-2398",name:"跨境转让定价咨询-融资利息类"},
+  {id:"Tax-2399",name:"境内转让定价咨询-货物贸易类"},{id:"Tax-2400",name:"境内转让定价咨询-服务类"},
+  {id:"Tax-2401",name:"境内转让定价咨询-无形资产类"},{id:"Tax-2402",name:"境内转让定价咨询-融资利息类"},
+  {id:"Tax-2403",name:"可比性分析报告"},{id:"Tax-2404",name:"同期资料文档"},
+  {id:"Tax-2405",name:"关联交易往来报告表"},{id:"Tax-2406",name:"预约定价安排APA"},
+  {id:"Tax-2407",name:"家庭资产纳税义务合规复核"},{id:"Tax-2408",name:"加拿大-登陆税务筹划-资产安排"},
+  {id:"Tax-2409",name:"加拿大-登陆税务筹划-基础合规"},{id:"Tax-2410",name:"跨境电商9610模式"},
+  {id:"Tax-2411",name:"跨境电商1039模式"},{id:"Tax-2412",name:"跨境电商0110或1210模式"},
+  {id:"Tax-2413",name:"跨境电商基础合规"},{id:"Tax-2414",name:"拟上市公司-改制阶段"},
+  {id:"Tax-2415",name:"拟上市公司-辅导备案阶段"},{id:"Tax-2416",name:"拟上市公司-审核上市阶段"},
+  {id:"Tax-2417",name:"主体设立-上海宝山"},{id:"Tax-2418",name:"主体设立-珠海横琴及海南"},
+  {id:"Tax-2419",name:"主体设立-浙江舟山"},{id:"Tax-2420",name:"主体设立-天津东疆"},
+  {id:"Tax-2421",name:"主体设立-浙江宁波"},{id:"Tax-2422",name:"主体设立-上海临港"},
+  {id:"Tax-2425",name:"公司常年税务顾问--境内"},{id:"Tax-2426",name:"公司常年税务顾问--境外"},
+  {id:"Tax-2427",name:"公司年度代帐报税"},{id:"Tax-2428",name:"公司盈余管理-政策性搬迁"},
+  {id:"Tax-2429",name:"双软落地"},{id:"Tax-2430",name:"新加坡公司账户"},
+  {id:"Tax-2431",name:"香港公司账户"},{id:"Tax-2432",name:"BVI公司账户"},
+  {id:"Tax-2433",name:"开曼公司账户"},{id:"Tax-2434",name:"美国公司账户"},
+  {id:"Tax-2435",name:"其他境外地区公司账户"},{id:"Tax-2436",name:"加拿大个税年度申报-收入申报"},
+  {id:"Tax-2437",name:"PREIPO-红筹架构税务意见"},{id:"Tax-2438",name:"PREIPO-VIE架构税务意见"},
+  {id:"Tax-2439",name:"股权价值评估"},{id:"Tax-2440",name:"财产份额价值评估"},
+  {id:"Tax-2441",name:"不动产价值评估"},{id:"Tax-2442",name:"动产价值评估"},
+  {id:"Tax-2443",name:"艺术品价值评估"},{id:"Tax-2444",name:"数据资产价值评估"},
+  {id:"Tax-2445",name:"另类资产价值评估"},{id:"Tax-2446",name:"验资报告"},
+  {id:"Tax-2447",name:"国内税收居民身份证明办理"},{id:"Tax-2448",name:"涉外税收居民身份证明办理"},
+  {id:"Tax-2449",name:"加拿大-非税居民身份筹划"},{id:"Tax-2450",name:"海外身份-格林纳达"},
+  {id:"Tax-2451",name:"明星网红行业税务合规基础"},{id:"Tax-2452",name:"网红直播细分领域"},
+  {id:"Tax-2453",name:"私域流量细分领域"},{id:"Tax-2454",name:"传统文娱明星细分领域"},
+  {id:"Tax-2455",name:"MCN公司细分领域"},{id:"Tax-2456",name:"房地产类企业主股转涉及的土地增值税规划"},
+  {id:"Tax-2457",name:"土地增值税筹划"},{id:"Tax-2458",name:"T1135海外金融资产披露"},
+  {id:"Tax-2459",name:"上市公司股权激励计划递延备案（45%递延备案）"},
+  {id:"Tax-2460",name:"非上市公司股权激励计划递延备案（20%递延备案）"},
+  {id:"Tax-2461",name:"上市公司股权激励计划合伙企业合规申报"},
+  {id:"Tax-2462",name:"上市公司股权激励计划个人所得税合规申报"},
+  {id:"Tax-2463",name:"非上市公司股权激励计划合伙企业合规申报"},
+  {id:"Tax-2464",name:"非上市公司股权激励计划个人所得税合规申报"},
+  {id:"Tax-2465",name:"上市公司股权激励计划实施前税务咨询"},
+  {id:"Tax-2466",name:"非上市公司股权激励计划实施前税务咨询"},
+  {id:"Tax-2467",name:"境内股权激励计划税务合规-基础"},{id:"Tax-2468",name:"境外-减持个税扶持"},
+  {id:"Tax-2469",name:"境外-股权激励外汇7号文备案"},{id:"Tax-2470",name:"境外-股权激励计划税务咨询"},
+  {id:"Tax-2471",name:"CRS涉税风险复核"},{id:"Tax-2472",name:"境内不动产持有结构涉税咨询"},
+  {id:"Tax-2473",name:"境内不动产转让税务规划"},{id:"Tax-2474",name:"境外不动产持有结构涉税咨询"},
+  {id:"Tax-2475",name:"境外不动产信托规划"},{id:"Tax-2476",name:"境外不动产转让税务规划"},
+  {id:"Tax-2477",name:"NIW"},{id:"Tax-2478",name:"香港薪俸税合规申报"},
+  {id:"Tax-2479",name:"海外身份-瓦努阿图"},{id:"Tax-2480",name:"EB1A"},
+  {id:"Tax-2481",name:"海外身份-多米尼克"},{id:"Tax-2482",name:"海外身份-圣基茨"},
+  {id:"Tax-2483",name:"EB5"},{id:"Tax-2484",name:"海外身份-马耳他"},
+  {id:"Tax-2485",name:"新加坡身份规划-自雇EP"},{id:"Tax-2486",name:"新加坡身份规划-家办EP"},
+  {id:"Tax-2487",name:"新加坡EP办理及续签"},{id:"Tax-2488",name:"新加坡DP办理及续签"},
+  {id:"Tax-2489",name:"新加坡LTVP办理及续签"},{id:"Tax-2490",name:"新加坡PR办理及续签"},
+  {id:"Tax-2491",name:"新加坡身份规划-GIP"},{id:"Tax-2492",name:"新加坡身份规划-基础"},
+  {id:"Tax-2493",name:"境外涉及澳洲受益人的税务意见"},{id:"Tax-2494",name:"房地产类企业主架构一般场景"},
+  {id:"Tax-2495",name:"基金类-创投有限合伙及有限公司"},{id:"Tax-2497",name:"有限公司创投备案-海南"},
+  {id:"Tax-2498",name:"一般基金架构设立"},{id:"Tax-2499",name:"基金GP税务规划"},
+  {id:"Tax-2500",name:"对外股权投资-ODI"},{id:"Tax-2501",name:"对外股权投资-QDLP"},
+  {id:"Tax-2502",name:"对外股权投资-37号文备案"},{id:"Tax-2503",name:"FDI外商直接投资"},
+  {id:"Tax-2504",name:"QFLP境外合格投资者"},{id:"Tax-2505",name:"境内公司财务尽调"},
+  {id:"Tax-2506",name:"境内公司税务尽调"},{id:"Tax-2507",name:"境内公司税务体检"},
+  {id:"Tax-2508",name:"境内公司税务风险应对-自查"},{id:"Tax-2509",name:"境内公司税务风险应对-自查-增值税应对"},
+  {id:"Tax-2510",name:"境内公司税务风险应对-自查-企业所得税应对"},
+  {id:"Tax-2511",name:"境内公司税务风险应对-自查-消费税应对"},
+  {id:"Tax-2512",name:"境内公司税务风险应对-自查-个人所得税应对"},
+  {id:"Tax-2513",name:"境内公司税务风险应对-自查-印花税应对"},
+  {id:"Tax-2514",name:"境内公司税务风险应对-自查-房产税应对"},
+  {id:"Tax-2515",name:"境内公司税务风险应对-稽查"},
+  {id:"Tax-2516",name:"境内公司税务风险应对-稽查-增值税应对"},
+  {id:"Tax-2517",name:"境内公司税务风险应对-稽查-企业所得税应对"},
+  {id:"Tax-2518",name:"境内公司税务风险应对-稽查-消费税应对"},
+  {id:"Tax-2519",name:"境内公司税务风险应对-稽查-个人所得税应对"},
+  {id:"Tax-2520",name:"境内公司税务风险应对-稽查-印花税应对"},
+  {id:"Tax-2521",name:"境内公司税务风险应对-稽查-房产税应对"},
+  {id:"Tax-2522",name:"公司盈余管理-公转私"},{id:"Tax-2523",name:"对外付汇-内地与香港税收安排"},
+  {id:"Tax-2524",name:"对外付汇-中新协定待遇"},{id:"Tax-2525",name:"对外付汇-一般对外付汇涉税处理及路径"},
+  {id:"Tax-2526",name:"对外付汇-境外非居民股东减持上市公司股票涉税处理"},
+  {id:"Tax-2527",name:"境外公司设立-BVI"},{id:"Tax-2528",name:"境外公司设立-CAY"},
+  {id:"Tax-2529",name:"境外公司设立-SG"},{id:"Tax-2530",name:"境外公司设立-HK"},
+  {id:"Tax-2531",name:"境外架构设立-可行性分析"},{id:"Tax-2532",name:"境外公司设立-USA"},
+  {id:"Tax-2533",name:"境外公司年度维护-CAY"},{id:"Tax-2534",name:"境外公司年度维护-BVI"},
+  {id:"Tax-2535",name:"经济实质法案-BVI"},{id:"Tax-2536",name:"经济实质法案-CAY"},
+  {id:"Tax-2537",name:"香港FSIE离岸豁免"},{id:"Tax-2538",name:"香港来源于海外收入利得税豁免"},
+  {id:"Tax-2539",name:"新加坡来源于海外收入不汇回不交税"},{id:"Tax-2540",name:"境外公司TRC申请"},
+  {id:"Tax-2541",name:"中国个人所得税综合所得年度汇算清缴（仅境内收入）"},
+  {id:"Tax-2542",name:"中国个税生产经营所得年度汇算清缴（仅境内收入）"},
+  {id:"Tax-2543",name:"中国个税汇算清缴（境内+境外收入）"},
+  {id:"Tax-2544",name:"美国个税年度申报-1040R"},{id:"Tax-2545",name:"美国个税年度申报-1040NR"},
+  {id:"Tax-2546",name:"美国个税年度申报-5471"},{id:"Tax-2547",name:"美国个税年度申报-8865"},
+  {id:"Tax-2548",name:"美国个税年度申报-8938"},{id:"Tax-2549",name:"美国个税年度申报-FINCEN114"},
+  {id:"Tax-2550",name:"美国个税非税身份的规划"},{id:"Tax-2551",name:"美国个税Streamline（简易型合规申报补救程序）"},
+  {id:"Tax-2552",name:"美国税务律师PLR（Privateletterruling）"},
+  {id:"Tax-2553",name:"美国个税Checkthebox-8832表-打勾规则"},
+  {id:"Tax-2555",name:"非货币性增资-合伙场景"},{id:"Tax-2559",name:"非货币性增资-有限公司场景"},
+  {id:"Tax-2560",name:"有限公司减持基本税制"},{id:"Tax-2561",name:"非货增与创投思路对比"},
+  {id:"Tax-2563",name:"份额转让-合伙场景"},{id:"Tax-2564",name:"创投合伙减持股票"},
+  {id:"Tax-2565",name:"境外-非居民企业间接股权转让-涉税分析"},
+  {id:"Tax-2566",name:"境外-非居民企业间接股权转让-税局报备（情况说明）"},
+  {id:"Tax-2567",name:"境内特殊重组-股权转让"},{id:"Tax-2568",name:"境内特殊重组-资产转让"},
+  {id:"Tax-2569",name:"境内特殊重组-公司合并"},{id:"Tax-2570",name:"境内特殊重组-分立"},
+  {id:"Tax-2571",name:"境内特殊重组-债务重组"},{id:"Tax-2572",name:"境内特殊重组-划拨"},
+  {id:"Tax-2573",name:"跨境特殊重组-标准非转非"},{id:"Tax-2574",name:"跨境特殊重组-合并非转非"},
+  {id:"Tax-2575",name:"跨境特殊重组-分立非转非"},{id:"Tax-2576",name:"跨境特殊重组-非转居"},
+  {id:"Tax-2577",name:"跨境特殊重组-居转非"},{id:"Tax-2578",name:"境内一般重组-股权转让"},
+  {id:"Tax-2579",name:"境内一般重组-资产转让"},{id:"Tax-2580",name:"境内一般重组-合并"},
+  {id:"Tax-2581",name:"境内一般重组-分立"},{id:"Tax-2582",name:"境内一般重组-债务重组"},
+  {id:"Tax-2583",name:"跨境一般重组-标准非转非"},{id:"Tax-2584",name:"跨境一般重组-非转居"},
+  {id:"Tax-2585",name:"跨境一般重组-居转非"},{id:"Tax-2586",name:"境内一般个人股转评估报告协调"},
+  {id:"Tax-2587",name:"美国-登陆前美国个税咨询"},{id:"Tax-2588",name:"美国-登陆前资产安排咨询"},
+  {id:"Tax-2589",name:"美国-赠与税非税的税务意见"},{id:"Tax-2590",name:"美国-赠与税申报Form709"},
+  {id:"Tax-2591",name:"美国-美国弃籍前咨询"},{id:"Tax-2592",name:"美国-美国移民局I407表格提交支持"},
+  {id:"Tax-2593",name:"美国-美国国务院DS表格提交支持"},{id:"Tax-2594",name:"美国-美国税务局Form8854支持"},
+  {id:"Tax-2595",name:"香港-个人身份规划-基础"},{id:"Tax-2596",name:"香港-个人身份规划-高才"},
+  {id:"Tax-2597",name:"香港-个人身份规划-专才或优才"},{id:"Tax-2598",name:"香港-个人身份规划-投资移民"},
+  {id:"Tax-2599",name:"境内FGT的税务意见"},{id:"Tax-2600",name:"境外FGT的税务意见"},
+  {id:"Tax-2601",name:"境内NRT的税务意见"},{id:"Tax-2602",name:"境外NRT的税务意见"},
+];
+
+// ── 状态 ──────────────────────────────────────────────────────
+const pgState = { selected: new Set(), counts: {} };
+
+// ── 初始化预测场景卡片 ────────────────────────────────────────
+function initPainGeneratePage() {
+  const el = document.getElementById('forecastChips');
+  if (!el || el.children.length > 0) return;
+  FORECAST_SCENES.forEach(name => {
+    const chip = document.createElement('div');
+    chip.className = 'scene-chip';
+    chip.textContent = name;
+    chip.onclick = () => {
+      if (pgState.selected.has(name)) {
+        pgState.selected.delete(name);
+        chip.classList.remove('selected');
+      } else {
+        pgState.selected.add(name);
+        chip.classList.add('selected');
+        if (!pgState.counts[name]) pgState.counts[name] = 3;
+      }
+      updateConfigPanel();
+    };
+    el.appendChild(chip);
+  });
+}
+
+// ── 解析手动输入 ──────────────────────────────────────────────
+function getManualScenes() {
+  const ta = document.getElementById('manualScenesInput');
+  if (!ta) return [];
+  return ta.value.split('\n').map(s => s.trim()).filter(Boolean);
+}
+
+function getAllScenes() {
+  const manual = getManualScenes();
+  manual.forEach(s => { if (!pgState.counts[s]) pgState.counts[s] = 3; });
+  const seen = new Set(pgState.selected);
+  return [...pgState.selected, ...manual.filter(s => !seen.has(s))];
+}
+
+// ── 刷新配置面板 ─────────────────────────────────────────────
+function updateConfigPanel() {
+  const scenes = getAllScenes();
+  const panel = document.getElementById('pgConfigPanel');
+  const list  = document.getElementById('pgConfigList');
+  if (!panel) return;
+  if (scenes.length === 0) { panel.style.display = 'none'; return; }
+  panel.style.display = 'block';
+
+  list.innerHTML = scenes.map(name => {
+    const safeName = name.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    return `<div class="config-scene-row">
+      <span class="config-scene-name">${name}</span>
+      <span style="font-size:12px;color:#9ca3af;">数量</span>
+      <input class="count-input" type="number" min="1" max="10"
+        value="${pgState.counts[name]||3}"
+        oninput="pgState.counts['${safeName}']=Math.max(1,Math.min(10,parseInt(this.value)||3));pgRefreshSummary()">
+    </div>`;
+  }).join('');
+
+  pgRefreshSummary(scenes);
+}
+
+function pgRefreshSummary(scenes) {
+  scenes = scenes || getAllScenes();
+  const total = scenes.reduce((s, n) => s + (pgState.counts[n] || 3), 0);
+  const el = document.getElementById('pgGenSummary');
+  if (el) el.textContent = `${scenes.length} 个场景 · 共生成 ${total} 个痛点`;
+}
+
+// ── 生成调用 ─────────────────────────────────────────────────
+async function pgStartGenerate() {
+  const scenes = getAllScenes();
+  if (!scenes.length) { alert('请先选择或输入至少一个场景'); return; }
+
+  const apiKey  = (document.getElementById('apiKeyInput')?.value || '').trim();
+  const apiBase = document.getElementById('apiBaseSelect')?.value || 'https://wolfai.top/v1';
+  if (!apiKey) { alert('请先填写 API Key'); return; }
+
+  const btn = document.getElementById('pgGenBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳ 生成中...</span>';
+
+  // 跳到结果页
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-pain-results').classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.textContent.trim() === '痛点结果') n.classList.add('active');
+    else n.classList.remove('active');
+  });
+
+  const total = scenes.reduce((s, n) => s + (pgState.counts[n] || 3), 0);
+  document.getElementById('pgResultsContent').innerHTML =
+    `<div class="gen-loading"><div class="spinner"></div>
+     <div style="color:#374151;font-weight:600;font-size:15px;">AI 正在生成痛点…</div>
+     <div style="color:#9ca3af;font-size:13px;margin-top:6px;">${scenes.length} 个场景 · ${total} 个痛点</div></div>`;
+
+  // 构造 Prompt
+  const sceneLines = scenes.map(n => `- ${n}（请生成 ${pgState.counts[n]||3} 个痛点）`).join('\n');
+  const skuLines   = SKU_DB.map(s => `${s.id}: ${s.name}`).join('\n');
+
+  const userPrompt = `你是朝曦家办的资深业务顾问。朝曦服务金融机构高净值客户，核心业务涵盖家族架构、税务规划、法律咨询、财富传承。
+
+请基于三维链路方法论（谁×有什么×发生了什么），为以下场景生成痛点：
+${sceneLines}
+
+每个痛点的 JSON 格式：
+{
+  "scene": "场景名称（与上方完全一致）",
+  "title": "痛点标题（10字以内，精炼表达）",
+  "desc": "痛点说明（40字左右，专业解释痛点成立的制度性必然原因和逻辑）",
+  "tags": [
+    {"label": "标签短语", "dim": "主体", "weight": "C"},
+    {"label": "标签短语", "dim": "资产", "weight": "B"},
+    {"label": "标签短语", "dim": "动作", "weight": "C"},
+    {"label": "标签短语", "dim": "约束", "weight": "A"}
+  ],
+  "skus": ["SKU_ID_1", "SKU_ID_2"]
+}
+
+标签规则：
+- 维度必须是 主体/资产/动作/约束 之一
+- 权重：C=核心关联（必有特征），B=中等关联，A=弱关联（参考）
+- 每个痛点 4-6 个标签，覆盖多个维度
+
+适配 SKU（从以下知识库中选 2-4 个最相关的 ID，无合适则返回空数组）：
+${skuLines}
+
+严格输出 JSON 数组，不输出任何其他文字。`;
+
+  try {
+    const resp = await fetch(apiBase + '/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5-20250929',
+        messages: [{ role: 'user', content: userPrompt }],
+        max_tokens: 8000,
+        temperature: 0.35
+      })
+    });
+
+    if (!resp.ok) {
+      const txt = await resp.text();
+      throw new Error(`API 错误 ${resp.status}：${txt.slice(0, 300)}`);
+    }
+
+    const data = await resp.json();
+    const raw  = data.choices?.[0]?.message?.content || '';
+
+    let results;
+    try {
+      const m = raw.match(/\[[\s\S]*\]/);
+      if (!m) throw new Error('未找到 JSON 数组');
+      results = JSON.parse(m[0]);
+    } catch(e) {
+      throw new Error('JSON 解析失败：' + e.message + '\n原始内容：' + raw.slice(0, 400));
+    }
+
+    pgRenderResults(results);
+
+  } catch (err) {
+    document.getElementById('pgResultsContent').innerHTML =
+      `<div style="padding:50px 20px;text-align:center;">
+        <div style="font-size:36px;margin-bottom:14px;">⚠️</div>
+        <div style="font-size:15px;font-weight:600;color:#dc2626;margin-bottom:8px;">生成失败</div>
+        <div style="font-size:13px;color:#6b7280;white-space:pre-wrap;max-width:600px;margin:0 auto;">${err.message}</div>
+        <div style="font-size:12px;color:#9ca3af;margin-top:16px;">如遇 CORS 问题，请通过本地服务器访问此页面</div>
+       </div>`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span>⚡ 生成痛点</span>';
+  }
+}
+
+// ── 渲染结果 ─────────────────────────────────────────────────
+const DIM_STYLE = {
+  '主体': { bg:'#ede9fe', color:'#5b21b6' },
+  '资产': { bg:'#dcfce7', color:'#166534' },
+  '动作': { bg:'#dbeafe', color:'#1e40af' },
+  '约束': { bg:'#fef3c7', color:'#92400e' },
+};
+
+function pgRenderResults(results) {
+  if (!results?.length) {
+    document.getElementById('pgResultsContent').innerHTML =
+      '<div class="gen-empty">未生成任何痛点，请检查场景配置后重试</div>';
+    return;
+  }
+
+  // 按场景分组
+  const byScene = {};
+  results.forEach(r => { (byScene[r.scene] = byScene[r.scene] || []).push(r); });
+
+  const sceneCnt = Object.keys(byScene).length;
+  let html = `<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:22px;">
+    <span style="font-size:20px;font-weight:700;color:#111827;">生成结果</span>
+    <span style="font-size:13px;color:#6b7280;">${sceneCnt} 个场景 · ${results.length} 个痛点</span>
+  </div>`;
+
+  for (const [sceneName, points] of Object.entries(byScene)) {
+    html += `<div style="margin-bottom:28px;">
+      <div class="pred-section-title">📌 ${sceneName}
+        <span style="font-size:12px;font-weight:400;color:#6b7280;margin-left:6px;">${points.length} 个痛点</span>
+      </div>`;
+
+    points.forEach((p, idx) => {
+      // 标签
+      const tagsHtml = (p.tags || []).map(t => {
+        const s = DIM_STYLE[t.dim] || { bg:'#f3f4f6', color:'#374151' };
+        return `<span style="display:inline-flex;align-items:center;gap:3px;padding:3px 9px 3px 7px;
+          border-radius:12px;font-size:12px;background:${s.bg};color:${s.color};margin:2px;">
+          <span style="font-size:9.5px;opacity:.65;font-weight:600;">${t.dim}</span>
+          <span>${t.label}</span>
+          <span style="font-size:9px;font-weight:700;padding:1px 4px;border-radius:4px;
+            background:rgba(0,0,0,.1);">${t.weight || ''}</span>
+        </span>`;
+      }).join('');
+
+      // SKU
+      const skusHtml = (p.skus || []).map(id => {
+        const sku = SKU_DB.find(s => s.id === id);
+        return `<span style="padding:3px 9px;background:#f9fafb;border:1px solid #e5e7eb;
+          border-radius:6px;font-size:12px;color:#374151;">${sku ? sku.name : id}</span>`;
+      }).join('');
+
+      html += `<div class="pr-card">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
+          <div style="font-size:17px;font-weight:700;color:#111827;line-height:1.3;flex:1;">${p.title || ''}</div>
+          <span style="font-size:11px;color:#d1d5db;margin-left:12px;white-space:nowrap;margin-top:3px;">#${idx+1}</span>
+        </div>
+        <div style="font-size:13.5px;color:#4b5563;line-height:1.7;margin-bottom:14px;">${p.desc || ''}</div>
+        <div style="font-size:10.5px;font-weight:600;color:#9ca3af;letter-spacing:.6px;text-transform:uppercase;margin-bottom:7px;">核心客户画像</div>
+        <div style="margin-bottom:${skusHtml ? 14 : 0}px;">${tagsHtml || '<span style="color:#d1d5db;font-size:12px;">暂无标签</span>'}</div>
+        ${skusHtml ? `<div style="font-size:10.5px;font-weight:600;color:#9ca3af;letter-spacing:.6px;text-transform:uppercase;margin-bottom:7px;">适配 SKU</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">${skusHtml}</div>` : ''}
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  document.getElementById('pgResultsContent').innerHTML = html;
+}
+
+// ── 注册页面初始化 ───────────────────────────────────────────
+PAGE_INIT_MAP['pain-generate'] = initPainGeneratePage;
 </script>
 </body>
 </html>
