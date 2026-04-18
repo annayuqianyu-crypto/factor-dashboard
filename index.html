@@ -1254,21 +1254,63 @@ tr:hover td { background: #fafafa; }
 
   <!-- API 配置 -->
   <div class="card" style="background:#fffbeb;border-color:#fcd34d;margin-bottom:16px;">
-    <div class="card-title" style="margin-bottom:10px;">🔑 API 配置</div>
-    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-      <input id="apiKeyInput" type="password"
-        placeholder="输入 API Key，保存后仅存于本地浏览器"
-        style="flex:1;min-width:280px;padding:8px 12px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;"
-        oninput="pgSaveKey()">
-      <select id="apiBaseSelect"
-        style="padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;background:#fff;"
-        onchange="pgSaveKey()">
-        <option value="https://wolfai.top/v1">wolfai.top 代理</option>
-        <option value="https://api.anthropic.com/v1">Anthropic 官方</option>
-      </select>
-      <button onclick="pgClearKey()" style="padding:7px 12px;border:1px solid #fca5a5;border-radius:6px;font-size:12px;color:#dc2626;background:#fff;cursor:pointer;">清除 Key</button>
+    <div class="card-title" style="margin-bottom:12px;">🔑 API 配置</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div>
+        <div style="font-size:11px;color:#92400e;font-weight:600;margin-bottom:4px;">API Key</div>
+        <input id="apiKeyInput" type="password"
+          placeholder="sk-... 或其他格式均可"
+          style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;"
+          oninput="pgSaveKey()">
+      </div>
+      <div>
+        <div style="font-size:11px;color:#92400e;font-weight:600;margin-bottom:4px;">模型名称</div>
+        <input id="apiModelInput"
+          placeholder="claude-sonnet-4-5-20250929"
+          list="model-suggestions"
+          style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;"
+          oninput="pgSaveKey()">
+        <datalist id="model-suggestions">
+          <option value="claude-sonnet-4-5-20250929">
+          <option value="claude-opus-4-5-20250929">
+          <option value="claude-haiku-4-5-20251001">
+          <option value="gpt-4o">
+          <option value="gpt-4o-mini">
+        </datalist>
+      </div>
     </div>
-    <div style="font-size:12px;color:#92400e;margin-top:8px;">🔒 Key 仅保存在你自己的浏览器本地（localStorage），不写入源码，其他人看不到</div>
+
+    <div style="margin-bottom:10px;">
+      <div style="font-size:11px;color:#92400e;font-weight:600;margin-bottom:4px;">API 服务地址（Base URL，任意 OpenAI 兼容接口均可）</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="apiBaseInput"
+          placeholder="https://wolfai.top/v1"
+          list="base-suggestions"
+          style="flex:1;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;"
+          oninput="pgSaveKey()">
+        <datalist id="base-suggestions">
+          <option value="https://wolfai.top/v1">wolfai.top 代理（推荐，支持浏览器直连）</option>
+          <option value="https://api.openai.com/v1">OpenAI 官方</option>
+          <option value="http://localhost:11434/v1">Ollama 本地</option>
+          <option value="http://localhost:8080/v1">本地自建代理</option>
+        </datalist>
+        <button onclick="pgTestConnection()"
+          style="padding:8px 14px;border:1px solid #1a56db;border-radius:6px;font-size:12px;font-weight:600;color:#1a56db;background:#fff;cursor:pointer;white-space:nowrap;">
+          🔌 测试连接
+        </button>
+        <button onclick="pgClearKey()"
+          style="padding:8px 12px;border:1px solid #fca5a5;border-radius:6px;font-size:12px;color:#dc2626;background:#fff;cursor:pointer;white-space:nowrap;">
+          清除
+        </button>
+      </div>
+      <div id="pgConnStatus" style="font-size:12px;margin-top:6px;"></div>
+    </div>
+
+    <div style="font-size:12px;color:#92400e;padding:8px 10px;background:rgba(250,240,210,.5);border-radius:6px;">
+      🔒 Key 仅存在你自己的浏览器本地（localStorage），不写入代码，其他人看不到。&nbsp;
+      ⚠️ <b>Anthropic 官方（api.anthropic.com）不支持浏览器直连</b>，请使用 wolfai.top 等兼容代理，或在本地运行代理服务后填 localhost 地址。
+    </div>
   </div>
 
   <!-- 从预测场景中选择 -->
@@ -2027,9 +2069,8 @@ async function pgStartGenerate() {
   const scenes = getAllScenes();
   if (!scenes.length) { alert('请先选择或输入至少一个场景'); return; }
 
-  const apiKey  = (document.getElementById('apiKeyInput')?.value || '').trim();
-  const apiBase = document.getElementById('apiBaseSelect')?.value || 'https://wolfai.top/v1';
-  if (!apiKey) { alert('请先填写 API Key'); return; }
+  const { key, model, base } = pgGetConfig();
+  if (!key) { alert('请先填写 API Key，并点击「测试连接」确认可用'); return; }
 
   const btn = document.getElementById('pgGenBtn');
   btn.disabled = true;
@@ -2047,56 +2088,45 @@ async function pgStartGenerate() {
   document.getElementById('pgResultsContent').innerHTML =
     `<div class="gen-loading"><div class="spinner"></div>
      <div style="color:#374151;font-weight:600;font-size:15px;">AI 正在生成痛点…</div>
-     <div style="color:#9ca3af;font-size:13px;margin-top:6px;">${scenes.length} 个场景 · ${total} 个痛点</div></div>`;
+     <div style="color:#9ca3af;font-size:13px;margin-top:6px;">${scenes.length} 个场景 · ${total} 个痛点 · 模型 ${model}</div></div>`;
 
-  // 构造 Prompt
-  const sceneLines = scenes.map(n => `- ${n}（请生成 ${pgState.counts[n]||3} 个痛点）`).join('\n');
-  const skuLines   = SKU_DB.map(s => `${s.id}: ${s.name}`).join('\n');
+  // 构造 Prompt（SKU 只传 ID 和名称，控制长度）
+  const sceneLines = scenes.map(n => `- ${n}（生成 ${pgState.counts[n]||3} 个）`).join('\n');
+  const skuLines   = SKU_DB.map(s => `${s.id}:${s.name}`).join('\n');
 
   const userPrompt = `你是朝曦家办的资深业务顾问。朝曦服务金融机构高净值客户，核心业务涵盖家族架构、税务规划、法律咨询、财富传承。
 
-请基于三维链路方法论（谁×有什么×发生了什么），为以下场景生成痛点：
+请基于三维链路方法论（谁×有什么×发生了什么），为以下场景各生成指定数量的痛点：
 ${sceneLines}
 
-每个痛点的 JSON 格式：
-{
-  "scene": "场景名称（与上方完全一致）",
-  "title": "痛点标题（10字以内，精炼表达）",
-  "desc": "痛点说明（40字左右，专业解释痛点成立的制度性必然原因和逻辑）",
-  "tags": [
-    {"label": "标签短语", "dim": "主体", "weight": "C"},
-    {"label": "标签短语", "dim": "资产", "weight": "B"},
-    {"label": "标签短语", "dim": "动作", "weight": "C"},
-    {"label": "标签短语", "dim": "约束", "weight": "A"}
-  ],
-  "skus": ["SKU_ID_1", "SKU_ID_2"]
-}
+每个痛点输出 JSON 对象，所有痛点合并为一个 JSON 数组：
+{"scene":"场景名称（与上方完全一致）","title":"痛点标题（10字以内）","desc":"痛点说明（约40字，解释制度性必然逻辑）","tags":[{"label":"标签短语","dim":"主体|资产|动作|约束","weight":"C|B|A"}],"skus":["匹配的SKU_ID"]}
 
-标签规则：
-- 维度必须是 主体/资产/动作/约束 之一
-- 权重：C=核心关联（必有特征），B=中等关联，A=弱关联（参考）
-- 每个痛点 4-6 个标签，覆盖多个维度
+标签规则：dim 必须是 主体/资产/动作/约束 之一；weight C=核心 B=中等 A=弱；每痛点4-6个标签覆盖多维度。
 
-适配 SKU（从以下知识库中选 2-4 个最相关的 ID，无合适则返回空数组）：
+SKU知识库（选2-4个最相关ID，无合适则skus为[]）：
 ${skuLines}
 
-严格输出 JSON 数组，不输出任何其他文字。`;
+只输出JSON数组，不输出任何其他内容。`;
 
   try {
-    const resp = await fetch(apiBase + '/chat/completions', {
+    const resp = await fetch(base + '/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5-20250929',
+        model,
         messages: [{ role: 'user', content: userPrompt }],
         max_tokens: 8000,
-        temperature: 0.35
+        temperature: 0.35,
       })
     });
 
     if (!resp.ok) {
       const txt = await resp.text();
-      throw new Error(`API 错误 ${resp.status}：${txt.slice(0, 300)}`);
+      const hint = resp.status === 401 ? '\n→ API Key 无效或已过期，请更换'
+                 : resp.status === 404 ? '\n→ URL 或模型名称有误，请检查 Base URL 和模型名'
+                 : resp.status === 403 ? '\n→ Key 无权限访问该模型' : '';
+      throw new Error(`API 返回 ${resp.status}${hint}\n\n详情：${txt.slice(0, 300)}`);
     }
 
     const data = await resp.json();
@@ -2105,21 +2135,29 @@ ${skuLines}
     let results;
     try {
       const m = raw.match(/\[[\s\S]*\]/);
-      if (!m) throw new Error('未找到 JSON 数组');
+      if (!m) throw new Error('模型未返回 JSON 数组\n\n原始输出：' + raw.slice(0, 500));
       results = JSON.parse(m[0]);
     } catch(e) {
-      throw new Error('JSON 解析失败：' + e.message + '\n原始内容：' + raw.slice(0, 400));
+      throw new Error('JSON 解析失败：' + e.message + '\n\n原始输出：' + raw.slice(0, 500));
     }
 
     pgRenderResults(results);
 
   } catch (err) {
+    const isCors = err.message.toLowerCase().includes('fetch') ||
+                   err.message.toLowerCase().includes('failed to');
+    const corsNote = isCors
+      ? '<div style="margin-top:12px;padding:10px 14px;background:#fef3c7;border-radius:6px;font-size:12px;color:#92400e;text-align:left;">⚠️ 检测到可能是 CORS 跨域拦截。解决方案：<br>① 确认 Base URL 填写的是支持跨域的代理（如 wolfai.top）<br>② 或在本地运行 <code>python -m http.server 8000</code> 后用 localhost:8000 访问页面</div>'
+      : '';
     document.getElementById('pgResultsContent').innerHTML =
-      `<div style="padding:50px 20px;text-align:center;">
-        <div style="font-size:36px;margin-bottom:14px;">⚠️</div>
-        <div style="font-size:15px;font-weight:600;color:#dc2626;margin-bottom:8px;">生成失败</div>
-        <div style="font-size:13px;color:#6b7280;white-space:pre-wrap;max-width:600px;margin:0 auto;">${err.message}</div>
-        <div style="font-size:12px;color:#9ca3af;margin-top:16px;">如遇 CORS 问题，请通过本地服务器访问此页面</div>
+      `<div style="padding:40px 24px;">
+        <div style="font-size:32px;margin-bottom:12px;text-align:center;">⚠️</div>
+        <div style="font-size:15px;font-weight:700;color:#dc2626;margin-bottom:10px;text-align:center;">生成失败</div>
+        <div style="font-size:13px;color:#374151;white-space:pre-wrap;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px;line-height:1.7;">${err.message}</div>
+        ${corsNote}
+        <div style="text-align:center;margin-top:16px;">
+          <button onclick="showPage('pain-generate')" style="padding:8px 18px;background:#1a56db;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">← 返回场景选择</button>
+        </div>
        </div>`;
   } finally {
     btn.disabled = false;
@@ -2196,28 +2234,82 @@ function pgRenderResults(results) {
   document.getElementById('pgResultsContent').innerHTML = html;
 }
 
-// ── API Key 本地存储 ─────────────────────────────────────────
+// ── API 配置存取 ─────────────────────────────────────────────
 function pgSaveKey() {
-  const key  = document.getElementById('apiKeyInput')?.value || '';
-  const base = document.getElementById('apiBaseSelect')?.value || '';
-  if (key)  localStorage.setItem('pg_api_key',  key);
-  if (base) localStorage.setItem('pg_api_base', base);
+  const key   = document.getElementById('apiKeyInput')?.value   || '';
+  const base  = document.getElementById('apiBaseInput')?.value  || '';
+  const model = document.getElementById('apiModelInput')?.value || '';
+  if (key)   localStorage.setItem('pg_api_key',   key);
+  if (base)  localStorage.setItem('pg_api_base',  base);
+  if (model) localStorage.setItem('pg_api_model', model);
 }
 
 function pgClearKey() {
-  localStorage.removeItem('pg_api_key');
-  localStorage.removeItem('pg_api_base');
-  const inp = document.getElementById('apiKeyInput');
-  if (inp) inp.value = '';
+  ['pg_api_key','pg_api_base','pg_api_model'].forEach(k => localStorage.removeItem(k));
+  ['apiKeyInput','apiBaseInput','apiModelInput'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const s = document.getElementById('pgConnStatus');
+  if (s) s.innerHTML = '';
 }
 
 function pgLoadKey() {
-  const key  = localStorage.getItem('pg_api_key');
-  const base = localStorage.getItem('pg_api_base');
-  const inp  = document.getElementById('apiKeyInput');
-  const sel  = document.getElementById('apiBaseSelect');
-  if (inp && key)  inp.value = key;
-  if (sel && base) sel.value = base;
+  const map = {
+    apiKeyInput:   'pg_api_key',
+    apiBaseInput:  'pg_api_base',
+    apiModelInput: 'pg_api_model',
+  };
+  for (const [id, key] of Object.entries(map)) {
+    const val = localStorage.getItem(key);
+    const el  = document.getElementById(id);
+    if (el && val) el.value = val;
+  }
+}
+
+// ── 从输入框读取配置（含默认值）────────────────────────────────
+function pgGetConfig() {
+  const key   = (document.getElementById('apiKeyInput')?.value   || '').trim();
+  const model = (document.getElementById('apiModelInput')?.value || '').trim() || 'claude-sonnet-4-5-20250929';
+  let base    = (document.getElementById('apiBaseInput')?.value  || '').trim() || 'https://wolfai.top/v1';
+  base = base.replace(/\/+$/, '');                    // 去掉末尾斜杠
+  if (!base.endsWith('/v1')) base = base + '/v1';     // 自动补 /v1
+  return { key, model, base };
+}
+
+// ── 测试连接 ─────────────────────────────────────────────────
+async function pgTestConnection() {
+  const { key, model, base } = pgGetConfig();
+  const statusEl = document.getElementById('pgConnStatus');
+  if (!key) { statusEl.innerHTML = '<span style="color:#dc2626;">请先填写 API Key</span>'; return; }
+  statusEl.innerHTML = '<span style="color:#6b7280;">⏳ 测试中…</span>';
+
+  try {
+    const resp = await fetch(base + '/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({
+        model,
+        messages: [{ role: 'user', content: '回复数字1' }],
+        max_tokens: 10,
+      })
+    });
+    if (resp.ok) {
+      statusEl.innerHTML = '<span style="color:#16a34a;">✅ 连接成功，可以生成痛点</span>';
+    } else {
+      const txt = await resp.text();
+      const hint = resp.status === 401 ? '（API Key 无效或已过期）'
+                 : resp.status === 404 ? '（URL 或模型名称有误）'
+                 : resp.status === 403 ? '（Key 无权限）' : '';
+      statusEl.innerHTML = `<span style="color:#dc2626;">❌ HTTP ${resp.status} ${hint} — ${txt.slice(0,120)}</span>`;
+    }
+  } catch (e) {
+    const isCors = e.message.includes('fetch') || e.message.includes('CORS') || e.message.includes('Failed');
+    if (isCors) {
+      statusEl.innerHTML = `<span style="color:#d97706;">⚠️ 连接被浏览器拦截（CORS）— 请确认 Base URL 是否支持跨域。wolfai.top 已支持；Anthropic 官方不支持浏览器直连，需要本地代理。</span>`;
+    } else {
+      statusEl.innerHTML = `<span style="color:#dc2626;">❌ ${e.message}</span>`;
+    }
+  }
 }
 
 // ── 注册页面初始化 ───────────────────────────────────────────
