@@ -395,9 +395,9 @@ tr:hover td { background: #fafafa; }
       <div class="kpi-sub">覆盖 L1 / L3–L6 层</div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-value">5029万</div>
-      <div class="kpi-label">三维组合数</div>
-      <div class="kpi-sub">204×287×859</div>
+      <div class="kpi-value">62.9亿</div>
+      <div class="kpi-label">四维组合数</div>
+      <div class="kpi-sub">204×287×707×152</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-value">359</div>
@@ -414,28 +414,11 @@ tr:hover td { background: #fafafa; }
     </div>
     <!-- 三维饼图 -->
     <div class="card">
-      <div class="card-title">三维结构占比</div>
+      <div class="card-title">四维结构占比</div>
       <div id="chart-3d-pie" class="chart-box" style="height:380px;"></div>
     </div>
   </div>
 
-  <!-- 版本对比表 -->
-  <div class="card">
-    <div class="card-title">版本对比：v6.0 补充版 vs v6.0 纯主表版</div>
-    <table class="ver-table">
-      <thead>
-        <tr>
-          <th>属性代码</th>
-          <th>维度名称</th>
-          <th>v6.0 纯主表版<br/><small style="font-weight:400;color:#9ca3af">2026-03-20</small></th>
-          <th>v6.0 补充版<br/><small style="font-weight:400;color:#9ca3af">2026-04-10</small></th>
-          <th>增量</th>
-          <th>备注</th>
-        </tr>
-      </thead>
-      <tbody id="ver-table-body"></tbody>
-    </table>
-  </div>
 </div>
 
 
@@ -460,6 +443,12 @@ tr:hover td { background: #fafafa; }
         </tr>
       </thead>
       <tbody>
+        <!-- ── 主体 ── -->
+        <tr style="background:#f5f3ff;">
+          <td colspan="6" style="padding:8px 14px;font-size:12px;font-weight:700;color:#5b21b6;letter-spacing:.5px;">
+            🧑 主体（204条）— 客户是谁
+          </td>
+        </tr>
         <tr>
           <td><strong>L1.1A</strong></td>
           <td>商业/职业身份</td>
@@ -475,6 +464,12 @@ tr:hover td { background: #fafafa; }
           <td>按配偶、子女、父母等家庭角色分类，补充家庭结构视角，用于传承/家族治理场景</td>
           <td>配偶（境外身份）、成年子女（海外留学）、非婚生子女权益、隔代传承</td>
           <td><span class="tag tag-high">高</span></td>
+        </tr>
+        <!-- ── 资产 ── -->
+        <tr style="background:#f0fdf4;">
+          <td colspan="6" style="padding:8px 14px;font-size:12px;font-weight:700;color:#166534;letter-spacing:.5px;">
+            💰 资产（287条）— 客户持有什么
+          </td>
         </tr>
         <tr>
           <td><strong>L3.1</strong></td>
@@ -524,20 +519,18 @@ tr:hover td { background: #fafafa; }
           <td>股权代持解除、股权质押预警、对赌条款触发、VIE架构合规风险</td>
           <td><span class="tag tag-high">高</span></td>
         </tr>
+        <!-- ── 动作 ── -->
+        <tr style="background:#eff6ff;">
+          <td colspan="6" style="padding:8px 14px;font-size:12px;font-weight:700;color:#1e40af;letter-spacing:.5px;">
+            ⚡ 动作（707条）— 发生了什么主动行为
+          </td>
+        </tr>
         <tr>
           <td><strong>L6.1</strong></td>
           <td>资本动作</td>
           <td><strong>110</strong></td>
           <td>企业层面的资本化动作，覆盖融资、IPO、增发、减持、回购等全生命周期</td>
           <td>Pre-IPO轮融资、H股IPO、上市后大宗减持、股份回购计划</td>
-          <td><span class="tag tag-high">极高</span></td>
-        </tr>
-        <tr>
-          <td><strong>L6.2</strong></td>
-          <td>税务合规</td>
-          <td><strong>139</strong></td>
-          <td>个税/企税/跨境税务合规，包括稽查应对、CRS申报、转让定价等</td>
-          <td>股权转让个税筹划、CRS申报合规、跨境税务稽查应对、反避税规则适用</td>
           <td><span class="tag tag-high">极高</span></td>
         </tr>
         <tr>
@@ -571,6 +564,20 @@ tr:hover td { background: #fafafa; }
           <td>家庭成员健康管理、重疾规划、心理健康等与财富规划交叉的健康维度</td>
           <td>重疾保险配置与传承规划、健康资产配置、长期护理规划、心理健康支持</td>
           <td><span class="tag tag-mid">中等</span></td>
+        </tr>
+        <!-- ── 约束 ── -->
+        <tr style="background:#fffbeb;">
+          <td colspan="6" style="padding:8px 14px;font-size:12px;font-weight:700;color:#92400e;letter-spacing:.5px;">
+            🔒 约束（152条）— 外部合规与法律限制
+          </td>
+        </tr>
+        <tr>
+          <td><strong>L6.2</strong></td>
+          <td>税务合规</td>
+          <td><strong>139</strong></td>
+          <td>个税/企税/跨境税务合规，包括稽查应对、CRS申报、转让定价等</td>
+          <td>股权转让个税合规处理、CRS申报应对、跨境税务稽查、反避税规则适用</td>
+          <td><span class="tag tag-high">极高</span></td>
         </tr>
         <tr>
           <td><strong>L6.7</strong> <span class="tag tag-new">新增</span></td>
@@ -1384,7 +1391,7 @@ tr:hover td { background: #fafafa; }
 const DIM_CODES   = ["L1.1A", "L1.1B", "L3.1", "L4.1", "L4.2", "L4.3", "L5.1", "L5.2", "L6.1", "L6.2", "L6.3", "L6.4", "L6.5", "L6.6", "L6.7"];
 const DIM_NAMES   = ["商业/职业身份", "家庭角色", "企业资本阶段", "财富标的(一级)", "财富标的(二级)", "财富规模特征", "持有形式", "治理/隐性状态", "资本动作", "税务合规", "身份规划", "架构搭建", "成长动作", "健康状况", "法律风险动作"];
 const DIM_COUNTS  = [149, 55, 38, 13, 160, 7, 38, 31, 110, 139, 431, 122, 12, 32, 13];
-const DIM_GROUPS  = ["谁", "谁", "有什么", "有什么", "有什么", "有什么", "有什么", "有什么", "发生了什么", "发生了什么", "发生了什么", "发生了什么", "发生了什么", "发生了什么", "发生了什么"];
+const DIM_GROUPS  = ["主体", "主体", "资产", "资产", "资产", "资产", "资产", "资产", "动作", "约束", "动作", "动作", "动作", "动作", "约束"];
 const PAIN_LABELS = ["税务合规", "身份/海外税务", "境外架构", "股权激励", "综合/其他", "资产保护", "资本市场", "法律架构", "财富传承", "慈善公益"];
 const PAIN_VALUES = [65, 39, 38, 35, 33, 25, 22, 19, 17, 8];
 const VER_NEW     = {"L1.1A": 149, "L1.1B": 55, "L3.1": 38, "L4.1": 13, "L4.2": 160, "L4.3": 7, "L5.1": 38, "L5.2": 31, "L6.1": 110, "L6.2": 139, "L6.3": 431, "L6.4": 122, "L6.5": 12, "L6.6": 32, "L6.7": 13};
@@ -1485,9 +1492,9 @@ function initOverviewCharts() {
   const chart2 = echarts.init(pieEl);
   chartInstances['overview-pie'] = chart2;
 
-  const groups = ['谁', '有什么', '发生了什么'];
+  const groups = ['主体', '资产', '动作', '约束'];
   const groupCounts = groups.map(g => DIM_COUNTS.reduce((s,c,i) => DIM_GROUPS[i]===g ? s+c : s, 0));
-  const groupColors = ['#C77DFF', '#6BCB77', '#4D96FF'];
+  const groupColors = ['#C77DFF', '#6BCB77', '#4D96FF', '#FFD93D'];
 
   chart2.setOption({
     tooltip: {
@@ -1512,43 +1519,7 @@ function initOverviewCharts() {
     }]
   });
 
-  // 3. 版本对比表
-  const tbody = document.getElementById('ver-table-body');
-  if (tbody) {
-    const dimNameMap = {};
-    DIM_CODES.forEach((c,i) => dimNameMap[c] = DIM_NAMES[i]);
-    let html = '';
-    DIM_CODES.forEach(code => {
-      const newVal = VER_NEW[code] || 0;
-      const oldVal = VER_OLD[code] || 0;
-      const d = newVal - oldVal;
-      const dStr = d > 0 ? `<span style="color:#16a34a;font-weight:600">+${d}</span>` :
-                   d < 0 ? `<span style="color:#dc2626">-${Math.abs(d)}</span>` : '—';
-      const detail = DIM_DETAILS[code] || {};
-      const noteHtml = detail.isNew ? '<span class="tag tag-new">新增维度</span>' :
-                       detail.note === '大幅扩充' ? '<span class="tag tag-expand">大幅扩充</span>' : '';
-      const newClass = detail.isNew ? ' class="new-dim"' : '';
-      html += `<tr>
-        <td><strong>${code}</strong></td>
-        <td>${dimNameMap[code] || ''}</td>
-        <td style="text-align:center">${oldVal || '—'}</td>
-        <td style="text-align:center"${newClass}><strong>${newVal}</strong></td>
-        <td style="text-align:center">${dStr}</td>
-        <td>${noteHtml}</td>
-      </tr>`;
-    });
-    // 总计行
-    const totalNew = Object.values(VER_NEW).reduce((a,b)=>a+b,0);
-    const totalOld = Object.values(VER_OLD).reduce((a,b)=>a+b,0);
-    html += `<tr style="background:#f3f4f6;font-weight:700">
-      <td colspan="2">合计</td>
-      <td style="text-align:center">${totalOld}</td>
-      <td style="text-align:center">${totalNew}</td>
-      <td style="text-align:center"><span style="color:#16a34a">+${totalNew-totalOld}</span></td>
-      <td></td>
-    </tr>`;
-    tbody.innerHTML = html;
-  }
+
 }
 
 function initExpansionCharts() {
