@@ -2109,11 +2109,7 @@ ${sceneLines}
   "scene":"场景名称（与上方完全一致）",
   "title":"痛点标题（10字以内，精炼表达）",
   "desc":"痛点说明（约40字，解释制度性必然原因和逻辑）",
-  "factors":{
-    "who":"谁的因子（从L1维度取，如：上市公司实控人、境外移民申请人、家族企业二代）",
-    "what":"有什么因子（从L3-L5维度取，如：境外持股架构、ESOP股权激励、境内不动产）",
-    "event":"发生了什么因子（从L6维度取，如：申请身份移民L6.3、跨境税务申报L6.2、股权减持L6.1）"
-  },
+  "factors_chain":"完整因子链路（参照因子库6.0格式，多条路径用中文分号「；」分隔，每条路径内用「>」逐级细化到叶子节点，需覆盖谁·有什么·发生了什么·约束四个维度）\n示例：商业/职业身份 > 企业家 (Entrepreneur) > 创一代 (F1) > 控制权结构 > 上市公司 > 实际控制人；资产类型 > 股权资产 > 上市公司股票 > A股 > 科创板；资本动作 > 流动性管理 > 变现/退出 > 股票减持方式 > 二级市场减持；外部监管触发 > 减持新规 > 减持比例限制\n路径起点规则（L1谁）：商业/职业身份 或 家庭角色；（L3-L5有什么）：资产类型/财富标的/持有形式/所在地/财富规模特征；（L6发生了什么）：资本动作/税务合规/身份规划/架构搭建/法律风险动作/健康状况 等；（约束）：外部监管触发 起头",
   "tags":[{"label":"标签短语","dim":"主体|资产|动作|约束","weight":"C|B|A"}],
   "skus":["匹配的SKU_ID"],
   "conflict":"核心冲突（≤25字，格式：[客户诉求]与[客观约束/风险]之间的矛盾）",
@@ -2257,15 +2253,8 @@ function pgRenderResults(results, newSkus) {
       </div>`;
 
     points.forEach((p, idx) => {
-      // 因子链路
-      const f = p.factors || {};
-      const factorHtml = (f.who || f.what || f.event) ? `
-        <div style="font-size:10.5px;font-weight:600;color:#9ca3af;letter-spacing:.5px;margin-bottom:7px;">因子链路</div>
-        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:14px;">
-          ${f.who   ? `<span style="padding:4px 10px;border-radius:20px;font-size:12px;background:#ede9fe;color:#5b21b6;">谁&nbsp;${f.who}</span><span style="color:#d1d5db;font-size:14px;">→</span>` : ''}
-          ${f.what  ? `<span style="padding:4px 10px;border-radius:20px;font-size:12px;background:#dcfce7;color:#166534;">有什么&nbsp;${f.what}</span><span style="color:#d1d5db;font-size:14px;">→</span>` : ''}
-          ${f.event ? `<span style="padding:4px 10px;border-radius:20px;font-size:12px;background:#dbeafe;color:#1e40af;">发生了什么&nbsp;${f.event}</span>` : ''}
-        </div>` : '';
+      // 因子链路（支持新格式 factors_chain 和旧格式 factors）
+      const factorHtml = pgRenderFactorChain(p);
 
       // 客户画像标签
       const tagsHtml = (p.tags || []).map(t => {
@@ -2447,6 +2436,69 @@ async function pgTestConnection() {
   }
 }
 
+// ── 因子链路渲染 ─────────────────────────────────────────────
+const FACTOR_DIM = [
+  { label:'谁',       bg:'#ede9fe', color:'#5b21b6', border:'#c4b5fd',
+    starts:['商业/职业身份','家庭角色'] },
+  { label:'有什么',   bg:'#dcfce7', color:'#166534', border:'#86efac',
+    starts:['资产类型','财富标的','持有形式','所在地','财富规模'] },
+  { label:'约束',     bg:'#fef3c7', color:'#92400e', border:'#fde68a',
+    starts:['外部监管触发'] },
+  { label:'发生了什么', bg:'#dbeafe', color:'#1e40af', border:'#93c5fd',
+    starts:[] }, // 兜底
+];
+
+function pgDetectDim(path) {
+  for (const d of FACTOR_DIM) {
+    if (d.starts.some(s => path.startsWith(s))) return d;
+  }
+  return FACTOR_DIM[3]; // 发生了什么
+}
+
+function pgRenderFactorChain(p) {
+  // 兼容新格式 factors_chain（字符串）和旧格式 factors（对象）
+  let chainStr = '';
+  if (p.factors_chain) {
+    chainStr = p.factors_chain;
+  } else if (p.factors) {
+    const f = p.factors;
+    const parts = [f.who, f.what, f.event].filter(Boolean);
+    chainStr = parts.join('；');
+  }
+  if (!chainStr) return '';
+
+  // 拆分多条路径
+  const paths = chainStr.split(/；|;/).map(s => s.trim()).filter(Boolean);
+
+  const rowsHtml = paths.map(path => {
+    const dim = pgDetectDim(path);
+    // 把路径按 > 拆分成节点
+    const nodes = path.split(/>/).map(s => s.trim()).filter(Boolean);
+
+    // 节点渲染：最后一个（叶子）加粗
+    const nodesHtml = nodes.map((n, i) => {
+      const isLeaf = i === nodes.length - 1;
+      const sep = i < nodes.length - 1
+        ? `<span style="margin:0 4px;color:#d1d5db;font-size:11px;">›</span>` : '';
+      return `<span style="font-size:${isLeaf?'12.5':'11.5'}px;color:${isLeaf?dim.color:'#6b7280'};
+        font-weight:${isLeaf?'600':'400'};">${n}</span>${sep}`;
+    }).join('');
+
+    return `<div style="display:flex;align-items:flex-start;gap:7px;padding:5px 0;
+        border-bottom:1px dashed #f3f4f6;">
+      <span style="flex-shrink:0;margin-top:2px;padding:2px 7px;border-radius:10px;font-size:10px;
+        font-weight:700;background:${dim.bg};color:${dim.color};border:1px solid ${dim.border};
+        white-space:nowrap;">${dim.label}</span>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;line-height:1.8;">${nodesHtml}</div>
+    </div>`;
+  }).join('');
+
+  return `<div style="font-size:10.5px;font-weight:600;color:#9ca3af;letter-spacing:.5px;
+      text-transform:uppercase;margin-bottom:8px;">因子链路</div>
+    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;
+      padding:8px 12px;margin-bottom:14px;">${rowsHtml}</div>`;
+}
+
 // ── 导出痛点结果 Excel ────────────────────────────────────────
 function pgExportExcel() {
   if (!_pgLastPoints.length) { alert('暂无数据，请先生成痛点'); return; }
@@ -2458,9 +2510,7 @@ function pgExportExcel() {
       '场景':   p.scene  || '',
       '痛点标题': p.title  || '',
       '痛点说明': p.desc   || '',
-      '因子·谁':       (p.factors||{}).who   || '',
-      '因子·有什么':   (p.factors||{}).what  || '',
-      '因子·发生了什么': (p.factors||{}).event || '',
+      '因子链路': p.factors_chain || (()=>{const f=p.factors||{};return [f.who,f.what,f.event].filter(Boolean).join('；')})(),
     };
     // 最多 6 个 Tag
     for (let i = 0; i < 6; i++) {
