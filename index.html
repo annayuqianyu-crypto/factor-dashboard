@@ -367,6 +367,9 @@ tr:hover td { background: #fafafa; }
   <div class="nav-item" onclick="showPage('pain-results')">
     <span class="icon">📋</span>痛点结果
   </div>
+  <div class="nav-item" onclick="showPage('pain-import')">
+    <span class="icon">📥</span>外部导入
+  </div>
 
 </nav>
 
@@ -1425,6 +1428,100 @@ tr:hover td { background: #fafafa; }
       <div style="font-size:13px;">请先在「场景选择」中配置场景并点击生成</div>
     </div>
   </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     PAGE 12: 外部痛点导入
+═══════════════════════════════════════ -->
+<div id="page-pain-import" class="page">
+  <div class="page-header">
+    <h2>📥 外部痛点导入</h2>
+    <p>上传已有痛点 Excel → AI 自动补全因子链路、标签、SKU 匹配与四步分析 → 导出完整结果</p>
+  </div>
+
+  <!-- ① Upload -->
+  <div class="card">
+    <div class="card-title">① 上传痛点 Excel</div>
+    <div style="font-size:12px;color:#9ca3af;margin-bottom:14px;margin-top:-6px;">
+      支持 .xlsx / .xls 格式，每次最多处理 <strong>30条</strong> 痛点。至少需包含「痛点标题」列；「场景」「说明」列可选。
+    </div>
+
+    <!-- Drop zone -->
+    <div id="piDropZone"
+      onclick="document.getElementById('piFileInput').click()"
+      ondragover="event.preventDefault();this.style.background='#eff6ff';"
+      ondragleave="this.style.background='';"
+      ondrop="event.preventDefault();this.style.background='';piHandleFile(event.dataTransfer.files[0]);"
+      style="border:2px dashed #d1d5db;border-radius:10px;padding:32px;text-align:center;cursor:pointer;transition:background .2s;">
+      <input type="file" id="piFileInput" accept=".xlsx,.xls" style="display:none;" onchange="piHandleFile(this.files[0])">
+      <div style="font-size:36px;margin-bottom:10px;">📂</div>
+      <div style="font-size:14px;font-weight:600;color:#374151;">点击选择文件，或将 Excel 文件拖放至此处</div>
+      <div style="font-size:12px;color:#9ca3af;margin-top:6px;">支持 .xlsx / .xls</div>
+    </div>
+
+    <!-- Preview -->
+    <div id="piPreviewWrap" style="display:none;margin-top:18px;">
+      <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:8px;" id="piPreviewTitle"></div>
+      <div style="overflow-x:auto;">
+        <table id="piPreviewTable" style="width:100%;border-collapse:collapse;font-size:12.5px;">
+          <thead id="piPreviewHead" style="background:#f3f4f6;"></thead>
+          <tbody id="piPreviewBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② Mapping + Config -->
+  <div class="card" id="piConfigCard" style="display:none;">
+    <div class="card-title">② 字段映射 & 生成配置</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;">
+      <div>
+        <div style="font-size:11px;font-weight:600;color:#6b7280;margin-bottom:5px;">场景列（可选）</div>
+        <select id="piColScene" style="width:100%;padding:7px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;">
+          <option value="">(无/统一命名为"外部导入")</option>
+        </select>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:600;color:#6b7280;margin-bottom:5px;">痛点标题列 <span style="color:#dc2626;">*</span></div>
+        <select id="piColTitle" style="width:100%;padding:7px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;"></select>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:600;color:#6b7280;margin-bottom:5px;">说明/描述列（可选）</div>
+        <select id="piColDesc" style="width:100%;padding:7px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;">
+          <option value="">(无)</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-top:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;margin-bottom:14px;">
+      <span style="font-size:13px;font-weight:600;color:#6b7280;">BU：</span>
+      <select id="piBuSelect"
+        style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;color:#374151;background:#fff;">
+        <option value="All Department">All Department</option>
+        <option value="CM">CM（资本市场）</option>
+        <option value="Tax">Tax（税务）</option>
+        <option value="Legal">Legal（法律）</option>
+      </select>
+      <span style="font-size:12px;color:#9ca3af;margin-left:4px;">选择 BU 后 AI 将聚焦对应领域补全分析</span>
+    </div>
+
+    <div style="font-size:12px;color:#6b7280;margin-bottom:14px;">
+      ⚙️ API 配置沿用「场景选择」页面的设置（Key / Base URL / 模型）。如尚未配置，请先前往
+      <span onclick="showPage('pain-generate')" style="color:#1a56db;cursor:pointer;text-decoration:underline;">场景选择</span> 页完成配置并测试连接。
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:12px;align-items:center;">
+      <span id="piEnrichStatus" style="font-size:12.5px;color:#6b7280;"></span>
+      <button id="piEnrichBtn" onclick="piStartEnrich()"
+        style="padding:10px 24px;background:#1a56db;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">
+        🤖 AI 补全分析
+      </button>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="piResultsContent"></div>
 </div>
 
 </main>
@@ -3973,6 +4070,407 @@ function pgExportSkuExcel() {
 }
 
 // ── 注册页面初始化 ───────────────────────────────────────────
+
+// ════════════════════════════════════════════════════════════
+// 外部痛点导入模块
+// ════════════════════════════════════════════════════════════
+
+let _piRawRows    = [];   // parsed Excel rows [{colA:v, colB:v, ...}]
+let _piHeaders    = [];   // column header names
+let _piLastPoints = [];
+let _piLastNewSkus= [];
+let _piLastBu     = 'All Department';
+
+// ── 文件处理 ────────────────────────────────────────────────
+function piHandleFile(file) {
+  if (!file) return;
+  const zone = document.getElementById('piDropZone');
+  zone.innerHTML = `<div style="font-size:28px;margin-bottom:6px;">⏳</div><div style="font-size:13px;color:#6b7280;">正在读取 ${file.name}…</div>`;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb    = XLSX.read(e.target.result, { type: 'array' });
+      const ws    = wb.Sheets[wb.SheetNames[0]];
+      const data  = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+      if (data.length < 2) { piError('Excel 内容为空或只有表头'); return; }
+
+      _piHeaders  = data[0].map(h => String(h).trim());
+      _piRawRows  = data.slice(1).filter(row => row.some(v => String(v).trim())).slice(0, 30);
+
+      zone.innerHTML = `<div style="font-size:24px;margin-bottom:6px;">✅</div>
+        <div style="font-size:13px;font-weight:600;color:#16a34a;">${file.name}</div>
+        <div style="font-size:12px;color:#9ca3af;margin-top:4px;">检测到 ${_piHeaders.length} 列 · ${_piRawRows.length} 行数据（最多处理30行）</div>
+        <div style="margin-top:8px;"><button onclick="document.getElementById('piFileInput').click()"
+          style="font-size:12px;color:#6b7280;background:none;border:1px solid #e5e7eb;border-radius:5px;padding:4px 10px;cursor:pointer;">更换文件</button></div>`;
+
+      piRenderPreview();
+      piRenderMapping();
+      document.getElementById('piPreviewWrap').style.display = '';
+      document.getElementById('piConfigCard').style.display  = '';
+    } catch(err) {
+      piError('读取失败：' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function piError(msg) {
+  document.getElementById('piDropZone').innerHTML =
+    `<div style="font-size:24px;margin-bottom:8px;">⚠️</div>
+     <div style="font-size:13px;color:#dc2626;">${msg}</div>
+     <div style="margin-top:8px;"><button onclick="document.getElementById('piFileInput').click()"
+       style="font-size:12px;color:#6b7280;background:none;border:1px solid #e5e7eb;border-radius:5px;padding:4px 10px;cursor:pointer;">重新选择</button></div>`;
+}
+
+// ── 预览表格 ────────────────────────────────────────────────
+function piRenderPreview() {
+  const MAX_PREVIEW = 5;
+  const shown = _piRawRows.slice(0, MAX_PREVIEW);
+
+  document.getElementById('piPreviewTitle').textContent =
+    `数据预览（前 ${shown.length} 行，共 ${_piRawRows.length} 行）`;
+
+  const thHtml = _piHeaders.map(h =>
+    `<th style="padding:7px 12px;text-align:left;font-size:12px;color:#6b7280;border-bottom:1px solid #e5e7eb;white-space:nowrap;">${h}</th>`
+  ).join('');
+  document.getElementById('piPreviewHead').innerHTML = `<tr>${thHtml}</tr>`;
+
+  const tbHtml = shown.map(row =>
+    '<tr>' + _piHeaders.map((_, i) => {
+      const v = String(row[i] || '').slice(0, 60);
+      return `<td style="padding:6px 12px;border-bottom:1px solid #f3f4f6;font-size:12px;color:#374151;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${v}</td>`;
+    }).join('') + '</tr>'
+  ).join('');
+  document.getElementById('piPreviewBody').innerHTML = tbHtml;
+}
+
+// ── 字段映射 ────────────────────────────────────────────────
+function piRenderMapping() {
+  const selScene = document.getElementById('piColScene');
+  const selTitle = document.getElementById('piColTitle');
+  const selDesc  = document.getElementById('piColDesc');
+
+  // Clear and repopulate
+  selScene.innerHTML = '<option value="">(无/统一命名为"外部导入")</option>';
+  selTitle.innerHTML = '';
+  selDesc.innerHTML  = '<option value="">(无)</option>';
+
+  const TITLE_HINTS = ['标题','title','痛点标题','名称','痛点名称','name'];
+  const SCENE_HINTS = ['场景','scene','业务场景','分类','类别'];
+  const DESC_HINTS  = ['说明','desc','description','描述','内容','摘要','痛点说明'];
+
+  _piHeaders.forEach(h => {
+    const opt = v => `<option value="${h}">${h}</option>`;
+    selScene.innerHTML += opt(h);
+    selTitle.innerHTML += opt(h);
+    selDesc.innerHTML  += opt(h);
+  });
+
+  // Auto-select best matches
+  const best = (hints) => _piHeaders.find(h => hints.some(k => h.toLowerCase().includes(k.toLowerCase()))) || '';
+  const bScene = best(SCENE_HINTS);
+  const bTitle = best(TITLE_HINTS) || _piHeaders[0];
+  const bDesc  = best(DESC_HINTS);
+  if (bScene) selScene.value = bScene;
+  if (bTitle) selTitle.value = bTitle;
+  if (bDesc)  selDesc.value  = bDesc;
+}
+
+// ── AI 补全 ─────────────────────────────────────────────────
+async function piStartEnrich() {
+  if (!_piRawRows.length) { alert('请先上传 Excel 文件'); return; }
+
+  const colScene = document.getElementById('piColScene').value;
+  const colTitle = document.getElementById('piColTitle').value;
+  const colDesc  = document.getElementById('piColDesc').value;
+  const bu       = document.getElementById('piBuSelect').value || 'All Department';
+
+  if (!colTitle) { alert('请选择「痛点标题列」'); return; }
+
+  const { key, model, base } = pgGetConfig();
+  if (!key) {
+    alert('请先在「场景选择」页面填写并测试 API Key');
+    showPage('pain-generate'); return;
+  }
+
+  // Build input list
+  const idxScene = colScene ? _piHeaders.indexOf(colScene) : -1;
+  const idxTitle = _piHeaders.indexOf(colTitle);
+  const idxDesc  = colDesc  ? _piHeaders.indexOf(colDesc)  : -1;
+
+  const points = _piRawRows.map(row => ({
+    scene:  idxScene >= 0 ? String(row[idxScene] || '').trim() || '外部导入' : '外部导入',
+    title:  String(row[idxTitle] || '').trim(),
+    desc:   idxDesc  >= 0 ? String(row[idxDesc]  || '').trim() : '',
+  })).filter(p => p.title);
+
+  if (!points.length) { alert('未能从所选列中提取到有效痛点标题'); return; }
+
+  // Disable button
+  const btn = document.getElementById('piEnrichBtn');
+  btn.disabled = true; btn.textContent = '⏳ 分析中…';
+  document.getElementById('piEnrichStatus').textContent = '';
+
+  document.getElementById('piResultsContent').innerHTML =
+    `<div class="gen-loading"><div class="spinner"></div>
+     <div style="color:#374151;font-weight:600;font-size:15px;">AI 正在补全 ${points.length} 条痛点…</div>
+     <div style="color:#9ca3af;font-size:13px;margin-top:6px;">BU: ${bu} · 模型 ${model}</div></div>`;
+
+  const skuLines       = SKU_DB.map(s => `${s.id}:${s.name}`).join('\n');
+  const factorPathsText = FACTOR_PATHS.join('\n');
+
+  const buInstructions = {
+    'CM':             '【BU约束：CM资本市场】补全分析请聚焦资本市场相关内容：股权架构/IPO/减持/股权激励/并购等。禁止出现 结构化/委托贷款/QFLP/资金入境/资金出境 等敏感词。',
+    'Tax':            '【BU约束：Tax税务】补全分析请聚焦税务合规内容。禁止使用 筹划/避税/减税/节税；可用 税务合规/税负管理/架构设计；不出现无来源的具体税率。',
+    'Legal':          '【BU约束：Legal法律】补全分析请聚焦法律风险与合规内容。不引用具体法典法条，说清法律逻辑即可。',
+    'All Department': '',
+  }[bu] || '';
+
+  const pointsJson = JSON.stringify(points.map((p, i) => ({id: i+1, ...p})), null, 2);
+
+  const userPrompt = `你是朝曦家办的资深业务顾问，专长跨境财富规划、企业股权架构、税务合规、家族传承。
+${buInstructions ? '\n' + buInstructions + '\n' : ''}
+以下是已有痛点数据，请为每条痛点补全标准化分析字段，保持原始 title 不变，若原 desc 内容不足约40字可适当完善。
+
+【已有痛点】：
+${pointsJson}
+
+请为每条痛点输出完整字段，格式为一个 JSON 对象 {"points":[...],"new_skus":[...]}
+
+【points 数组】每个痛点字段：
+{
+  "scene":"原场景名称（不变）",
+  "title":"原痛点标题（完全保持不变）",
+  "desc":"原说明（保持或完善至约40字）",
+  "factors_chain":"【重要】从下方【因子库路径表】中精确选取3条与该痛点最匹配的完整路径，用中文分号「；」拼接。路径必须与因子库中完全一致，禁止自行编造或修改路径内容。三条路径分别代表：①谁（商业/职业身份或家庭角色起头）②有什么/发生了什么（资产/动作类路径）③约束（外部监管触发或税务/法律类路径）",
+  "tags":[{"label":"标签短语","dim":"主体|资产|动作|约束","weight":"C|B|A"}],
+  "skus":["匹配的SKU_ID"],
+  "conflict":"核心冲突（≤25字，格式：[客户诉求]与[客观约束/风险]之间的矛盾）",
+  "risk":"潜在风险（若不解决最坏情况，100字内，具体化风险后果）",
+  "solution":"解决方案（结合已匹配SKU，专业行动建议，120字内，分步骤，平实语言，不含营销用语）",
+  "effect":"预期效果（成功实施后正面价值，80字内，平实语言）"
+}
+
+标签规则：dim 必须是 主体/资产/动作/约束 之一；weight C=核心 B=中等 A=弱；每痛点4-6个标签。
+
+四步分析合规要求：
+- 资本市场痛点：禁止出现 结构化/委托贷款/QFLP/NOTES/资金入境/资金出境 等敏感词
+- 税务痛点：禁止使用 筹划/避税/减税/节税；可用 税务合规/税负管理/架构设计
+- 法律痛点：不引用具体法典法条，说清法律逻辑即可
+- 通用：禁用 完全解决/保证/一定/帮助/陪伴/助力/护航 等绝对化或营销词；四部分总字数不超过300字
+
+【new_skus 数组】根据以上痛点，建议新增 SKU（可为空数组）：
+{"id":"New-XXX-001","name":"...","reason":"...（50字内）","category":"...","summary":"...","highlights":"...","scenarios":"...","preconditions":"...","keywords":"...","use_case":"..."}
+
+SKU知识库（从中为每个痛点选2-4个最相关ID）：
+${skuLines}
+
+【因子库路径表】（共${FACTOR_PATHS.length}条，为每个痛点的factors_chain从此表精确选取3条完整路径，复制原文不可修改）：
+${factorPathsText}
+
+严格只输出JSON对象，不输出任何其他文字。`;
+
+  try {
+    const resp = await fetch(base + '/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({ model, messages: [{ role: 'user', content: userPrompt }], max_tokens: 16000, temperature: 0.3 })
+    });
+
+    if (!resp.ok) {
+      const txt = await resp.text();
+      throw new Error(`API 返回 ${resp.status}\n${txt.slice(0, 300)}`);
+    }
+
+    const data = await resp.json();
+    const raw  = data.choices?.[0]?.message?.content || '';
+
+    let enrichedPoints, newSkus;
+    try {
+      const m = raw.match(/\{[\s\S]*\}/);
+      if (!m) throw new Error('未返回 JSON\n原始输出：' + raw.slice(0, 400));
+      const parsed = JSON.parse(m[0]);
+      enrichedPoints = parsed.points || [];
+      newSkus        = parsed.new_skus || [];
+      if (!enrichedPoints.length) throw new Error('points 数组为空');
+    } catch(e) {
+      throw new Error('JSON 解析失败：' + e.message + '\n原始输出：' + raw.slice(0, 400));
+    }
+
+    _piLastPoints  = enrichedPoints;
+    _piLastNewSkus = newSkus;
+    _piLastBu      = bu;
+
+    piRenderResults(enrichedPoints, newSkus, bu);
+    document.getElementById('piEnrichStatus').textContent = `✅ 已补全 ${enrichedPoints.length} 条`;
+
+  } catch(err) {
+    const isCors = err.message.toLowerCase().includes('fetch') || err.message.toLowerCase().includes('failed to');
+    document.getElementById('piResultsContent').innerHTML =
+      `<div style="padding:32px 24px;text-align:center;">
+        <div style="font-size:32px;margin-bottom:10px;">⚠️</div>
+        <div style="font-size:15px;font-weight:700;color:#dc2626;margin-bottom:8px;">补全失败</div>
+        <div style="font-size:13px;color:#374151;white-space:pre-wrap;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px;line-height:1.7;text-align:left;">${err.message}</div>
+        ${isCors ? '<div style="margin-top:10px;font-size:12px;color:#92400e;background:#fef3c7;padding:8px 14px;border-radius:6px;">⚠️ 疑似 CORS 拦截，请确认 Base URL 支持跨域（wolfai.top 已支持）</div>' : ''}
+      </div>`;
+    document.getElementById('piEnrichStatus').textContent = '';
+  } finally {
+    btn.disabled = false; btn.textContent = '🤖 AI 补全分析';
+  }
+}
+
+// ── 渲染结果（复用 pgRenderResults 逻辑，但导出用 pi 缓存）─
+function piRenderResults(results, newSkus, bu) {
+  newSkus = newSkus || []; bu = bu || 'All Department';
+  if (!results?.length) {
+    document.getElementById('piResultsContent').innerHTML =
+      '<div class="gen-empty">未补全任何痛点，请检查配置后重试</div>'; return;
+  }
+
+  const byScene  = {};
+  results.forEach(r => { (byScene[r.scene] = byScene[r.scene] || []).push(r); });
+  const sceneCnt = Object.keys(byScene).length;
+
+  let html = `
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+    <div>
+      <span style="font-size:20px;font-weight:700;color:#111827;">导入结果</span>
+      <span style="font-size:13px;color:#6b7280;margin-left:10px;">${sceneCnt} 个场景 · ${results.length} 条痛点</span>
+      <span style="margin-left:10px;padding:2px 10px;border-radius:10px;font-size:12px;font-weight:700;background:#dbeafe;color:#1e40af;">${bu}</span>
+    </div>
+    <button onclick="piExportExcel()"
+      style="padding:8px 16px;background:#16a34a;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;">
+      📥 导出补全结果 Excel
+    </button>
+  </div>`;
+
+  for (const [sceneName, points] of Object.entries(byScene)) {
+    html += `<div style="margin-bottom:28px;">
+      <div class="pred-section-title">📌 ${sceneName}
+        <span style="font-size:12px;font-weight:400;color:#6b7280;margin-left:6px;">${points.length} 条</span>
+      </div>`;
+
+    points.forEach((p, idx) => {
+      const factorHtml = pgRenderFactorChain(p);
+      const tagsHtml = (p.tags || []).map(t => {
+        const s = DIM_STYLE[t.dim] || { bg:'#f3f4f6', color:'#374151' };
+        return `<span style="display:inline-flex;align-items:center;gap:3px;padding:3px 9px 3px 7px;border-radius:12px;font-size:12px;background:${s.bg};color:${s.color};margin:2px;">
+          <span style="font-size:9.5px;opacity:.6;font-weight:600;">${t.dim}</span>
+          <span>${t.label}</span>
+          <span style="font-size:9px;font-weight:700;padding:1px 4px;border-radius:4px;background:rgba(0,0,0,.1);">${t.weight||''}</span>
+        </span>`;
+      }).join('');
+      const skusHtml = (p.skus || []).map(id => {
+        const sku = SKU_DB.find(s => s.id === id);
+        return `<span style="padding:3px 9px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;color:#374151;">${sku ? sku.name : id}</span>`;
+      }).join('');
+      const steps = [
+        { key:'conflict', label:'核心冲突', bg:'#fef2f2', border:'#fecaca', color:'#991b1b', icon:'⚡' },
+        { key:'risk',     label:'潜在风险', bg:'#fff7ed', border:'#fed7aa', color:'#9a3412', icon:'⚠️' },
+        { key:'solution', label:'解决方案', bg:'#f0fdf4', border:'#bbf7d0', color:'#166534', icon:'🔧' },
+        { key:'effect',   label:'预期效果', bg:'#eff6ff', border:'#bfdbfe', color:'#1e40af', icon:'✅' },
+      ];
+      const analysisHtml = steps.filter(s => p[s.key]).map(s =>
+        `<div style="padding:10px 14px;background:${s.bg};border:1px solid ${s.border};border-radius:8px;margin-bottom:8px;">
+          <div style="font-size:11px;font-weight:700;color:${s.color};margin-bottom:4px;">${s.icon} ${s.label}</div>
+          <div style="font-size:13px;color:#374151;line-height:1.65;">${p[s.key]}</div>
+        </div>`
+      ).join('');
+
+      html += `<div class="pr-card">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
+          <div style="font-size:17px;font-weight:700;color:#111827;line-height:1.3;flex:1;">${p.title||''}</div>
+          <span style="font-size:11px;color:#d1d5db;margin-left:12px;white-space:nowrap;margin-top:3px;">#${idx+1}</span>
+        </div>
+        <div style="font-size:13.5px;color:#4b5563;line-height:1.7;margin-bottom:14px;">${p.desc||''}</div>
+        ${factorHtml}
+        <div style="font-size:10.5px;font-weight:600;color:#9ca3af;letter-spacing:.5px;margin-bottom:7px;">核心客户画像</div>
+        <div style="margin-bottom:${skusHtml?14:8}px;">${tagsHtml||'<span style="color:#d1d5db;font-size:12px;">暂无标签</span>'}</div>
+        ${skusHtml ? `<div style="font-size:10.5px;font-weight:600;color:#9ca3af;letter-spacing:.5px;margin-bottom:7px;">适配 SKU</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">${skusHtml}</div>` : ''}
+        ${analysisHtml ? `<div style="margin-top:4px;">${analysisHtml}</div>` : ''}
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  // 建议新增 SKU
+  if (newSkus.length) {
+    html += `<div style="margin-top:8px;margin-bottom:4px;">
+      <div class="pred-section-title" style="border-left-color:#f59e0b;">
+        💡 建议新增 SKU（${newSkus.length} 个）
+        <button onclick="piExportSkuExcel()" style="margin-left:auto;padding:5px 12px;background:#f59e0b;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">📥 导出知识卡片</button>
+      </div>`;
+    newSkus.forEach((s, i) => {
+      html += `<div class="pr-card" style="border-left:3px solid #f59e0b;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <span style="font-size:11px;font-weight:700;padding:2px 8px;background:#fef3c7;color:#92400e;border-radius:10px;">${s.id||'New-'+(i+1)}</span>
+          <span style="font-size:16px;font-weight:700;color:#111827;">${s.name||''}</span>
+        </div>
+        <div style="font-size:12.5px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 12px;margin-bottom:10px;"><b>建议原因：</b>${s.reason||''}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12.5px;">
+          ${[['服务类别',s.category],['服务流程',s.summary],['核心亮点',s.highlights],['适用渠道',s.scenarios],['适用前提',s.preconditions],['不适用情形',s.use_case]].filter(([,v])=>v).map(([l,v])=>
+            `<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:8px 10px;">
+              <div style="font-size:10px;font-weight:700;color:#9ca3af;margin-bottom:3px;">${l}</div>
+              <div style="color:#374151;line-height:1.6;">${v}</div></div>`).join('')}
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  document.getElementById('piResultsContent').innerHTML = html;
+}
+
+// ── 导出 Excel ───────────────────────────────────────────────
+function piExportExcel() {
+  if (!_piLastPoints.length) { alert('暂无数据，请先导入并补全痛点'); return; }
+  const rows = _piLastPoints.map(p => {
+    const tags = p.tags || [];
+    const row  = {
+      'BU':     _piLastBu || 'All Department',
+      '场景':   p.scene  || '',
+      '痛点标题': p.title  || '',
+      '痛点说明': p.desc   || '',
+      '因子链路': p.factors_chain || '',
+    };
+    for (let i = 0; i < 6; i++) {
+      const t = tags[i];
+      row[`Tag${i+1}`]     = t ? `[${t.dim}] ${t.label}` : '';
+      row[`Tag${i+1}权重`] = t ? (t.weight||'') : '';
+    }
+    row['适配SKU'] = (p.skus||[]).map(id => { const s=SKU_DB.find(x=>x.id===id); return s?s.name:id; }).join(' / ');
+    row['核心冲突'] = p.conflict || '';
+    row['潜在风险'] = p.risk     || '';
+    row['解决方案'] = p.solution || '';
+    row['预期效果'] = p.effect   || '';
+    return row;
+  });
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:10},{wch:12},{wch:16},{wch:40},{wch:18},
+    {wch:20},{wch:6},{wch:20},{wch:6},{wch:20},{wch:6},{wch:20},{wch:6},{wch:20},{wch:6},{wch:20},{wch:6},
+    {wch:30},{wch:28},{wch:50},{wch:50},{wch:40}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '导入痛点结果');
+  XLSX.writeFile(wb, `外部痛点补全结果_${new Date().toLocaleDateString('zh-CN').replace(/\//g,'-')}.xlsx`);
+}
+
+function piExportSkuExcel() {
+  if (!_piLastNewSkus.length) { alert('本次未建议新增 SKU'); return; }
+  const rows = _piLastNewSkus.map(s => ({
+    '建议编号':s.id||'','SKU名称':s.name||'','建议原因':s.reason||'',
+    '服务类别描述':s.category||'','服务流程摘要':s.summary||'','核心亮点':s.highlights||'',
+    '适用渠道/场景':s.scenarios||'','适用前提':s.preconditions||'','关键词':s.keywords||'','不适用情形':s.use_case||'',
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:16},{wch:24},{wch:40},{wch:45},{wch:40},{wch:30},{wch:24},{wch:30},{wch:36},{wch:30}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '新增SKU知识卡片');
+  XLSX.writeFile(wb, `建议新增SKU_${new Date().toLocaleDateString('zh-CN').replace(/\//g,'-')}.xlsx`);
+}
+
+PAGE_INIT_MAP['pain-import'] = function() {};
 PAGE_INIT_MAP['pain-generate'] = function() {
   initPainGeneratePage();
   pgLoadKey();
