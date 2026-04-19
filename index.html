@@ -9113,7 +9113,7 @@ let _simLibCache   = null;   // [{pid,bu,desc,expl,fc,tags,sku}, ...]
 let _simLibStatus  = 'idle'; // idle | loading | ok | fail
 let _simLibWaiters = [];
 
-// 动态加载主库：只取「痛点库-正式库」批次中非删除、非子痛点记录
+// 动态加载主库：只取「痛点库-正式库」批次中非删除记录（不做 PID 二次过滤）
 function simLoadLibrary() {
   if (_simLibStatus === 'ok')   return Promise.resolve(_simLibCache);
   if (_simLibStatus === 'fail') return Promise.resolve([]);
@@ -9146,7 +9146,7 @@ function simLoadLibrary() {
         .then(r => r.ok ? r.json() : Promise.reject('pain_points ' + r.status))
         .then(data => {
           const lib = (Array.isArray(data) ? data : [])
-            .filter(x => x.description && x.pid && !/\.\d+$/.test(x.pid.trim()))
+            .filter(x => x.description && x.pid)
             .map(x => ({
               pid:  x.pid.trim(),
               bu:   x.bu   || '',
