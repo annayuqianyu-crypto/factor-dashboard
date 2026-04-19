@@ -9102,48 +9102,65 @@ function piExportSkuExcel() {
 
 
 // ════════════════════════════════════════════════════════════
-// 相似性分析模块（纯前端算法，主库从 Supabase 动态加载）
+// 相似性分析模块 v2 · 四重算法 · 主库=「痛点库-正式库」批次
 // ════════════════════════════════════════════════════════════
 
-const _SIM_SB_URL = 'https://upbpuechbbritldtsxxf.supabase.co';
-const _SIM_SB_KEY = 'sb_publishable___TxVAe6d4YbzdRnX6-7qw_cYxggXAQ';
-let   _simLibCache  = null;   // [[pid, bu, title, fc], ...]
-let   _simLibStatus = 'idle'; // 'idle' | 'loading' | 'ok' | 'fail'
-let   _simLibWaiters = [];
+const _SIM_SB_URL  = 'https://upbpuechbbritldtsxxf.supabase.co';
+const _SIM_SB_KEY  = 'sb_publishable___TxVAe6d4YbzdRnX6-7qw_cYxggXAQ';
+const _SIM_BATCH_NAME = '痛点库-正式库';
 
-// 动态从 Supabase 加载痛点主库（需先在 Supabase 执行 pp_select_anon policy）
-// 返回 [[pid, bu, title, fc], ...]
+let _simLibCache   = null;   // [{pid,bu,desc,expl,fc,tags,sku}, ...]
+let _simLibStatus  = 'idle'; // idle | loading | ok | fail
+let _simLibWaiters = [];
+
+// 动态加载主库：只取「痛点库-正式库」批次中非删除、非子痛点记录
 function simLoadLibrary() {
   if (_simLibStatus === 'ok')   return Promise.resolve(_simLibCache);
   if (_simLibStatus === 'fail') return Promise.resolve([]);
-  if (_simLibStatus === 'loading') {
-    return new Promise(res => _simLibWaiters.push(res));
-  }
+  if (_simLibStatus === 'loading') return new Promise(res => _simLibWaiters.push(res));
   _simLibStatus = 'loading';
-  const resolve = (lib) => {
-    _simLibCache  = lib;
-    _simLibStatus = lib.length ? 'ok' : 'fail';
-    _simLibWaiters.forEach(fn => fn(lib));
-    _simLibWaiters = [];
-    return lib;
+
+  const headers = { 'apikey': _SIM_SB_KEY, 'Authorization': 'Bearer ' + _SIM_SB_KEY, 'Accept': 'application/json' };
+
+  const done = (lib) => {
+    _simLibCache = lib; _simLibStatus = lib.length ? 'ok' : 'fail';
+    _simLibWaiters.forEach(fn => fn(lib)); _simLibWaiters = []; return lib;
   };
-  return fetch(
-    _SIM_SB_URL + '/rest/v1/pain_points?status=neq.deleted&select=pid,bu,description,factor_chain&order=pid&limit=5000',
-    { headers: { 'apikey': _SIM_SB_KEY, 'Authorization': 'Bearer ' + _SIM_SB_KEY, 'Accept': 'application/json' } }
-  )
-  .then(resp => resp.ok ? resp.json() : Promise.reject(resp.status))
-  .then(data => {
-    // 过滤子痛点（pid 含小数点，如 CM-001.1）
-    const lib = (Array.isArray(data) ? data : [])
-      .filter(x => x.description && x.pid && !/\.\d+$/.test(x.pid) && x.pid.trim() !== '')
-      .map(x => [x.pid.trim(), x.bu || '', x.description.trim(), (x.factor_chain || '').trim()]);
-    console.log('[Sim] 主库加载成功：', lib.length, '条');
-    return resolve(lib);
-  })
-  .catch(err => {
-    console.warn('[Sim] 主库加载失败（请检查 Supabase pp_select_anon policy）：', err);
-    return resolve([]);
-  });
+
+  // Step 1: 找到批次 id
+  return fetch(_SIM_SB_URL + '/rest/v1/batches?name=eq.' + encodeURIComponent(_SIM_BATCH_NAME) + '&select=id', { headers })
+    .then(r => r.ok ? r.json() : Promise.reject('batches ' + r.status))
+    .then(rows => {
+      if (!rows || !rows.length) {
+        console.warn('[Sim] 未找到批次「' + _SIM_BATCH_NAME + '」，主库为空');
+        return done([]);
+      }
+      const batchId = rows[0].id;
+      // Step 2: 拉取该批次痛点
+      const url = _SIM_SB_URL + '/rest/v1/pain_points'
+        + '?batch_id=eq.' + batchId
+        + '&status=neq.deleted'
+        + '&select=pid,bu,description,explanation,factor_chain,tags,sku'
+        + '&limit=5000';
+      return fetch(url, { headers })
+        .then(r => r.ok ? r.json() : Promise.reject('pain_points ' + r.status))
+        .then(data => {
+          const lib = (Array.isArray(data) ? data : [])
+            .filter(x => x.description && x.pid && !/\.\d+$/.test(x.pid.trim()))
+            .map(x => ({
+              pid:  x.pid.trim(),
+              bu:   x.bu   || '',
+              desc: (x.description || '').trim(),
+              expl: (x.explanation || '').trim(),
+              fc:   (x.factor_chain || '').trim(),
+              tags: Array.isArray(x.tags) ? x.tags : (x.tags ? String(x.tags).split(/[,；、]/).map(t=>t.trim()).filter(Boolean) : []),
+              sku:  (x.sku || '').trim()
+            }));
+          console.log('[Sim] 主库「' + _SIM_BATCH_NAME + '」加载成功：', lib.length, '条');
+          return done(lib);
+        });
+    })
+    .catch(err => { console.warn('[Sim] 主库加载失败：', err); return done([]); });
 }
 
 // ── 算法核心 ─────────────────────────────────────────────────
@@ -9151,137 +9168,153 @@ function simLoadLibrary() {
 function simNormPath(s) {
   return (s || '').replace(/\s*\/\s*/g, '/').replace(/\s*>\s*/g, ' > ').trim();
 }
-
 function simSplitFC(fc) {
   return (fc || '').split(/；|;/).map(simNormPath).filter(Boolean);
 }
-
 function simPathScore(pA, pB) {
   if (pA === pB) return 1.0;
-  const lA = pA.split(' > ').map(s => s.trim());
-  const lB = pB.split(' > ').map(s => s.trim());
+  const lA = pA.split(' > ').map(s=>s.trim());
+  const lB = pB.split(' > ').map(s=>s.trim());
   let shared = 0;
-  for (let i = 0; i < Math.min(lA.length, lB.length); i++) {
-    if (lA[i] === lB[i]) shared++;
-    else break;
-  }
-  const minL = Math.min(lA.length, lB.length);
-  return minL > 0 ? (shared / minL) * (shared >= 3 ? 1 : 0.5) : 0;
+  for (let i=0; i < Math.min(lA.length,lB.length); i++) { if (lA[i]===lB[i]) shared++; else break; }
+  const minL = Math.min(lA.length,lB.length);
+  return minL > 0 ? (shared/minL)*(shared>=3?1:0.5) : 0;
 }
-
+// 因子链路重叠 F（0-1）
 function simFactorScore(fcA, fcB) {
-  const pathsA = simSplitFC(fcA);
-  const pathsB = simSplitFC(fcB);
+  const pathsA = simSplitFC(fcA), pathsB = simSplitFC(fcB);
   if (!pathsA.length || !pathsB.length) return 0;
   let total = 0;
-  for (const pA of pathsA) {
-    let best = 0;
-    for (const pB of pathsB) best = Math.max(best, simPathScore(pA, pB));
-    total += best;
-  }
+  for (const pA of pathsA) { let best=0; for (const pB of pathsB) best=Math.max(best,simPathScore(pA,pB)); total+=best; }
   return total / Math.max(pathsA.length, pathsB.length);
 }
-
+// 中文 bigram Jaccard T（0-1）
 function simBigram(s1, s2) {
-  const bg = s => { const r = new Set(); for (let i = 0; i < s.length - 1; i++) r.add(s.slice(i,i+2)); return r; };
-  const A = bg(s1 || ''), B = bg(s2 || '');
+  const bg = s => { const r=new Set(); for (let i=0;i<s.length-1;i++) r.add(s.slice(i,i+2)); return r; };
+  const A=bg(s1||''), B=bg(s2||'');
   if (!A.size && !B.size) return 0;
-  let inter = 0; for (const x of A) if (B.has(x)) inter++;
-  return inter / (A.size + B.size - inter);
+  let inter=0; for (const x of A) if (B.has(x)) inter++;
+  return inter / (A.size+B.size-inter);
+}
+// 标签 Jaccard G（0-1）
+function simTagScore(tagsA, tagsB) {
+  function toTagSet(tags) {
+    const arr = Array.isArray(tags) ? tags : (tags ? String(tags).split(/[,；、]/) : []);
+    return new Set(arr.map(function(t){return (t||'').toString().trim().toLowerCase();}).filter(Boolean));
+  }
+  const setA = toTagSet(tagsA), setB = toTagSet(tagsB);
+  if (!setA.size && !setB.size) return 0;
+  let inter = 0; for (const t of setA) if (setB.has(t)) inter++;
+  return inter / (setA.size + setB.size - inter);
+}
+// SKU 重叠 S（0-1）
+function simSkuScore(skuA, skuB) {
+  const parse = s => new Set((s||'').split(/[,；;、\s]+/).map(x=>x.trim()).filter(Boolean));
+  const setA=parse(skuA), setB=parse(skuB);
+  if (!setA.size && !setB.size) return 0;
+  let inter=0; for (const s of setA) if (setB.has(s)) inter++;
+  return inter / (setA.size+setB.size-inter);
 }
 
-function simScore(titleA, fcA, titleB, fcB) {
-  return 0.6 * simFactorScore(fcA, fcB) + 0.4 * simBigram(titleA, titleB);
+// 四重综合相似度（0-1）
+// F=因子链路40% T=痛点说明(标题+说明)30% G=标签15% S=SKU 15%
+function simScore(descA, explA, fcA, tagsA, skuA, descB, explB, fcB, tagsB, skuB) {
+  const F = simFactorScore(fcA, fcB);
+  const T = simBigram((descA+' '+(explA||'')).trim(), (descB+' '+(explB||'')).trim());
+  const G = simTagScore(tagsA, tagsB);
+  const S = simSkuScore(skuA, skuB);
+  return 0.40*F + 0.30*T + 0.15*G + 0.15*S;
 }
 
+// 得分 → 等级
 function simLevel(s) {
-  if (s >= 0.82) return { level:'dup',     badge:'🔴 高度疑似重复', color:'#dc2626', bg:'#fef2f2', border:'#fecaca' };
-  if (s >= 0.58) return { level:'high',    badge:'🟡 高度相似',     color:'#d97706', bg:'#fffbeb', border:'#fde68a' };
-  if (s >= 0.32) return { level:'related', badge:'🔵 相关联',       color:'#2563eb', bg:'#eff6ff', border:'#bfdbfe' };
+  if (s >= 0.82) return {level:'dup',     badge:'🔴 高度疑似重复', color:'#dc2626', bg:'#fef2f2', border:'#fecaca'};
+  if (s >= 0.58) return {level:'high',    badge:'🟡 高度相似',     color:'#d97706', bg:'#fffbeb', border:'#fde68a'};
+  if (s >= 0.32) return {level:'related', badge:'🔵 相关联',       color:'#2563eb', bg:'#eff6ff', border:'#bfdbfe'};
   return null;
 }
 
-function simExplain(titleA, fcA, titleB, fcB) {
-  const pathsA = simSplitFC(fcA), pathsB = simSplitFC(fcB);
-  const matched = [];
-  for (const pA of pathsA) {
-    for (const pB of pathsB) {
-      if (simPathScore(pA, pB) >= 0.8)
-        matched.push(pA === pB
-          ? '「' + pA.split(' > ').pop() + '」路径完全相同'
-          : '「' + pA.split(' > ').pop() + '」与「' + pB.split(' > ').pop() + '」前缀重叠');
-    }
-  }
-  const F = simFactorScore(fcA, fcB), T = simBigram(titleA, titleB);
+// 人读解释（四维）
+function simExplain(descA, explA, fcA, tagsA, skuA, descB, explB, fcB, tagsB, skuB) {
+  const F = simFactorScore(fcA, fcB);
+  const T = simBigram((descA+' '+(explA||'')).trim(), (descB+' '+(explB||'')).trim());
+  const G = simTagScore(tagsA, tagsB);
+  const S = simSkuScore(skuA, skuB);
   const parts = [];
-  if (F >= 0.6)  parts.push('因子链路重叠度 ' + Math.round(F*100) + '%' + (matched.length ? '（' + matched.slice(0,2).join('、') + '）' : ''));
-  else if (F > 0) parts.push('因子链路有部分重叠（' + Math.round(F*100) + '%）');
-  if (T >= 0.4)  parts.push('标题字符相似度 ' + Math.round(T*100) + '%');
-  return parts.join('；') || '综合相似度达到阈值';
+  if (F >= 0.5) {
+    const pathsA = simSplitFC(fcA), pathsB = simSplitFC(fcB);
+    const matched = [];
+    for (const pA of pathsA) for (const pB of pathsB)
+      if (simPathScore(pA,pB)>=0.8)
+        matched.push(pA===pB ? '「'+pA.split(' > ').pop()+'」路径完全一致' : '「'+pA.split(' > ').pop()+'」与「'+pB.split(' > ').pop()+'」前缀重叠');
+    parts.push('因子链路重叠 '+Math.round(F*100)+'%'+(matched.length?'（'+matched.slice(0,2).join('、')+'）':''));
+  }
+  if (T >= 0.35) parts.push('痛点说明相似度 '+Math.round(T*100)+'%');
+  if (G >= 0.3)  parts.push('标签重合：'+Math.round(G*100)+'%');
+  if (S > 0)     parts.push('SKU 匹配');
+  return parts.join('；') || '综合四维相似度达阈值';
 }
 
-// 对一批痛点做相似性分析，library = [[pid,bu,title,fc],...]
+// 提取生成痛点的字段（兼容 pg / pi 两种命名）
+function simGetPFields(p) {
+  return {
+    desc: p.title || p.description || '',
+    expl: p.explanation || p.expl || '',
+    fc:   p.factors_chain || p.factor_chain || '',
+    tags: p.tags || [],
+    sku:  p.sku  || ''
+  };
+}
+
+// 主分析入口
 function simAnalyze(points, library) {
   const vsLib = [], vsInt = [], MIN = 0.32;
-  for (let i = 0; i < points.length; i++) {
-    const p = points[i];
-    const fc = p.factors_chain || p.factor_chain || '';
+  for (let i=0; i < points.length; i++) {
+    const p  = simGetPFields(points[i]);
     const best = [];
     for (const lib of library) {
-      const s = simScore(p.title, fc, lib[2], lib[3]);
-      if (s >= MIN) best.push({ s, pid: lib[0], bu: lib[1], title: lib[2], fc: lib[3] });
+      const s = simScore(p.desc,p.expl,p.fc,p.tags,p.sku, lib.desc,lib.expl,lib.fc,lib.tags,lib.sku);
+      if (s >= MIN) best.push({s, pid:lib.pid, bu:lib.bu, desc:lib.desc, expl:lib.expl, fc:lib.fc, tags:lib.tags, sku:lib.sku});
     }
-    best.sort((a,b) => b.s - a.s);
-    if (best.length) vsLib.push({ idx: i, point: p, matches: best.slice(0,3) });
+    best.sort((a,b)=>b.s-a.s);
+    if (best.length) vsLib.push({idx:i, point:points[i], matches:best.slice(0,3)});
   }
-  for (let i = 0; i < points.length; i++) {
-    for (let j = i+1; j < points.length; j++) {
-      const pA = points[i], pB = points[j];
-      const s = simScore(pA.title, pA.factors_chain||'', pB.title, pB.factors_chain||'');
-      if (s >= MIN) vsInt.push({ idxA:i, idxB:j, pA, pB, s });
+  for (let i=0; i < points.length; i++) {
+    for (let j=i+1; j < points.length; j++) {
+      const pA=simGetPFields(points[i]), pB=simGetPFields(points[j]);
+      const s = simScore(pA.desc,pA.expl,pA.fc,pA.tags,pA.sku, pB.desc,pB.expl,pB.fc,pB.tags,pB.sku);
+      if (s >= MIN) vsInt.push({idxA:i, idxB:j, pA:points[i], pB:points[j], s});
     }
   }
-  vsInt.sort((a,b) => b.s - a.s);
-  return { vsLib, vsInt };
+  vsInt.sort((a,b)=>b.s-a.s);
+  return {vsLib, vsInt};
 }
 
 // ── 渲染面板 ─────────────────────────────────────────────────
 function simRenderPanel(containerId, points, deleteFn) {
   const container = document.getElementById(containerId);
   if (!container) return;
-
-  // 先加载主库，再渲染
-  const loadingBar = document.createElement('div');
-  loadingBar.style.cssText = 'padding:12px 16px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;font-size:13px;color:#0369a1;margin-top:8px;display:flex;align-items:center;gap:8px;';
-  loadingBar.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid #bae6fd;border-top-color:#0369a1;border-radius:50%;animation:spin 0.7s linear infinite;"></span> 正在从协作平台加载主库数据…';
-  container.appendChild(loadingBar);
-
-  simLoadLibrary().then(library => {
-    loadingBar.remove();
-    _simBuildPanel(containerId, points, deleteFn, library);
-  });
+  const bar = document.createElement('div');
+  bar.style.cssText = 'padding:12px 16px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;font-size:13px;color:#0369a1;margin-top:8px;display:flex;align-items:center;gap:8px;';
+  bar.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid #bae6fd;border-top-color:#0369a1;border-radius:50%;animation:spin .7s linear infinite;"></span> 正在从协作平台加载「' + _SIM_BATCH_NAME + '」主库…';
+  container.appendChild(bar);
+  simLoadLibrary().then(library => { bar.remove(); _simBuildPanel(containerId, points, deleteFn, library); });
 }
 
 function _simBuildPanel(containerId, points, deleteFn, library) {
   const container = document.getElementById(containerId);
   if (!container) return;
+  const {vsLib, vsInt} = simAnalyze(points, library);
+  const libRows = vsLib.flatMap(r => r.matches.map(m=>({idx:r.idx, point:r.point, match:m}))).filter(x=>simLevel(x.match.s)).sort((a,b)=>b.match.s-a.match.s);
+  const intRows = vsInt.filter(r=>simLevel(r.s));
 
-  const { vsLib, vsInt } = simAnalyze(points, library);
-  const libRows = vsLib
-    .flatMap(r => r.matches.map(m => ({ idx: r.idx, point: r.point, match: m })))
-    .filter(x => simLevel(x.match.s))
-    .sort((a,b) => b.match.s - a.match.s);
-  const intRows = vsInt.filter(r => simLevel(r.s));
-
-  const hasAny = libRows.length > 0 || intRows.length > 0;
-
-  if (!hasAny) {
+  if (!libRows.length && !intRows.length) {
     const note = document.createElement('div');
     note.style.cssText = 'padding:14px 18px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:13px;color:#166534;margin-top:8px;';
-    const libNote = library.length
-      ? '与主库（' + library.length + ' 条）及批次内部均无明显相似条目（阈值 0.32），可直接使用。'
-      : '主库暂未加载（请在 Supabase 执行 pp_select_anon 策略），批次内部亦无明显相似条目，可直接使用。';
-    note.innerHTML = '✅ 相似性分析：' + libNote;
+    const libTip = library.length
+      ? '与「'+_SIM_BATCH_NAME+'」主库（'+library.length+' 条）及批次内部均无明显相似（四重算法，阈值 0.32），可直接使用。'
+      : '主库「'+_SIM_BATCH_NAME+'」暂未加载（请执行 pp_select_anon 策略），批次内部亦无明显相似。';
+    note.innerHTML = '✅ 相似性分析：' + libTip;
     container.appendChild(note);
     return;
   }
@@ -9289,99 +9322,97 @@ function _simBuildPanel(containerId, points, deleteFn, library) {
   const wrap = document.createElement('div');
   wrap.className = 'sim-panel-wrap';
   wrap._deleteFn = deleteFn;
-
-  const libLabel = library.length
-    ? '与主库（' + library.length + ' 条）及批次内部对比'
-    : '批次内部对比（主库未加载）';
-
-  wrap.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">' +
-    '<div style="font-size:16px;font-weight:700;color:#111827;">🔍 相似性分析</div>' +
-    '<div style="font-size:12px;color:#9ca3af;">' + libLabel + ' · 纯算法，无需消耗 Token</div>' +
-    '</div>';
+  const libLabel = library.length ? '主库「'+_SIM_BATCH_NAME+'」（'+library.length+' 条）+ 批次内部 · 四重算法，无需消耗 Token' : '批次内部对比（主库未加载）';
+  wrap.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">'
+    + '<div style="font-size:16px;font-weight:700;color:#111827;">🔍 相似性分析</div>'
+    + '<div style="font-size:12px;color:#9ca3af;">'+libLabel+'</div></div>';
 
   // ── 与主库对比 ──────────────────────────────────────────────
   if (libRows.length) {
-    let libHtml = '<div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #f3f4f6;">📚 与主库对比（' + libRows.length + ' 条相似提示）</div>';
-    libRows.forEach(function({ idx, point, match }) {
+    let html = '<div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #f3f4f6;">📚 与「'+_SIM_BATCH_NAME+'」主库对比（'+libRows.length+' 条提示）</div>';
+    libRows.forEach(function({idx, point, match}) {
       const lv  = simLevel(match.s);
-      const exp = simExplain(point.title, point.factors_chain||'', match.title, match.fc);
-      const fcA = (point.factors_chain||'').split(/；|;/).map(p=>'<span style="display:block;margin-top:2px;">· '+p.trim()+'</span>').join('');
-      const fcB = (match.fc||'').split(/；|;/).map(p=>'<span style="display:block;margin-top:2px;">· '+p.trim()+'</span>').join('');
-      libHtml += '<div style="background:'+lv.bg+';border:1px solid '+lv.border+';border-radius:8px;padding:12px 14px;margin-bottom:10px;">' +
-        '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px;">' +
-          '<div><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:'+lv.border+';color:'+lv.color+';">'+lv.badge+'</span>' +
-          '<span style="font-size:12px;color:#6b7280;margin-left:8px;">相似度 '+Math.round(match.s*100)+'%</span></div>' +
-          '<button onclick="simDeletePoint(\''+containerId+'\','+idx+',this.closest(\'.sim-panel-wrap\'))" ' +
-            'style="padding:3px 10px;font-size:12px;font-weight:600;border:1px solid #fca5a5;border-radius:5px;color:#dc2626;background:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;">' +
-            '🗑 删除本条</button>' +
-        '</div>' +
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12.5px;">' +
-          '<div style="background:#fff;border-radius:6px;padding:8px 10px;">' +
-            '<div style="font-size:10px;font-weight:700;color:#9ca3af;margin-bottom:3px;">本批次 #'+(idx+1)+'</div>' +
-            '<div style="font-weight:600;color:#111827;margin-bottom:3px;">'+point.title+'</div>' +
-            '<div style="color:#6b7280;font-size:11.5px;">'+fcA+'</div>' +
-          '</div>' +
-          '<div style="background:#fff;border-radius:6px;padding:8px 10px;">' +
-            '<div style="font-size:10px;font-weight:700;color:#9ca3af;margin-bottom:3px;">主库 '+match.pid+' ['+match.bu+']</div>' +
-            '<div style="font-weight:600;color:#111827;margin-bottom:3px;">'+match.title+'</div>' +
-            '<div style="color:#6b7280;font-size:11.5px;">'+fcB+'</div>' +
-          '</div>' +
-        '</div>' +
-        '<div style="margin-top:8px;font-size:12px;color:'+lv.color+';"><strong>相似原因：</strong>'+exp+
-          (lv.level==='dup' ? ' · <strong>建议：删除本条或确认差异后保留</strong>'
-            : lv.level==='high' ? ' · <strong>建议：确认两条是否为独立业务场景</strong>'
-            : ' · 仅供参考') +
-        '</div>' +
-        '</div>';
+      const pf  = simGetPFields(point);
+      const exp = simExplain(pf.desc,pf.expl,pf.fc,pf.tags,pf.sku, match.desc,match.expl,match.fc,match.tags,match.sku);
+      const fcAHtml = pf.fc.split(/；|;/).map(p=>'<span style="display:block;margin-top:2px;">· '+p.trim()+'</span>').join('');
+      const fcBHtml = match.fc.split(/；|;/).map(p=>'<span style="display:block;margin-top:2px;">· '+p.trim()+'</span>').join('');
+      const tagsAHtml = (Array.isArray(pf.tags)?pf.tags:String(pf.tags||'').split(/[,；、]/)).filter(Boolean).map(t=>'<span style="padding:1px 6px;background:#e5e7eb;border-radius:8px;margin-right:3px;font-size:11px;">'+t+'</span>').join('');
+      const tagsBHtml = (Array.isArray(match.tags)?match.tags:String(match.tags||'').split(/[,；、]/)).filter(Boolean).map(t=>'<span style="padding:1px 6px;background:#e5e7eb;border-radius:8px;margin-right:3px;font-size:11px;">'+t+'</span>').join('');
+      html += '<div style="background:'+lv.bg+';border:1px solid '+lv.border+';border-radius:8px;padding:12px 14px;margin-bottom:10px;">'
+        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px;">'
+          + '<div><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:'+lv.border+';color:'+lv.color+';">'+lv.badge+'</span>'
+          + '<span style="font-size:12px;color:#6b7280;margin-left:8px;">四重综合 '+Math.round(match.s*100)+'%</span></div>'
+          + '<button onclick="simDeletePoint(\''+containerId+'\','+idx+',this.closest(\'.sim-panel-wrap\'))" '
+            + 'style="padding:3px 10px;font-size:12px;font-weight:600;border:1px solid #fca5a5;border-radius:5px;color:#dc2626;background:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;">🗑 删除本条</button>'
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12.5px;">'
+          + '<div style="background:#fff;border-radius:6px;padding:8px 10px;">'
+            + '<div style="font-size:10px;font-weight:700;color:#9ca3af;margin-bottom:3px;">本批次 #'+(idx+1)+'</div>'
+            + '<div style="font-weight:600;color:#111827;margin-bottom:2px;">'+pf.desc+'</div>'
+            + (pf.expl ? '<div style="color:#6b7280;font-size:11.5px;margin-bottom:4px;">'+pf.expl.slice(0,60)+(pf.expl.length>60?'…':'')+'</div>' : '')
+            + '<div style="color:#6b7280;font-size:11.5px;">'+fcAHtml+'</div>'
+            + (tagsAHtml ? '<div style="margin-top:4px;">'+tagsAHtml+'</div>' : '')
+            + (pf.sku ? '<div style="font-size:11px;color:#9ca3af;margin-top:3px;">SKU: '+pf.sku+'</div>' : '')
+          + '</div>'
+          + '<div style="background:#fff;border-radius:6px;padding:8px 10px;">'
+            + '<div style="font-size:10px;font-weight:700;color:#9ca3af;margin-bottom:3px;">主库 '+match.pid+' ['+match.bu+']</div>'
+            + '<div style="font-weight:600;color:#111827;margin-bottom:2px;">'+match.desc+'</div>'
+            + (match.expl ? '<div style="color:#6b7280;font-size:11.5px;margin-bottom:4px;">'+match.expl.slice(0,60)+(match.expl.length>60?'…':'')+'</div>' : '')
+            + '<div style="color:#6b7280;font-size:11.5px;">'+fcBHtml+'</div>'
+            + (tagsBHtml ? '<div style="margin-top:4px;">'+tagsBHtml+'</div>' : '')
+            + (match.sku ? '<div style="font-size:11px;color:#9ca3af;margin-top:3px;">SKU: '+match.sku+'</div>' : '')
+          + '</div>'
+        + '</div>'
+        + '<div style="margin-top:8px;font-size:12px;color:'+lv.color+';"><strong>相似原因：</strong>'+exp
+          + (lv.level==='dup' ? ' · <strong>建议：删除本条或确认差异后保留</strong>' : lv.level==='high' ? ' · <strong>建议：确认是否为独立业务场景</strong>' : ' · 仅供参考')
+        + '</div></div>';
     });
-    const libCard = document.createElement('div');
-    libCard.style.cssText = 'background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:14px;';
-    libCard.innerHTML = libHtml;
-    wrap.appendChild(libCard);
+    const card = document.createElement('div');
+    card.style.cssText = 'background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:14px;';
+    card.innerHTML = html;
+    wrap.appendChild(card);
   }
 
   // ── 批次内部对比 ────────────────────────────────────────────
   if (intRows.length) {
-    let intHtml = '<div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #f3f4f6;">🔄 批次内部对比（' + intRows.length + ' 对相似提示）</div>';
-    intRows.forEach(function({ idxA, idxB, pA, pB, s }) {
+    let html = '<div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #f3f4f6;">🔄 批次内部对比（'+intRows.length+' 对提示）</div>';
+    intRows.forEach(function({idxA, idxB, pA, pB, s}) {
       const lv  = simLevel(s);
-      const exp = simExplain(pA.title, pA.factors_chain||'', pB.title, pB.factors_chain||'');
-      const fcA = (pA.factors_chain||'').split(/；|;/).map(p=>'<span style="display:block;margin-top:2px;">· '+p.trim()+'</span>').join('');
-      const fcB = (pB.factors_chain||'').split(/；|;/).map(p=>'<span style="display:block;margin-top:2px;">· '+p.trim()+'</span>').join('');
-      intHtml += '<div style="background:'+lv.bg+';border:1px solid '+lv.border+';border-radius:8px;padding:12px 14px;margin-bottom:10px;">' +
-        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
-          '<div><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:'+lv.border+';color:'+lv.color+';">'+lv.badge+'</span>' +
-          '<span style="font-size:12px;color:#6b7280;margin-left:8px;">相似度 '+Math.round(s*100)+'%</span></div>' +
-          '<div style="display:flex;gap:6px;">' +
-            '<button onclick="simDeletePoint(\''+containerId+'\','+idxA+',this.closest(\'.sim-panel-wrap\'))" ' +
-              'style="padding:3px 10px;font-size:12px;font-weight:600;border:1px solid #fca5a5;border-radius:5px;color:#dc2626;background:#fff;cursor:pointer;">' +
-              '🗑 删除 #'+(idxA+1)+'</button>' +
-            '<button onclick="simDeletePoint(\''+containerId+'\','+idxB+',this.closest(\'.sim-panel-wrap\'))" ' +
-              'style="padding:3px 10px;font-size:12px;font-weight:600;border:1px solid #fca5a5;border-radius:5px;color:#dc2626;background:#fff;cursor:pointer;">' +
-              '🗑 删除 #'+(idxB+1)+'</button>' +
-          '</div>' +
-        '</div>' +
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12.5px;">' +
-          '<div style="background:#fff;border-radius:6px;padding:8px 10px;">' +
-            '<div style="font-size:10px;font-weight:700;color:#9ca3af;margin-bottom:3px;">本批次 #'+(idxA+1)+'</div>' +
-            '<div style="font-weight:600;color:#111827;margin-bottom:3px;">'+pA.title+'</div>' +
-            '<div style="color:#6b7280;font-size:11.5px;">'+fcA+'</div>' +
-          '</div>' +
-          '<div style="background:#fff;border-radius:6px;padding:8px 10px;">' +
-            '<div style="font-size:10px;font-weight:700;color:#9ca3af;margin-bottom:3px;">本批次 #'+(idxB+1)+'</div>' +
-            '<div style="font-weight:600;color:#111827;margin-bottom:3px;">'+pB.title+'</div>' +
-            '<div style="color:#6b7280;font-size:11.5px;">'+fcB+'</div>' +
-          '</div>' +
-        '</div>' +
-        '<div style="margin-top:8px;font-size:12px;color:'+lv.color+';"><strong>相似原因：</strong>'+exp+
-          (lv.level==='dup' ? ' · <strong>建议：删除其中一条</strong>' : ' · <strong>建议：确认是否为独立业务场景</strong>') +
-        '</div>' +
-        '</div>';
+      const pfA = simGetPFields(pA), pfB = simGetPFields(pB);
+      const exp = simExplain(pfA.desc,pfA.expl,pfA.fc,pfA.tags,pfA.sku, pfB.desc,pfB.expl,pfB.fc,pfB.tags,pfB.sku);
+      const fcAHtml = pfA.fc.split(/；|;/).map(p=>'<span style="display:block;margin-top:2px;">· '+p.trim()+'</span>').join('');
+      const fcBHtml = pfB.fc.split(/；|;/).map(p=>'<span style="display:block;margin-top:2px;">· '+p.trim()+'</span>').join('');
+      html += '<div style="background:'+lv.bg+';border:1px solid '+lv.border+';border-radius:8px;padding:12px 14px;margin-bottom:10px;">'
+        + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
+          + '<div><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:'+lv.border+';color:'+lv.color+';">'+lv.badge+'</span>'
+          + '<span style="font-size:12px;color:#6b7280;margin-left:8px;">四重综合 '+Math.round(s*100)+'%</span></div>'
+          + '<div style="display:flex;gap:6px;">'
+            + '<button onclick="simDeletePoint(\''+containerId+'\','+idxA+',this.closest(\'.sim-panel-wrap\'))" '
+              + 'style="padding:3px 10px;font-size:12px;font-weight:600;border:1px solid #fca5a5;border-radius:5px;color:#dc2626;background:#fff;cursor:pointer;">🗑 删除 #'+(idxA+1)+'</button>'
+            + '<button onclick="simDeletePoint(\''+containerId+'\','+idxB+',this.closest(\'.sim-panel-wrap\'))" '
+              + 'style="padding:3px 10px;font-size:12px;font-weight:600;border:1px solid #fca5a5;border-radius:5px;color:#dc2626;background:#fff;cursor:pointer;">🗑 删除 #'+(idxB+1)+'</button>'
+          + '</div>'
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12.5px;">'
+          + '<div style="background:#fff;border-radius:6px;padding:8px 10px;">'
+            + '<div style="font-size:10px;font-weight:700;color:#9ca3af;margin-bottom:3px;">本批次 #'+(idxA+1)+'</div>'
+            + '<div style="font-weight:600;color:#111827;margin-bottom:2px;">'+pfA.desc+'</div>'
+            + '<div style="color:#6b7280;font-size:11.5px;">'+fcAHtml+'</div>'
+          + '</div>'
+          + '<div style="background:#fff;border-radius:6px;padding:8px 10px;">'
+            + '<div style="font-size:10px;font-weight:700;color:#9ca3af;margin-bottom:3px;">本批次 #'+(idxB+1)+'</div>'
+            + '<div style="font-weight:600;color:#111827;margin-bottom:2px;">'+pfB.desc+'</div>'
+            + '<div style="color:#6b7280;font-size:11.5px;">'+fcBHtml+'</div>'
+          + '</div>'
+        + '</div>'
+        + '<div style="margin-top:8px;font-size:12px;color:'+lv.color+';"><strong>相似原因：</strong>'+exp
+          + (lv.level==='dup' ? ' · <strong>建议：删除其中一条</strong>' : ' · <strong>建议：确认是否为独立业务场景</strong>')
+        + '</div></div>';
     });
-    const intCard = document.createElement('div');
-    intCard.style.cssText = 'background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:14px;';
-    intCard.innerHTML = intHtml;
-    wrap.appendChild(intCard);
+    const card = document.createElement('div');
+    card.style.cssText = 'background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:14px;';
+    card.innerHTML = html;
+    wrap.appendChild(card);
   }
 
   wrap.style.cssText = 'margin-top:16px;';
@@ -9390,11 +9421,11 @@ function _simBuildPanel(containerId, points, deleteFn, library) {
 
 // 删除某条痛点并刷新面板
 function simDeletePoint(containerId, idx, panelWrap) {
-  const deleteFn = panelWrap && panelWrap._deleteFn;
-  if (typeof deleteFn === 'function') deleteFn(idx);
+  const fn = panelWrap && panelWrap._deleteFn;
+  if (typeof fn === 'function') fn(idx);
 }
 
-// CSS 动画（loading spinner）
+// CSS spin 动画
 (function() {
   if (document.getElementById('sim-spin-style')) return;
   const st = document.createElement('style');
@@ -9402,7 +9433,6 @@ function simDeletePoint(containerId, idx, panelWrap) {
   st.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
   document.head.appendChild(st);
 })();
-
 PAGE_INIT_MAP['pain-import'] = function() {};
 
 
