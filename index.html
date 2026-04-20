@@ -7236,7 +7236,7 @@ ${sceneLines}
 
   "tags":[{"label":"标签短语","dim":"主体|资产|动作|约束","weight":"C|B|A"}],
 
-  "skus":["匹配的SKU_ID"],
+  "skus":[{"id":"匹配的SKU_ID","name":"对应SKU名称"}],
 
   "conflict":"核心冲突（≤25字，格式：[客户诉求]与[客观约束/风险]之间的矛盾）",
 
@@ -7564,11 +7564,14 @@ function pgRenderResults(results, newSkus, bu, failNote) {
 
       // 适配SKU
 
-      const skusHtml = (p.skus || []).map(id => {
+      const skusHtml = (p.skus || []).map(item => {
 
-        const sku = SKU_DB.find(s => s.id === id);
+        const id   = (typeof item === 'object' && item !== null) ? (item.id   || '') : String(item);
+        const hint = (typeof item === 'object' && item !== null) ? (item.name || '') : '';
+        const sku  = SKU_DB.find(s => s.id === id);
+        const name = (sku ? sku.name : null) || hint || '';
 
-        return `<span style="padding:3px 9px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;color:#374151;">${sku ? id + ' ' + sku.name : id}</span>`;
+        return `<span style="padding:3px 9px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;color:#374151;">${id}${name ? ' ' + name : ''}</span>`;
 
       }).join('');
 
@@ -8084,11 +8087,14 @@ function pgExportExcel() {
 
     }
 
-    row['适配SKU'] = (p.skus || []).map(id => {
+    row['适配SKU'] = (p.skus || []).map(item => {
 
-      const s = SKU_DB.find(x => x.id === id);
+      const id   = (typeof item === 'object' && item !== null) ? (item.id   || '') : String(item);
+      const hint = (typeof item === 'object' && item !== null) ? (item.name || '') : '';
+      const s    = SKU_DB.find(x => x.id === id);
+      const name = (s ? s.name : null) || hint || '';
 
-      return s ? s.id + ' ' + s.name : id;
+      return id + (name ? ' ' + name : '');
 
     }).join(' / ');
 
@@ -8590,7 +8596,7 @@ ${pointsJson}
 
   "tags":[{"label":"标签短语","dim":"主体|资产|动作|约束","weight":"C|B|A"}],
 
-  "skus":["匹配的SKU_ID"],
+  "skus":[{"id":"匹配的SKU_ID","name":"对应SKU名称"}],
 
   "conflict":"核心冲突（≤25字，[客户诉求]与[客观约束/风险]之间的矛盾）",
 
@@ -8872,11 +8878,14 @@ function piRenderResults(results, newSkus, bu, failNote) {
 
       }).join('');
 
-      const skusHtml = (p.skus || []).map(id => {
+      const skusHtml = (p.skus || []).map(item => {
 
-        const sku = SKU_DB.find(s => s.id === id);
+        const id   = (typeof item === 'object' && item !== null) ? (item.id   || '') : String(item);
+        const hint = (typeof item === 'object' && item !== null) ? (item.name || '') : '';
+        const sku  = SKU_DB.find(s => s.id === id);
+        const name = (sku ? sku.name : null) || hint || '';
 
-        return `<span style="padding:3px 9px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;color:#374151;">${sku ? id + ' ' + sku.name : id}</span>`;
+        return `<span style="padding:3px 9px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;color:#374151;">${id}${name ? ' ' + name : ''}</span>`;
 
       }).join('');
 
@@ -9034,7 +9043,7 @@ function piExportExcel() {
 
     }
 
-    row['适配SKU'] = (p.skus||[]).map(id => { const s=SKU_DB.find(x=>x.id===id); return s?s.id+' '+s.name:id; }).join(' / ');
+    row['适配SKU'] = (p.skus||[]).map(item => { const id=(typeof item==='object'&&item)?item.id||'':String(item); const hint=(typeof item==='object'&&item)?item.name||'':''; const s=SKU_DB.find(x=>x.id===id); const name=(s?s.name:null)||hint||''; return id+(name?' '+name:''); }).join(' / ');
 
     row['核心冲突'] = p.conflict || '';
 
