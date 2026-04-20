@@ -2878,7 +2878,7 @@ tr:hover td { background: #fafafa; }
 
     <h2>📋 痛点结果</h2>
 
-    <p>AI 生成的标准化痛点 · 含核心客户画像标签（主体 · 资产 · 动作 · 约束）与适配 SKU</p>
+    <p>AI 生成的标准化痛点 · 含关键业务标签（主体 · 资产 · 动作 · 约束）与适配 SKU</p>
 
   </div>
 
@@ -7228,9 +7228,9 @@ ${sceneLines}
 
   "scene":"场景名称（与上方完全一致）",
 
-  "desc":"【第一步·先写】痛点说明（80-120字）：详细论证该痛点之所以成为痛点的逻辑与证据，按以下结构逐层展开——①谁（客户身份/角色）②持有什么资产或处于什么资产状态③发生了什么事情或计划采取什么动作④在什么外部条件/监管环境下⑤因为什么制度性原因或结构性矛盾⑥最终遇到了什么具体痛点/障碍/风险。要求逻辑连贯、有理有据、体现专业认知深度，禁用笼统概括",
+  "desc":"【第一步·先写】痛点说明（50-60字）：以一段流畅自然段落说明该痛点，无需编号，内容须覆盖：客户是谁、持有什么资产、发生了什么事/计划做什么、在什么外部条件下、因何制度性矛盾、最终遇到什么具体障碍或风险。逻辑连贯，语言简练，体现专业深度，禁用笼统概括",
 
-  "title":"【第二步·后提炼】痛点描述（8-12字）：从上方痛点说明中提炼最能概括该痛点场景的短句，必须同时包含「谁的」和「什么痛点」两个要素，例如：「创始人股权代持的税务暴露风险」「配偶离婚时境外信托资产分割困境」「Pre-IPO高管跨境减持的合规锁定问题」",
+  "title":"【第二步·后提炼】痛点描述（8-12字）：从上方痛点说明中提炼最能概括该场景的短句，必须同时体现「谁的」和「什么痛点」，例如：「创始人股权代持的税务暴露风险」「离婚时境外信托资产分割困境」「Pre-IPO高管跨境减持的合规锁定」",
 
   "factors_chain":"【重要】从下方【因子库路径表】中精确选取3条与该痛点最匹配的完整路径，用中文分号「；」拼接。路径必须与因子库中完全一致，禁止自行编造或修改路径内容。三条路径分别代表：①谁（商业/职业身份或家庭角色起头）②有什么/发生了什么（资产/动作/税务/法律类路径）③约束/背景（外部监管触发等，如无则另选最贴合的第三条路径）",
 
@@ -7270,7 +7270,7 @@ ${sceneLines}
 
 {
 
-  "id":"建议编号（如New-Legal-001、New-Tax-001、New-CM-001）",
+  "id":"建议编号，仅限三类前缀：Tax-001起（偏税务产品）、Legal-001起（偏法律产品）、CM-001起（偏资本市场&架构产品）。格式如 Tax-001、Legal-002、CM-003，禁止使用其他前缀",
 
   "name":"SKU名称",
 
@@ -7620,7 +7620,7 @@ function pgRenderResults(results, newSkus, bu, failNote) {
 
 
 
-        <div style="font-size:10.5px;font-weight:600;color:#9ca3af;letter-spacing:.5px;margin-bottom:7px;">核心客户画像</div>
+        <div style="font-size:10.5px;font-weight:600;color:#9ca3af;letter-spacing:.5px;margin-bottom:7px;">关键业务标签</div>
 
         <div style="margin-bottom:${skusHtml?14:8}px;">${tagsHtml||'<span style="color:#d1d5db;font-size:12px;">暂无标签</span>'}</div>
 
@@ -8914,7 +8914,7 @@ function piRenderResults(results, newSkus, bu, failNote) {
 
         ${factorHtml}
 
-        <div style="font-size:10.5px;font-weight:600;color:#9ca3af;letter-spacing:.5px;margin-bottom:7px;">核心客户画像</div>
+        <div style="font-size:10.5px;font-weight:600;color:#9ca3af;letter-spacing:.5px;margin-bottom:7px;">关键业务标签</div>
 
         <div style="margin-bottom:${skusHtml?14:8}px;">${tagsHtml||'<span style="color:#d1d5db;font-size:12px;">暂无标签</span>'}</div>
 
