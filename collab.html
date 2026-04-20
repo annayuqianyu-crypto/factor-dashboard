@@ -707,7 +707,7 @@ function renderList(){
       <td class="td-pid">${p.pid||'-'}</td>
       <td class="td-desc">
         <div class="td-clamp">${esc(p.description||'（无描述）')}</div>
-        ${p.tags?.length?`<div class="td-tags">${p.tags.slice(0,3).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>`:''}
+        ${p.tags?.length?`<div class="td-tags">${p.tags.slice(0,5).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>`:''}
       </td>
       <td><span class="badge bu-${p.bu}">${p.bu}</span></td>
       <td><span class="badge s-${p.status}">${statusLabel(p)}</span></td>
@@ -756,6 +756,8 @@ const EDIT_FIELDS=[
   {k:'tag1', l:'Tag 1', rows:1, pair:{k:'tag1_weight', l:'权重'}},
   {k:'tag2', l:'Tag 2', rows:1, pair:{k:'tag2_weight', l:'权重'}},
   {k:'tag3', l:'Tag 3', rows:1, pair:{k:'tag3_weight', l:'权重'}},
+  {k:'tag4', l:'Tag 4', rows:1, pair:{k:'tag4_weight', l:'权重'}},
+  {k:'tag5', l:'Tag 5', rows:1, pair:{k:'tag5_weight', l:'权重'}},
   {k:'sku',           l:'SKU 匹配'},
   {k:'risks',         l:'潜在风险'},
   {k:'solution',      l:'解决方案'},
@@ -814,7 +816,7 @@ function renderEditFields(pp){
             <div><div class="f-label">${f.pair.l}</div>
               <div class="f-val">${pv?esc(pv):'<span class="f-empty">—</span>'}</div></div>
           </div></div>`
-        if(f.k==='tag3') html+=TAG_NOTE
+        if(f.k==='tag5') html+=TAG_NOTE
       } else {
         html+=`<div class="edit-field-block">
           <div class="f-label${f.dim?' dim-label':''}">${f.l}</div>
@@ -1335,7 +1337,7 @@ function parseXlsx(file){
         const pid=row[FC.pid]; if(!pid) continue
         const buRaw=row[FC.bu_raw]?String(row[FC.bu_raw]).trim():''
         const bu=BU_MAP[buRaw]||buRaw
-        const tags=[row[FC.tag1],row[FC.tag2],row[FC.tag3]].map(t=>t?String(t).trim():null).filter(Boolean)
+        const tags=[row[FC.tag1],row[FC.tag2],row[FC.tag3],row[FC.tag4],row[FC.tag5]].map(t=>t?String(t).trim():null).filter(Boolean)
         const record={
           pid:String(pid).trim(), bu,
           description:xs(row[FC.description]), explanation:xs(row[FC.explanation]),
@@ -1343,6 +1345,8 @@ function parseXlsx(file){
           tag1:xs(row[FC.tag1]), tag1_weight:xs(row[FC.tag1_weight]),
           tag2:xs(row[FC.tag2]), tag2_weight:xs(row[FC.tag2_weight]),
           tag3:xs(row[FC.tag3]), tag3_weight:xs(row[FC.tag3_weight]),
+          tag4:xs(row[FC.tag4]), tag4_weight:xs(row[FC.tag4_weight]),
+          tag5:xs(row[FC.tag5]), tag5_weight:xs(row[FC.tag5_weight]),
           tags, sku:xs(row[FC.sku]), core_conflict:xs(row[FC.core_conflict]),
           risks:xs(row[FC.risks]), solution:xs(row[FC.solution]),
           expected_effect:xs(row[FC.expected_effect])
@@ -1428,11 +1432,13 @@ async function exportPPs(){
   if(!data?.length){toast('暂无已确认痛点','err');return}
   const headers=['编号','BU','痛点描述','痛点说明','场景分类','因子组合','核心要素',
     '核心冲突','相关法律法规','Tag1','Tag1权重','Tag2','Tag2权重','Tag3','Tag3权重',
+    'Tag4','Tag4权重','Tag5','Tag5权重',
     'SKU','潜在风险','解决方案','预期效果']
   const rows=[headers,...data.map(p=>[
     p.pid,p.bu,p.description,p.explanation,p.scene_category,
     p.factor_chain,p.core_elements,p.core_conflict,p.legal_refs,
     p.tag1,p.tag1_weight,p.tag2,p.tag2_weight,p.tag3,p.tag3_weight,
+    p.tag4||'',p.tag4_weight||'',p.tag5||'',p.tag5_weight||'',
     p.sku,p.risks,p.solution,p.expected_effect
   ])]
   const ws=XLSX.utils.aoa_to_sheet(rows)
