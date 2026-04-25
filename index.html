@@ -9425,17 +9425,51 @@ ${sourceList}
     const m    = raw.match(/\{[\s\S]*\}/);
     if (!m) throw new Error('未返回JSON');
     const cleaned = cleanLLMJson(m[0]);
+    // 字符串感知的对象提取器：用括号计数定位每个 {...}，正确处理字符串内的 { } 字符
+    const extractObjects = (txt) => {
+      const out = [];
+      let i = 0, n = txt.length;
+      while (i < n) {
+        if (txt[i] !== '{') { i++; continue; }
+        let depth = 0, inStr = false, esc = false, start = i;
+        for (; i < n; i++) {
+          const c = txt[i];
+          if (esc) { esc = false; continue; }
+          if (c === '\\') { esc = true; continue; }
+          if (c === '"') { inStr = !inStr; continue; }
+          if (inStr) continue;
+          if (c === '{') depth++;
+          else if (c === '}') { depth--; if (depth === 0) { out.push(txt.substring(start, i+1)); i++; break; } }
+        }
+        if (depth !== 0) break;
+      }
+      return out;
+    };
     let parsed;
     try {
       parsed = JSON.parse(cleaned);
     } catch(e1) {
-      // 降级：逐对象提取（兼容 LLM 在数组尾部追加说明文字的情况）
-      const objs = cleaned.match(/\{(?:[^{}]|\[[^\[\]]*\])*\}/g) || [];
-      const extracted = [];
-      for (const obj of objs) {
+      // 降级 1：在清洗后的文本上逐对象提取
+      let extracted = [];
+      for (const obj of extractObjects(cleaned)) {
         try { const o = JSON.parse(obj); if (o.scene) extracted.push(o); } catch(_) {}
       }
-      if (!extracted.length) throw new Error('JSON解析失败：' + e1.message);
+      // 降级 2：如果清洗后还是不行，从原始文本上重新提取并各自单独清洗
+      if (!extracted.length) {
+        for (const obj of extractObjects(raw)) {
+          try { const o = JSON.parse(cleanLLMJson(obj)); if (o.scene) extracted.push(o); } catch(_) {}
+        }
+      }
+      if (!extracted.length) {
+        // 把出错位置附近的文本片段写进 console，便于诊断
+        const m2 = /position (\d+)/.exec(e1.message);
+        if (m2) {
+          const p = +m2[1];
+          console.warn('[radar] JSON parse failed near position', p, ':', cleaned.substring(Math.max(0,p-80), p+80));
+        }
+        console.warn('[radar] raw response:', raw);
+        throw new Error('JSON解析失败：' + e1.message + '（原始响应已输出到 Console，按 F12 查看）');
+      }
       parsed = { scenes: extracted };
     }
     const scenes = parsed.scenes || [];
