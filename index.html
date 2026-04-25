@@ -9398,6 +9398,7 @@ ${sourceList}
 - 场景须与高净值客户/家族办公室税务、传承、架构相关
 - 优先选择政策变化窗口期、监管趋严领域、跨境新动向
 - 禁用"筹划/避税/减税"等词，可用"税务合规/税负管理"
+- **【硬性规则】source_names 字段必须从上方${TAX_SOURCES.length}个信息源的"名称"中精确选取（1-3个），名称须与列表中的写法完全一致，禁止编造或简写**
 
 输出格式（严格JSON，不输出任何其他文字）：
 {"scenes":[
@@ -9405,7 +9406,7 @@ ${sourceList}
     "scene":"场景名称（≤15字，含客群+事件）",
     "reason":"建议原因（该场景为何是当前热点，60字内）",
     "source_dim":"来源维度",
-    "source_names":["参考信息源1","参考信息源2"],
+    "source_names":["必须严格来自上方信息源列表的名称1","名称2"],
     "trend":"近期政策或市场动向简述（50字内）"
   }
 ]}`;
@@ -9501,8 +9502,28 @@ ${sourceList}
     const scenes = parsed.scenes || [];
     if (!scenes.length) throw new Error('场景数组为空');
 
+    // 把每个场景的 source_names 严格匹配回 TAX_SOURCES（精确名 + 模糊名兜底）
+    const sourceNameSet = new Set(TAX_SOURCES.map(t => t.name));
+    scenes.forEach(s => {
+      const raw = (s.source_names || []).map(n => String(n||'').trim()).filter(Boolean);
+      const matched = [];
+      raw.forEach(n => {
+        if (sourceNameSet.has(n)) { matched.push(n); return; }
+        // 模糊匹配：去括号、去空格后比对
+        const norm = n.replace(/[（()）\s]/g,'');
+        const hit = TAX_SOURCES.find(t => t.name.replace(/[（()）\s]/g,'') === norm);
+        if (hit) matched.push(hit.name);
+      });
+      s._matched_sources = matched;
+    });
+
     // 渲染结果卡片
-    result.innerHTML = scenes.map((s,i) => `
+    result.innerHTML = scenes.map((s,i) => {
+      const matched = s._matched_sources || [];
+      const sourceLine = matched.length
+        ? matched.map(n => `<span style="padding:3px 9px;background:#fef3c7;color:#92400e;border:1px solid #fde68a;border-radius:10px;font-size:11px;font-weight:600;">${n}</span>`).join(' ')
+        : `<span style="color:#9ca3af;font-size:11px;font-style:italic;">（AI 未给出匹配的信息源，请人工核对）</span>`;
+      return `
       <div style="border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:10px;background:#fafafa;">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
           <div style="flex:1;">
@@ -9513,8 +9534,11 @@ ${sourceList}
             <div style="font-size:12px;color:#4b5563;margin-bottom:5px;">
               <span style="color:#6b7280;font-weight:600;">📰 近期动向：</span>${s.trend||''}
             </div>
+            <div style="font-size:12px;color:#4b5563;margin-top:8px;padding-top:8px;border-top:1px dashed #e5e7eb;">
+              <div style="margin-bottom:5px;"><span style="color:#92400e;font-weight:700;">📍 场景来源：</span></div>
+              <div style="display:flex;flex-wrap:wrap;gap:5px;">${sourceLine}</div>
+            </div>
             <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
-              ${(s.source_names||[]).map(n=>`<span style="padding:2px 7px;background:#dbeafe;color:#1d4ed8;border-radius:10px;font-size:10px;">${n}</span>`).join('')}
               <span style="padding:2px 7px;background:#f1f5f9;color:#64748b;border-radius:10px;font-size:10px;">${s.source_dim||''}</span>
             </div>
           </div>
@@ -9523,7 +9547,8 @@ ${sourceList}
             + 加入场景池
           </button>
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
 
     // 更新时间
     const upd = document.getElementById('radar-tax-lastupd');
