@@ -7557,15 +7557,18 @@ let _pgLastBu      = 'All Department';
 
 
 
-// ── LLM JSON 清洗：处理尾随逗号、markdown 代码块、行内注释 ──────
+// ── LLM JSON 清洗：处理尾随逗号、markdown 代码块、行内注释、裸换行 ──
 function cleanLLMJson(s) {
   // 1. 去掉 markdown 代码块包裹（```json ... ``` 或 ``` ... ```）
   s = s.replace(/^```(?:json)?\s*/im, '').replace(/```\s*$/im, '');
   // 2. 去掉行内注释（// 到行尾），但保留字符串内的 // 不动
-  //    简单策略：只删行首或逗号/冒号后的注释行
   s = s.replace(/([,\[{:])\s*\/\/[^\n]*/g, '$1');
   // 3. 去掉尾随逗号（, 后紧跟 ] 或 }，可含空白/换行）
   s = s.replace(/,(\s*[\]}])/g, '$1');
+  // 4. 转义字符串值内的裸换行/回车/制表符（JSON规范不允许字符串内有字面控制字符）
+  s = s.replace(/"(?:[^"\\]|\\.)*"/g, function(m) {
+    return m.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
+  });
   return s.trim();
 }
 
