@@ -7574,6 +7574,9 @@ function cleanLLMJson(s) {
   });
   // 5. 删除数组中最后一个 } 与 ] 之间的多余文字（LLM 有时在末尾追加中文说明或英文注释）
   s = s.replace(/\}(\s*)([\u4e00-\u9fa5A-Za-z\(（][^\]]*?)(\s*\])/g, '}$3');
+  // 6. 修复被截断的字符串值（如 "url": "https:[换行] → 自动闭合引号；同样适用于 title/source 等）
+  //    安全前提：[^"\n]*? 不会跨越正常引号，因此不会破坏完整的字符串
+  s = s.replace(/("(?:url|title|source|scene|reason|trend|source_dim)"\s*:\s*"[^"\n]*?)(\s*\n)/g, '$1"$2');
   return s.trim();
 }
 
@@ -9476,15 +9479,23 @@ ${sourceList}
     try {
       parsed = JSON.parse(cleaned);
     } catch(e1) {
-      // 降级 1：在清洗后的文本上逐对象提取
+      // 降级 1：在清洗后的文本上逐对象提取；单条失败时再尝试把 articles 清空
       let extracted = [];
+      const tryParseScene = (obj) => {
+        try { return JSON.parse(obj); } catch(_) {}
+        // 二次尝试：移除 articles 数组（最常见的内嵌损坏源）
+        try { return JSON.parse(obj.replace(/"articles"\s*:\s*\[[\s\S]*?\](?=\s*[,}])/, '"articles":[]')); } catch(_) {}
+        return null;
+      };
       for (const obj of extractObjects(cleaned)) {
-        try { const o = JSON.parse(obj); if (o.scene) extracted.push(o); } catch(_) {}
+        const o = tryParseScene(obj);
+        if (o && o.scene) extracted.push(o);
       }
       // 降级 2：如果清洗后还是不行，从原始文本上重新提取并各自单独清洗
       if (!extracted.length) {
         for (const obj of extractObjects(raw)) {
-          try { const o = JSON.parse(cleanLLMJson(obj)); if (o.scene) extracted.push(o); } catch(_) {}
+          const o = tryParseScene(cleanLLMJson(obj));
+          if (o && o.scene) extracted.push(o);
         }
       }
       if (!extracted.length) {
