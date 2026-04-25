@@ -7569,6 +7569,8 @@ function cleanLLMJson(s) {
   s = s.replace(/"(?:[^"\\]|\\.)*"/g, function(m) {
     return m.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
   });
+  // 5. 删除数组中最后一个 } 与 ] 之间的多余文字（LLM 有时在末尾追加中文说明或英文注释）
+  s = s.replace(/\}(\s*)([\u4e00-\u9fa5A-Za-z\(（][^\]]*?)(\s*\])/g, '}$3');
   return s.trim();
 }
 
@@ -9422,7 +9424,20 @@ ${sourceList}
     const raw  = data.choices?.[0]?.message?.content || '';
     const m    = raw.match(/\{[\s\S]*\}/);
     if (!m) throw new Error('未返回JSON');
-    const parsed = JSON.parse(cleanLLMJson(m[0]));
+    const cleaned = cleanLLMJson(m[0]);
+    let parsed;
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch(e1) {
+      // 降级：逐对象提取（兼容 LLM 在数组尾部追加说明文字的情况）
+      const objs = cleaned.match(/\{(?:[^{}]|\[[^\[\]]*\])*\}/g) || [];
+      const extracted = [];
+      for (const obj of objs) {
+        try { const o = JSON.parse(obj); if (o.scene) extracted.push(o); } catch(_) {}
+      }
+      if (!extracted.length) throw new Error('JSON解析失败：' + e1.message);
+      parsed = { scenes: extracted };
+    }
     const scenes = parsed.scenes || [];
     if (!scenes.length) throw new Error('场景数组为空');
 
