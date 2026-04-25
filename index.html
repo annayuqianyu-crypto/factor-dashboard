@@ -9366,9 +9366,8 @@ function switchBuRadar(bu) {
 // ── Tax 雷达：调用 AI 生成场景 ───────────────────────────────
 async function radarRefresh(bu) {
   if (bu !== 'tax') return; // Legal/CM 暂未实现
-  const base = (document.getElementById('apiBaseInput')||{}).value ||
-               localStorage.getItem('pg_base') || 'https://wolfai.top/v1';
-  const key  = localStorage.getItem('pg_key') || '';
+  const base = localStorage.getItem('pg_api_base') || 'https://wolfai.top/v1';
+  const key  = localStorage.getItem('pg_api_key')  || '';
   if (!key) { alert('请先在痛点生成页填写 API Key'); return; }
 
   const btn  = document.querySelector('[onclick="radarRefresh(\'tax\')"]');
@@ -9411,7 +9410,7 @@ ${sourceList}
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
       body: JSON.stringify({
-        model: localStorage.getItem('pg_model') || 'claude-sonnet-4-5-20250929',
+        model: localStorage.getItem('pg_api_model') || 'claude-sonnet-4-5-20250929',
         messages:[{role:'user',content:prompt}],
         max_tokens:2000, temperature:0.7
       })
