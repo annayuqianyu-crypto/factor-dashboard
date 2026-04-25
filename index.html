@@ -9461,14 +9461,26 @@ ${sourceList}
         }
       }
       if (!extracted.length) {
-        // 把出错位置附近的文本片段写进 console，便于诊断
         const m2 = /position (\d+)/.exec(e1.message);
+        let snippet = '';
         if (m2) {
           const p = +m2[1];
-          console.warn('[radar] JSON parse failed near position', p, ':', cleaned.substring(Math.max(0,p-80), p+80));
+          snippet = cleaned.substring(Math.max(0,p-100), Math.min(cleaned.length, p+100));
         }
-        console.warn('[radar] raw response:', raw);
-        throw new Error('JSON解析失败：' + e1.message + '（原始响应已输出到 Console，按 F12 查看）');
+        console.warn('[radar] JSON parse failed:', e1.message);
+        console.warn('[radar] near position snippet:', snippet);
+        console.warn('[radar] raw response (full):', raw);
+        // 把片段直接显示在页面上，避免依赖 Console
+        const safeSnip = (snippet||'(无法定位)').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+        const safeRaw  = raw.substring(0,500).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+        result.innerHTML = `<div style="padding:14px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;font-size:12px;color:#991b1b;">
+          <div style="font-weight:700;margin-bottom:8px;">⚠️ JSON 解析失败：${e1.message}</div>
+          <div style="font-size:11px;color:#7f1d1d;margin-bottom:6px;font-weight:600;">出错位置前后 200 字符：</div>
+          <pre style="background:#fff;padding:8px;border-radius:5px;font-size:11px;white-space:pre-wrap;word-break:break-all;color:#374151;max-height:200px;overflow:auto;">${safeSnip}</pre>
+          <div style="font-size:11px;color:#7f1d1d;margin:8px 0 6px;font-weight:600;">原始响应（前 500 字符）：</div>
+          <pre style="background:#fff;padding:8px;border-radius:5px;font-size:11px;white-space:pre-wrap;word-break:break-all;color:#374151;max-height:200px;overflow:auto;">${safeRaw}</pre>
+        </div>`;
+        return;
       }
       parsed = { scenes: extracted };
     }
