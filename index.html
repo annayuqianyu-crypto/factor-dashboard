@@ -2588,6 +2588,108 @@ tr:hover td { background: #fafafa; }
 
 </div>
 
+  <!-- ══ 专项场景雷达 ══ -->
+  <div style="margin-top:32px;">
+    <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+      <span>📡</span> 专项场景雷达
+      <span style="font-size:11px;font-weight:400;color:#9ca3af;margin-left:4px;">各BU基于偏好信息源生成建议场景</span>
+    </div>
+    <div style="display:flex;gap:4px;margin-bottom:0;border-bottom:2px solid #e5e7eb;">
+      <button id="bu-tab-tax" onclick="switchBuRadar('tax')"
+        style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#0369a1;color:#fff;border-bottom:2px solid #0369a1;margin-bottom:-2px;">
+        💼 Tax 专项场景
+      </button>
+      <button id="bu-tab-legal" onclick="switchBuRadar('legal')"
+        style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#f3f4f6;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">
+        ⚖️ Legal 专项场景
+      </button>
+      <button id="bu-tab-cm" onclick="switchBuRadar('cm')"
+        style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#f3f4f6;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">
+        📈 CM 专项场景
+      </button>
+    </div>
+
+    <!-- Tax 雷达面板 -->
+    <div id="radar-panel-tax" style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div>
+          <div style="font-size:13.5px;font-weight:700;color:#0369a1;">税务专项场景雷达</div>
+          <div style="font-size:12px;color:#6b7280;margin-top:3px;">基于 40 个税务重点信息源，AI 合成当前值得关注的场景建议</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span id="radar-tax-lastupd" style="font-size:11px;color:#9ca3af;"></span>
+          <button onclick="radarRefresh('tax')"
+            style="padding:8px 18px;background:#0369a1;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
+            <span id="radar-tax-spin">⟳</span> 更新信息
+          </button>
+        </div>
+      </div>
+      <details style="margin-bottom:14px;">
+        <summary style="font-size:12px;color:#6b7280;cursor:pointer;user-select:none;">📋 查看全部 40 个信息源</summary>
+        <div id="radar-tax-sources" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;"></div>
+      </details>
+      <div id="radar-tax-result" style="min-height:80px;"></div>
+    </div>
+
+    <!-- Legal 雷达面板（占位） -->
+    <div id="radar-panel-legal" style="display:none;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
+      <div style="text-align:center;padding:40px 0;color:#9ca3af;">
+        <div style="font-size:28px;margin-bottom:10px;">⚖️</div>
+        <div style="font-size:14px;font-weight:600;">Legal 专项场景雷达</div>
+        <div style="font-size:12px;margin-top:6px;">法律 BU 信息源配置完成后上线，敬请期待</div>
+      </div>
+    </div>
+
+    <!-- CM 雷达面板（占位） -->
+    <div id="radar-panel-cm" style="display:none;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
+      <div style="text-align:center;padding:40px 0;color:#9ca3af;">
+        <div style="font-size:28px;margin-bottom:10px;">📈</div>
+        <div style="font-size:14px;font-weight:600;">CM 专项场景雷达</div>
+        <div style="font-size:12px;margin-top:6px;">资本市场 BU 信息源配置完成后上线，敬请期待</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 待用场景池 ══ -->
+  <div style="margin-top:32px;border:2px solid #dbeafe;border-radius:12px;background:#f8faff;padding:20px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <div style="font-size:15px;font-weight:700;color:#1e40af;display:flex;align-items:center;gap:7px;">
+          📥 待用场景池
+        </div>
+        <div style="font-size:12px;color:#6b7280;margin-top:3px;">各 BU 雷达生成的场景暂存于此，点击「导入」后直接进入痛点生成</div>
+      </div>
+      <button onclick="clearAllPools()"
+        style="padding:6px 14px;font-size:12px;color:#dc2626;background:#fff;border:1px solid #fca5a5;border-radius:6px;cursor:pointer;">
+        清空全部
+      </button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:12px;font-weight:700;color:#1d4ed8;">💼 Tax 场景池</div>
+          <button onclick="clearPool('tax')" style="font-size:10px;color:#6b7280;background:none;border:none;cursor:pointer;">清空</button>
+        </div>
+        <div id="pool-tax-items"><div style="text-align:center;padding:20px 0;font-size:12px;color:#9ca3af;">暂无场景，点击上方「更新信息」生成</div></div>
+      </div>
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:12px;font-weight:700;color:#15803d;">⚖️ Legal 场景池</div>
+          <button onclick="clearPool('legal')" style="font-size:10px;color:#6b7280;background:none;border:none;cursor:pointer;">清空</button>
+        </div>
+        <div id="pool-legal-items"><div style="text-align:center;padding:20px 0;font-size:12px;color:#9ca3af;">Legal 雷达上线后可生成</div></div>
+      </div>
+      <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:12px;font-weight:700;color:#c2410c;">📈 CM 场景池</div>
+          <button onclick="clearPool('cm')" style="font-size:10px;color:#6b7280;background:none;border:none;cursor:pointer;">清空</button>
+        </div>
+        <div id="pool-cm-items"><div style="text-align:center;padding:20px 0;font-size:12px;color:#9ca3af;">CM 雷达上线后可生成</div></div>
+      </div>
+    </div>
+  </div>
+
+
 
 
 
@@ -7368,7 +7470,7 @@ ${factorPathsText}
 
       if (!objM) throw new Error('模型未返回 JSON\n\n原始输出：' + raw.slice(0, 500));
 
-      const parsed = JSON.parse(objM[0]);
+      const parsed = JSON.parse(cleanLLMJson(objM[0]));
 
       points  = parsed.points  || parsed;          // 兼容旧格式纯数组
 
@@ -7457,6 +7559,18 @@ let _pgLastNewSkus = [];
 let _pgLastBu      = 'All Department';
 
 
+
+// ── LLM JSON 清洗：处理尾随逗号、markdown 代码块、行内注释 ──────
+function cleanLLMJson(s) {
+  // 1. 去掉 markdown 代码块包裹（```json ... ``` 或 ``` ... ```）
+  s = s.replace(/^```(?:json)?\s*/im, '').replace(/```\s*$/im, '');
+  // 2. 去掉行内注释（// 到行尾），但保留字符串内的 // 不动
+  //    简单策略：只删行首或逗号/冒号后的注释行
+  s = s.replace(/([,\[{:])\s*\/\/[^\n]*/g, '$1');
+  // 3. 去掉尾随逗号（, 后紧跟 ] 或 }，可含空白/换行）
+  s = s.replace(/,(\s*[\]}])/g, '$1');
+  return s.trim();
+}
 
 function pgRenderResults(results, newSkus, bu, failNote) {
 
@@ -8720,7 +8834,7 @@ ${factorPathsText}
 
       if (!m) throw new Error('批次 ' + (i+1) + ' 未返回 JSON');
 
-      const parsed = JSON.parse(m[0]);
+      const parsed = JSON.parse(cleanLLMJson(m[0]));
 
       allEnriched.push(...(parsed.points  || []));
 
@@ -9160,6 +9274,287 @@ PAGE_INIT_MAP['pain-generate'] = function() {
   pgLoadKey();
 
 };
+
+
+// ══════════════════════════════════════════════════════════════
+// 专项场景雷达 & 待用场景池
+// ══════════════════════════════════════════════════════════════
+
+const TAX_SOURCES = [
+  {dim:'证券行业', name:'中国证监会', url:'http://www.csrc.gov.cn', section:'监管动态/法律法规', keywords:'减持新规、再融资、并购重组'},
+  {dim:'证券行业', name:'中国证券报', url:'http://www.cs.com.cn', section:'公司/市场', keywords:'上市公司、资本市场、证券业务'},
+  {dim:'证券行业', name:'证券时报', url:'http://www.stcn.com', section:'券商/资管', keywords:'券商创新、资管业务、财富管理'},
+  {dim:'证券行业', name:'中证网', url:'http://www.cs.com.cn', section:'研报/数据', keywords:'行业研究、市场数据、证券分析'},
+  {dim:'证券行业', name:'中国证券业协会', url:'http://www.sac.net.cn', section:'行业规范/研究', keywords:'从业规范、业务标准、行业数据'},
+  {dim:'银行业', name:'中国银行业杂志', url:'http://www.chinabanking.com.cn', section:'封面专题/行业研究', keywords:'银行业转型、数字化转型、私人银行'},
+  {dim:'银行业', name:'中国银行业协会', url:'http://www.china-cba.net', section:'行业研究/政策法规', keywords:'私人银行、财富管理、家族信托'},
+  {dim:'银行业', name:'中国货币网', url:'http://www.chinamoney.com.cn', section:'市场分析/宏观研究', keywords:'货币政策、利率走势、信贷政策'},
+  {dim:'银行业', name:'中国支付清算协会', url:'http://www.pcac.org.cn', section:'政策法规/行业动态', keywords:'支付清算、数字货币、银行业务'},
+  {dim:'银行业', name:'金融监管研究院', url:'https://www.banklaw.com', section:'监管解读/政策分析', keywords:'银行业监管、合规管理、政策解读'},
+  {dim:'聚合财经', name:'财联社', url:'https://www.cls.cn', section:'电报/深度', keywords:'银行业务、金融监管、市场动态'},
+  {dim:'聚合财经', name:'华尔街见闻', url:'https://wallstreetcn.com', section:'快讯/深度', keywords:'货币政策、利率、银行业动态'},
+  {dim:'聚合财经', name:'路透中文网', url:'https://cn.reuters.com', section:'财经/商业', keywords:'全球经济、金融市场、银行业'},
+  {dim:'聚合财经', name:'彭博社', url:'https://www.bloomberg.com/china', section:'市场/经济', keywords:'全球市场、经济数据、金融资讯'},
+  {dim:'聚合财经', name:'东方财富网', url:'https://www.eastmoney.com', section:'要闻/数据', keywords:'财经要闻、市场数据、行业动态'},
+  {dim:'聚合财经', name:'和讯网', url:'https://www.hexun.com', section:'新闻/观点', keywords:'财经评论、市场分析、行业研究'},
+  {dim:'聚合财经', name:'零壹财经', url:'https://www.01caijing.com', section:'银行科技/数字金融', keywords:'数字银行、金融科技、银行业创新'},
+  {dim:'家企架构与资本市场', name:'巨潮资讯网', url:'http://www.cninfo.com.cn', section:'上市公司公告', keywords:'股东减持、股权激励、并购重组、非公开发行'},
+  {dim:'家企架构与资本市场', name:'投中网', url:'https://www.chinaventure.com.cn', section:'资本市场/PE/VC', keywords:'PE/VC、IPO、创业投资、QDLP、QFLP'},
+  {dim:'家企架构与资本市场', name:'上海证券交易所', url:'http://www.sse.com.cn', section:'规则/监管动态', keywords:'上市规则、监管指引、问询函、减持细则'},
+  {dim:'家企架构与资本市场', name:'清科研究中心', url:'https://research.pedaily.cn', section:'研究报告', keywords:'股权投资、市场报告、投资趋势'},
+  {dim:'家族财富传承与全球税务规划', name:'国家税务总局', url:'http://www.chinatax.gov.cn', section:'政策文件', keywords:'税收协定、非居民企业、股权转让、个人所得税'},
+  {dim:'家族财富传承与全球税务规划', name:'美国国税局(IRS)', url:'https://www.irs.gov', section:'Forms and Instructions/News', keywords:'Estate Tax, Gift Tax, Expatriation, FATCA'},
+  {dim:'家族财富传承与全球税务规划', name:'香港证监会(SFC)', url:'https://www.sfc.hk', section:'新闻稿/监管政策', keywords:'家族办公室、虚拟资产、信托、SFO'},
+  {dim:'家族财富传承与全球税务规划', name:'新加坡金管局(MAS)', url:'https://www.mas.gov.sg', section:'News and Publications', keywords:'Single Family Office, 13O, 13U, Tax Incentive'},
+  {dim:'家族财富传承与全球税务规划', name:'STEP.org', url:'https://www.step.org', section:'News', keywords:'Trust, Estate Planning, Cross-border'},
+  {dim:'家族财富传承与全球税务规划', name:'新加坡税务(IRAS)', url:'https://www.iras.gov.sg/', section:'Taxes', keywords:'Pillar 2, Transfer Pricing, 13(8), 10(25)'},
+  {dim:'家族财富传承与全球税务规划', name:'香港税务局(IRD)', url:'https://www.ird.gov.hk/chs/welcome.htm', section:'最新消息', keywords:'支柱二、转让定价、离岸豁免、FSIE、OFC'},
+  {dim:'保险行业', name:'中国银行保险报', url:'http://www.cbimc.cn', section:'保险/深度', keywords:'保险金信托、年金保险、大额保单'},
+  {dim:'保险行业', name:'慧保天下', url:'https://www.huibaoxiang.com', section:'行业观察/产品创新', keywords:'保险资管、寿险转型、保险+信托'},
+  {dim:'保险行业', name:'今日保', url:'https://www.jinribao.cn', section:'行业要闻/高净值', keywords:'高净值保险、财富管理、传承规划'},
+  {dim:'保险行业', name:'中国保险资产管理业协会', url:'http://www.iamac.org.cn', section:'政策研究/行业数据', keywords:'保险资金、资产配置、另类投资'},
+  {dim:'信托行业', name:'中国信托业协会', url:'http://www.xtxh.net', section:'行业研究/政策法规', keywords:'家族信托、服务信托、资产证券化'},
+  {dim:'信托行业', name:'用益信托网', url:'https://www.yanglee.com', section:'行业新闻/研究报告', keywords:'信托产品、业务创新、市场数据'},
+  {dim:'信托行业', name:'信睿周刊', url:'https://www.xinruizhoukan.com', section:'专题研究/实务探讨', keywords:'信托法务、案例解析、业务模式'},
+  {dim:'全球法律与新兴业务', name:'CoinDesk', url:'https://www.coindesk.com', section:'Policy & Regulation', keywords:'Regulation, Virtual Asset, Metaverse'},
+  {dim:'组织效能与ESG价值', name:'上海证券交易所(ESG)', url:'http://www.sse.com.cn', section:'可持续发展/ESG专区', keywords:'ESG披露、可持续发展报告、绿色金融'},
+  {dim:'组织效能与ESG价值', name:'人力资源和社会保障部', url:'http://www.mohrss.gov.cn', section:'政策法规', keywords:'企业年金、社保、薪酬福利'},
+  {dim:'组织效能与ESG价值', name:'哈佛商业评论(中文版)', url:'https://www.hbrchina.org', section:'组织效能/领导力', keywords:'组织效能、战略规划、激励机制'},
+];
+
+// ── 初始化信息源标签 ─────────────────────────────────────────
+function radarInitSources() {
+  const el = document.getElementById('radar-tax-sources');
+  if (!el || el.children.length > 0) return;
+  const dimColors = {
+    '证券行业':'#dbeafe:#1d4ed8', '银行业':'#dcfce7:#15803d',
+    '聚合财经':'#fef3c7:#92400e', '家企架构与资本市场':'#ede9fe:#6d28d9',
+    '家族财富传承与全球税务规划':'#fee2e2:#991b1b',
+    '保险行业':'#fce7f3:#9d174d', '信托行业':'#e0f2fe:#0369a1',
+    '全球法律与新兴业务':'#f1f5f9:#475569',
+    '组织效能与ESG价值':'#ecfdf5:#065f46',
+  };
+  TAX_SOURCES.forEach(s => {
+    const [bg, color] = (dimColors[s.dim]||'#f3f4f6:#374151').split(':');
+    const chip = document.createElement('a');
+    chip.href = s.url; chip.target = '_blank';
+    chip.title = s.section + '｜' + s.keywords;
+    chip.style.cssText = `display:inline-block;padding:3px 9px;background:${bg};color:${color};border-radius:20px;font-size:11px;font-weight:500;text-decoration:none;`;
+    chip.textContent = s.name;
+    el.appendChild(chip);
+  });
+}
+
+// ── 二级 tab 切换 ─────────────────────────────────────────────
+function switchBuRadar(bu) {
+  ['tax','legal','cm'].forEach(b => {
+    const panel = document.getElementById('radar-panel-' + b);
+    const tab   = document.getElementById('bu-tab-' + b);
+    if (!panel || !tab) return;
+    const active = b === bu;
+    panel.style.display = active ? 'block' : 'none';
+    if (active) {
+      tab.style.background = b==='tax'?'#0369a1': b==='legal'?'#15803d':'#c2410c';
+      tab.style.color = '#fff';
+      tab.style.borderBottom = '2px solid ' + (b==='tax'?'#0369a1': b==='legal'?'#15803d':'#c2410c');
+    } else {
+      tab.style.background = '#f3f4f6';
+      tab.style.color = '#6b7280';
+      tab.style.borderBottom = '2px solid transparent';
+    }
+  });
+  if (bu === 'tax') radarInitSources();
+}
+
+// ── Tax 雷达：调用 AI 生成场景 ───────────────────────────────
+async function radarRefresh(bu) {
+  if (bu !== 'tax') return; // Legal/CM 暂未实现
+  const base = (document.getElementById('apiBaseInput')||{}).value ||
+               localStorage.getItem('pg_base') || 'https://wolfai.top/v1';
+  const key  = localStorage.getItem('pg_key') || '';
+  if (!key) { alert('请先在痛点生成页填写 API Key'); return; }
+
+  const btn  = document.querySelector('[onclick="radarRefresh(\'tax\')"]');
+  const spin = document.getElementById('radar-tax-spin');
+  const result = document.getElementById('radar-tax-result');
+  if (spin) spin.textContent = '⏳';
+  if (btn)  btn.disabled = true;
+  result.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ AI 正在分析信息源，生成场景建议…</div>';
+
+  const today = new Date().toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric'});
+  const sourceList = TAX_SOURCES.map(s =>
+    `【${s.dim}】${s.name}（${s.section}）关键词：${s.keywords}`
+  ).join('\n');
+
+  const prompt = `你是朝曦家族办公室税务BU的专项场景分析师，当前日期：${today}。
+
+以下是税务BU重点关注的${TAX_SOURCES.length}个信息源：
+${sourceList}
+
+请基于上述信息源覆盖的领域和关键词，结合当前监管环境与市场动态，为朝曦家族办公室税务BU生成7-9个值得近期关注的专项场景建议。
+
+要求：
+- 场景须与高净值客户/家族办公室税务、传承、架构相关
+- 优先选择政策变化窗口期、监管趋严领域、跨境新动向
+- 禁用"筹划/避税/减税"等词，可用"税务合规/税负管理"
+
+输出格式（严格JSON，不输出任何其他文字）：
+{"scenes":[
+  {
+    "scene":"场景名称（≤15字，含客群+事件）",
+    "reason":"建议原因（该场景为何是当前热点，60字内）",
+    "source_dim":"来源维度",
+    "source_names":["参考信息源1","参考信息源2"],
+    "trend":"近期政策或市场动向简述（50字内）"
+  }
+]}`;
+
+  try {
+    const resp = await fetch(base + '/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body: JSON.stringify({
+        model: localStorage.getItem('pg_model') || 'claude-sonnet-4-5-20250929',
+        messages:[{role:'user',content:prompt}],
+        max_tokens:2000, temperature:0.7
+      })
+    });
+    const data = await resp.json();
+    const raw  = data.choices?.[0]?.message?.content || '';
+    const m    = raw.match(/\{[\s\S]*\}/);
+    if (!m) throw new Error('未返回JSON');
+    const parsed = JSON.parse(cleanLLMJson(m[0]));
+    const scenes = parsed.scenes || [];
+    if (!scenes.length) throw new Error('场景数组为空');
+
+    // 渲染结果卡片
+    result.innerHTML = scenes.map((s,i) => `
+      <div style="border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:10px;background:#fafafa;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:700;color:#111827;margin-bottom:6px;">${s.scene||''}</div>
+            <div style="font-size:12px;color:#4b5563;margin-bottom:5px;">
+              <span style="color:#0369a1;font-weight:600;">💡 建议原因：</span>${s.reason||''}
+            </div>
+            <div style="font-size:12px;color:#4b5563;margin-bottom:5px;">
+              <span style="color:#6b7280;font-weight:600;">📰 近期动向：</span>${s.trend||''}
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
+              ${(s.source_names||[]).map(n=>`<span style="padding:2px 7px;background:#dbeafe;color:#1d4ed8;border-radius:10px;font-size:10px;">${n}</span>`).join('')}
+              <span style="padding:2px 7px;background:#f1f5f9;color:#64748b;border-radius:10px;font-size:10px;">${s.source_dim||''}</span>
+            </div>
+          </div>
+          <button onclick="addToPool('tax', ${JSON.stringify(s).replace(/"/g,'&quot;')})"
+            style="flex-shrink:0;padding:7px 14px;background:#0369a1;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">
+            + 加入场景池
+          </button>
+        </div>
+      </div>`).join('');
+
+    // 更新时间
+    const upd = document.getElementById('radar-tax-lastupd');
+    if (upd) upd.textContent = '上次更新：' + new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
+
+  } catch(e) {
+    result.innerHTML = `<div style="padding:16px;background:#fef2f2;border-radius:8px;font-size:12px;color:#991b1b;">⚠️ 生成失败：${e.message}</div>`;
+  } finally {
+    if (spin) spin.textContent = '⟳';
+    if (btn)  btn.disabled = false;
+  }
+}
+
+// ── 待用场景池 ────────────────────────────────────────────────
+function _poolKey(bu) { return 'scene_pool_' + bu; }
+
+function addToPool(bu, scene) {
+  const pool = JSON.parse(localStorage.getItem(_poolKey(bu))||'[]');
+  // 去重（同名场景不重复加入）
+  if (pool.some(s => s.scene === scene.scene)) {
+    alert('「' + scene.scene + '」已在场景池中');
+    return;
+  }
+  scene._addedAt = new Date().toLocaleString('zh-CN');
+  pool.unshift(scene);
+  localStorage.setItem(_poolKey(bu), JSON.stringify(pool));
+  renderPool(bu);
+}
+
+function clearPool(bu) {
+  if (!confirm('确认清空 ' + bu.toUpperCase() + ' 场景池？')) return;
+  localStorage.removeItem(_poolKey(bu));
+  renderPool(bu);
+}
+
+function clearAllPools() {
+  if (!confirm('确认清空全部三个 BU 的场景池？')) return;
+  ['tax','legal','cm'].forEach(b => localStorage.removeItem(_poolKey(b)));
+  ['tax','legal','cm'].forEach(b => renderPool(b));
+}
+
+function removeFromPool(bu, idx) {
+  const pool = JSON.parse(localStorage.getItem(_poolKey(bu))||'[]');
+  pool.splice(idx, 1);
+  localStorage.setItem(_poolKey(bu), JSON.stringify(pool));
+  renderPool(bu);
+}
+
+function importSceneFromPool(bu, idx) {
+  const pool = JSON.parse(localStorage.getItem(_poolKey(bu))||'[]');
+  const s = pool[idx];
+  if (!s) return;
+  // 跳转到痛点生成页并注入场景
+  showPage('pain-generate');
+  setTimeout(() => {
+    const ta = document.getElementById('manualScenesInput');
+    if (ta) {
+      const existing = ta.value.trim();
+      ta.value = existing ? existing + '\n' + s.scene : s.scene;
+      ta.dispatchEvent(new Event('input'));
+    }
+    // 滚动到场景输入区
+    const el = document.getElementById('manualScenesInput');
+    if (el) el.scrollIntoView({behavior:'smooth', block:'center'});
+  }, 300);
+}
+
+function renderPool(bu) {
+  const container = document.getElementById('pool-' + bu + '-items');
+  if (!container) return;
+  const pool = JSON.parse(localStorage.getItem(_poolKey(bu))||'[]');
+  if (!pool.length) {
+    const emptyMsg = bu==='tax' ? '暂无场景，点击上方「更新信息」生成' :
+                     bu==='legal' ? 'Legal 雷达上线后可生成' : 'CM 雷达上线后可生成';
+    container.innerHTML = `<div style="text-align:center;padding:20px 0;font-size:12px;color:#9ca3af;">${emptyMsg}</div>`;
+    return;
+  }
+  container.innerHTML = pool.map((s,i) => `
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px;margin-bottom:8px;">
+      <div style="display:flex;align-items:flex-start;gap:6px;">
+        <div style="flex:1;">
+          <div style="font-size:12.5px;font-weight:700;color:#111827;margin-bottom:4px;">${s.scene||''}</div>
+          <div style="font-size:11px;color:#6b7280;margin-bottom:6px;line-height:1.5;">${s.reason||''}</div>
+          <div style="font-size:10px;color:#9ca3af;">${s._addedAt||''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
+          <button onclick="importSceneFromPool('${bu}',${i})"
+            style="padding:5px 10px;background:#0369a1;color:#fff;border:none;border-radius:5px;font-size:11px;cursor:pointer;white-space:nowrap;">
+            导入
+          </button>
+          <button onclick="removeFromPool('${bu}',${i})"
+            style="padding:5px 10px;background:#f9fafb;color:#6b7280;border:1px solid #e5e7eb;border-radius:5px;font-size:11px;cursor:pointer;">
+            删除
+          </button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ── 页面初始化时渲染场景池 ────────────────────────────────────
+(function initRadarOnLoad() {
+  ['tax','legal','cm'].forEach(b => renderPool(b));
+  radarInitSources();
+})();
+
 
 </script>
 
