@@ -9398,11 +9398,12 @@ ${sourceList}
 - 场景须与高净值客户/家族办公室税务、传承、架构相关
 - 优先选择政策变化窗口期、监管趋严领域、跨境新动向
 - 禁用"筹划/避税/减税"等词，可用"税务合规/税负管理"
-- **【硬性规则1】source_names 字段必须从上方${TAX_SOURCES.length}个信息源的"名称"中精确选取（1-3个）**
-  - 名称写法须与列表完全一致（如：「香港税务局(IRD)」「STEP.org」「美国国税局(IRS)」「中国银行保险报」）
-  - **禁止使用 markdown 链接格式 [name](url)，只输出纯名称字符串**
-  - **禁止编造列表外的名称**
-- **【硬性规则2】如能定位到具体文章/政策原文，在 source_url 字段填入完整 https URL；找不到时填空字符串 ""**
+- **【硬性规则·信息佐证】每个场景必须给出 3-5 条具体的「政策/文章/新闻」原文链接作为佐证（articles 字段）**
+  - source 必须从上方${TAX_SOURCES.length}个信息源中精确选取（与列表写法完全一致），articles 数组中每条 article 的 source 都要在白名单内
+  - title 是该篇文章/政策/新闻的真实标题（不超过 40 字）
+  - url 必须是完整的 https:// 真实可访问链接（**不要编造、不要写域名首页，要具体到文章 URL**）
+  - 如果某条信息源无法定位到具体文章 URL，可使用该信息源在 TAX_SOURCES 中的 url 兜底
+  - **严禁使用 markdown 格式 [text](url)，url 字段就是裸 URL 字符串**
 
 输出格式（严格JSON，不输出任何其他文字）：
 {"scenes":[
@@ -9410,9 +9411,12 @@ ${sourceList}
     "scene":"场景名称（≤15字，含客群+事件）",
     "reason":"建议原因（该场景为何是当前热点，60字内）",
     "source_dim":"来源维度",
-    "source_names":["香港税务局(IRD)","STEP.org"],
-    "source_url":"https://www.example.com/article-or-policy（找不到具体文章时填空字符串）",
-    "trend":"近期政策或市场动向简述（50字内）"
+    "trend":"近期政策或市场动向简述（50字内）",
+    "articles":[
+      {"source":"香港税务局(IRD)","title":"2025/26 课税年度跨境企业转让定价指引","url":"https://www.ird.gov.hk/chs/ppr/archives/25081501.htm"},
+      {"source":"STEP.org","title":"Cross-border Trust Planning Update Q4 2025","url":"https://www.step.org/industry-news/cross-border-trust-update"},
+      {"source":"美国国税局(IRS)","title":"Final Regulations on Foreign Trust Reporting","url":"https://www.irs.gov/newsroom/final-regs-foreign-trust"}
+    ]
   }
 ]}`;
 
@@ -9507,44 +9511,51 @@ ${sourceList}
     const scenes = parsed.scenes || [];
     if (!scenes.length) throw new Error('场景数组为空');
 
-    // 极度宽容的来源匹配：剥 markdown、去全/半角标点、双向 includes
-    const stripMd = n => String(n||'').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').trim();
+    // 标准化每个 article：剥 markdown、匹配 source 回 TAX_SOURCES、URL 兜底
+    const stripMd = n => String(n||'').replace(/\[([^\]]+)\]\(([^)]*)\)/g, '$1').trim();
     const norm    = n => stripMd(n).replace(/[（()）\[\]\s\.\-_：:、，,]/g,'').toLowerCase();
+    const matchSource = name => {
+      const ns = norm(name); if (!ns) return null;
+      let hit = TAX_SOURCES.find(t => norm(t.name) === ns);
+      if (!hit) hit = TAX_SOURCES.find(t => { const tn = norm(t.name); return tn.includes(ns) || ns.includes(tn); });
+      return hit || null;
+    };
     scenes.forEach(s => {
-      const rawList = (s.source_names || []).map(stripMd).filter(Boolean);
-      const matched = [];   // [{name, url}]
-      rawList.forEach(n => {
-        const ns = norm(n);
-        if (!ns) return;
-        // 1. 完全等同
-        let hit = TAX_SOURCES.find(t => norm(t.name) === ns);
-        // 2. 双向 includes（如 "STEPorg" vs "stepor g"，或 "美国国税局" vs "美国国税局irs"）
-        if (!hit) hit = TAX_SOURCES.find(t => { const tn = norm(t.name); return tn.includes(ns) || ns.includes(tn); });
-        if (hit) {
-          if (!matched.find(m => m.name === hit.name)) matched.push({name: hit.name, url: hit.url});
-        } else {
-          // 未命中也保留原文（标记为 unmatched），方便用户人工核对
-          matched.push({name: stripMd(n), url: '', unmatched: true});
-        }
-      });
-      s._matched_sources = matched;
+      // 兼容旧字段：如果 AI 仍返回 source_names 而非 articles，降级转换
+      let articles = Array.isArray(s.articles) ? s.articles : [];
+      if (!articles.length && Array.isArray(s.source_names)) {
+        articles = s.source_names.map(n => ({source: stripMd(n), title: '', url: ''}));
+      }
+      const cleaned = articles.map(a => {
+        const srcRaw = stripMd(a.source);
+        const hit    = matchSource(srcRaw);
+        const url    = String(a.url||'').replace(/^[（(]+|[）)]+$/g,'').trim();
+        return {
+          source:    hit ? hit.name : srcRaw,
+          title:     stripMd(a.title || ''),
+          url:       url || (hit ? hit.url : ''),
+          unmatched: !hit,
+          isFallback: !url && !!hit
+        };
+      }).filter(a => a.source);
+      s._articles = cleaned;
     });
 
-    // 渲染结果卡片
+    // 渲染结果卡片（参考"2026新兴场景建议"卡片样式：折叠的"触发原因·政策与热点来源"链接列表）
     result.innerHTML = scenes.map((s,i) => {
-      const matched = s._matched_sources || [];
-      const sourceLine = matched.length
-        ? matched.map(m => {
-            if (m.unmatched) {
-              return `<span title="AI 输出的名称未匹配到 40 个税务信息源，可能是新增或写法不同" style="padding:3px 9px;background:#fef2f2;color:#991b1b;border:1px dashed #fca5a5;border-radius:10px;font-size:11px;">${m.name} ⚠</span>`;
-            }
-            return `<a href="${m.url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:3px;padding:3px 9px;background:#fef3c7;color:#92400e;border:1px solid #fde68a;border-radius:10px;font-size:11px;font-weight:600;text-decoration:none;">${m.name} <span style="font-size:9px;opacity:0.7;">↗</span></a>`;
-          }).join(' ')
-        : `<span style="color:#9ca3af;font-size:11px;font-style:italic;">（AI 未给出来源）</span>`;
-      // 文章链接（如果 AI 提供了 source_url）
-      const articleLink = s.source_url
-        ? `<div style="margin-top:6px;font-size:11px;"><a href="${s.source_url}" target="_blank" rel="noopener" style="color:#0369a1;text-decoration:underline;">📎 相关文章原文 ↗</a></div>`
-        : '';
+      const arts = s._articles || [];
+      const triggerLinks = arts.length ? arts.map(a => {
+        const icon = a.isFallback ? '🔗' : '📄';
+        const tag  = a.unmatched
+          ? `<span style="color:#991b1b;font-weight:600;">[${a.source} ⚠]</span>`
+          : `<span style="color:#92400e;font-weight:600;">[${a.source}]</span>`;
+        const titleTxt = a.title || (a.isFallback ? '（信息源官网，AI 未提供具体文章）' : '查看原文');
+        const safeUrl  = a.url || '#';
+        return `<a href="${safeUrl}" target="_blank" rel="noopener" style="display:block;padding:6px 10px;margin:3px 0;background:#fff;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;color:#0369a1;text-decoration:none;line-height:1.5;">
+          ${icon} ${tag} ${titleTxt} <span style="font-size:10px;opacity:0.6;">↗</span>
+        </a>`;
+      }).join('') : `<div style="padding:8px;color:#9ca3af;font-size:11px;font-style:italic;">（AI 未提供任何信息佐证，无法验证场景成立性，建议人工核对）</div>`;
+
       return `
       <div style="border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:10px;background:#fafafa;">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
@@ -9556,14 +9567,15 @@ ${sourceList}
             <div style="font-size:12px;color:#4b5563;margin-bottom:5px;">
               <span style="color:#6b7280;font-weight:600;">📰 近期动向：</span>${s.trend||''}
             </div>
-            <div style="font-size:12px;color:#4b5563;margin-top:8px;padding-top:8px;border-top:1px dashed #e5e7eb;">
-              <div style="margin-bottom:5px;"><span style="color:#92400e;font-weight:700;">📍 场景来源：</span></div>
-              <div style="display:flex;flex-wrap:wrap;gap:5px;">${sourceLine}</div>
-              ${articleLink}
-            </div>
             <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
               <span style="padding:2px 7px;background:#f1f5f9;color:#64748b;border-radius:10px;font-size:10px;">${s.source_dim||''}</span>
             </div>
+            <details style="margin-top:10px;padding:8px 10px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;" open>
+              <summary style="cursor:pointer;font-size:12px;font-weight:700;color:#92400e;user-select:none;">
+                📍 触发原因 · 政策与热点来源 <span style="font-size:11px;font-weight:400;color:#a16207;">（${arts.length} 条佐证）</span>
+              </summary>
+              <div style="margin-top:8px;">${triggerLinks}</div>
+            </details>
           </div>
           <button onclick="addToPool('tax', ${JSON.stringify(s).replace(/"/g,'&quot;')})"
             style="flex-shrink:0;padding:7px 14px;background:#0369a1;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">
