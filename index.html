@@ -9417,7 +9417,7 @@ ${sourceList}
       body: JSON.stringify({
         model: localStorage.getItem('pg_api_model') || 'claude-sonnet-4-5-20250929',
         messages:[{role:'user',content:prompt}],
-        max_tokens:2000, temperature:0.7
+        max_tokens:4000, temperature:0.7
       })
     });
     const data = await resp.json();
@@ -9425,23 +9425,37 @@ ${sourceList}
     const m    = raw.match(/\{[\s\S]*\}/);
     if (!m) throw new Error('未返回JSON');
     const cleaned = cleanLLMJson(m[0]);
-    // 字符串感知的对象提取器：用括号计数定位每个 {...}，正确处理字符串内的 { } 字符
+    // 锚点提取器：找到每个 "scene": 字段，向前回溯到 { ，向后正向查找匹配的 }
+    // 这样即使 JSON 被截断（最外层 } 缺失），仍能提取到所有完整的内层场景对象
     const extractObjects = (txt) => {
       const out = [];
-      let i = 0, n = txt.length;
-      while (i < n) {
-        if (txt[i] !== '{') { i++; continue; }
-        let depth = 0, inStr = false, esc = false, start = i;
-        for (; i < n; i++) {
+      const sceneRx = /"scene"\s*:/g;
+      let m;
+      while ((m = sceneRx.exec(txt)) !== null) {
+        // 向前回溯找包裹的 {
+        let bs = m.index, depth = 0;
+        while (bs > 0) {
+          const c = txt[bs];
+          if (c === '}') depth++;
+          else if (c === '{') { if (depth === 0) break; depth--; }
+          bs--;
+        }
+        if (txt[bs] !== '{') continue;
+        // 向后字符串感知正向匹配 }
+        let i = bs, d = 0, inStr = false, esc = false, end = -1;
+        for (; i < txt.length; i++) {
           const c = txt[i];
           if (esc) { esc = false; continue; }
           if (c === '\\') { esc = true; continue; }
           if (c === '"') { inStr = !inStr; continue; }
           if (inStr) continue;
-          if (c === '{') depth++;
-          else if (c === '}') { depth--; if (depth === 0) { out.push(txt.substring(start, i+1)); i++; break; } }
+          if (c === '{') d++;
+          else if (c === '}') { d--; if (d === 0) { end = i; break; } }
         }
-        if (depth !== 0) break;
+        if (end > bs) {
+          out.push(txt.substring(bs, end + 1));
+          sceneRx.lastIndex = end + 1;
+        }
       }
       return out;
     };
