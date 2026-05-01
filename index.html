@@ -8534,7 +8534,7 @@ function piRenderMapping() {
 
 // ── AI 补全（自动分批）────────────────────────────────────
 
-const PI_BATCH_SIZE = 20;  // 每批条数（可调整）
+const PI_BATCH_SIZE = 8;   // 每批条数（从 20 降到 8，避免 JSON 输出被截断）
 
 
 
@@ -8801,65 +8801,68 @@ ${factorPathsText}
     try {
 
       const resp = await fetch(base + '/chat/completions', {
-
         method: 'POST',
-
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
-
         body: JSON.stringify({
-
           model,
-
           messages: [{ role: 'user', content: buildPrompt(batch, i) }],
-
-          max_tokens: 16000,
-
+          max_tokens: 6000,
           temperature: 0.3,
-
         })
-
       });
 
-
-
       if (!resp.ok) {
-
         const txt = await resp.text();
-
         throw new Error(`API ${resp.status}: ${txt.slice(0, 200)}`);
-
       }
 
-
-
       const data = await resp.json();
-
       const raw  = data.choices?.[0]?.message?.content || '';
 
-
-
       const m = raw.match(/\{[\s\S]*\}/);
-
-      if (!m) throw new Error('批次 ' + (i+1) + ' 未返回 JSON');
-
-      const parsed = JSON.parse(cleanLLMJson(m[0]));
-
+      if (!m) {
+        console.warn('[piEnrich] 批次', i+1, '未返回 JSON。原始响应前 500 字:', raw.slice(0, 500));
+        throw new Error('批次 ' + (i+1) + ' 未返回 JSON（response 前 200 字: ' + raw.slice(0,200) + '）');
+      }
+      let parsed;
+      try {
+        parsed = JSON.parse(cleanLLMJson(m[0]));
+      } catch(parseErr) {
+        // 降级：用对象提取器逐个 point 解析
+        console.warn('[piEnrich] 批次', i+1, 'JSON 解析失败:', parseErr.message);
+        console.warn('[piEnrich] 出错位置附近 200 字:',
+          (function(){const p=/position (\d+)/.exec(parseErr.message); if(!p) return ''; const pos=+p[1]; return cleanLLMJson(m[0]).slice(Math.max(0,pos-100), pos+100);})()
+        );
+        // 单条提取
+        const objRx = /\{[^{}]*"title"\s*:\s*"[^"]+?"[^{}]*\}/g;
+        const objs  = (cleanLLMJson(m[0]).match(objRx) || []);
+        const recovered = [];
+        for (const o of objs) {
+          try { const obj = JSON.parse(o); if (obj.title) recovered.push(obj); } catch(_) {}
+        }
+        if (recovered.length) {
+          console.log('[piEnrich] 批次', i+1, '降级恢复', recovered.length, '条');
+          parsed = { points: recovered, new_skus: [] };
+        } else {
+          throw new Error('批次 ' + (i+1) + ' JSON 解析失败：' + parseErr.message + '（已尝试单条恢复但失败，详见 Console）');
+        }
+      }
       allEnriched.push(...(parsed.points  || []));
-
       allNewSkus.push( ...(parsed.new_skus || []));
-
       batchTimes.push(Date.now() - batchStart);
 
-
+      // 每批成功后即时刷新进度子标题，让用户看到累积进展
+      const sub = document.getElementById('piProgressSub');
+      if (sub) sub.innerHTML = `已成功 ${allEnriched.length} / 失败 ${errors.length} | 第 ${i+1}/${batchCount} 批 · BU: ${bu} · 模型 ${model}`;
 
     } catch(err) {
-
+      console.warn('[piEnrich] 批次', i+1, '失败:', err.message);
       // 记录失败批次，继续处理后续批次
-
       errors.push({ batch: i + 1, from: i * PI_BATCH_SIZE + 1, to: Math.min((i+1)*PI_BATCH_SIZE, total), msg: err.message });
-
       batchTimes.push(Date.now() - batchStart);
-
+      // 失败也即时显示
+      const sub = document.getElementById('piProgressSub');
+      if (sub) sub.innerHTML = `已成功 ${allEnriched.length} / <span style="color:#dc2626;">失败 ${errors.length}</span> | 第 ${i+1}/${batchCount} 批 · 最近错误：${err.message.slice(0,80)}`;
     }
 
   }
