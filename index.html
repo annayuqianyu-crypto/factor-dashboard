@@ -8887,18 +8887,37 @@ ${factorPathsText}
       allNewSkus.push( ...(parsed.new_skus || []));
       batchTimes.push(Date.now() - batchStart);
 
-      // 每批成功后即时刷新进度子标题，让用户看到累积进展
-      const sub = document.getElementById('piProgressSub');
-      if (sub) sub.innerHTML = `已成功 ${allEnriched.length} / 失败 ${errors.length} | 第 ${i+1}/${batchCount} 批 · BU: ${bu} · 模型 ${model}`;
-
     } catch(err) {
       console.warn('[piEnrich] 批次', i+1, '失败:', err.message);
-      // 记录失败批次，继续处理后续批次
       errors.push({ batch: i + 1, from: i * PI_BATCH_SIZE + 1, to: Math.min((i+1)*PI_BATCH_SIZE, total), msg: err.message });
       batchTimes.push(Date.now() - batchStart);
-      // 失败也即时显示
+    }
+
+    // ── 每批结束后实时渲染累积结果（成功/失败都更新）──
+    if (allEnriched.length > 0) {
+      const pct = Math.round(allEnriched.length / total * 100);
+      const avgMs2 = batchTimes.length ? batchTimes.reduce((a,b)=>a+b,0)/batchTimes.length : 30000;
+      const etaMins2 = Math.round(avgMs2 * (batchCount - i - 1) / 60000);
+      const progressBanner = `<div style="padding:14px 18px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;">
+          <div class="spinner" style="width:22px;height:22px;flex-shrink:0;border-width:3px;"></div>
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:700;color:#1e40af;">AI 正在补全：第 ${i+1}/${batchCount} 批 · 已完成 ${allEnriched.length}/${total} 条${errors.length?` <span style="color:#dc2626;font-weight:600;margin-left:8px;">失败 ${errors.length} 批</span>`:''}</div>
+            <div style="font-size:12px;color:#6b7280;margin-top:2px;">BU: ${bu} · 模型 ${model}${etaMins2 > 0 ? ` · 预计剩余约 ${etaMins2} 分钟` : ''}</div>
+          </div>
+        </div>
+        <div style="background:#dbeafe;border-radius:99px;height:6px;overflow:hidden;">
+          <div style="height:100%;background:#1a56db;border-radius:99px;width:${pct}%;transition:width .4s;"></div>
+        </div>
+      </div>`;
+      _piLastPoints  = allEnriched;
+      _piLastNewSkus = allNewSkus;
+      _piLastBu      = bu;
+      try { piRenderResults(allEnriched, allNewSkus, bu, progressBanner); } catch(e) { console.warn('增量渲染失败', e); }
+    } else if (errors.length > 0) {
+      // 还没有任何成功，但有失败，更新进度提示
       const sub = document.getElementById('piProgressSub');
-      if (sub) sub.innerHTML = `已成功 ${allEnriched.length} / <span style="color:#dc2626;">失败 ${errors.length}</span> | 第 ${i+1}/${batchCount} 批 · 最近错误：${err.message.slice(0,80)}`;
+      if (sub) sub.innerHTML = `已成功 0 / <span style="color:#dc2626;">失败 ${errors.length}</span> 批 · 最近错误：${errors[errors.length-1].msg.slice(0,100)}`;
     }
 
   }
@@ -8985,7 +9004,7 @@ function piRenderResults(results, newSkus, bu, failNote) {
 
 
 
-  let html = `
+  let html = failNote + `
 
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
 
