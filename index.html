@@ -8799,6 +8799,7 @@ ${factorPathsText}
 
 
 
+    let _rawSample = '';
     try {
 
       const resp = await fetch(base + '/chat/completions', {
@@ -8814,11 +8815,13 @@ ${factorPathsText}
 
       if (!resp.ok) {
         const txt = await resp.text();
+        _rawSample = txt.slice(0, 300);
         throw new Error(`API ${resp.status}: ${txt.slice(0, 200)}`);
       }
 
       const data = await resp.json();
       const raw  = data.choices?.[0]?.message?.content || '';
+      _rawSample = raw.slice(0, 300);
 
       const m = raw.match(/\{[\s\S]*\}/);
       if (!m) {
@@ -8889,7 +8892,7 @@ ${factorPathsText}
 
     } catch(err) {
       console.warn('[piEnrich] 批次', i+1, '失败:', err.message);
-      errors.push({ batch: i + 1, from: i * PI_BATCH_SIZE + 1, to: Math.min((i+1)*PI_BATCH_SIZE, total), msg: err.message });
+      errors.push({ batch: i + 1, from: i * PI_BATCH_SIZE + 1, to: Math.min((i+1)*PI_BATCH_SIZE, total), msg: err.message, raw: _rawSample });
       batchTimes.push(Date.now() - batchStart);
     }
 
@@ -8915,9 +8918,35 @@ ${factorPathsText}
       _piLastBu      = bu;
       try { piRenderResults(allEnriched, allNewSkus, bu, progressBanner); } catch(e) { console.warn('增量渲染失败', e); }
     } else if (errors.length > 0) {
-      // 还没有任何成功，但有失败，更新进度提示
-      const sub = document.getElementById('piProgressSub');
-      if (sub) sub.innerHTML = `已成功 0 / <span style="color:#dc2626;">失败 ${errors.length}</span> 批 · 最近错误：${errors[errors.length-1].msg.slice(0,100)}`;
+      // 还没有任何成功，但有失败 → 持久渲染进度+错误面板（不会被 setProgress 覆盖）
+      const pct2 = Math.round(allEnriched.length / total * 100);
+      const recent = errors.slice(-3).map(e =>
+        `<div style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px dashed #fca5a5;">
+          <div style="font-size:12.5px;font-weight:700;color:#991b1b;margin-bottom:4px;">批次 ${e.batch}（第 ${e.from}-${e.to} 条）</div>
+          <div style="font-size:12px;color:#7f1d1d;line-height:1.6;margin-bottom:4px;"><strong>错误：</strong>${e.msg}</div>
+          ${e.raw ? `<div style="font-size:11px;color:#374151;background:#fff;padding:6px 8px;border-radius:4px;border:1px solid #fecaca;font-family:monospace;white-space:pre-wrap;word-break:break-all;max-height:120px;overflow:auto;"><strong>响应前 300 字：</strong>${e.raw.replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</div>` : ''}
+        </div>`
+      ).join('');
+      document.getElementById('piResultsContent').innerHTML = `
+        <div style="padding:14px 18px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div class="spinner" style="width:22px;height:22px;flex-shrink:0;border-width:3px;"></div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:700;color:#1e40af;">第 ${i+1}/${batchCount} 批 · 已成功 0 / <span style="color:#dc2626;">失败 ${errors.length}</span></div>
+              <div style="font-size:12px;color:#6b7280;margin-top:2px;">BU: ${bu} · 模型 ${model}</div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:16px 20px;background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;margin-bottom:16px;">
+          <div style="font-size:14px;font-weight:700;color:#991b1b;margin-bottom:12px;">⚠️ 已连续失败 ${errors.length} 个批次，请查看以下原因：</div>
+          ${recent}
+          <div style="margin-top:10px;padding:10px 12px;background:#fff;border:1px dashed #f87171;border-radius:6px;font-size:12px;color:#374151;line-height:1.7;">
+            <strong>常见解决办法：</strong><br>
+            • 如果是「未返回 JSON」或响应是大段文字 → 模型不擅长 JSON 输出，建议在「场景选择」页换成 <strong>claude-sonnet-4-5-20250929</strong> 后重试<br>
+            • 如果是「Expected ',' or ']'」位置错误 → 输出被截断，建议把批次大小调小或检查 max_tokens<br>
+            • 如果是「API 401/403」 → API Key 过期，请重新配置
+          </div>
+        </div>`;
     }
 
   }
