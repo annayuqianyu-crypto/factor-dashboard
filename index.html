@@ -8667,9 +8667,21 @@ async function piStartEnrich() {
 
 
 
-  const skuLines        = SKU_DB.map(s => `${s.id}:${s.name}`).join('\n');
+  // 按 BU 过滤 SKU（Tax 200 / Legal 75 / CM 59）；All Department 时全量
+  const buPrefix = {'Tax':'Tax','Legal':'Legal','Law':'Legal','CM':'CM'}[bu];
+  const filteredSku = buPrefix ? SKU_DB.filter(s => s.id.startsWith(buPrefix)) : SKU_DB;
+  const skuLines = filteredSku.map(s => `${s.id}:${s.name}`).join('\n');
 
-  const factorPathsText = FACTOR_PATHS.join('\n');
+  // 因子库路径不再全文塞入（1357 条 ≈ 25k tokens），改为只给路径格式样例
+  // 让模型按朝曦因子库的命名规律自由生成 3 条最相关路径
+  const factorFormatHint = `路径格式样例（≥3 级，用「>」分隔，最末级保留具体业务动作/资产/约束）：
+  - 谁（主体）：商业/职业身份 > 职业人士 > 上市公司股东（通用）
+  - 谁（家庭）：核心家庭成员 > 配偶
+  - 有什么/动作：财富标的/资产类型 > 资产类型 > 股权资产 > 上市公司股票 > 限售股
+  - 动作：资本动作 > 流动性管理 > 减持 > 大宗交易
+  - 动作：个人税务申报 > 个人所得税 > 股权转让所得
+  - 约束：外部监管触发 > 政策变化 > 减持新规
+  - 约束：身份维护 > 合规要求 > 信息披露`;
 
   const buInstructions  = {
 
@@ -8717,7 +8729,7 @@ ${pointsJson}
 
   "desc":"痛点说明（严格不超过60字，语言极度精炼，超过须压缩后输出）",
 
-  "factors_chain":"【重要】从下方【因子库路径表】中精确选取3条完整路径，用中文分号「；」拼接，路径必须与库中完全一致不可修改。①谁（商业/职业身份或家庭角色起头）②有什么/发生了什么（资产/动作类路径）③约束（税务/法律/监管类路径）",
+  "factors_chain":"按下方【路径格式样例】生成3条最贴合该痛点的完整路径（每条 3-5 级，用「>」分隔），3条之间用中文分号「；」拼接。三条分别对应：①谁（主体身份）②有什么/做什么（资产或动作）③约束/背景（税务/法律/监管类）",
 
   "tags":[{"label":"标签短语","dim":"主体|资产|动作|约束","weight":"C|B|A"}],
 
@@ -8749,15 +8761,15 @@ ${pointsJson}
 
 
 
-SKU知识库（从中为每个痛点选2-4个最相关ID）：
+SKU知识库（从中为每个痛点选2-4个最相关ID${buPrefix?'，已按 '+buPrefix+' BU 过滤':''}）：
 
 ${skuLines}
 
 
 
-【因子库路径表】（共${FACTOR_PATHS.length}条，factors_chain 必须从此精确选取3条完整路径）：
+【路径格式样例】（factors_chain 按此风格生成 3 条最相关路径）：
 
-${factorPathsText}
+${factorFormatHint}
 
 
 
