@@ -8829,23 +8829,58 @@ ${factorPathsText}
       try {
         parsed = JSON.parse(cleanLLMJson(m[0]));
       } catch(parseErr) {
-        // 降级：用对象提取器逐个 point 解析
         console.warn('[piEnrich] 批次', i+1, 'JSON 解析失败:', parseErr.message);
-        console.warn('[piEnrich] 出错位置附近 200 字:',
-          (function(){const p=/position (\d+)/.exec(parseErr.message); if(!p) return ''; const pos=+p[1]; return cleanLLMJson(m[0]).slice(Math.max(0,pos-100), pos+100);})()
-        );
-        // 单条提取
-        const objRx = /\{[^{}]*"title"\s*:\s*"[^"]+?"[^{}]*\}/g;
-        const objs  = (cleanLLMJson(m[0]).match(objRx) || []);
+        const cleaned = cleanLLMJson(m[0]);
+        const p = /position (\d+)/.exec(parseErr.message);
+        if (p) console.warn('[piEnrich] 出错位置附近 200 字:', cleaned.slice(Math.max(0, +p[1]-100), +p[1]+100));
+
+        // ── 字符串感知括号计数器（和雷达模块同款，能处理嵌套对象/数组）──
+        const extractObjects = (txt, anchorKey) => {
+          const out = [];
+          const anchorRx = new RegExp('"' + anchorKey + '"\\s*:', 'g');
+          let m2;
+          while ((m2 = anchorRx.exec(txt)) !== null) {
+            // 向前回溯找包裹的 {
+            let bs = m2.index, dep = 0;
+            while (bs > 0) {
+              const c = txt[bs];
+              if (c === '}') dep++;
+              else if (c === '{') { if (dep === 0) break; dep--; }
+              bs--;
+            }
+            if (txt[bs] !== '{') continue;
+            // 向后字符串感知正向匹配 }
+            let j = bs, d = 0, inStr = false, esc = false, end = -1;
+            for (; j < txt.length; j++) {
+              const c = txt[j];
+              if (esc) { esc = false; continue; }
+              if (c === '\\') { esc = true; continue; }
+              if (c === '"') { inStr = !inStr; continue; }
+              if (inStr) continue;
+              if (c === '{') d++;
+              else if (c === '}') { d--; if (d === 0) { end = j; break; } }
+            }
+            if (end > bs) {
+              out.push(txt.substring(bs, end + 1));
+              anchorRx.lastIndex = end + 1;
+            }
+          }
+          return out;
+        };
+
         const recovered = [];
-        for (const o of objs) {
-          try { const obj = JSON.parse(o); if (obj.title) recovered.push(obj); } catch(_) {}
+        for (const o of extractObjects(cleaned, 'title')) {
+          try { const obj = JSON.parse(o); if (obj.title) recovered.push(obj); }
+          catch(e) {
+            // 单个对象再失败：尝试在原始（未清洗）文本上单独清洗
+            try { const obj2 = JSON.parse(cleanLLMJson(o)); if (obj2.title) recovered.push(obj2); } catch(_) {}
+          }
         }
         if (recovered.length) {
           console.log('[piEnrich] 批次', i+1, '降级恢复', recovered.length, '条');
           parsed = { points: recovered, new_skus: [] };
         } else {
-          throw new Error('批次 ' + (i+1) + ' JSON 解析失败：' + parseErr.message + '（已尝试单条恢复但失败，详见 Console）');
+          throw new Error('批次 ' + (i+1) + ' JSON 解析失败：' + parseErr.message + '（恢复失败，详见 Console）');
         }
       }
       allEnriched.push(...(parsed.points  || []));
