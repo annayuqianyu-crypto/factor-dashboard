@@ -3884,25 +3884,40 @@ function initBusinessCharts() {
 
     ];
 
-    detailEl.innerHTML = biz.map(b => `
+    // 覆盖度等级标签（用人话取代「X/10」）
+    const levelOf = s =>
+      s >= 10 ? { text:'极高', desc:'核心业务，深度覆盖' } :
+      s >= 9  ? { text:'高',   desc:'优势领域，覆盖充分' } :
+      s >= 8  ? { text:'良好', desc:'已具备能力，可增强' } :
+      s >= 7  ? { text:'中等', desc:'部分覆盖，待补强' } :
+                { text:'偏弱', desc:'覆盖不足，重点扩库方向' };
 
-      <div class="biz-card">
+    detailEl.innerHTML = `
+      <div style="font-size:11.5px;color:#6b7280;margin-bottom:10px;line-height:1.6;padding:8px 10px;background:#f9fafb;border-radius:6px;">
+        💡 <strong>覆盖度评分（满分 10 分）</strong>：综合该业务线对应的因子维度行数 + 已覆盖痛点数评估。10 分=核心业务深度覆盖，6 分=覆盖不足需扩库。
+      </div>
+      ${biz.map(b => {
+        const lv = levelOf(b.score);
+        return `
+        <div class="biz-card">
 
-        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
 
-          <span style="font-size:14px;font-weight:600;">${b.name}</span>
+            <span style="font-size:14px;font-weight:600;">${b.name}</span>
 
-          <span style="font-size:16px;font-weight:700;color:${b.color}">${b.score}/10</span>
+            <span style="display:flex;align-items:baseline;gap:6px;">
+              <span style="font-size:11px;font-weight:600;color:${b.color};background:${b.color}1a;padding:2px 8px;border-radius:10px;">${lv.text}</span>
+              <span style="font-size:15px;font-weight:700;color:${b.color}" title="覆盖度评分（满分 10 分）：${lv.desc}">${b.score} <span style="font-size:11px;font-weight:500;color:#9ca3af;">/ 10 分</span></span>
+            </span>
+
+          </div>
+
+          <div style="font-size:12px;color:#6b7280;margin-top:4px;">${b.coverage}</div>
+
+          <div class="biz-bar"><div class="biz-bar-fill" style="width:${b.score*10}%;background:${b.color};"></div></div>
 
         </div>
-
-        <div style="font-size:12px;color:#6b7280;margin-top:4px;">${b.coverage}</div>
-
-        <div class="biz-bar"><div class="biz-bar-fill" style="width:${b.score*10}%;background:${b.color};"></div></div>
-
-      </div>
-
-    `).join('');
+      `;}).join('')}`;
 
   }
 
