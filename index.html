@@ -3093,7 +3093,19 @@ tr:hover td { background: #fafafa; }
 
     <div class="card-title">② 字段映射 & 生成配置</div>
 
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;">
+
+      <div>
+
+        <div style="font-size:11px;font-weight:600;color:#6b7280;margin-bottom:5px;">痛点编码列（可选，用于回索引原始数据）</div>
+
+        <select id="piColCode" style="width:100%;padding:7px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;">
+
+          <option value="">(无)</option>
+
+        </select>
+
+      </div>
 
       <div>
 
@@ -7734,7 +7746,13 @@ function pgRenderResults(results, newSkus, bu, failNote) {
 
         <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
 
-          <div style="font-size:17px;font-weight:700;color:#111827;line-height:1.3;flex:1;">${p.title||''}</div>
+          <div style="flex:1;min-width:0;">
+
+            ${p.code ? `<div style="display:inline-block;font-family:monospace;font-size:11.5px;font-weight:600;color:#1e40af;background:#eff6ff;border:1px solid #bfdbfe;padding:2px 8px;border-radius:5px;margin-bottom:6px;">${p.code}</div>` : ''}
+
+            <div style="font-size:17px;font-weight:700;color:#111827;line-height:1.3;">${p.title||''}</div>
+
+          </div>
 
           <span style="font-size:11px;color:#d1d5db;margin-left:12px;white-space:nowrap;margin-top:3px;">#${idx+1}</span>
 
@@ -8473,6 +8491,8 @@ function piRenderPreview() {
 
 function piRenderMapping() {
 
+  const selCode  = document.getElementById('piColCode');
+
   const selScene = document.getElementById('piColScene');
 
   const selTitle = document.getElementById('piColTitle');
@@ -8483,6 +8503,8 @@ function piRenderMapping() {
 
   // Clear and repopulate
 
+  selCode.innerHTML  = '<option value="">(无)</option>';
+
   selScene.innerHTML = '<option value="">(无/统一命名为"外部导入")</option>';
 
   selTitle.innerHTML = '';
@@ -8491,7 +8513,9 @@ function piRenderMapping() {
 
 
 
-  const TITLE_HINTS = ['标题','title','痛点标题','名称','痛点名称','name'];
+  const CODE_HINTS  = ['编码','编号','code','id','痛点编码','痛点编号','子痛点编码'];
+
+  const TITLE_HINTS = ['标题','title','痛点标题','名称','痛点名称','name','痛点描述'];
 
   const SCENE_HINTS = ['场景','scene','业务场景','分类','类别'];
 
@@ -8502,6 +8526,8 @@ function piRenderMapping() {
   _piHeaders.forEach(h => {
 
     const opt = v => `<option value="${h}">${h}</option>`;
+
+    selCode.innerHTML  += opt(h);
 
     selScene.innerHTML += opt(h);
 
@@ -8517,11 +8543,15 @@ function piRenderMapping() {
 
   const best = (hints) => _piHeaders.find(h => hints.some(k => h.toLowerCase().includes(k.toLowerCase()))) || '';
 
+  const bCode  = best(CODE_HINTS);
+
   const bScene = best(SCENE_HINTS);
 
   const bTitle = best(TITLE_HINTS) || _piHeaders[0];
 
   const bDesc  = best(DESC_HINTS);
+
+  if (bCode)  selCode.value  = bCode;
 
   if (bScene) selScene.value = bScene;
 
@@ -8544,6 +8574,8 @@ async function piStartEnrich() {
   if (!_piRawRows.length) { alert('请先上传 Excel 文件'); return; }
 
 
+
+  const colCode  = document.getElementById('piColCode').value;
 
   const colScene = document.getElementById('piColScene').value;
 
@@ -8571,6 +8603,8 @@ async function piStartEnrich() {
 
 
 
+  const idxCode  = colCode  ? _piHeaders.indexOf(colCode)  : -1;
+
   const idxScene = colScene ? _piHeaders.indexOf(colScene) : -1;
 
   const idxTitle = _piHeaders.indexOf(colTitle);
@@ -8580,6 +8614,8 @@ async function piStartEnrich() {
 
 
   const allPoints = _piRawRows.map(row => ({
+
+    code:  idxCode  >= 0 ? String(row[idxCode]  || '').trim() : '',
 
     scene: idxScene >= 0 ? String(row[idxScene] || '').trim() || '外部导入' : '外部导入',
 
@@ -8692,14 +8728,15 @@ async function piStartEnrich() {
 
     return `你是朝曦家办的资深业务顾问，专长跨境财富规划、企业股权架构、税务合规、家族传承。
 ${buInstructions ? '\n' + buInstructions + '\n' : ''}
-以下是已有痛点数据（已包含 title 和 desc），请为每条痛点补全 6 个分析字段：tags / skus / conflict / risk / solution / effect。
-**保持原始 title 完全不变**；如原 desc 超过 60 字则压缩到 60 字内，否则原样。
+以下是已有痛点数据（已包含 code/title/desc），请为每条痛点补全 6 个分析字段：tags / skus / conflict / risk / solution / effect。
+**保持原始 code 和 title 完全不变**；如原 desc 超过 60 字则压缩到 60 字内，否则原样。
 
 【已有痛点】：
 ${pointsJson}
 
 请输出 JSON 对象 {"points":[...]}，每个 point 字段：
 {
+  "code":"原痛点编码（完全保持不变，原样回填）",
   "scene":"原场景（不变）",
   "title":"原痛点标题（不变）",
   "desc":"痛点说明（≤60字）",
@@ -8843,7 +8880,15 @@ ${skuLines}
           throw new Error('批次 ' + (i+1) + ' JSON 解析失败：' + parseErr.message + '（恢复失败，详见 Console）');
         }
       }
-      allEnriched.push(...(parsed.points  || []));
+      // 防御性合并：模型若漏写 code，按 title 从原 batch 回填
+      const enrichedPoints = (parsed.points || []).map(p => {
+        if (!p.code && p.title) {
+          const orig = batch.find(b => b.title === p.title);
+          if (orig && orig.code) p.code = orig.code;
+        }
+        return p;
+      });
+      allEnriched.push(...enrichedPoints);
       allNewSkus.push( ...(parsed.new_skus || []));
       batchTimes.push(Date.now() - batchStart);
 
@@ -9089,7 +9134,13 @@ function piRenderResults(results, newSkus, bu, failNote) {
 
         <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
 
-          <div style="font-size:17px;font-weight:700;color:#111827;line-height:1.3;flex:1;">${p.title||''}</div>
+          <div style="flex:1;min-width:0;">
+
+            ${p.code ? `<div style="display:inline-block;font-family:monospace;font-size:11.5px;font-weight:600;color:#1e40af;background:#eff6ff;border:1px solid #bfdbfe;padding:2px 8px;border-radius:5px;margin-bottom:6px;">${p.code}</div>` : ''}
+
+            <div style="font-size:17px;font-weight:700;color:#111827;line-height:1.3;">${p.title||''}</div>
+
+          </div>
 
           <span style="font-size:11px;color:#d1d5db;margin-left:12px;white-space:nowrap;margin-top:3px;">#${idx+1}</span>
 
@@ -9188,6 +9239,8 @@ function piExportExcel() {
     const tags = p.tags || [];
 
     const row  = {
+
+      '痛点编码': p.code   || '',
 
       'BU':     _piLastBu || 'All Department',
 
