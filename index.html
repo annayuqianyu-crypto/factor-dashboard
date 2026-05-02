@@ -3935,6 +3935,8 @@ window.addEventListener('load', () => {
 
   initOverviewCharts();
 
+  initBusinessCharts();   // overview 已合并业务契合分析，初始加载也要初始化
+
   window.addEventListener('resize', () => {
 
     Object.values(chartInstances).forEach(c => { try { c.resize(); } catch(e) {} });
@@ -3949,7 +3951,9 @@ window.addEventListener('load', () => {
 
 const PAGE_INIT_MAP = {
 
-  'overview':  initOverviewCharts,
+  // overview 页已合并 业务契合分析+维度详细说明，需同时初始化两类图表
+
+  'overview':  function() { initOverviewCharts(); initBusinessCharts(); },
 
   'expansion': initExpansionCharts,
 
@@ -3957,7 +3961,7 @@ const PAGE_INIT_MAP = {
 
   'forecast':  initForecastCharts,
 
-  'business':  initBusinessCharts,
+  'business':  initBusinessCharts,  // 旧页保留兼容
 
 };
 
