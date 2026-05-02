@@ -9501,12 +9501,13 @@ ${sourceList}
 - 场景须与高净值客户/家族办公室税务、传承、架构相关
 - 优先选择政策变化窗口期、监管趋严领域、跨境新动向
 - 禁用"筹划/避税/减税"等词，可用"税务合规/税负管理"
-- **【硬性规则·信息佐证】每个场景必须给出 3-5 条具体的「政策/文章/新闻」原文链接作为佐证（articles 字段）**
-  - source 必须从上方${TAX_SOURCES.length}个信息源中精确选取（与列表写法完全一致），articles 数组中每条 article 的 source 都要在白名单内
-  - title 是该篇文章/政策/新闻的真实标题（不超过 40 字）
-  - url 必须是完整的 https:// 真实可访问链接（**不要编造、不要写域名首页，要具体到文章 URL**）
-  - 如果某条信息源无法定位到具体文章 URL，可使用该信息源在 TAX_SOURCES 中的 url 兜底
-  - **严禁使用 markdown 格式 [text](url)，url 字段就是裸 URL 字符串**
+- **【硬性规则·信息佐证】每个场景必须给出 3-5 条文章佐证（articles 字段，不可为空数组）**
+  - source 必须从上方${TAX_SOURCES.length}个信息源中精确选取，与列表写法完全一致
+  - title 是该篇文章/政策/新闻的真实或合理推测的标题（≤40 字）
+  - url 是完整 https:// 链接，找不到具体文章时填该信息源的官网 URL 兜底
+  - **严禁使用 markdown 格式 \`[text](url)\`，url 字段必须是裸字符串**
+  - **每个 url 必须在同一行内闭合，不要换行，不要包含中文字符**
+  - **JSON 格式必须严格闭合，所有引号、括号、逗号必须正确**
 
 输出格式（严格JSON，不输出任何其他文字）：
 {"scenes":[
@@ -9530,7 +9531,7 @@ ${sourceList}
       body: JSON.stringify({
         model: localStorage.getItem('pg_api_model') || 'claude-sonnet-4-5-20250929',
         messages:[{role:'user',content:prompt}],
-        max_tokens:4000, temperature:0.7
+        max_tokens:8000, temperature:0.7
       })
     });
     const data = await resp.json();
@@ -9576,24 +9577,50 @@ ${sourceList}
     try {
       parsed = JSON.parse(cleaned);
     } catch(e1) {
-      // 降级 1：在清洗后的文本上逐对象提取；单条失败时再尝试把 articles 清空
+      // 降级 1：在清洗后的文本上逐对象提取；尽可能保留 articles，最后兜底才清空
       let extracted = [];
+      let articlesPreserved = 0, articlesCleared = 0;
       const tryParseScene = (obj) => {
-        try { return JSON.parse(obj); } catch(_) {}
-        // 二次尝试：移除 articles 数组（最常见的内嵌损坏源）
-        try { return JSON.parse(obj.replace(/"articles"\s*:\s*\[[\s\S]*?\](?=\s*[,}])/, '"articles":[]')); } catch(_) {}
+        // L1：原样
+        try { return { o: JSON.parse(obj), kept: true }; } catch(_) {}
+        // L2：剥 article source/title 中的 markdown 链接 [text](url) → text
+        const stripMd = obj.replace(/"(source|title)"\s*:\s*"\[([^\]]+)\]\(([^)]*)\)"/g, '"$1":"$2"');
+        try { return { o: JSON.parse(stripMd), kept: true }; } catch(_) {}
+        // L3：修复 article 内 url 字段未闭合（"url":"https:[换行]）
+        const fixedUrl = stripMd.replace(/("url"\s*:\s*"[^"\n]*?)(\s*\n)/g, '$1"$2');
+        try { return { o: JSON.parse(fixedUrl), kept: true }; } catch(_) {}
+        // L4：把 article 数组每个元素的尾随逗号/坏字符修正
+        const fixed2 = fixedUrl.replace(/,(\s*[}\]])/g, '$1');
+        try { return { o: JSON.parse(fixed2), kept: true }; } catch(_) {}
+        // L5（兜底）：清空 articles 数组—这种 scene 会显示 0 条佐证
+        try { return { o: JSON.parse(obj.replace(/"articles"\s*:\s*\[[\s\S]*?\](?=\s*[,}])/, '"articles":[]')), kept: false }; } catch(_) {}
         return null;
       };
       for (const obj of extractObjects(cleaned)) {
-        const o = tryParseScene(obj);
-        if (o && o.scene) extracted.push(o);
+        const r = tryParseScene(obj);
+        if (r && r.o && r.o.scene) {
+          extracted.push(r.o);
+          if (r.kept) articlesPreserved++; else articlesCleared++;
+        }
       }
-      // 降级 2：如果清洗后还是不行，从原始文本上重新提取并各自单独清洗
       if (!extracted.length) {
         for (const obj of extractObjects(raw)) {
-          const o = tryParseScene(cleanLLMJson(obj));
-          if (o && o.scene) extracted.push(o);
+          const r = tryParseScene(cleanLLMJson(obj));
+          if (r && r.o && r.o.scene) {
+            extracted.push(r.o);
+            if (r.kept) articlesPreserved++; else articlesCleared++;
+          }
         }
+      }
+      console.warn('[radar] 降级解析：保留 articles', articlesPreserved, '条 / 清空', articlesCleared, '条');
+      if (articlesCleared > 0) {
+        // 顶部提示用户：部分场景的佐证因 JSON 损坏被清空，可点重新生成
+        setTimeout(() => {
+          const banner = document.createElement('div');
+          banner.style.cssText = 'margin-bottom:10px;padding:10px 14px;background:#fef3c7;border:1px solid #fde68a;border-radius:8px;font-size:12px;color:#92400e;';
+          banner.innerHTML = `⚠️ 本次响应中有 <strong>${articlesCleared}</strong> 个场景的佐证字段因 JSON 格式损坏被丢弃（共保留 ${articlesPreserved} 个完整）。建议重新生成；如反复出现，可换模型试试。`;
+          if (result.firstChild) result.insertBefore(banner, result.firstChild);
+        }, 100);
       }
       if (!extracted.length) {
         const m2 = /position (\d+)/.exec(e1.message);
