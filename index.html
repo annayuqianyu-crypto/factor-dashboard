@@ -675,12 +675,6 @@ tr:hover td { background: #fafafa; }
 
   </div>
 
-  <div class="nav-item" onclick="showPage('expansion')">
-
-    <span class="icon">✨</span>本次扩库详情
-
-  </div>
-
   <div class="nav-item" onclick="showPage('suggestions')">
 
     <span class="icon">🔧</span>后续迭代建议
@@ -1347,6 +1341,134 @@ tr:hover td { background: #fafafa; }
 
   </div>
 
+
+
+  <!-- ─────────  本次扩库详情（合并自 PAGE 4，去除 各维度增量对比图）  ───────── -->
+
+  <div style="margin-top:32px;padding-top:20px;border-top:2px solid #e5e7eb;">
+
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+
+      <span style="font-size:20px;">✨</span>
+
+      <h3 style="font-size:18px;font-weight:700;color:#111827;margin:0;">本次扩库详情</h3>
+
+      <span style="font-size:12px;color:#9ca3af;">v6.0 补充版相对 v6.0 纯主表版的增量明细</span>
+
+    </div>
+
+    <div class="two-col">
+
+      <div class="card">
+
+        <div class="card-title">新增维度（4个）</div>
+
+        <table>
+
+          <thead><tr><th>维度代码</th><th>维度名称</th><th>新增行数</th><th>新增方向</th></tr></thead>
+
+          <tbody>
+
+            <tr>
+
+              <td><strong>L4.3</strong> <span class="tag tag-new">新增</span></td>
+
+              <td>财富规模特征</td>
+
+              <td><strong style="color:#16a34a">+7</strong></td>
+
+              <td>超高净值/高净值/准高净值区间定义，客户分层基础</td>
+
+            </tr>
+
+            <tr>
+
+              <td><strong>L6.5</strong> <span class="tag tag-new">新增</span></td>
+
+              <td>成长动作</td>
+
+              <td><strong style="color:#16a34a">+12</strong></td>
+
+              <td>子女教育、二代传承、创业支持等成长规划</td>
+
+            </tr>
+
+            <tr>
+
+              <td><strong>L6.6</strong> <span class="tag tag-new">新增</span></td>
+
+              <td>健康状况</td>
+
+              <td><strong style="color:#16a34a">+32</strong></td>
+
+              <td>重疾、长期护理、心理健康与财富规划交叉</td>
+
+            </tr>
+
+            <tr>
+
+              <td><strong>L6.7</strong> <span class="tag tag-new">新增</span></td>
+
+              <td>法律风险动作</td>
+
+              <td><strong style="color:#16a34a">+13</strong></td>
+
+              <td>股权纠纷、财产纠纷、合规风险主动管控</td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      <div class="card">
+
+        <div class="card-title">扩充维度（各维度增量）</div>
+
+        <div id="chart-delta-bar" class="chart-box" style="height:260px;"></div>
+
+      </div>
+
+    </div>
+
+    <div class="card" style="margin-top:14px;">
+
+      <div class="card-title">质检修复说明（78处）</div>
+
+      <div class="three-col">
+
+        <div style="background:#f0fdf4;border-radius:8px;padding:14px 16px;">
+
+          <div style="font-size:14px;font-weight:600;color:#166534;margin-bottom:6px;">维度归类修正 · 约35处</div>
+
+          <div style="font-size:13px;color:#374151;line-height:1.6;">将 L6.3 中混入的"架构搭建"类条目准确迁移至 L6.4；将"成长类"条目独立为 L6.5；修正 L4.1/L4.2 分层混用问题</div>
+
+        </div>
+
+        <div style="background:#fef3c7;border-radius:8px;padding:14px 16px;">
+
+          <div style="font-size:14px;font-weight:600;color:#92400e;margin-bottom:6px;">编码格式规范 · 约28处</div>
+
+          <div style="font-size:13px;color:#374151;line-height:1.6;">统一属性代码格式（L6.3→L6.3X）、修正重复编码、补全缺失编码、规范化中英文混用问题</div>
+
+        </div>
+
+        <div style="background:#eff6ff;border-radius:8px;padding:14px 16px;">
+
+          <div style="font-size:14px;font-weight:600;color:#1e40af;margin-bottom:6px;">内容重复去重 · 约15处</div>
+
+          <div style="font-size:13px;color:#374151;line-height:1.6;">识别并合并语义高度重叠的因子条目（如"境外居民移民"与"海外身份规划"），降低冗余度</div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
 </div>
 
 
@@ -1355,144 +1477,11 @@ tr:hover td { background: #fafafa; }
 
 <!-- ══════════════════════════════════════
 
-     PAGE 4: 本次扩库详情
+     PAGE 4 已合并到 版本更新历史；旧 div 保留为隐藏占位
 
 ═══════════════════════════════════════ -->
 
-<div id="page-expansion" class="page">
-
-  <div class="page-header">
-
-    <h2>✨ 本次扩库详情</h2>
-
-    <p>v6.0 补充版（2026-04-10）相对 v6.0 纯主表版的增量明细</p>
-
-  </div>
-
-
-
-  <div class="two-col">
-
-    <div class="card">
-
-      <div class="card-title">新增维度（4个）</div>
-
-      <table>
-
-        <thead><tr><th>维度代码</th><th>维度名称</th><th>新增行数</th><th>新增方向</th></tr></thead>
-
-        <tbody>
-
-          <tr>
-
-            <td><strong>L4.3</strong> <span class="tag tag-new">新增</span></td>
-
-            <td>财富规模特征</td>
-
-            <td><strong style="color:#16a34a">+7</strong></td>
-
-            <td>超高净值/高净值/准高净值区间定义，客户分层基础</td>
-
-          </tr>
-
-          <tr>
-
-            <td><strong>L6.5</strong> <span class="tag tag-new">新增</span></td>
-
-            <td>成长动作</td>
-
-            <td><strong style="color:#16a34a">+12</strong></td>
-
-            <td>子女教育、二代传承、创业支持等成长规划</td>
-
-          </tr>
-
-          <tr>
-
-            <td><strong>L6.6</strong> <span class="tag tag-new">新增</span></td>
-
-            <td>健康状况</td>
-
-            <td><strong style="color:#16a34a">+32</strong></td>
-
-            <td>重疾、长期护理、心理健康与财富规划交叉</td>
-
-          </tr>
-
-          <tr>
-
-            <td><strong>L6.7</strong> <span class="tag tag-new">新增</span></td>
-
-            <td>法律风险动作</td>
-
-            <td><strong style="color:#16a34a">+13</strong></td>
-
-            <td>股权纠纷、财产纠纷、合规风险主动管控</td>
-
-          </tr>
-
-        </tbody>
-
-      </table>
-
-    </div>
-
-    <div class="card">
-
-      <div class="card-title">扩充维度（各维度增量）</div>
-
-      <div id="chart-delta-bar" class="chart-box" style="height:260px;"></div>
-
-    </div>
-
-  </div>
-
-
-
-  <div class="card">
-
-    <div class="card-title">各维度增量对比图</div>
-
-    <div id="chart-compare-bar" class="chart-box" style="height:320px;"></div>
-
-  </div>
-
-
-
-  <div class="card">
-
-    <div class="card-title">质检修复说明（78处）</div>
-
-    <div class="three-col">
-
-      <div style="background:#f0fdf4;border-radius:8px;padding:14px 16px;">
-
-        <div style="font-size:14px;font-weight:600;color:#166534;margin-bottom:6px;">维度归类修正 · 约35处</div>
-
-        <div style="font-size:13px;color:#374151;line-height:1.6;">将 L6.3 中混入的"架构搭建"类条目准确迁移至 L6.4；将"成长类"条目独立为 L6.5；修正 L4.1/L4.2 分层混用问题</div>
-
-      </div>
-
-      <div style="background:#fef3c7;border-radius:8px;padding:14px 16px;">
-
-        <div style="font-size:14px;font-weight:600;color:#92400e;margin-bottom:6px;">编码格式规范 · 约28处</div>
-
-        <div style="font-size:13px;color:#374151;line-height:1.6;">统一属性代码格式（L6.3→L6.3X）、修正重复编码、补全缺失编码、规范化中英文混用问题</div>
-
-      </div>
-
-      <div style="background:#eff6ff;border-radius:8px;padding:14px 16px;">
-
-        <div style="font-size:14px;font-weight:600;color:#1e40af;margin-bottom:6px;">内容重复去重 · 约15处</div>
-
-        <div style="font-size:13px;color:#374151;line-height:1.6;">识别并合并语义高度重叠的因子条目（如"境外居民移民"与"海外身份规划"），降低冗余度</div>
-
-      </div>
-
-    </div>
-
-  </div>
-
+<div id="page-expansion" class="page" style="display:none;">
 </div>
 
 
@@ -3954,6 +3943,10 @@ const PAGE_INIT_MAP = {
   // overview 页已合并 业务契合分析+维度详细说明，需同时初始化两类图表
 
   'overview':  function() { initOverviewCharts(); initBusinessCharts(); },
+
+  // history 页已合并 本次扩库详情，需初始化 chart-delta-bar
+
+  'history':   initExpansionCharts,
 
   'expansion': initExpansionCharts,
 
