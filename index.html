@@ -811,7 +811,7 @@ tr:hover td { background: #fafafa; }
 
     </div>
 
-    <!-- 三维饼图 -->
+    <!-- 四维占比饼图 -->
 
     <div class="card">
 
@@ -1269,7 +1269,7 @@ tr:hover td { background: #fafafa; }
 
           <p>总计 <strong>1216 行</strong>，12个活跃维度，首次建立 L6.x 动作层完整框架。</p>
 
-          <p style="margin-top:6px;">主要完成了 L6.3 身份规划的大规模扩充（443行），确立三维因子体系的基础结构。</p>
+          <p style="margin-top:6px;">主要完成了 L6.3 身份规划的大规模扩充（443行），确立四维因子体系的基础结构。</p>
 
         </div>
 
@@ -1301,7 +1301,7 @@ tr:hover td { background: #fafafa; }
 
         <div class="tl-body">
 
-          <p>提出"谁 × 有什么 × 发生了什么"三维方法论，完成因子库整体架构设计与早期维度定义。</p>
+          <p>提出"谁 × 有什么 × 发生了什么 × 约束/合规"四维方法论，完成因子库整体架构设计与早期维度定义。</p>
 
         </div>
 
@@ -1514,9 +1514,9 @@ tr:hover td { background: #fafafa; }
 
         <div>
 
-          <div class="pl-text">三维比例严重失衡——"发生了什么"一枝独秀</div>
+          <div class="pl-text">四维比例严重失衡——"动作"一枝独秀，"约束"明显不足</div>
 
-          <div class="pl-sub">当前占比：谁（15%）· 有什么（21%）· 发生了什么（62%）。"发生了什么"是"谁"的 4 倍，但链路生成中"谁"的精度对痛点定向至关重要。建议将 L1.1A/B 合计扩至 250 行以上，使三维比例趋近 20%·25%·55%</div>
+          <div class="pl-sub">当前占比：主体（15%）· 资产（21%）· 动作（52%）· 约束（11%）。"动作"是"主体"的 3.5 倍、是"约束"的近 5 倍，但链路生成中"主体"的精度与"约束"的覆盖度对痛点定向同样至关重要。建议将 L1.1A/B 合计扩至 250 行以上、约束类（L6.2/L6.7）扩至 250 行以上，使四维比例趋近 20%·25%·40%·15%</div>
 
         </div>
 
@@ -1850,7 +1850,7 @@ tr:hover td { background: #fafafa; }
 
   <div class="card">
 
-    <div class="card-title">链路示例（3条典型链路）</div>
+    <div class="card-title">链路示例（4条典型链路）</div>
 
 
 
@@ -1924,6 +1924,30 @@ tr:hover td { background: #fafafa; }
 
     </div>
 
+
+
+    <div class="chain-example">
+
+      <div class="chain-title">示例4：实控人婚变股权分割 + 信息披露合规</div>
+
+      <span class="chain-pill" style="background:#ede9fe;color:#5b21b6;">主体：A股上市公司实控人配偶 (L1.1B)</span>
+
+      <span class="chain-arrow">×</span>
+
+      <span class="chain-pill" style="background:#dcfce7;color:#166534;">资产：上市公司限售股 + 婚内增值股权 (L4.2 × L5.2)</span>
+
+      <span class="chain-arrow">×</span>
+
+      <span class="chain-pill" style="background:#dbeafe;color:#1e40af;">动作：离婚财产分割 + 大宗减持 (L6.7 × L6.1)</span>
+
+      <span class="chain-arrow">×</span>
+
+      <span class="chain-pill" style="background:#fef3c7;color:#92400e;">约束：信息披露 + 减持新规 (L6.2)</span>
+
+      <div style="margin-top:10px;font-size:13px;color:#6b7280;">→ 痛点：实控人婚变如何在不冲击股价与信息披露的前提下完成股权分割与税务清算</div>
+
+    </div>
+
   </div>
 
 
@@ -1944,15 +1968,15 @@ tr:hover td { background: #fafafa; }
 
       <div style="background:#f9fafb;border-radius:8px;padding:14px 16px;text-align:center;">
 
-        <div style="font-size:26px;font-weight:700;color:#1a56db;">≈3条</div>
+        <div style="font-size:26px;font-weight:700;color:#1a56db;">≈4条</div>
 
-        <div style="font-size:12.5px;color:#6b7280;margin-top:4px;">每个痛点平均链路数</div>
+        <div style="font-size:12.5px;color:#6b7280;margin-top:4px;">每个痛点平均链路数（四维）</div>
 
       </div>
 
       <div style="background:#f9fafb;border-radius:8px;padding:14px 16px;text-align:center;">
 
-        <div style="font-size:26px;font-weight:700;color:#1a56db;">≈1,077</div>
+        <div style="font-size:26px;font-weight:700;color:#1a56db;">≈1,436</div>
 
         <div style="font-size:12.5px;color:#6b7280;margin-top:4px;">已覆盖链路总数</div>
 
@@ -1960,9 +1984,9 @@ tr:hover td { background: #fafafa; }
 
       <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px 16px;text-align:center;">
 
-        <div style="font-size:26px;font-weight:700;color:#1a56db;">0.006%</div>
+        <div style="font-size:26px;font-weight:700;color:#1a56db;">0.0077%</div>
 
-        <div style="font-size:12.5px;color:#6b7280;margin-top:4px;">当前覆盖率（1,077/1,860万）</div>
+        <div style="font-size:12.5px;color:#6b7280;margin-top:4px;">当前覆盖率（1,436/1,860万）</div>
 
       </div>
 
@@ -1972,7 +1996,7 @@ tr:hover td { background: #fafafa; }
 
       <strong style="color:#374151;">扩库空间提示：</strong>
 
-      当前1,077条已标注链路仅覆盖有效四维组合空间的约0.006%，说明朝曦因子库仍有极大扩展潜力。
+      当前1,436条已标注链路仅覆盖有效四维组合空间的约0.0077%，说明朝曦因子库仍有极大扩展潜力。
 
       建议以每季度新增50-100条痛点的节奏持续补充，重点围绕<span style="color:#1a56db;font-weight:600;">约束维度（152行，当前最薄弱）</span>和高频客户身份组合优先扩充。
 
@@ -2442,7 +2466,7 @@ tr:hover td { background: #fafafa; }
 
       💡 上方"各业务板块分布"按 10 大业务板块统计痛点总数；本卡片向下钻取，展示<strong>每个板块内部的细分场景类型</strong>与典型痛点数（括号内数字），帮助识别哪些子场景已有充分覆盖、哪些还需补充。<br>
 
-      <span style="color:#1a56db;font-weight:600;">📌 券商专项场景</span>：原 60 条券商专项已分别融入「资本市场（含券商专项）」「股权激励（含券商专项）」两个板块，子项末尾标注 <sup style="color:#1a56db;font-weight:600;">券</sup> 的即为券商专项来源；这 60 条均与主库 299 条痛点共用三维因子映射，可联合检索。
+      <span style="color:#1a56db;font-weight:600;">📌 券商专项场景</span>：原 60 条券商专项已分别融入「资本市场（含券商专项）」「股权激励（含券商专项）」两个板块，子项末尾标注 <sup style="color:#1a56db;font-weight:600;">券</sup> 的即为券商专项来源；这 60 条均与主库 299 条痛点共用四维因子映射，可联合检索。
 
     </div>
 
@@ -3686,7 +3710,7 @@ function initOverviewCharts() {
 
 
 
-  // 2. 三维饼图
+  // 2. 四维占比饼图
 
   const pieEl = document.getElementById('chart-3d-pie');
 
@@ -7625,7 +7649,7 @@ async function pgStartGenerate() {
 
 
 
-请基于三维链路方法论（谁×有什么×发生了什么），为以下场景各生成指定数量的痛点：
+请基于四维链路方法论（谁×有什么×发生了什么×约束/合规），为以下场景各生成指定数量的痛点：
 
 ${sceneLines}
 
@@ -7645,7 +7669,7 @@ ${sceneLines}
 
   "title":"【第二步·后提炼】痛点描述（8-12字）：从上方痛点说明中提炼最能概括该场景的短句，必须同时体现「谁的」和「什么痛点」，例如：「创始人股权代持的税务暴露风险」「离婚时境外信托资产分割困境」「Pre-IPO高管跨境减持的合规锁定」",
 
-  "factors_chain":"【重要】从下方【因子库路径表】中精确选取3条与该痛点最匹配的完整路径，用中文分号「；」拼接。路径必须与因子库中完全一致，禁止自行编造或修改路径内容。三条路径分别代表：①谁（商业/职业身份或家庭角色起头）②有什么/发生了什么（资产/动作/税务/法律类路径）③约束/背景（外部监管触发等，如无则另选最贴合的第三条路径）",
+  "factors_chain":"【重要】从下方【因子库路径表】中精确选取4条与该痛点最匹配的完整路径，用中文分号「；」拼接。路径必须与因子库中完全一致，禁止自行编造或修改路径内容。四条路径分别代表：①谁（商业/职业身份或家庭角色起头）②有什么（资产/持有结构/财富标的类路径）③发生了什么（资本动作/税务申报/架构搭建等动作类路径）④约束/合规（外部监管触发/税务合规/法律风险等约束类路径）",
 
   "tags":[{"label":"标签短语","dim":"主体|资产|动作|约束","weight":"C|B|A"}],
 
@@ -7715,7 +7739,7 @@ ${skuLines}
 
 
 
-【因子库路径表】（共${FACTOR_PATHS.length}条，为每个痛点的factors_chain从此表精确选取3条完整路径，复制原文不可修改）：
+【因子库路径表】（共${FACTOR_PATHS.length}条，为每个痛点的factors_chain从此表精确选取4条完整路径，分别覆盖 主体/资产/动作/约束 四维，复制原文不可修改）：
 
 ${factorPathsText}
 
