@@ -7669,7 +7669,7 @@ ${sceneLines}
 
   "title":"【第二步·后提炼】痛点描述（8-12字）：从上方痛点说明中提炼最能概括该场景的短句，必须同时体现「谁的」和「什么痛点」，例如：「创始人股权代持的税务暴露风险」「离婚时境外信托资产分割困境」「Pre-IPO高管跨境减持的合规锁定」",
 
-  "factors_chain":"【重要】从下方【因子库路径表】中精确选取4条与该痛点最匹配的完整路径，用中文分号「；」拼接。路径必须与因子库中完全一致，禁止自行编造或修改路径内容。四条路径分别代表：①谁（商业/职业身份或家庭角色起头）②有什么（资产/持有结构/财富标的类路径）③发生了什么（资本动作/税务申报/架构搭建等动作类路径）④约束/合规（外部监管触发/税务合规/法律风险等约束类路径）",
+  "factors_chain":"【硬性规则】必须从下方【因子库路径表】中精确选取**恰好 4 条**与该痛点最匹配的完整路径，用中文分号「；」拼接。路径必须与因子库中完全一致，禁止编造或修改。**4 条路径必须分别属于以下 4 个不同维度，每个维度恰好 1 条，禁止 2 条同维度（例如绝不可出现 2 条「发生了什么」）**：①谁（必以「商业/职业身份」「家庭角色」「核心家庭成员」「核心员工」开头）②有什么（必以「资产类型」「财富标的」「持有形式」「持有结构」「所在地」「财富规模」「公司架构」「金融账户」开头）③发生了什么（必以「资本动作」「流动性管理」「价值管理」「架构搭建」「身份规划」「身份优化」「成长动作」「健康管理」「个人税务申报」「企业税务申报」开头）④约束条件（必以「外部监管触发」「税务合规」「法律风险」「合规要求」「政策变化」「身份维护」开头）。生成前请检查：4 条路径是否分别覆盖 4 个不同维度，缺一不可。",
 
   "tags":[{"label":"标签短语","dim":"主体|资产|动作|约束","weight":"C|B|A"}],
 
@@ -7739,7 +7739,7 @@ ${skuLines}
 
 
 
-【因子库路径表】（共${FACTOR_PATHS.length}条，为每个痛点的factors_chain从此表精确选取4条完整路径，分别覆盖 主体/资产/动作/约束 四维，复制原文不可修改）：
+【因子库路径表】（共${FACTOR_PATHS.length}条，为每个痛点的 factors_chain 从此表精确选取**恰好 4 条**完整路径，**分别且仅分别**覆盖「谁/有什么/发生了什么/约束条件」四维，每维 1 条不可重复，复制原文不可修改）：
 
 ${factorPathsText}
 
@@ -8388,23 +8388,25 @@ async function pgTestConnection() {
 
 const FACTOR_DIM = [
 
-  { label:'谁',       bg:'#ede9fe', color:'#5b21b6', border:'#c4b5fd',
+  { label:'谁',         bg:'#ede9fe', color:'#5b21b6', border:'#c4b5fd',
 
-    starts:['商业/职业身份','家庭角色'] },
+    starts:['商业/职业身份','家庭角色','核心家庭成员','核心员工'] },
 
-  { label:'有什么',   bg:'#dcfce7', color:'#166534', border:'#86efac',
+  { label:'有什么',     bg:'#dcfce7', color:'#166534', border:'#86efac',
 
-    starts:['资产类型','财富标的','持有形式','所在地','财富规模'] },
+    starts:['资产类型','财富标的','持有形式','持有结构','所在地','财富规模','金融账户','公司架构'] },
 
-  { label:'约束',     bg:'#fef3c7', color:'#92400e', border:'#fde68a',
+  { label:'约束条件',   bg:'#fef3c7', color:'#92400e', border:'#fde68a',
 
-    starts:['外部监管触发'] },
+    starts:['外部监管触发','税务合规','法律风险','合规要求','政策变化','身份维护'] },
 
   { label:'发生了什么', bg:'#dbeafe', color:'#1e40af', border:'#93c5fd',
 
-    starts:[] }, // 兜底
+    starts:['资本动作','流动性管理','价值管理','架构搭建','身份规划','身份优化','成长动作','健康管理','个人税务申报','企业税务申报'] },
 
 ];
+
+const FACTOR_DIM_ORDER = ['谁','有什么','发生了什么','约束条件'];
 
 
 
@@ -8416,7 +8418,7 @@ function pgDetectDim(path) {
 
   }
 
-  return FACTOR_DIM[3]; // 发生了什么
+  return FACTOR_DIM[3]; // 兜底为 发生了什么
 
 }
 
@@ -8452,9 +8454,65 @@ function pgRenderFactorChain(p) {
 
 
 
-  const rowsHtml = paths.map(path => {
+  // 按 4 维分桶；每维取首条（去重）
 
-    const dim = pgDetectDim(path);
+  const buckets = { '谁':[], '有什么':[], '发生了什么':[], '约束条件':[] };
+
+  paths.forEach(p => {
+
+    const d = pgDetectDim(p);
+
+    buckets[d.label] = buckets[d.label] || [];
+
+    buckets[d.label].push(p);
+
+  });
+
+
+
+  // 按固定顺序展示；同维度多条仅取首条作为主条，其余用灰色"补充"标签显示
+
+  const orderedRows = [];
+
+  for (const dimLabel of FACTOR_DIM_ORDER) {
+
+    const dimMeta = FACTOR_DIM.find(d => d.label === dimLabel);
+
+    const list = buckets[dimLabel] || [];
+
+    if (list.length === 0) {
+
+      orderedRows.push({ dim: dimMeta, path: null, missing: true });
+
+    } else {
+
+      orderedRows.push({ dim: dimMeta, path: list[0], missing: false });
+
+      for (let i = 1; i < list.length; i++) {
+
+        orderedRows.push({ dim: dimMeta, path: list[i], missing: false, extra: true });
+
+      }
+
+    }
+
+  }
+
+
+
+  const rowsHtml = orderedRows.map(({ dim, path, missing, extra }) => {
+
+    if (missing) {
+
+      return `<div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px dashed #f3f4f6;opacity:.55;">
+
+        <span style="flex-shrink:0;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;background:${dim.bg};color:${dim.color};border:1px dashed ${dim.border};white-space:nowrap;">${dim.label}</span>
+
+        <span style="font-size:11.5px;color:#9ca3af;font-style:italic;">（未生成此维度路径）</span>
+
+      </div>`;
+
+    }
 
     // 把路径按 > 拆分成节点
 
@@ -8488,7 +8546,7 @@ function pgRenderFactorChain(p) {
 
         font-weight:700;background:${dim.bg};color:${dim.color};border:1px solid ${dim.border};
 
-        white-space:nowrap;">${dim.label}</span>
+        white-space:nowrap;">${dim.label}${extra ? ' · 补充' : ''}</span>
 
       <div style="display:flex;flex-wrap:wrap;align-items:center;line-height:1.8;">${nodesHtml}</div>
 
