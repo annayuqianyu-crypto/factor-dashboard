@@ -2963,7 +2963,7 @@ tr:hover td { background: #fafafa; }
         <div id="radar-tax-sources" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;"></div>
       </details>
       <div style="margin:10px 0;padding:8px 12px;background:#fffbeb;border-left:3px solid #f59e0b;border-radius:4px;font-size:11px;color:#78350f;line-height:1.6;">
-        ⚠️ <strong>链接可信度提示</strong>：AI 输出的 URL 受限于模型训练截止时间，可能存在<strong>过期、失效或编造</strong>。所有链接<strong>仅供参考</strong>，纳入正式场景库前请人工二次校验原文。
+        💡 <strong>佐证链接说明</strong>：AI 不再直接给出文章 URL（避免 404 / 编造），改为给出<strong>信息源 + 关键词组合</strong>，链接点击后进入该信息源的 <strong>Bing 站内搜索结果</strong>，由你直接看到该网站内符合关键词的真实文章列表。如果搜索结果为空，可能是该信息源近期没有相关文章——可换信息源或调整关键词重新生成。
       </div>
       <div id="radar-tax-result" style="min-height:80px;"></div>
     </div>
@@ -9881,13 +9881,12 @@ ${sourceList}
 - 场景须与高净值客户/家族办公室税务、传承、架构相关
 - 优先选择政策变化窗口期、监管趋严领域、跨境新动向
 - 禁用"筹划/避税/减税"等词，可用"税务合规/税负管理"
-- **【硬性规则·信息佐证】每个场景必须给出 3-5 条文章佐证（articles 字段，不可为空数组）**
+- **【硬性规则·信息佐证】每个场景给出 3-5 条 references（不可为空数组）**
+  - **不要编造具体 URL 或文章标题**——前端会基于 source + search_terms 自动生成站内搜索链接
   - source 必须从上方${TAX_SOURCES.length}个信息源中精确选取，与列表写法完全一致
-  - title 是该篇文章/政策/新闻的真实或合理推测的标题（≤40 字）
-  - url 是完整 https:// 链接，找不到具体文章时填该信息源的官网 URL 兜底
-  - **严禁使用 markdown 格式 \`[text](url)\`，url 字段必须是裸字符串**
-  - **每个 url 必须在同一行内闭合，不要换行，不要包含中文字符**
-  - **JSON 格式必须严格闭合，所有引号、括号、逗号必须正确**
+  - search_terms 是 5-15 字的精炼关键词组合（用空格分隔），描述该信息源中可能出现的相关政策/新闻主题（如"减持新规 2026 实施细则"、"FSIE 跨境收益豁免"）
+  - note 是 ≤25 字的简短说明，解释为什么该信息源对本场景有参考价值（如"证监会发布的减持规则更新主体"、"披露境外被动收入豁免门槛新规"）
+  - **JSON 必须严格闭合，所有引号/括号/逗号正确**
 
 输出格式（严格JSON，不输出任何其他文字）：
 {"scenes":[
@@ -9896,10 +9895,10 @@ ${sourceList}
     "reason":"建议原因（该场景为何是当前热点，60字内）",
     "source_dim":"来源维度",
     "trend":"近期政策或市场动向简述（50字内）",
-    "articles":[
-      {"source":"香港税务局(IRD)","title":"2025/26 课税年度跨境企业转让定价指引","url":"https://www.ird.gov.hk/chs/ppr/archives/25081501.htm"},
-      {"source":"STEP.org","title":"Cross-border Trust Planning Update Q4 2025","url":"https://www.step.org/industry-news/cross-border-trust-update"},
-      {"source":"美国国税局(IRS)","title":"Final Regulations on Foreign Trust Reporting","url":"https://www.irs.gov/newsroom/final-regs-foreign-trust"}
+    "references":[
+      {"source":"中国证监会","search_terms":"减持新规 2026 实施细则","note":"证监会减持规则修订发布主体"},
+      {"source":"上海证券交易所","search_terms":"减持 大宗交易 协议转让 信息登记","note":"交易所执行细则与问答"},
+      {"source":"国家税务总局","search_terms":"股权转让 个人所得税 加强管理","note":"减持后个税合规配套要求"}
     ]
   }
 ]}`;
@@ -10051,7 +10050,7 @@ ${sourceList}
     const scenes = parsed.scenes || [];
     if (!scenes.length) throw new Error('场景数组为空');
 
-    // 标准化每个 article：剥 markdown、匹配 source 回 TAX_SOURCES、URL 兜底
+    // 标准化每个 reference：匹配 source 回 TAX_SOURCES，构造 Bing 站内搜索 URL
     const stripMd = n => String(n||'').replace(/\[([^\]]+)\]\(([^)]*)\)/g, '$1').trim();
     const norm    = n => stripMd(n).replace(/[（()）\[\]\s\.\-_：:、，,]/g,'').toLowerCase();
     const matchSource = name => {
@@ -10060,40 +10059,68 @@ ${sourceList}
       if (!hit) hit = TAX_SOURCES.find(t => { const tn = norm(t.name); return tn.includes(ns) || ns.includes(tn); });
       return hit || null;
     };
+    // 从信息源 URL 提取域名用于 site: 搜索
+    const domainOf = url => {
+      try { return new URL(url.replace(/^http(s)?:\/\/(www\.)?/,'https://')).hostname.replace(/^www\./,''); }
+      catch(_) { return (url||'').replace(/^https?:\/\//,'').replace(/^www\./,'').split('/')[0]; }
+    };
+    // 构造 Bing 国内可访问的站内搜索链接
+    const buildSearchUrl = (sourceUrl, terms) => {
+      const dom = domainOf(sourceUrl);
+      const q   = encodeURIComponent(`site:${dom} ${terms}`);
+      return `https://cn.bing.com/search?q=${q}`;
+    };
     scenes.forEach(s => {
-      // 兼容旧字段：如果 AI 仍返回 source_names 而非 articles，降级转换
-      let articles = Array.isArray(s.articles) ? s.articles : [];
-      if (!articles.length && Array.isArray(s.source_names)) {
-        articles = s.source_names.map(n => ({source: stripMd(n), title: '', url: ''}));
+      // 兼容三种格式：references（新）/ articles（旧·AI 编 URL）/ source_names（更旧）
+      let refs = Array.isArray(s.references) ? s.references : [];
+      if (!refs.length && Array.isArray(s.articles)) {
+        // 旧格式 articles → 转换为 references；丢弃 AI 编的 URL，保留 title 作 search_terms
+        refs = s.articles.map(a => ({
+          source: stripMd(a.source),
+          search_terms: stripMd(a.title || ''),
+          note: ''
+        }));
       }
-      const cleaned = articles.map(a => {
-        const srcRaw = stripMd(a.source);
+      if (!refs.length && Array.isArray(s.source_names)) {
+        refs = s.source_names.map(n => ({source: stripMd(n), search_terms: s.scene || '', note: ''}));
+      }
+      const cleaned = refs.map(r => {
+        const srcRaw = stripMd(r.source);
         const hit    = matchSource(srcRaw);
-        const url    = String(a.url||'').replace(/^[（(]+|[）)]+$/g,'').trim();
+        const terms  = stripMd(r.search_terms || r.title || s.scene || '');
         return {
-          source:    hit ? hit.name : srcRaw,
-          title:     stripMd(a.title || ''),
-          url:       url || (hit ? hit.url : ''),
-          unmatched: !hit,
-          isFallback: !url && !!hit
+          source:        hit ? hit.name : srcRaw,
+          searchTerms:   terms,
+          note:          stripMd(r.note || ''),
+          searchUrl:     hit ? buildSearchUrl(hit.url, terms) : `https://cn.bing.com/search?q=${encodeURIComponent(srcRaw + ' ' + terms)}`,
+          homepageUrl:   hit ? hit.url : '',
+          unmatched:     !hit
         };
-      }).filter(a => a.source);
+      }).filter(r => r.source);
       s._articles = cleaned;
     });
 
-    // 渲染结果卡片（参考"2026新兴场景建议"卡片样式：折叠的"触发原因·政策与热点来源"链接列表）
+    // 渲染：每条 reference 显示为「在 [source] 中搜索：keywords」可点击链接
     result.innerHTML = scenes.map((s,i) => {
       const arts = s._articles || [];
       const triggerLinks = arts.length ? arts.map(a => {
-        const icon = a.isFallback ? '🔗' : '📄';
-        const tag  = a.unmatched
-          ? `<span style="color:#991b1b;font-weight:600;">[${a.source} ⚠]</span>`
-          : `<span style="color:#92400e;font-weight:600;">[${a.source}]</span>`;
-        const titleTxt = a.title || (a.isFallback ? '（信息源官网，AI 未提供具体文章）' : '查看原文');
-        const safeUrl  = a.url || '#';
-        return `<a href="${safeUrl}" target="_blank" rel="noopener" style="display:block;padding:6px 10px;margin:3px 0;background:#fff;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;color:#0369a1;text-decoration:none;line-height:1.5;">
-          ${icon} ${tag} ${titleTxt} <span style="font-size:10px;opacity:0.6;">↗</span>
-        </a>`;
+        const tag = a.unmatched
+          ? `<span style="color:#991b1b;font-weight:600;">${a.source} ⚠</span>`
+          : `<span style="color:#92400e;font-weight:600;">${a.source}</span>`;
+        const noteHtml = a.note
+          ? `<div style="font-size:11px;color:#6b7280;margin-top:2px;">↳ ${a.note}</div>` : '';
+        const homeBtn = a.homepageUrl
+          ? `<a href="${a.homepageUrl}" target="_blank" rel="noopener" style="margin-left:8px;font-size:10px;color:#9ca3af;text-decoration:none;border:1px solid #e5e7eb;padding:1px 6px;border-radius:4px;">官网</a>` : '';
+        return `<div style="padding:8px 10px;margin:4px 0;background:#fff;border:1px solid #e5e7eb;border-radius:6px;line-height:1.5;">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span style="font-size:13px;">🔍</span>
+            <a href="${a.searchUrl}" target="_blank" rel="noopener" style="font-size:12.5px;color:#0369a1;text-decoration:none;font-weight:500;">
+              在 ${tag} 搜索：<strong style="color:#0369a1;">${a.searchTerms || '（无关键词）'}</strong> <span style="font-size:10px;opacity:0.6;">↗</span>
+            </a>
+            ${homeBtn}
+          </div>
+          ${noteHtml}
+        </div>`;
       }).join('') : `<div style="padding:8px;color:#9ca3af;font-size:11px;font-style:italic;">（AI 未提供任何信息佐证，无法验证场景成立性，建议人工核对）</div>`;
 
       return `
