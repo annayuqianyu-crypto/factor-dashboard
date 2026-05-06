@@ -4006,15 +4006,17 @@ function initScenesCharts() {
 
     chartInstances['scenes-bu-bar'] = buChart;
 
-    // 配色对齐"痛点结果"页四步法：深红/深橙/深绿/深蓝（柔和雅致，与四步分析卡片同色系）
+    // 配色对齐下方"现有痛点场景分型展示"对应板块色——形成 BU↔板块 视觉同源
+
+    // CM↔资本市场卡(琥珀 #92400e), Tax↔税务合规卡(深红 #991b1b), Legal↔法律架构卡(玫瑰 #9d174d)
 
     const buData = [
 
-      { name: 'CM 资本市场', value: 88,  color: '#9a3412', detail: '资本市场场景 + 股权激励 + 境外架构 + 综合' },
+      { name: 'CM 资本市场', value: 88,  color: '#92400e', detail: '资本市场场景 + 股权激励 + 境外架构 + 综合' },
 
-      { name: 'Tax 税务',    value: 175, color: '#1e40af', detail: '税务合规 + 身份/海外税务 + 跨境税务 + 转让定价 + CRS/FATCA 等' },
+      { name: 'Tax 税务',    value: 175, color: '#991b1b', detail: '税务合规 + 身份/海外税务 + 跨境税务 + 转让定价 + CRS/FATCA 等' },
 
-      { name: 'Legal 法律',  value: 97,  color: '#166534', detail: '法律架构 + 资产保护 + 财富传承 + 慈善公益（痛点库中标注为 Law）' },
+      { name: 'Legal 法律',  value: 97,  color: '#9d174d', detail: '法律架构 + 资产保护 + 财富传承 + 慈善公益（痛点库中标注为 Law）' },
 
     ];
 
