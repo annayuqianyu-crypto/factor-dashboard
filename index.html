@@ -2018,14 +2018,6 @@ tr:hover td { background: #fafafa; }
 
 <div id="page-scenes" class="page">
 
-  <div class="page-header">
-
-    <h2>🗂️ 已入库痛点总览</h2>
-
-    <p>360条痛点场景的分类分布与典型举例（数据源：痛点库 20260410 最新版）</p>
-
-  </div>
-
 
 
   <!-- 各 BU 痛点分布（按 CM/Tax/Legal 三大业务单元统计） -->
@@ -4006,17 +3998,15 @@ function initScenesCharts() {
 
     chartInstances['scenes-bu-bar'] = buChart;
 
-    // 配色对齐下方"现有痛点场景分型展示"对应板块色——形成 BU↔板块 视觉同源
-
-    // CM↔资本市场卡(琥珀 #92400e), Tax↔税务合规卡(深红 #991b1b), Legal↔法律架构卡(玫瑰 #9d174d)
+    // 蓝白 SaaS 风：单一蓝色三档明暗（数量大→颜色深），白色细分隔
 
     const buData = [
 
-      { name: 'CM 资本市场', value: 88,  color: '#92400e', detail: '资本市场场景 + 股权激励 + 境外架构 + 综合' },
+      { name: 'CM 资本市场', value: 88,  color: '#3b82f6', detail: '资本市场场景 + 股权激励 + 境外架构 + 综合' },
 
-      { name: 'Tax 税务',    value: 175, color: '#991b1b', detail: '税务合规 + 身份/海外税务 + 跨境税务 + 转让定价 + CRS/FATCA 等' },
+      { name: 'Tax 税务',    value: 175, color: '#1e3a8a', detail: '税务合规 + 身份/海外税务 + 跨境税务 + 转让定价 + CRS/FATCA 等' },
 
-      { name: 'Legal 法律',  value: 97,  color: '#9d174d', detail: '法律架构 + 资产保护 + 财富传承 + 慈善公益（痛点库中标注为 Law）' },
+      { name: 'Legal 法律',  value: 97,  color: '#1d4ed8', detail: '法律架构 + 资产保护 + 财富传承 + 慈善公益（痛点库中标注为 Law）' },
 
     ];
 
@@ -4058,7 +4048,15 @@ function initScenesCharts() {
 
         data: [{ value: b.value, name: b.name, detail: b.detail }],
 
-        itemStyle: { color: b.color, borderRadius: i===0?[6,0,0,6]:i===buData.length-1?[0,6,6,0]:[0,0,0,0] },
+        itemStyle: {
+
+          color: b.color,
+
+          borderRadius: i===0?[6,0,0,6]:i===buData.length-1?[0,6,6,0]:[0,0,0,0],
+
+          borderColor: '#fff', borderWidth: 2
+
+        },
 
         label: {
 
