@@ -2028,6 +2028,24 @@ tr:hover td { background: #fafafa; }
 
 
 
+  <!-- 各 BU 痛点分布（按 CM/Tax/Legal 三大业务单元统计） -->
+
+  <div class="card" style="margin-bottom:16px;">
+
+    <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+
+      <span>各 BU 痛点分布</span>
+
+      <span style="font-size:11.5px;font-weight:400;color:#9ca3af;">按 CM 资本市场 / Tax 税务 / Legal 法律 三大业务单元统计（合计 359 条 = 主库 299 + 券商专项 60）</span>
+
+    </div>
+
+    <div id="chart-bu-bar" class="chart-box" style="height:180px;"></div>
+
+  </div>
+
+
+
   <div class="two-col">
 
     <div class="card">
@@ -3975,6 +3993,92 @@ function initScenesCharts() {
     }]
 
   });
+
+
+
+  // ── 各 BU 痛点分布（横向 stacked bar，更紧凑）──
+
+  const buEl = document.getElementById('chart-bu-bar');
+
+  if (buEl && !chartInstances['scenes-bu-bar']) {
+
+    const buChart = echarts.init(buEl);
+
+    chartInstances['scenes-bu-bar'] = buChart;
+
+    const buData = [
+
+      { name: 'CM 资本市场', value: 137, color: '#1a56db', detail: '资本市场 52（含券商 30）+ 股权激励 50（含券商 15）+ 境外架构 25 + 综合 10' },
+
+      { name: 'Tax 税务',    value: 145, color: '#dc2626', detail: '税务合规 65 + 身份/海外税务 39 + 跨境税务 25 + 综合/其他 16' },
+
+      { name: 'Legal 法律',  value: 77,  color: '#16a34a', detail: '法律架构 19 + 资产保护 25 + 财富传承 17 + 慈善公益 8 + 其他 8' },
+
+    ];
+
+    const total = buData.reduce((s,b)=>s+b.value,0);
+
+    buChart.setOption({
+
+      tooltip: {
+
+        trigger:'item',
+
+        formatter: p => `<b>${p.data.name}</b><br/>痛点数：<b style="color:${p.color}">${p.value} 条</b>（占 ${(p.value/total*100).toFixed(1)}%）<br/><span style="font-size:11px;color:#888;">${p.data.detail}</span>`
+
+      },
+
+      grid: { left: 110, right: 80, top: 10, bottom: 10 },
+
+      xAxis: { type: 'value', max: total, axisLine:{show:false}, axisTick:{show:false}, splitLine:{show:false}, axisLabel:{show:false} },
+
+      yAxis: {
+
+        type: 'category',
+
+        data: ['痛点分布'],
+
+        axisLabel: { fontSize: 13, fontWeight: 600, color: '#374151' },
+
+        axisLine:{show:false}, axisTick:{show:false}
+
+      },
+
+      series: buData.map((b, i) => ({
+
+        name: b.name,
+
+        type: 'bar',
+
+        stack: 'bu',
+
+        data: [{ value: b.value, name: b.name, detail: b.detail }],
+
+        itemStyle: { color: b.color, borderRadius: i===0?[6,0,0,6]:i===buData.length-1?[0,6,6,0]:[0,0,0,0] },
+
+        label: {
+
+          show: true,
+
+          formatter: p => `${p.data.name}\n${p.value} 条 · ${(p.value/total*100).toFixed(1)}%`,
+
+          color: '#fff',
+
+          fontWeight: 700,
+
+          fontSize: 12,
+
+          lineHeight: 18
+
+        },
+
+        barWidth: 60
+
+      }))
+
+    });
+
+  }
 
 }
 
