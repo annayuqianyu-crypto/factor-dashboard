@@ -4282,11 +4282,9 @@ function initBusinessCharts() {
 
     tooltip: { trigger: 'item' },
 
-    legend: { data: ['覆盖度评分'], bottom: 0 },
-
     radar: {
 
-      indicator: bizLines.map((name, i) => ({ name, max: 10, color: COLORS[i] })),
+      indicator: bizLines.map(name => ({ name, max: 10, color: '#1e3a8a' })),
 
       center: ['50%', '48%'],
 
