@@ -2024,13 +2024,7 @@ tr:hover td { background: #fafafa; }
 
   <div class="card" style="margin-bottom:16px;">
 
-    <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
-
-      <span>各 BU 痛点分布</span>
-
-      <span style="font-size:11.5px;font-weight:400;color:#9ca3af;">按 CM 资本市场 / Tax 税务 / Legal 法律 三大业务单元统计（合计 360 条 · 数据源：痛点库 20260410 最新版）</span>
-
-    </div>
+    <div class="card-title">各 BU 痛点分布</div>
 
     <div id="chart-bu-bar" class="chart-box" style="height:180px;"></div>
 
@@ -4052,7 +4046,7 @@ function initScenesCharts() {
 
       },
 
-      grid: { left: 110, right: 80, top: 10, bottom: 10 },
+      grid: { left: 10, right: 80, top: 10, bottom: 10 },
 
       xAxis: { type: 'value', max: total, axisLine:{show:false}, axisTick:{show:false}, splitLine:{show:false}, axisLabel:{show:false} },
 
@@ -4060,9 +4054,9 @@ function initScenesCharts() {
 
         type: 'category',
 
-        data: ['痛点分布'],
+        data: [''],
 
-        axisLabel: { fontSize: 13, fontWeight: 600, color: '#374151' },
+        axisLabel: { show: false },
 
         axisLine:{show:false}, axisTick:{show:false}
 
