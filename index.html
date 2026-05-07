@@ -3064,125 +3064,127 @@ tr:hover td { background: #fafafa; }
 
 
 
-  <!-- API 配置 -->
+  <!-- API 配置（公司统一配置，无需手动填写） -->
 
-  <div class="card" style="background:#fffbeb;border-color:#fcd34d;margin-bottom:16px;">
+  <div class="card" style="background:#f0fdf4;border-color:#86efac;margin-bottom:16px;">
 
-    <div class="card-title" style="margin-bottom:12px;">🔑 API 配置</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;">
 
+      <div style="display:flex;align-items:center;gap:10px;">
 
+        <span style="font-size:18px;">✅</span>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+        <div>
 
-      <div>
+          <div style="font-size:14px;font-weight:700;color:#166534;">API 已配置（朝曦公司统一接入）</div>
 
-        <div style="font-size:11px;color:#92400e;font-weight:600;margin-bottom:4px;">API Key</div>
+          <div style="font-size:12px;color:#15803d;margin-top:2px;">DeepSeek &nbsp;·&nbsp; deepseek-v4-pro &nbsp;·&nbsp; api.deepseek.com</div>
 
-        <input id="apiKeyInput" type="password"
-
-          placeholder="sk-... 或其他格式均可"
-
-          style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;"
-
-          oninput="pgSaveKey()">
+        </div>
 
       </div>
 
-      <div>
-
-        <div style="font-size:11px;color:#92400e;font-weight:600;margin-bottom:4px;">模型名称</div>
-
-        <input id="apiModelInput"
-
-          placeholder="自行填写模型名称，如 deepseek-chat"
-
-          style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;"
-
-          oninput="pgSaveKey()">
-
-      </div>
-
-    </div>
-
-
-
-    <div style="margin-bottom:10px;">
-
-      <div style="font-size:11px;color:#92400e;font-weight:600;margin-bottom:4px;">API 服务地址（Base URL，任意 OpenAI 兼容接口均可）</div>
-
-      <div style="display:flex;gap:8px;align-items:center;">
-
-        <input id="apiBaseInput"
-
-          placeholder="https://wolfai.top/v1"
-
-          list="base-suggestions"
-
-          style="flex:1;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;"
-
-          oninput="pgSaveKey()">
-
-        <datalist id="base-suggestions">
-
-          <option value="https://api.deepseek.com/v1">DeepSeek 官方</option>
-
-          <option value="https://api.minimax.chat/v1">MiniMax 官方</option>
-
-          <option value="https://dashscope.aliyuncs.com/compatible-mode/v1">通义千问 Qwen</option>
-
-          <option value="https://open.bigmodel.cn/api/paas/v4">智谱 GLM</option>
-
-          <option value="https://api.moonshot.cn/v1">月之暗面 Moonshot</option>
-
-          <option value="https://ark.cn-beijing.volces.com/api/v3">豆包 Doubao（字节）</option>
-
-          <option value="https://api.hunyuan.cloud.tencent.com/v1">腾讯混元</option>
-
-          <option value="https://api.lingyiwanwu.com/v1">零一万物 Yi</option>
-
-          <option value="https://api.baichuan-ai.com/v1">百川 Baichuan</option>
-
-          <option value="https://api.stepfun.com/v1">阶跃星辰 Stepfun</option>
-
-          <option value="https://wolfai.top/v1">wolfai.top 代理（Claude/GPT）</option>
-
-          <option value="https://api.openai.com/v1">OpenAI 官方</option>
-
-          <option value="http://localhost:11434/v1">Ollama 本地</option>
-
-          <option value="http://localhost:8080/v1">本地自建代理</option>
-
-        </datalist>
+      <div style="display:flex;align-items:center;gap:8px;">
 
         <button onclick="pgTestConnection()"
 
-          style="padding:8px 14px;border:1px solid #1a56db;border-radius:6px;font-size:12px;font-weight:600;color:#1a56db;background:#fff;cursor:pointer;white-space:nowrap;">
+          style="padding:6px 12px;border:1px solid #16a34a;border-radius:6px;font-size:12px;font-weight:600;color:#16a34a;background:#fff;cursor:pointer;white-space:nowrap;">
 
           🔌 测试连接
 
         </button>
 
-        <button onclick="pgClearKey()"
+        <button onclick="document.getElementById('pgApiAdvanced').style.display=document.getElementById('pgApiAdvanced').style.display==='none'?'block':'none'"
 
-          style="padding:8px 12px;border:1px solid #fca5a5;border-radius:6px;font-size:12px;color:#dc2626;background:#fff;cursor:pointer;white-space:nowrap;">
+          style="padding:6px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;color:#6b7280;background:#fff;cursor:pointer;white-space:nowrap;">
 
-          清除
+          ⚙️ 自定义
 
         </button>
 
       </div>
 
-      <div id="pgConnStatus" style="font-size:12px;margin-top:6px;"></div>
-
     </div>
 
+    <div id="pgConnStatus" style="font-size:12px;margin-top:6px;"></div>
 
+    <!-- 折叠的自定义区域 -->
 
-    <div style="font-size:12px;color:#92400e;padding:8px 10px;background:rgba(250,240,210,.5);border-radius:6px;">
+    <div id="pgApiAdvanced" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid #bbf7d0;">
 
-      🔒 Key 仅存在你自己的浏览器本地（localStorage），不写入代码，其他人看不到。&nbsp;
+      <div style="font-size:11.5px;color:#6b7280;margin-bottom:10px;">如需覆盖公司默认配置，在此填写后保存即可。留空则使用公司统一配置。</div>
 
-      ⚠️ <b>Anthropic 官方（api.anthropic.com）不支持浏览器直连</b>，请使用 wolfai.top 等兼容代理，或在本地运行代理服务后填 localhost 地址。
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+
+        <div>
+
+          <div style="font-size:11px;color:#374151;font-weight:600;margin-bottom:4px;">API Key（留空使用公司 Key）</div>
+
+          <input id="apiKeyInput" type="password"
+
+            placeholder="留空 = 使用公司统一 Key"
+
+            style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;"
+
+            oninput="pgSaveKey()">
+
+        </div>
+
+        <div>
+
+          <div style="font-size:11px;color:#374151;font-weight:600;margin-bottom:4px;">模型名称（留空使用 deepseek-v4-pro）</div>
+
+          <input id="apiModelInput"
+
+            placeholder="留空 = deepseek-v4-pro"
+
+            style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;"
+
+            oninput="pgSaveKey()">
+
+        </div>
+
+      </div>
+
+      <div>
+
+        <div style="font-size:11px;color:#374151;font-weight:600;margin-bottom:4px;">API 服务地址（留空使用 api.deepseek.com）</div>
+
+        <div style="display:flex;gap:8px;align-items:center;">
+
+          <input id="apiBaseInput"
+
+            placeholder="留空 = https://api.deepseek.com"
+
+            list="base-suggestions"
+
+            style="flex:1;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;"
+
+            oninput="pgSaveKey()">
+
+          <datalist id="base-suggestions">
+
+            <option value="https://api.deepseek.com">DeepSeek 官方</option>
+
+            <option value="https://api.openai.com/v1">OpenAI 官方</option>
+
+            <option value="https://api.moonshot.cn/v1">月之暗面 Moonshot</option>
+
+            <option value="http://localhost:11434/v1">Ollama 本地</option>
+
+          </datalist>
+
+          <button onclick="pgClearKey()"
+
+            style="padding:8px 12px;border:1px solid #fca5a5;border-radius:6px;font-size:12px;color:#dc2626;background:#fff;cursor:pointer;white-space:nowrap;">
+
+            重置为公司默认
+
+          </button>
+
+        </div>
+
+      </div>
 
     </div>
 
@@ -8430,13 +8432,18 @@ function pgLoadKey() {
 
 // ── 从输入框读取配置（含默认值）────────────────────────────────
 
+// ── 公司统一 API 配置（管理员内置，无需用户填写）────────────────
+const COMPANY_API_KEY   = 'sk-603a729e51d54a82bf8b8de3e06530b4';
+const COMPANY_API_BASE  = 'https://api.deepseek.com';
+const COMPANY_API_MODEL = 'deepseek-v4-pro';
+
 function pgGetConfig() {
 
-  const key   = (document.getElementById('apiKeyInput')?.value   || '').trim();
+  const key   = (document.getElementById('apiKeyInput')?.value   || '').trim() || COMPANY_API_KEY;
 
-  const model = (document.getElementById('apiModelInput')?.value || '').trim() || 'claude-sonnet-4-5-20250929';
+  const model = (document.getElementById('apiModelInput')?.value || '').trim() || COMPANY_API_MODEL;
 
-  let base    = (document.getElementById('apiBaseInput')?.value  || '').trim() || 'https://wolfai.top/v1';
+  let base    = (document.getElementById('apiBaseInput')?.value  || '').trim() || COMPANY_API_BASE;
 
   base = base.replace(/\/+$/, '');                    // 去掉末尾斜杠
 
@@ -9990,8 +9997,8 @@ function switchBuRadar(bu) {
 // ── Tax 雷达：调用 AI 生成场景 ───────────────────────────────
 async function radarRefresh(bu) {
   if (bu !== 'tax') return; // Legal/CM 暂未实现
-  const base = localStorage.getItem('pg_api_base') || 'https://wolfai.top/v1';
-  const key  = localStorage.getItem('pg_api_key')  || '';
+  const base = localStorage.getItem('pg_api_base') || COMPANY_API_BASE;
+  const key  = localStorage.getItem('pg_api_key')  || COMPANY_API_KEY;
   if (!key) { alert('请先在痛点生成页填写 API Key'); return; }
 
   const btn  = document.querySelector('[onclick="radarRefresh(\'tax\')"]');
@@ -10044,7 +10051,7 @@ ${sourceList}
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
       body: JSON.stringify({
-        model: localStorage.getItem('pg_api_model') || 'claude-sonnet-4-5-20250929',
+        model: localStorage.getItem('pg_api_model') || COMPANY_API_MODEL,
         messages:[{role:'user',content:prompt}],
         max_tokens:8000, temperature:0.7
       })
