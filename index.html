@@ -3762,9 +3762,9 @@ function initOverviewCharts() {
 
       type: 'pie',
 
-      radius: ['40%', '70%'],
+      radius: ['35%', '60%'],
 
-      center: ['50%', '45%'],
+      center: ['50%', '44%'],
 
       data: groups.map((g, i) => ({
 
@@ -3780,9 +3780,15 @@ function initOverviewCharts() {
 
         formatter: '{b}\n{c}行 ({d}%)',
 
-        fontSize: 13
+        fontSize: 12,
+
+        minMargin: 6
 
       },
+
+      labelLine: { length: 18, length2: 12, smooth: true },
+
+      labelLayout: { hideOverlap: false },
 
       emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0,0,0,.2)' } }
 
@@ -4320,17 +4326,17 @@ function initBusinessCharts() {
 
     const biz = [
 
-      { name: '身份规划', score: 10, coverage: 'L6.3（431行）深度覆盖，43条相关痛点', color: '#4D96FF' },
+      { name: '身份规划', score: 10, coverage: 'L6.3（431行）深度覆盖，43条相关痛点',           color: '#7c3aed', gradient: 'linear-gradient(to right, #f5f3ff, #c084fc)' },
 
-      { name: '税务规划', score: 9, coverage: 'L6.2（139行）+ L6.1（110行），65条税务痛点', color: '#FF6B6B' },
+      { name: '税务规划', score: 9,  coverage: 'L6.2（139行）+ L6.1（110行），65条税务痛点',    color: '#dc2626', gradient: 'linear-gradient(to right, #fff5f5, #fca5a5)' },
 
-      { name: '资本市场', score: 9, coverage: 'L6.1（110行）+ L3.1（38行），22+60条专项场景', color: '#FF9F1C' },
+      { name: '资本市场', score: 9,  coverage: 'L6.1（110行）+ L3.1（38行），22+60条专项场景',  color: '#1d4ed8', gradient: 'linear-gradient(to right, #f0f9ff, #93c5fd)' },
 
-      { name: '法律架构', score: 8, coverage: 'L6.4（122行）+ L5.1/L5.2（69行），19条法律痛点', color: '#6BCB77' },
+      { name: '法律架构', score: 8,  coverage: 'L6.4（122行）+ L5.1/L5.2（69行），19条法律痛点', color: '#059669', gradient: 'linear-gradient(to right, #f0fdf4, #86efac)' },
 
-      { name: '财富传承', score: 8, coverage: 'L6.4（122行）+ L1.1B（55行），17条传承痛点', color: '#C77DFF' },
+      { name: '财富传承', score: 8,  coverage: 'L6.4（122行）+ L1.1B（55行），17条传承痛点',    color: '#7c3aed', gradient: 'linear-gradient(to right, #faf5ff, #d8b4fe)' },
 
-      { name: '健康管理', score: 6, coverage: 'L6.6（32行，新增），与传承/保险场景交叉覆盖不足', color: '#FF6BB5' },
+      { name: '健康管理', score: 6,  coverage: 'L6.6（32行，新增），与传承/保险场景交叉覆盖不足', color: '#db2777', gradient: 'linear-gradient(to right, #fdf2f8, #f9a8d4)' },
 
     ];
 
@@ -4364,7 +4370,7 @@ function initBusinessCharts() {
 
           <div style="font-size:12px;color:#6b7280;margin-top:4px;">${b.coverage}</div>
 
-          <div class="biz-bar"><div class="biz-bar-fill" style="width:${b.score*10}%;background:${b.color};"></div></div>
+          <div class="biz-bar"><div class="biz-bar-fill" style="width:${b.score*10}%;background:${b.gradient};"></div></div>
 
         </div>
       `;}).join('')}`;
