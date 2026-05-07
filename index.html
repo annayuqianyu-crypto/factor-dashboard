@@ -3710,9 +3710,9 @@ function initOverviewCharts() {
 
       type: 'bar',
 
-      data: sortedCounts.map((v, i) => ({ value: v, itemStyle: { color: sortedColors[i] } })),
+      data: sortedCounts.map(v => ({ value: v, itemStyle: { color: 'transparent', borderColor: '#1a56db', borderWidth: 1.5 } })),
 
-      label: { show: true, position: 'right', fontSize: 11, formatter: '{c} 行' }
+      label: { show: true, position: 'right', fontSize: 11, formatter: '{c} 行', color: '#374151' }
 
     }]
 
@@ -3736,7 +3736,19 @@ function initOverviewCharts() {
 
   const groupCounts = groups.map(g => DIM_COUNTS.reduce((s,c,i) => DIM_GROUPS[i]===g ? s+c : s, 0));
 
-  const groupColors = ['#C77DFF', '#6BCB77', '#4D96FF', '#FFD93D'];
+  // 淡雅径向渐变：从近白中心向外渐变到淡彩色边缘
+
+  const groupGradients = [
+
+    { type:'radial', x:.5, y:.5, r:.8, colorStops:[{offset:0,color:'#fdf8ff'},{offset:1,color:'#d8b4fe'}] },
+
+    { type:'radial', x:.5, y:.5, r:.8, colorStops:[{offset:0,color:'#f0f9ff'},{offset:1,color:'#93c5fd'}] },
+
+    { type:'radial', x:.5, y:.5, r:.8, colorStops:[{offset:0,color:'#fff7ed'},{offset:1,color:'#fda4af'}] },
+
+    { type:'radial', x:.5, y:.5, r:.8, colorStops:[{offset:0,color:'#fffbeb'},{offset:1,color:'#fcd34d'}] },
+
+  ];
 
 
 
@@ -3766,7 +3778,7 @@ function initOverviewCharts() {
 
         value: groupCounts[i],
 
-        itemStyle: { color: groupColors[i] }
+        itemStyle: { color: groupGradients[i] }
 
       })),
 
