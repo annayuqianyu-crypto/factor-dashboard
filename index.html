@@ -3844,9 +3844,9 @@ function initExpansionCharts() {
 
       type: 'bar',
 
-      data: deltaVals.map((v, i) => ({ value: v, itemStyle: { color: COLORS[i % COLORS.length] } })),
+      data: deltaVals.map(v => ({ value: v, itemStyle: { color: 'transparent', borderColor: '#1a56db', borderWidth: 1.5 } })),
 
-      label: { show: true, position: 'right', formatter: '+{c}' }
+      label: { show: true, position: 'right', formatter: '+{c}', color: '#374151' }
 
     }]
 
