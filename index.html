@@ -3008,17 +3008,17 @@ tr:hover td { background: #fafafa; }
       <!-- API Key 配置 -->
       <details id="news-api-setup" style="margin-bottom:16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;">
         <summary style="font-size:12px;font-weight:600;color:#475569;cursor:pointer;user-select:none;">
-          🔑 Bing Search API 配置
+          🔑 Exa Search API 配置
           <span id="news-key-status" style="margin-left:8px;font-size:11px;color:#16a34a;font-weight:400;"></span>
         </summary>
         <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
-          <input id="news-bing-key" type="password" placeholder="粘贴 Bing Web Search API Key（Azure 免费 1000次/月）"
+          <input id="news-bing-key" type="password" placeholder="粘贴 Exa API Key"
             style="flex:1;padding:7px 11px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px;"/>
           <button onclick="newsSaveKey()"
             style="padding:7px 16px;background:#0f172a;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">保存</button>
         </div>
         <div style="margin-top:6px;font-size:11px;color:#94a3b8;">
-          获取方式：Azure Portal → 创建 Bing Search v7 资源（免费层 F1）→ 复制 Key1
+          获取方式：注册 <a href="https://exa.ai" target="_blank" style="color:#7c3aed;">exa.ai</a> → Dashboard → API Keys → 复制 Key（免费 1000次/月，无需云平台）
         </div>
       </details>
 
@@ -10274,12 +10274,11 @@ function switchBuRadar(bu) {
 }
 
 // ══════════════════════════════════════════════════════════════
-// Tax 时事新闻 搜索模块
+// Tax 时事新闻 搜索模块（Exa AI）
 // ══════════════════════════════════════════════════════════════
 
 function newsInit() {
-  // 恢复已保存的 key
-  const saved = localStorage.getItem('bing_search_key') || '';
+  const saved = localStorage.getItem('exa_search_key') || '';
   const inp = document.getElementById('news-bing-key');
   if (inp && saved) inp.value = saved;
   document.getElementById('news-key-status').textContent = saved ? '✓ 已配置' : '';
@@ -10297,18 +10296,18 @@ function newsInit() {
 function newsSaveKey() {
   const v = (document.getElementById('news-bing-key').value || '').trim();
   if (!v) { alert('请输入 API Key'); return; }
-  localStorage.setItem('bing_search_key', v);
+  localStorage.setItem('exa_search_key', v);
   document.getElementById('news-key-status').textContent = '✓ 已配置';
-  alert('API Key 已保存');
+  alert('Exa API Key 已保存');
 }
 
 async function newsSearch() {
-  const key   = localStorage.getItem('bing_search_key') || '';
+  const key   = localStorage.getItem('exa_search_key') || '';
   const start = document.getElementById('news-date-start').value;
   const end   = document.getElementById('news-date-end').value;
   const kw    = (document.getElementById('news-keyword').value || '').trim();
 
-  if (!key)   { alert('请先配置 Bing Search API Key'); document.getElementById('news-api-setup').open = true; return; }
+  if (!key)   { alert('请先配置 Exa API Key（exa.ai 注册后获取）'); document.getElementById('news-api-setup').open = true; return; }
   if (!start || !end) { alert('请选择起止日期'); return; }
   if (new Date(start) > new Date(end)) { alert('起始日期不能晚于结束日期'); return; }
 
@@ -10319,92 +10318,92 @@ async function newsSearch() {
   res.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ 正在从 40 个信息源中检索文章…</div>';
 
   // 从 TAX_SOURCES 提取唯一域名
-  const domains = [...new Set(TAX_SOURCES.map(s => {
+  const includeDomains = [...new Set(TAX_SOURCES.map(s => {
     try { return new URL(s.url).hostname.replace(/^www\./, ''); } catch(e) { return ''; }
   }).filter(Boolean))];
 
-  // 每批 6 个域名，构造 site: 查询，避免 URL 过长
-  const BATCH = 6;
-  const allItems = [];
-  const freshness = `${start}..${end}`;
-  const baseKw = kw || '税务 政策 合规 家办 传承 信托 财富';
+  const query = kw || '税务政策 合规 家族财富 传承 信托 个人所得税';
 
-  for (let i = 0; i < domains.length; i += BATCH) {
-    const chunk = domains.slice(i, i + BATCH);
-    const siteQ = chunk.map(d => `site:${d}`).join(' OR ');
-    const q = `(${siteQ}) ${baseKw}`;
-    try {
-      const resp = await fetch(
-        `https://api.bing.microsoft.com/v7.0/search?q=${encodeURIComponent(q)}&count=10&freshness=${freshness}&mkt=zh-CN&responseFilter=Webpages&setLang=zh-hans`,
-        { headers: { 'Ocp-Apim-Subscription-Key': key } }
-      );
-      if (!resp.ok) {
-        const errText = await resp.text();
-        throw new Error(`HTTP ${resp.status}: ${errText.slice(0,120)}`);
-      }
-      const data = await resp.json();
-      (data.webPages?.value || []).forEach(item => allItems.push(item));
-    } catch(e) {
-      console.warn('批次搜索失败:', e.message);
+  try {
+    const resp = await fetch('https://api.exa.ai/search', {
+      method: 'POST',
+      headers: { 'x-api-key': key, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query,
+        numResults: 30,
+        includeDomains,
+        startCrawlDate: start + 'T00:00:00.000Z',
+        endCrawlDate:   end   + 'T23:59:59.000Z',
+        contents: { snippet: { numSentences: 3 } }
+      })
+    });
+
+    if (!resp.ok) {
+      const errText = await resp.text();
+      throw new Error(`HTTP ${resp.status}: ${errText.slice(0, 200)}`);
     }
-  }
+    const data = await resp.json();
+    const items = data.results || [];
 
-  btn.disabled = false; spin.textContent = '🔍';
+    btn.disabled = false; spin.textContent = '🔍';
 
-  if (!allItems.length) {
-    res.innerHTML = `<div style="padding:24px;text-align:center;color:#9ca3af;font-size:13px;">
-      未找到符合条件的文章。<br><span style="font-size:12px;">请检查 API Key 是否有效，或尝试调整日期范围和关键词。</span></div>`;
-    return;
-  }
+    if (!items.length) {
+      res.innerHTML = `<div style="padding:24px;text-align:center;color:#9ca3af;font-size:13px;">
+        未找到符合条件的文章。<br>
+        <span style="font-size:12px;">可尝试：扩大日期范围 / 调整关键词 / 检查 API Key 是否有效</span></div>`;
+      return;
+    }
 
-  // 去重（按 URL）并按日期倒序
-  const seen = new Set();
-  const items = allItems.filter(it => {
-    if (seen.has(it.url)) return false;
-    seen.add(it.url); return true;
-  });
+    function matchSource(url) {
+      try {
+        const host = new URL(url).hostname.replace(/^www\./, '');
+        const hit = TAX_SOURCES.find(s => {
+          try { return new URL(s.url).hostname.replace(/^www\./, '') === host; } catch(e) { return false; }
+        });
+        return hit ? hit.name : host;
+      } catch(e) { return url; }
+    }
 
-  // 匹配 source 名称
-  function matchSource(url) {
-    try {
-      const host = new URL(url).hostname.replace(/^www\./, '');
-      const hit = TAX_SOURCES.find(s => {
-        try { return new URL(s.url).hostname.replace(/^www\./, '') === host; } catch(e) { return false; }
-      });
-      return hit ? hit.name : host;
-    } catch(e) { return url; }
-  }
-
-  res.innerHTML = `
-    <div style="font-size:12px;color:#64748b;margin-bottom:12px;">
-      找到 <strong>${items.length}</strong> 篇文章（${start} 至 ${end}）· 点击标题访问原文，点击「提炼场景」提取业务场景
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      ${items.map((it, idx) => {
-        const src = matchSource(it.url);
-        const date = it.dateLastCrawled ? it.dateLastCrawled.slice(0,10) : '';
-        return `
-        <div style="background:#fafafa;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px;">
-          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:6px;">
-            <div style="flex:1;">
-              <a href="${it.url}" target="_blank" rel="noopener"
-                style="font-size:13.5px;font-weight:600;color:#1e293b;text-decoration:none;line-height:1.4;display:block;"
-                onmouseover="this.style.color='#7c3aed'" onmouseout="this.style.color='#1e293b'">
-                ${it.name}
-              </a>
-              <div style="font-size:11px;color:#94a3b8;margin-top:3px;">
-                📌 ${src}${date ? '  ·  ' + date : ''}
+    res.innerHTML = `
+      <div style="font-size:12px;color:#64748b;margin-bottom:12px;">
+        找到 <strong>${items.length}</strong> 篇文章（${start} 至 ${end}）· 点击标题访问原文，点击「提炼场景」提取业务场景
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        ${items.map(it => {
+          const src  = matchSource(it.url);
+          const date = (it.publishedDate || it.crawlDate || '').slice(0, 10);
+          const snip = it.snippet || it.text?.slice(0, 150) || '';
+          const safeUrl   = it.url.replace(/'/g, '%27');
+          const safeTitle = (it.title || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+          return `
+          <div style="background:#fafafa;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px;">
+            <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:6px;">
+              <div style="flex:1;">
+                <a href="${it.url}" target="_blank" rel="noopener"
+                  style="font-size:13.5px;font-weight:600;color:#1e293b;text-decoration:none;line-height:1.4;display:block;"
+                  onmouseover="this.style.color='#7c3aed'" onmouseout="this.style.color='#1e293b'">
+                  ${it.title || it.url}
+                </a>
+                <div style="font-size:11px;color:#94a3b8;margin-top:3px;">
+                  📌 ${src}${date ? '  ·  ' + date : ''}
+                </div>
               </div>
+              <button onclick="newsExtractScene('${safeUrl}','${safeTitle}')"
+                style="flex-shrink:0;padding:5px 13px;background:#7c3aed;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">
+                提炼场景
+              </button>
             </div>
-            <button onclick="newsExtractScene('${it.url.replace(/'/g,"\\'")}','${(it.name||'').replace(/'/g,"\\'")}')"
-              style="flex-shrink:0;padding:5px 13px;background:#7c3aed;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">
-              提炼场景
-            </button>
-          </div>
-          <div style="font-size:12px;color:#475569;line-height:1.6;">${it.snippet || ''}</div>
-        </div>`;
-      }).join('')}
-    </div>`;
+            <div style="font-size:12px;color:#475569;line-height:1.6;">${snip}</div>
+          </div>`;
+        }).join('')}
+      </div>`;
+
+  } catch(e) {
+    btn.disabled = false; spin.textContent = '🔍';
+    res.innerHTML = `<div style="padding:16px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;color:#dc2626;font-size:13px;">
+      搜索失败：${e.message}<br>
+      <span style="font-size:12px;color:#9ca3af;">请检查 API Key 是否正确，或网络是否可达 api.exa.ai</span></div>`;
+  }
 }
 
 async function newsExtractScene(url, title) {
