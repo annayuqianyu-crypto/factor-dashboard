@@ -3198,7 +3198,7 @@ tr:hover td { background: #fafafa; }
     container.innerHTML = data.map((d,i) => `
       <div class="hgj-card" data-cat="${d.cat}" data-novelty="${d.novelty}">
         <div class="hgj-card-header">
-          <span style="font-size:15px;font-weight:700;color:#1e293b;flex:1;">${d.title}</span>
+          <span style="font-size:15px;font-weight:700;color:#1e293b;flex:1;cursor:pointer;text-decoration:underline;text-decoration-color:#cbd5e1;text-underline-offset:3px;" onclick="hgjSendToPainGenerate('${d.title.replace(/'/g,\"\\\\'\")}');" title="点击添加为场景">${d.title}</span>
           <span class="hgj-tag ${noveltyClass(d.novelty)}">${noveltyLabel(d.novelty)}</span>
           <span class="hgj-cat-tag">${d.cat}</span>
         </div>
