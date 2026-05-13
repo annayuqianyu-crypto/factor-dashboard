@@ -3016,7 +3016,10 @@ tr:hover td { background: #fafafa; }
             style="flex:1;padding:7px 11px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px;"/>
           <button onclick="newsSaveKey()"
             style="padding:7px 16px;background:#0f172a;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">保存</button>
+          <button onclick="newsTestKey()"
+            style="padding:7px 16px;background:#7c3aed;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">测试连通性</button>
         </div>
+        <div id="news-test-result" style="margin-top:7px;font-size:12px;display:none;"></div>
         <div style="margin-top:6px;font-size:11px;color:#94a3b8;">
           获取方式：注册 <a href="https://exa.ai" target="_blank" style="color:#7c3aed;">exa.ai</a> → Dashboard → API Keys → 复制 Key（免费 1000次/月，无需云平台）
         </div>
@@ -10299,6 +10302,33 @@ function newsSaveKey() {
   localStorage.setItem('exa_search_key', v);
   document.getElementById('news-key-status').textContent = '✓ 已配置';
   alert('Exa API Key 已保存');
+}
+
+async function newsTestKey() {
+  const v = (document.getElementById('news-bing-key').value || '').trim()
+         || localStorage.getItem('exa_search_key') || '';
+  const box = document.getElementById('news-test-result');
+  box.style.display = 'block';
+  if (!v) { box.style.color='#dc2626'; box.textContent = '请先输入 API Key'; return; }
+  box.style.color = '#6b7280'; box.textContent = '⏳ 测试中…';
+  try {
+    const resp = await fetch('https://api.exa.ai/search', {
+      method: 'POST',
+      headers: { 'x-api-key': v, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: 'test', numResults: 1 })
+    });
+    if (resp.ok) {
+      box.style.color = '#16a34a';
+      box.textContent = '✓ 连接成功，API Key 有效';
+    } else {
+      const err = await resp.json().catch(() => ({}));
+      box.style.color = '#dc2626';
+      box.textContent = `✗ 失败（${resp.status}）：${err.message || resp.statusText}`;
+    }
+  } catch(e) {
+    box.style.color = '#dc2626';
+    box.textContent = `✗ 网络错误：${e.message}`;
+  }
 }
 
 async function newsSearch() {
