@@ -701,6 +701,12 @@ tr:hover td { background: #fafafa; }
 
   </div>
 
+  <div class="nav-item" onclick="showPage('hgj')">
+
+    <span class="icon">📋</span>渠道场景来源
+
+  </div>
+
 
 
   <div class="nav-section-title" style="margin-top:12px;">痛点生成</div>
@@ -3039,6 +3045,209 @@ tr:hover td { background: #fafafa; }
      PAGE 9: 业务契合分析
 
 ═══════════════════════════════════════ -->
+
+<!-- ══════════════════════════════════════
+     PAGE: 渠道场景来源
+═══════════════════════════════════════ -->
+
+<div id="page-hgj" class="page">
+  <div class="page-header">
+    <h2>渠道场景来源</h2>
+    <p class="page-desc">基于渠道会议纪要的智能分析，共整理 <strong>23</strong> 场会议，提炼场景结构与痛点方向</p>
+  </div>
+
+  <!-- 统计概览 -->
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px;">
+    <div style="background:#f0f7ff;border-radius:10px;padding:14px 10px;text-align:center;">
+      <div style="font-size:26px;font-weight:700;color:#1a56db;">23</div>
+      <div style="font-size:12px;color:#64748b;margin-top:4px;">会议总数</div>
+    </div>
+    <div style="background:#fdf4ff;border-radius:10px;padding:14px 10px;text-align:center;">
+      <div style="font-size:26px;font-weight:700;color:#7c3aed;">11</div>
+      <div style="font-size:12px;color:#64748b;margin-top:4px;">税务合规</div>
+    </div>
+    <div style="background:#fff7f0;border-radius:10px;padding:14px 10px;text-align:center;">
+      <div style="font-size:26px;font-weight:700;color:#ea580c;">5</div>
+      <div style="font-size:12px;color:#64748b;margin-top:4px;">合规诉讼</div>
+    </div>
+    <div style="background:#f0fff4;border-radius:10px;padding:14px 10px;text-align:center;">
+      <div style="font-size:26px;font-weight:700;color:#16a34a;">6</div>
+      <div style="font-size:12px;color:#64748b;margin-top:4px;">跨境/劳动/股权</div>
+    </div>
+    <div style="background:#fff8f0;border-radius:10px;padding:14px 10px;text-align:center;">
+      <div style="font-size:26px;font-weight:700;color:#d97706;">4</div>
+      <div style="font-size:12px;color:#64748b;margin-top:4px;">高新颖度场景</div>
+    </div>
+  </div>
+
+  <!-- 筛选栏 -->
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;" id="hgjFilters">
+    <button class="hgj-filter-btn active" data-cat="全部" onclick="hgjFilter(this,'全部')">全部（23）</button>
+    <button class="hgj-filter-btn" data-cat="税务合规" onclick="hgjFilter(this,'税务合规')">税务合规</button>
+    <button class="hgj-filter-btn" data-cat="合规诉讼" onclick="hgjFilter(this,'合规诉讼')">合规诉讼</button>
+    <button class="hgj-filter-btn" data-cat="跨境规划" onclick="hgjFilter(this,'跨境规划')">跨境规划</button>
+    <button class="hgj-filter-btn" data-cat="劳动用工" onclick="hgjFilter(this,'劳动用工')">劳动用工</button>
+    <button class="hgj-filter-btn" data-cat="股权架构" onclick="hgjFilter(this,'股权架构')">股权架构</button>
+    <button class="hgj-filter-btn" data-cat="高新颖度" onclick="hgjFilter(this,'高新颖度')">⭐ 高新颖度</button>
+  </div>
+
+  <!-- 场景卡片列表 -->
+  <div id="hgjCards" style="display:flex;flex-direction:column;gap:14px;"></div>
+</div>
+
+<style>
+.hgj-filter-btn {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1.5px solid #cbd5e1;
+  background: #fff;
+  color: #475569;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.hgj-filter-btn.active {
+  background: #1a56db;
+  border-color: #1a56db;
+  color: #fff;
+}
+.hgj-card {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  padding: 16px 20px;
+  transition: box-shadow .15s;
+}
+.hgj-card:hover { box-shadow: 0 2px 12px rgba(26,86,219,.10); }
+.hgj-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.hgj-tag {
+  font-size: 11px;
+  padding: 2px 9px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+.hgj-novelty-high { background:#fef3c7;color:#d97706; }
+.hgj-novelty-mid  { background:#e0f2fe;color:#0369a1; }
+.hgj-novelty-low  { background:#f1f5f9;color:#64748b; }
+.hgj-cat-tag {
+  font-size: 11px;
+  padding: 2px 9px;
+  border-radius: 12px;
+  background: #ede9fe;
+  color: #6d28d9;
+  font-weight: 500;
+}
+.hgj-pain-dir {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.hgj-pain-chip {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 12px;
+  color: #334155;
+  cursor: pointer;
+  transition: background .12s;
+}
+.hgj-pain-chip:hover { background: #dbeafe; border-color: #93c5fd; }
+</style>
+
+<script>
+(function(){
+  const HGJ_DATA = [
+    {title:"小规模企业注销税务清算",who:"北京小规模贸易公司法人黄总",asset:"库存商品、固定资产、账面现金及股东超额出资",event:"计划注销公司，需处理存货、固定资产、债务及税务清算",friction:"注销前需处理存货和固定资产，涉及视同销售及税务申报",dirs:["存货处置方式选择及税务影响","固定资产处置的税务处理","股东超额出资的清偿与税务合规"],tags:["小规模纳税人","注销清算","视同销售"],cat:"税务合规",novelty:"低",file:"北京20260327-企业注销.docx"},
+    {title:"涉美传承资金出境规划",who:"中国籍父亲",asset:"2000万现金",event:"希望将资金传承给美国绿卡子女，面临外汇管制和税务问题",friction:"中国外汇管制与美国税务申报的冲突",dirs:["资金出境合规路径复杂","美国税务申报义务","保险金出境政策不确定性"],tags:["外汇管理","美国赠与税","美国税务申报"],cat:"跨境规划",novelty:"中",file:"北京260324-涉美传承.docx"},
+    {title:"建筑分包增值税政策咨询",who:"北京建筑公司财务负责人",asset:"机电安装分包业务，一般纳税人",event:"咨询增值税法实施后分包发票及差额计税变化",friction:"新法下简易计税分包只能开普票，影响差额扣除",dirs:["分包发票类型变化导致抵扣方式调整","预缴税款时分包款扣除规则不明确","一般计税与简易计税适用场景混淆"],tags:["增值税法","分包差额计税","简易计税"],cat:"税务合规",novelty:"中",file:"北京260326-建工财税.docx"},
+    {title:"香港公司税务筹划咨询",who:"南京特种阀内贸企业主朱总",asset:"新设香港公司，主营三国贸易",event:"已收第一笔款，需了解香港会计、税务及离岸豁免政策",friction:"香港离岸豁免与大陆常设机构风险并存",dirs:["香港公司年费及会计维护成本","离岸豁免申请条件与通过率","利润汇回大陆的个人所得税处理"],tags:["离岸豁免","利得税","常设机构"],cat:"税务合规",novelty:"中",file:"南京20260317-香港公司.docx"},
+    {title:"股票索赔维权咨询",who:"个人投资者",asset:"暮光高科股票",event:"因虚假陈述导致投资损失，已委托律师但进展缓慢",friction:"证券虚假陈述索赔周期长，法院处理方式不确定",dirs:["索赔周期过长，缺乏明确时间表","与律师沟通不畅，信任度下降","担心赔偿比例及优先顺序"],tags:["证券虚假陈述","最高院司法解释","代表人诉讼"],cat:"合规诉讼",novelty:"中",file:"南昌20260303-A股索赔.docx"},
+    {title:"家族企业控制权纠纷",who:"家族企业二代（儿子）",asset:"母亲持股51%的北京总公司及下属生产公司",event:"夫妻股东经营分歧，男方扰乱市场，欲离婚分产，需免去男方法人职务",friction:"公司章程规定过半数可免法人，但工商局设置额外障碍",dirs:["法人免职受阻于工商局","销售公司股权被转移至男方亲戚","男方利用销售公司扰乱市场"],tags:["公司法","公司章程","工商变更"],cat:"合规诉讼",novelty:"中",file:"合肥260409-公司纠纷.docx"},
+    {title:"信托产品违约维权咨询",who:"成都信托投资人",asset:"中融信托等7款信托产品，本金约300万",event:"信托产品到期未兑付，寻求维权方案",friction:"信托产品违约后，投资人维权路径与信托公司责任界定不清",dirs:["信托产品违约后如何维权","受益人大会投票决策无实质影响","底层资产回收困难，诉讼成本高"],tags:["信托违约","受益人大会","诉讼维权"],cat:"合规诉讼",novelty:"中",file:"成都20260304-信托暴雷.docx"},
+    {title:"游戏出海日本税务合规",who:"成都游戏公司负责人",asset:"国内游戏发行主体，计划与日本第三方合作发行游戏",event:"拟向日本合作方支付服务费，并接收日本玩家收入回流",friction:"中日跨境支付中的代扣代缴义务与日本消费税合规",dirs:["对外付汇代扣代缴增值税及所得税","日本消费税的纳税义务与平台扣缴","服务费定价与转让定价风险"],tags:["日本消费税","对外付汇代扣代缴","增值税进项抵扣"],cat:"税务合规",novelty:"中",file:"成都20260326-游戏出海.docx"},
+    {title:"游戏出海日本税务架构",who:"成都游戏公司高管",asset:"境内游戏版权及香港子公司",event:"计划将游戏发行至日本，需选择合规且税负最低的架构",friction:"日本资金决算法要求发行主体备案，与境外主体税务优化存在冲突",dirs:["日本资金决算法备案合规要求","跨境架构下的税负成本优化","香港与日本间特许权使用费代扣税"],tags:["资金决算法","日本消费税","中日税收协定"],cat:"跨境规划",novelty:"高",file:"成都20260416-游戏出海.docx"},
+    {title:"餐饮企业用工合规与主体变更",who:"成都餐饮连锁企业HR及管理层",asset:"跨店跨省经营的多家餐饮门店",event:"面临社保未足额缴纳、员工主体变更及劳动争议仲裁",friction:"社保未足额缴纳的合规风险与员工签署声明的法律效力冲突",dirs:["社保公积金未足额缴纳的合规风险","员工劳动关系主体变更的协议设计","劳动争议仲裁应对与成本控制"],tags:["社保合规","劳动合同法","劳动争议仲裁"],cat:"劳动用工",novelty:"中",file:"成都20260429-用工困惑.docx"},
+    {title:"餐饮企业用工合规与制度优化",who:"成都餐饮企业负责人谢总",asset:"400多名全职员工的劳动密集型企业",event:"面临员工劳动仲裁风险，希望完善民主流程和内部制度",friction:"民主流程合法性不足，制度内容不完整，员工利用自媒体维权",dirs:["民主流程如何合法合规","病假管理漏洞与虚假病假","加班制度与赔偿条款的合法性"],tags:["工会","民主流程","劳动仲裁"],cat:"劳动用工",novelty:"中",file:"成都260409-用工困惑.docx"},
+    {title:"电商企业股东借款归还税务合规",who:"武汉电商公司股东万总",asset:"公司账上3000万其他应付款（股东借款）",event:"业务转让给总公司后，希望将公司资金合理转至个人账户",friction:"股东借款长期挂账，归还时可能被税务局视为隐瞒收入或分红",dirs:["如何证明借款真实性避免被认定为账外收入","大额资金归还触发银行和税务预警","历史凭证不全难以追溯借款来源"],tags:["财税[2003]158号","久亏不倒企业预警","简易注销税务清算"],cat:"税务合规",novelty:"中",file:"武汉20260411-电商税务.docx"},
+    {title:"家政公司财税合规与分账",who:"武汉家政公司财务负责人",asset:"年流水过亿的家政中介业务，收款中含服务费与代收阿姨工资",event:"收款进入对公账户需全额报税，成本缺失导致税负高；希望实现资金分账",friction:"家政中介代收工资无法拆分报税，全额纳税导致企业所得税虚高",dirs:["公转私收款税务风险高","代收工资无法合规分账","阿姨不配合个税申报"],tags:["家政服务业税收优惠","反向开票","灵活用工"],cat:"税务合规",novelty:"高",file:"武汉20260424-家政税务.docx"},
+    {title:"中港税务与公司运营合规",who:"武汉创始人及配偶",asset:"内地公司和香港公司，夫妻共同持股",event:"希望利用香港公司开展业务，但面临税务和运营合规问题",friction:"中港两地税务居民身份重叠及关联交易定价合规",dirs:["个人中港双重税务居民身份下的CRS申报","内地与香港公司关联交易的转让定价风险","香港公司运营合规"],tags:["CRS 2.0","金税四期","关联交易转让定价"],cat:"税务合规",novelty:"中",file:"武汉20260508-香港公司.docx"},
+    {title:"连锁教培机构税务架构优化",who:"武汉连锁教培机构负责人",asset:"16个校区，主营托管及学科培训",event:"收入增长接近一般纳税人边界，希望优化税务结构降低税负",friction:"小规模与一般纳税人边界税负差异，企业所得税累进与利润分配矛盾",dirs:["增值税纳税人身份转换的税负影响","企业所得税利润控制在300万以下","功能拆分架构的税务合规性"],tags:["增值税法2026","非学历教育简易征收","小型微利企业所得税优惠"],cat:"税务合规",novelty:"中",file:"武汉260202-连锁教培.docx"},
+    {title:"煤炭贸易海南双15政策咨询",who:"武汉煤炭贸易企业主及财务",asset:"海南两家公司，年收入约1亿元",event:"计划享受海南双15%税收优惠，但担心两头在外业务被拒",friction:"海南双15政策对实质经营要求与煤炭贸易两头在外模式冲突",dirs:["企业所得税15%政策执行口径不一","个人所得税15%先征后退兑现困难","实质经营条件成本与风险"],tags:["海南自由贸易港","企业所得税15%","两头在外"],cat:"税务合规",novelty:"中",file:"武汉260206-煤炭贸易.docx"},
+    {title:"试用期员工解除纠纷",who:"深圳某企业主",asset:"中小企业，有员工管理及薪酬发放权",event:"因试用期员工不符合录用条件解除劳动关系，员工不认可并威胁仲裁",friction:"试用期解除合法性举证责任与薪酬支付策略的平衡",dirs:["解除通知书瑕疵风险","绩效扣款争议与证据不足","工资支付时机与仲裁筹码权衡"],tags:["劳动合同法第三十九条","试用期解除","绩效工资争议"],cat:"劳动用工",novelty:"中",file:"深圳260227-劳动纠纷.docx"},
+    {title:"房地产资产剥离税务筹划",who:"香港控股公司实控人杨姐",asset:"广西桂林房地产公司，持有未开发土地和自持物业",event:"计划将未开发土地和自持物业剥离至新公司，由原股东持有",friction:"房地产开发资质限制税收优惠适用，资产转让税负高",dirs:["资产剥离税务成本高","房地产开发资质影响税收优惠","外资母公司架构增加复杂性"],tags:["资产重组税收优惠","土地增值税","企业所得税"],cat:"税务合规",novelty:"中",file:"深圳260319-房产涉税.docx"},
+    {title:"黄金交易税务合规咨询",who:"上海黄金交易所机构客户",asset:"通过会员单位进行黄金延期交易，涉及法人个人黄金出借",event:"黄金税收新政后，法人借入黄金出库开票及交易收益税务处理存疑",friction:"黄金新政下个人与公司间黄金流转的税务定性及凭证认可矛盾",dirs:["法人借入黄金出库开票后归还的税务处理","场内交易收益免增值税但税务局不认可日结单凭证","浮动盈亏导致月度税负波动及申报困难"],tags:["黄金税收新政","增值税免税","印花税"],cat:"税务合规",novelty:"高",file:"西安20260422-黄金交易.docx"},
+    {title:"机械加工企业合资架构设计",who:"重庆机械加工企业实际控制人",asset:"具备机加工能力的现有公司，但缺乏冷挤压和铸造工艺",event:"获得新业务订单，计划与两家外地公司合资成立新公司",friction:"客户希望以合资公司形式满足客户资质要求，但实际能力依赖股东，存在合规风险",dirs:["合资公司能力依赖股东，合规性存疑","多地生产基地管理及法律风险","关联交易定价与利润分配争议"],tags:["国有企业采购合规","关联交易","合资公司架构"],cat:"股权架构",novelty:"中",file:"重庆20260427-业务扩张.docx"},
+    {title:"美国信托迁移香港税务合规",who:"重庆高净值客户杜总",asset:"美国不可撤销信托持有加州房产及银行账户",event:"计划出售房产将资金转至香港信托账户",friction:"美国信托转香港需避免触发赠与税及税务居民申报义务",dirs:["信托架构调整与税务合规","美国税务居民身份认定与申报","资产跨境转移的税务优化"],tags:["美国信托税法","赠与税","海外账户申报FBAR/FATCA"],cat:"跨境规划",novelty:"高",file:"重庆20260430-美国房产.docx"},
+    {title:"电缆追款与股权稀释咨询",who:"重庆电缆经销商胡总",asset:"电缆经销业务，持有鱼峰电缆原始股",event:"追讨泰山电缆居间费欠款，并咨询股权稀释问题",friction:"小额欠款诉讼流程不熟悉，股权稀释缺乏协议保障",dirs:["网上立案操作困难","证据收集不完整","股权稀释风险不明"],tags:["人民法院在线服务","强制执行","新三板股权稀释"],cat:"合规诉讼",novelty:"中",file:"重庆260209-电缆追款.docx"},
+    {title:"个人借贷欠款追讨咨询",who:"重庆教师邓老师",asset:"30万出借款项，有借条、转账凭证和微信记录",event:"借款人拖欠本金和利息，态度好但不还钱，希望尽快追回本金",friction:"民间借贷利息超标，诉讼时效及保全程序需专业指导",dirs:["借款人无固定单位且行踪不定","借款人可能资不抵债，面临其他债权人","客户缺乏法律知识，担心诉讼时效和成本"],tags:["民间借贷利率上限","诉讼时效","财产保全"],cat:"合规诉讼",novelty:"低",file:"重庆260226-欠款追讨.docx"}
+  ];
+
+  function noveltyLabel(n){ return n==='高'?'⭐ 高新颖度':n==='中'?'中等':' 常见'; }
+  function noveltyClass(n){ return n==='高'?'hgj-novelty-high':n==='中'?'hgj-novelty-mid':'hgj-novelty-low'; }
+
+  function renderCards(data){
+    const container = document.getElementById('hgjCards');
+    if(!container) return;
+    container.innerHTML = data.map((d,i) => `
+      <div class="hgj-card" data-cat="${d.cat}" data-novelty="${d.novelty}">
+        <div class="hgj-card-header">
+          <span style="font-size:15px;font-weight:700;color:#1e293b;flex:1;">${d.title}</span>
+          <span class="hgj-tag ${noveltyClass(d.novelty)}">${noveltyLabel(d.novelty)}</span>
+          <span class="hgj-cat-tag">${d.cat}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;">
+          <div style="font-size:12px;color:#64748b;"><span style="color:#94a3b8;">👤 谁</span><br><span style="color:#334155;">${d.who}</span></div>
+          <div style="font-size:12px;color:#64748b;"><span style="color:#94a3b8;">💼 资产</span><br><span style="color:#334155;">${d.asset}</span></div>
+          <div style="font-size:12px;color:#64748b;"><span style="color:#94a3b8;">📌 发生了什么</span><br><span style="color:#334155;">${d.event}</span></div>
+        </div>
+        <div style="font-size:12px;background:#fafafa;border-left:3px solid #e2e8f0;padding:6px 10px;color:#475569;margin-bottom:8px;border-radius:0 6px 6px 0;">
+          <span style="color:#94a3b8;font-size:11px;">制度性摩擦 · </span>${d.friction}
+        </div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:6px;">痛点方向：</div>
+        <div class="hgj-pain-dir">
+          ${d.dirs.map(dir=>`<span class="hgj-pain-chip" onclick="hgjSendToPainGenerate('${dir.replace(/'/g,"\\'")}')">＋ ${dir}</span>`).join('')}
+        </div>
+        <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px;">
+          ${d.tags.map(t=>`<span style="font-size:11px;background:#f1f5f9;color:#64748b;padding:2px 7px;border-radius:4px;">${t}</span>`).join('')}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function hgjFilter(btn, cat){
+    document.querySelectorAll('.hgj-filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const filtered = cat==='全部' ? HGJ_DATA :
+                     cat==='高新颖度' ? HGJ_DATA.filter(d=>d.novelty==='高') :
+                     HGJ_DATA.filter(d=>d.cat===cat);
+    renderCards(filtered);
+  }
+
+  window.hgjFilter = hgjFilter;
+
+  window.hgjSendToPainGenerate = function(dir){
+    showPage('pain-generate');
+    setTimeout(()=>{
+      const sceneInput = document.getElementById('sceneInput') || document.querySelector('#page-pain-generate textarea');
+      if(sceneInput){ sceneInput.value = dir; sceneInput.dispatchEvent(new Event('input')); }
+    }, 300);
+  };
+
+  // 初始化渲染（页面切换时触发）
+  const origShowPage = window.showPage;
+  window.showPage = function(pageId){
+    origShowPage && origShowPage.apply(this, arguments);
+    if(pageId==='hgj') renderCards(HGJ_DATA);
+  };
+})();
+</script>
 
 <div id="page-business" class="page" style="display:none;"></div>
 
