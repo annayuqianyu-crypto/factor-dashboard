@@ -2953,6 +2953,10 @@ tr:hover td { background: #fafafa; }
         style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#f3f4f6;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">
         📈 CM 专项场景
       </button>
+      <button id="bu-tab-news" onclick="switchBuRadar('news')"
+        style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#f3f4f6;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">
+        📰 Tax 时事新闻
+      </button>
     </div>
 
     <!-- Tax 雷达面板 -->
@@ -2996,6 +3000,69 @@ tr:hover td { background: #fafafa; }
         <div style="font-size:14px;font-weight:600;">CM 专项场景雷达</div>
         <div style="font-size:12px;margin-top:6px;">资本市场 BU 信息源配置完成后上线，敬请期待</div>
       </div>
+    </div>
+
+    <!-- Tax 时事新闻面板 -->
+    <div id="radar-panel-news" style="display:none;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
+
+      <!-- API Key 配置 -->
+      <details id="news-api-setup" style="margin-bottom:16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;">
+        <summary style="font-size:12px;font-weight:600;color:#475569;cursor:pointer;user-select:none;">
+          🔑 Bing Search API 配置
+          <span id="news-key-status" style="margin-left:8px;font-size:11px;color:#16a34a;font-weight:400;"></span>
+        </summary>
+        <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
+          <input id="news-bing-key" type="password" placeholder="粘贴 Bing Web Search API Key（Azure 免费 1000次/月）"
+            style="flex:1;padding:7px 11px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px;"/>
+          <button onclick="newsSaveKey()"
+            style="padding:7px 16px;background:#0f172a;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">保存</button>
+        </div>
+        <div style="margin-top:6px;font-size:11px;color:#94a3b8;">
+          获取方式：Azure Portal → 创建 Bing Search v7 资源（免费层 F1）→ 复制 Key1
+        </div>
+      </details>
+
+      <!-- 搜索条件 -->
+      <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+        <div>
+          <div style="font-size:11px;color:#64748b;margin-bottom:4px;">起始日期</div>
+          <input id="news-date-start" type="date" style="padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;"/>
+        </div>
+        <div>
+          <div style="font-size:11px;color:#64748b;margin-bottom:4px;">结束日期</div>
+          <input id="news-date-end" type="date" style="padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;"/>
+        </div>
+        <div style="flex:1;min-width:140px;">
+          <div style="font-size:11px;color:#64748b;margin-bottom:4px;">关键词（可选）</div>
+          <input id="news-keyword" type="text" placeholder="如：个税 减持 信托…" style="width:100%;box-sizing:border-box;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;"/>
+        </div>
+        <button onclick="newsSearch()" id="news-search-btn"
+          style="padding:8px 22px;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;">
+          <span id="news-search-spin">🔍</span> 搜索
+        </button>
+      </div>
+
+      <!-- 信息源预览 -->
+      <details style="margin-bottom:14px;">
+        <summary style="font-size:12px;color:#6b7280;cursor:pointer;user-select:none;">📋 查看全部 40 个信息源（同 Tax 雷达）</summary>
+        <div style="margin-top:8px;font-size:11px;color:#94a3b8;">所有搜索将在这 40 个来源的域名范围内进行</div>
+      </details>
+
+      <!-- 结果区 -->
+      <div id="news-result" style="min-height:60px;"></div>
+
+      <!-- 场景提炼浮层 -->
+      <div id="news-extract-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:14px;padding:28px;max-width:640px;width:90%;max-height:80vh;overflow-y:auto;position:relative;">
+          <button onclick="document.getElementById('news-extract-modal').style.display='none'"
+            style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:18px;color:#94a3b8;cursor:pointer;">✕</button>
+          <div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:4px;">场景提炼</div>
+          <div id="news-extract-source" style="font-size:11px;color:#94a3b8;margin-bottom:16px;"></div>
+          <div id="news-extract-body" style="font-size:13px;color:#374151;line-height:1.7;"></div>
+          <div id="news-extract-actions" style="display:none;margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;"></div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -10185,23 +10252,282 @@ function radarInitSources() {
 
 // ── 二级 tab 切换 ─────────────────────────────────────────────
 function switchBuRadar(bu) {
-  ['tax','legal','cm'].forEach(b => {
+  const tabColors = {tax:'#0369a1', legal:'#15803d', cm:'#c2410c', news:'#7c3aed'};
+  ['tax','legal','cm','news'].forEach(b => {
     const panel = document.getElementById('radar-panel-' + b);
     const tab   = document.getElementById('bu-tab-' + b);
     if (!panel || !tab) return;
     const active = b === bu;
     panel.style.display = active ? 'block' : 'none';
     if (active) {
-      tab.style.background = b==='tax'?'#0369a1': b==='legal'?'#15803d':'#c2410c';
-      tab.style.color = '#fff';
-      tab.style.borderBottom = '2px solid ' + (b==='tax'?'#0369a1': b==='legal'?'#15803d':'#c2410c');
+      tab.style.background   = tabColors[b];
+      tab.style.color        = '#fff';
+      tab.style.borderBottom = '2px solid ' + tabColors[b];
     } else {
-      tab.style.background = '#f3f4f6';
-      tab.style.color = '#6b7280';
+      tab.style.background   = '#f3f4f6';
+      tab.style.color        = '#6b7280';
       tab.style.borderBottom = '2px solid transparent';
     }
   });
-  if (bu === 'tax') radarInitSources();
+  if (bu === 'tax')  radarInitSources();
+  if (bu === 'news') newsInit();
+}
+
+// ══════════════════════════════════════════════════════════════
+// Tax 时事新闻 搜索模块
+// ══════════════════════════════════════════════════════════════
+
+function newsInit() {
+  // 恢复已保存的 key
+  const saved = localStorage.getItem('bing_search_key') || '';
+  const inp = document.getElementById('news-bing-key');
+  if (inp && saved) inp.value = saved;
+  document.getElementById('news-key-status').textContent = saved ? '✓ 已配置' : '';
+
+  // 默认日期：过去 30 天
+  const today = new Date();
+  const ago30 = new Date(today); ago30.setDate(ago30.getDate() - 30);
+  const fmt = d => d.toISOString().slice(0, 10);
+  const s = document.getElementById('news-date-start');
+  const e = document.getElementById('news-date-end');
+  if (s && !s.value) s.value = fmt(ago30);
+  if (e && !e.value) e.value = fmt(today);
+}
+
+function newsSaveKey() {
+  const v = (document.getElementById('news-bing-key').value || '').trim();
+  if (!v) { alert('请输入 API Key'); return; }
+  localStorage.setItem('bing_search_key', v);
+  document.getElementById('news-key-status').textContent = '✓ 已配置';
+  alert('API Key 已保存');
+}
+
+async function newsSearch() {
+  const key   = localStorage.getItem('bing_search_key') || '';
+  const start = document.getElementById('news-date-start').value;
+  const end   = document.getElementById('news-date-end').value;
+  const kw    = (document.getElementById('news-keyword').value || '').trim();
+
+  if (!key)   { alert('请先配置 Bing Search API Key'); document.getElementById('news-api-setup').open = true; return; }
+  if (!start || !end) { alert('请选择起止日期'); return; }
+  if (new Date(start) > new Date(end)) { alert('起始日期不能晚于结束日期'); return; }
+
+  const btn  = document.getElementById('news-search-btn');
+  const spin = document.getElementById('news-search-spin');
+  const res  = document.getElementById('news-result');
+  btn.disabled = true; spin.textContent = '⏳';
+  res.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ 正在从 40 个信息源中检索文章…</div>';
+
+  // 从 TAX_SOURCES 提取唯一域名
+  const domains = [...new Set(TAX_SOURCES.map(s => {
+    try { return new URL(s.url).hostname.replace(/^www\./, ''); } catch(e) { return ''; }
+  }).filter(Boolean))];
+
+  // 每批 6 个域名，构造 site: 查询，避免 URL 过长
+  const BATCH = 6;
+  const allItems = [];
+  const freshness = `${start}..${end}`;
+  const baseKw = kw || '税务 政策 合规 家办 传承 信托 财富';
+
+  for (let i = 0; i < domains.length; i += BATCH) {
+    const chunk = domains.slice(i, i + BATCH);
+    const siteQ = chunk.map(d => `site:${d}`).join(' OR ');
+    const q = `(${siteQ}) ${baseKw}`;
+    try {
+      const resp = await fetch(
+        `https://api.bing.microsoft.com/v7.0/search?q=${encodeURIComponent(q)}&count=10&freshness=${freshness}&mkt=zh-CN&responseFilter=Webpages&setLang=zh-hans`,
+        { headers: { 'Ocp-Apim-Subscription-Key': key } }
+      );
+      if (!resp.ok) {
+        const errText = await resp.text();
+        throw new Error(`HTTP ${resp.status}: ${errText.slice(0,120)}`);
+      }
+      const data = await resp.json();
+      (data.webPages?.value || []).forEach(item => allItems.push(item));
+    } catch(e) {
+      console.warn('批次搜索失败:', e.message);
+    }
+  }
+
+  btn.disabled = false; spin.textContent = '🔍';
+
+  if (!allItems.length) {
+    res.innerHTML = `<div style="padding:24px;text-align:center;color:#9ca3af;font-size:13px;">
+      未找到符合条件的文章。<br><span style="font-size:12px;">请检查 API Key 是否有效，或尝试调整日期范围和关键词。</span></div>`;
+    return;
+  }
+
+  // 去重（按 URL）并按日期倒序
+  const seen = new Set();
+  const items = allItems.filter(it => {
+    if (seen.has(it.url)) return false;
+    seen.add(it.url); return true;
+  });
+
+  // 匹配 source 名称
+  function matchSource(url) {
+    try {
+      const host = new URL(url).hostname.replace(/^www\./, '');
+      const hit = TAX_SOURCES.find(s => {
+        try { return new URL(s.url).hostname.replace(/^www\./, '') === host; } catch(e) { return false; }
+      });
+      return hit ? hit.name : host;
+    } catch(e) { return url; }
+  }
+
+  res.innerHTML = `
+    <div style="font-size:12px;color:#64748b;margin-bottom:12px;">
+      找到 <strong>${items.length}</strong> 篇文章（${start} 至 ${end}）· 点击标题访问原文，点击「提炼场景」提取业务场景
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      ${items.map((it, idx) => {
+        const src = matchSource(it.url);
+        const date = it.dateLastCrawled ? it.dateLastCrawled.slice(0,10) : '';
+        return `
+        <div style="background:#fafafa;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px;">
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:6px;">
+            <div style="flex:1;">
+              <a href="${it.url}" target="_blank" rel="noopener"
+                style="font-size:13.5px;font-weight:600;color:#1e293b;text-decoration:none;line-height:1.4;display:block;"
+                onmouseover="this.style.color='#7c3aed'" onmouseout="this.style.color='#1e293b'">
+                ${it.name}
+              </a>
+              <div style="font-size:11px;color:#94a3b8;margin-top:3px;">
+                📌 ${src}${date ? '  ·  ' + date : ''}
+              </div>
+            </div>
+            <button onclick="newsExtractScene('${it.url.replace(/'/g,"\\'")}','${(it.name||'').replace(/'/g,"\\'")}')"
+              style="flex-shrink:0;padding:5px 13px;background:#7c3aed;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">
+              提炼场景
+            </button>
+          </div>
+          <div style="font-size:12px;color:#475569;line-height:1.6;">${it.snippet || ''}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+async function newsExtractScene(url, title) {
+  const modal = document.getElementById('news-extract-modal');
+  const body  = document.getElementById('news-extract-body');
+  const src   = document.getElementById('news-extract-source');
+  const acts  = document.getElementById('news-extract-actions');
+  modal.style.display = 'flex';
+  src.textContent  = url;
+  acts.style.display = 'none';
+  body.innerHTML   = '<div style="text-align:center;padding:20px;color:#6b7280;">⏳ 正在读取文章内容…</div>';
+
+  // 用 Jina Reader 获取文章正文
+  let articleText = '';
+  try {
+    const jinaResp = await fetch(`https://r.jina.ai/${encodeURIComponent(url)}`, {
+      headers: { 'Accept': 'text/plain', 'X-Return-Format': 'text' }
+    });
+    articleText = await jinaResp.text();
+    if (articleText.length > 6000) articleText = articleText.slice(0, 6000) + '\n…（已截断）';
+  } catch(e) {
+    body.innerHTML = `<div style="color:#dc2626;">文章读取失败：${e.message}<br><a href="${url}" target="_blank" style="color:#7c3aed;">点此在新标签页查看原文</a></div>`;
+    return;
+  }
+
+  body.innerHTML = '<div style="text-align:center;padding:20px;color:#6b7280;">⏳ AI 正在提炼场景…</div>';
+
+  const apiBase = localStorage.getItem('pg_api_base') || COMPANY_API_BASE;
+  const apiKey  = localStorage.getItem('pg_api_key')  || COMPANY_API_KEY;
+  if (!apiKey) { body.innerHTML = '<div style="color:#dc2626;">请先在痛点生成页配置 DeepSeek API Key</div>'; return; }
+
+  const prompt = `你是朝曦家族办公室的场景分析师。请阅读以下文章，从中提炼1-3个与高净值客户（家企传承、税务合规、跨境规划、资产保护）相关的业务场景。
+
+文章标题：${title}
+文章来源：${url}
+文章内容：
+${articleText}
+
+请用以下格式输出（JSON数组），若文章与家办业务无关则返回空数组 []：
+[
+  {
+    "scene": "场景名称（10-20字）",
+    "rationale": "为何与家办客户相关（30字内）",
+    "pain_direction": "可能的痛点方向（20字内）"
+  }
+]
+只输出 JSON，不要其他文字。`;
+
+  try {
+    const resp = await fetch(`${apiBase}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: COMPANY_API_MODEL,
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.3,
+        max_tokens: 600,
+        response_format: { type: 'json_object' }
+      })
+    });
+    const data = await resp.json();
+    let raw = data.choices?.[0]?.message?.content || '[]';
+    // 兼容返回对象包裹的情况
+    let scenes = [];
+    try {
+      const parsed = JSON.parse(raw);
+      scenes = Array.isArray(parsed) ? parsed : (parsed.scenes || parsed.result || []);
+    } catch(e) {
+      const match = raw.match(/\[[\s\S]*\]/);
+      if (match) scenes = JSON.parse(match[0]);
+    }
+
+    if (!scenes.length) {
+      body.innerHTML = '<div style="color:#94a3b8;padding:16px 0;">该文章暂未发现与家办业务直接相关的场景。</div>';
+      return;
+    }
+
+    body.innerHTML = scenes.map((s, i) => `
+      <div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:8px;padding:14px;margin-bottom:10px;">
+        <div style="font-size:14px;font-weight:700;color:#6d28d9;margin-bottom:4px;">${s.scene}</div>
+        <div style="font-size:12px;color:#475569;margin-bottom:6px;">${s.rationale}</div>
+        <div style="font-size:12px;color:#7c3aed;background:#ede9fe;padding:4px 10px;border-radius:4px;display:inline-block;">
+          痛点方向：${s.pain_direction}
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;">
+          <button onclick="newsSendScene('${s.scene.replace(/'/g,"\\'")}','${s.pain_direction.replace(/'/g,"\\'")}','tax')"
+            style="padding:5px 14px;background:#7c3aed;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">
+            ＋ 加入 Tax 场景池
+          </button>
+          <button onclick="hgjSendToPainGenerate('${s.scene.replace(/'/g,"\\'")}');document.getElementById('news-extract-modal').style.display='none';"
+            style="padding:5px 14px;background:#1a56db;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">
+            直接生成痛点
+          </button>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    body.innerHTML = `<div style="color:#dc2626;">AI 提炼失败：${e.message}</div>`;
+  }
+}
+
+function newsSendScene(scene, painDir, bu) {
+  // 复用现有场景池逻辑
+  const pool = document.getElementById(`pool-${bu}-items`);
+  if (!pool) return;
+  // 清除空状态提示
+  if (pool.querySelector('[style*="暂无场景"]') || pool.children.length === 0 ||
+      pool.innerHTML.includes('暂无场景') || pool.innerHTML.includes('上线后')) {
+    pool.innerHTML = '';
+  }
+  const id = 'news-scene-' + Date.now();
+  const el = document.createElement('div');
+  el.id = id;
+  el.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:#fff;border:1px solid #ddd6fe;border-radius:6px;margin-bottom:6px;gap:6px;';
+  el.innerHTML = `
+    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex:1;min-width:0;">
+      <input type="checkbox" style="flex-shrink:0;" onchange="poolToggle('${bu}',this,'${scene.replace(/'/g,"\\'")}')"/>
+      <span style="font-size:12px;color:#374151;line-height:1.4;">${scene}</span>
+    </label>
+    <button onclick="document.getElementById('${id}').remove()"
+      style="flex-shrink:0;background:none;border:none;color:#9ca3af;font-size:14px;cursor:pointer;padding:0 2px;">×</button>`;
+  pool.appendChild(el);
+  document.getElementById('news-extract-modal').style.display = 'none';
+  alert(`"${scene}" 已加入 Tax 场景池`);
 }
 
 // ── Tax 雷达：调用 AI 生成场景 ───────────────────────────────
