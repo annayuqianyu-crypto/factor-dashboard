@@ -3006,16 +3006,24 @@ tr:hover td { background: #fafafa; }
     <div id="radar-panel-news" style="display:none;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
 
       <!-- API Key 配置 -->
-      <div style="margin-bottom:16px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-        <div style="font-size:12px;color:#166534;">
-          🔍 搜索由 <strong>Jina AI Search</strong> 提供 · 免费 · 无需配置 · 国内可直达
+      <details id="news-api-setup" style="margin-bottom:16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;">
+        <summary style="font-size:12px;font-weight:600;color:#475569;cursor:pointer;user-select:none;">
+          🔑 Jina Search API 配置
+          <span id="news-key-status" style="margin-left:8px;font-size:11px;color:#16a34a;font-weight:400;"></span>
+        </summary>
+        <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
+          <input id="news-jina-key" type="password" placeholder="粘贴 Jina API Key（jina_xxxxxx 格式）"
+            style="flex:1;padding:7px 11px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px;"/>
+          <button onclick="newsSaveKey()"
+            style="padding:7px 16px;background:#0f172a;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">保存</button>
+          <button onclick="newsTestKey()"
+            style="padding:7px 16px;background:#16a34a;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">测试连通性</button>
         </div>
-        <button onclick="newsTestKey()"
-          style="padding:6px 14px;background:#16a34a;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">
-          测试连通性
-        </button>
-        <div id="news-test-result" style="width:100%;font-size:12px;display:none;margin-top:2px;"></div>
-      </div>
+        <div id="news-test-result" style="margin-top:7px;font-size:12px;display:none;"></div>
+        <div style="margin-top:6px;font-size:11px;color:#94a3b8;">
+          获取方式：访问 <a href="https://jina.ai" target="_blank" style="color:#16a34a;">jina.ai</a> → 右上角 Get API Key → 邮箱注册即得，免费额度充足，无需信用卡
+        </div>
+      </details>
 
       <!-- 搜索条件 -->
       <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
@@ -3260,7 +3268,7 @@ tr:hover td { background: #fafafa; }
     container.innerHTML = data.map((d,i) => `
       <div class="hgj-card" data-cat="${d.cat}" data-novelty="${d.novelty}">
         <div class="hgj-card-header">
-          <span style="font-size:15px;font-weight:700;color:#1e293b;flex:1;cursor:pointer;text-decoration:underline;text-decoration-color:#cbd5e1;text-underline-offset:3px;" onclick="hgjSendToPainGenerate('${d.title.replace(/'/g,\"\\\\'\")}');" title="点击添加为场景">${d.title}</span>
+          <span style="font-size:15px;font-weight:700;color:#1e293b;flex:1;cursor:pointer;text-decoration:underline;text-decoration-color:#cbd5e1;text-underline-offset:3px;" onclick="hgjSendToPainGenerate(HGJ_DATA[${i}].title);" title="点击添加为场景">${d.title}</span>
           <span class="hgj-tag ${noveltyClass(d.novelty)}">${noveltyLabel(d.novelty)}</span>
           <span class="hgj-cat-tag">${d.cat}</span>
         </div>
@@ -10280,24 +10288,42 @@ function newsInit() {
   const e = document.getElementById('news-date-end');
   if (s && !s.value) s.value = fmt(ago30);
   if (e && !e.value) e.value = fmt(today);
+  const saved = localStorage.getItem('jina_search_key') || '';
+  const inp = document.getElementById('news-jina-key');
+  if (inp && saved) inp.value = saved;
+  if (document.getElementById('news-key-status'))
+    document.getElementById('news-key-status').textContent = saved ? '✓ 已配置' : '';
 }
 
-function newsSaveKey() {} // 保留兼容，无实际操作
+function newsSaveKey() {
+  const v = (document.getElementById('news-jina-key').value || '').trim();
+  if (!v) { alert('请输入 Jina API Key'); return; }
+  localStorage.setItem('jina_search_key', v);
+  document.getElementById('news-key-status').textContent = '✓ 已配置';
+  alert('Jina API Key 已保存');
+}
+
+function newsGetKey() {
+  return (document.getElementById('news-jina-key')?.value || '').trim()
+      || localStorage.getItem('jina_search_key') || '';
+}
 
 async function newsTestKey() {
+  const key = newsGetKey();
   const box = document.getElementById('news-test-result');
   box.style.display = 'block';
+  if (!key) { box.style.color='#dc2626'; box.textContent='请先输入并保存 Jina API Key'; return; }
   box.style.color = '#6b7280'; box.textContent = '⏳ 测试连接 s.jina.ai …';
   try {
-    const resp = await fetch('https://s.jina.ai/税务政策', {
-      headers: { 'Accept': 'application/json', 'X-Retain-Images': 'none' }
+    const resp = await fetch('https://s.jina.ai/tax%20policy', {
+      headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${key}`, 'X-Retain-Images': 'none' }
     });
     if (resp.ok) {
       box.style.color = '#16a34a';
-      box.textContent = '✓ 连接成功，Jina Search 可正常使用';
+      box.textContent = '✓ 连接成功，API Key 有效';
     } else {
       box.style.color = '#dc2626';
-      box.textContent = `✗ 响应异常（HTTP ${resp.status}）`;
+      box.textContent = `✗ 失败（HTTP ${resp.status}）：Key 无效或额度用尽`;
     }
   } catch(e) {
     box.style.color = '#dc2626';
@@ -10306,10 +10332,12 @@ async function newsTestKey() {
 }
 
 async function newsSearch() {
+  const key   = newsGetKey();
   const start = document.getElementById('news-date-start').value;
   const end   = document.getElementById('news-date-end').value;
   const kw    = (document.getElementById('news-keyword').value || '').trim();
 
+  if (!key)   { alert('请先配置 Jina API Key'); document.getElementById('news-api-setup').open = true; return; }
   if (!start || !end) { alert('请选择起止日期'); return; }
   if (new Date(start) > new Date(end)) { alert('起始日期不能晚于结束日期'); return; }
 
@@ -10346,7 +10374,7 @@ async function newsSearch() {
     const query = encodeURIComponent(`(${siteQ}) ${baseKw} ${dateHint}`);
     try {
       const resp = await fetch(`https://s.jina.ai/${query}`, {
-        headers: { 'Accept': 'application/json', 'X-Retain-Images': 'none' }
+        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${key}`, 'X-Retain-Images': 'none' }
       });
       if (!resp.ok) continue;
       const data = await resp.json();
