@@ -3896,6 +3896,28 @@ function showPage(pageId) {
 
   event.currentTarget.classList.add('active');
 
+  // 痛点结果页：恢复缓存
+  if (pageId === 'pain-results') {
+    const container = document.getElementById('pgResultsContent');
+    if (container && container.querySelector('.gen-empty')) {
+      try {
+        const cache = JSON.parse(localStorage.getItem('pain_results_cache') || 'null');
+        if (cache && cache.html) {
+          const bar = `<div id="pain-cache-bar" style="display:flex;align-items:center;justify-content:space-between;
+            background:#fefce8;border:1px solid #fde68a;border-radius:6px;
+            padding:7px 12px;margin-bottom:16px;font-size:12px;color:#92400e;">
+            <span>📦 缓存结果 · 上次生成于 ${new Date(cache.savedAt).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>
+            <button onclick="localStorage.removeItem('pain_results_cache');document.getElementById('pgResultsContent').innerHTML='<div class=gen-empty><div style=font-size:48px;margin-bottom:14px>⚡</div><div style=font-weight:600;font-size:15px;color:#6b7280;margin-bottom:6px>尚未生成痛点</div><div style=font-size:13px>请先在「场景选择」中配置场景并点击生成</div></div>'"
+              style="padding:3px 10px;background:#fbbf24;color:#78350f;border:none;border-radius:4px;font-size:11px;cursor:pointer;">
+              清除缓存
+            </button>
+          </div>`;
+          container.innerHTML = bar + cache.html;
+        }
+      } catch(e) { /* 忽略损坏缓存 */ }
+    }
+  }
+
   // resize 所有此页图表
 
   setTimeout(() => {
@@ -8631,6 +8653,14 @@ function pgRenderResults(results, newSkus, bu, failNote) {
 
 
   document.getElementById('pgResultsContent').innerHTML = html;
+
+  // 写入缓存
+  try {
+    localStorage.setItem('pain_results_cache', JSON.stringify({
+      html,
+      savedAt: new Date().toISOString()
+    }));
+  } catch(e) { console.warn('痛点缓存写入失败:', e.message); }
 
 }
 
