@@ -10466,18 +10466,7 @@ async function newsSearch() {
   }).filter(Boolean))];
 
   const baseKw = kw || '税务 政策 合规 家办 传承 信托';
-  const BATCH = 5;
   const allItems = [];
-
-  function matchSource(url) {
-    try {
-      const host = new URL(url).hostname.replace(/^www\./, '');
-      const hit = TAX_SOURCES.find(s => {
-        try { return new URL(s.url).hostname.replace(/^www\./, '') === host; } catch(e) { return false; }
-      });
-      return hit ? hit.name : host;
-    } catch(e) { return url; }
-  }
 
   // Jina Search — 小批次(3域名) + 并行 + 失败重试一次
   const startYear  = start.slice(0, 4);
