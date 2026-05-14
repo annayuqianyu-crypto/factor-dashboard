@@ -8528,6 +8528,8 @@ function pgRenderResults(results, newSkus, bu, failNote) {
 
   // ── 痛点卡片 ──
 
+  window._pgAllPoints = [];   // 供「推送痛点学习」按钮索引
+
   for (const [sceneName, points] of Object.entries(byScene)) {
 
     html += `<div style="margin-bottom:28px;">
@@ -8541,6 +8543,9 @@ function pgRenderResults(results, newSkus, bu, failNote) {
 
 
     points.forEach((p, idx) => {
+
+      const globalIdx = window._pgAllPoints.length;
+      window._pgAllPoints.push(p);
 
       // 因子链路（支持新格式 factors_chain 和旧格式 factors）
 
@@ -8652,6 +8657,14 @@ function pgRenderResults(results, newSkus, bu, failNote) {
 
 
         ${analysisHtml ? `<div style="margin-top:4px;">${analysisHtml}</div>` : ''}
+
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #f3f4f6;display:flex;justify-content:flex-end;">
+          <button onclick="sendToLearn(${globalIdx})"
+            style="padding:7px 18px;background:#6d28d9;color:#fff;border:none;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;"
+            onmouseover="this.style.opacity='.82'" onmouseout="this.style.opacity='1'">
+            📖 推送痛点学习
+          </button>
+        </div>
 
       </div>`;
 
@@ -11357,6 +11370,57 @@ function renderPool(bu) {
   ['tax','legal','cm'].forEach(b => renderPool(b));
   radarInitSources();
 })();
+
+
+// ══════════════════════════════════════════════════════════════
+// 推送痛点学习（痛点结果页 → 痛点学习页）
+// ══════════════════════════════════════════════════════════════
+
+function sendToLearn(idx) {
+  const p = (window._pgAllPoints || [])[idx];
+  if (!p) { alert('痛点数据不存在，请重新生成结果'); return; }
+
+  // 组装完整文本，涵盖所有已生成字段
+  const lines = [
+    `【痛点标题】${p.title || ''}`,
+    `【痛点说明】${p.desc  || ''}`,
+  ];
+  if (p.laws)     lines.push(`【相关法律法规】${p.laws}`);
+  if (p.conflict) lines.push(`【核心冲突】${p.conflict}`);
+  if (p.risk)     lines.push(`【潜在风险】${p.risk}`);
+  if (p.solution) lines.push(`【已有解决方案建议】${p.solution}`);
+  if (p.effect)   lines.push(`【预期效果】${p.effect}`);
+  const text = lines.join('\n\n');
+
+  // 存入 localStorage 供"载入最近痛点"使用
+  localStorage.setItem('pg_last_pain_point', text);
+
+  // 切换到痛点学习页，高亮对应导航项
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-pain-learn').classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.remove('active');
+    if ((n.getAttribute('onclick') || '').includes('pain-learn')) n.classList.add('active');
+  });
+
+  // 填充输入框并滚动到顶部
+  const ta = document.getElementById('learn-pain-input');
+  if (ta) {
+    ta.value = text;
+    ta.style.border = '2px solid #6d28d9';
+    setTimeout(() => { ta.style.border = ''; }, 1800);
+  }
+
+  // 重置上次分析结果，准备新一轮
+  const out = document.getElementById('learn-analysis-output');
+  if (out) out.innerHTML = '';
+  const chatSec = document.getElementById('learn-chat-section');
+  if (chatSec) chatSec.style.display = 'none';
+  _learnState.chatHistory   = [];
+  _learnState.systemContext = '';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
 
 // ══════════════════════════════════════════════════════════════
