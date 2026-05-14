@@ -10314,7 +10314,7 @@ function switchBuRadar(bu) {
 }
 
 // ══════════════════════════════════════════════════════════════
-// Tax 时事新闻 搜索模块（Jina AI Search，国内可达，免费无需Key）
+// Tax 时事新闻 搜索模块（Jina Reader r.jina.ai，免费抓取，国内可用）
 // ══════════════════════════════════════════════════════════════
 
 function newsInit() {
@@ -10425,22 +10425,25 @@ async function newsTestKey() {
   const key = newsGetKey();
   const box = document.getElementById('news-test-result');
   box.style.display = 'block';
-  if (!key) { box.style.color='#dc2626'; box.textContent='请先输入并保存 Jina API Key'; return; }
-  box.style.color = '#6b7280'; box.textContent = '⏳ 测试连接 s.jina.ai …';
+  box.style.color = '#6b7280'; box.textContent = '⏳ 测试连接 r.jina.ai …';
   try {
-    const resp = await fetch('https://s.jina.ai/tax%20policy', {
-      headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${key}`, 'X-Retain-Images': 'none' }
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 10000);
+    const resp = await fetch('https://r.jina.ai/https://www.chinatax.gov.cn', {
+      headers: { 'Accept': 'text/plain', 'X-Return-Format': 'text', 'Authorization': `Bearer ${key}` },
+      signal: ctrl.signal
     });
+    clearTimeout(timer);
     if (resp.ok) {
       box.style.color = '#16a34a';
-      box.textContent = '✓ 连接成功，API Key 有效';
+      box.textContent = '✓ Jina Reader 连接正常，可以抓取文章';
     } else {
       box.style.color = '#dc2626';
-      box.textContent = `✗ 失败（HTTP ${resp.status}）：Key 无效或额度用尽`;
+      box.textContent = `✗ 连接失败（HTTP ${resp.status}）`;
     }
   } catch(e) {
     box.style.color = '#dc2626';
-    box.textContent = `✗ 网络错误：${e.message}`;
+    box.textContent = e.name === 'AbortError' ? '✗ 连接超时（>10s），网络较慢但不影响使用' : `✗ 网络错误：${e.message}`;
   }
 }
 
@@ -10450,7 +10453,6 @@ async function newsSearch() {
   const end   = document.getElementById('news-date-end').value;
   const kw    = (document.getElementById('news-keyword').value || '').trim();
 
-  if (!key)   { alert('请先配置 Jina API Key'); document.getElementById('news-api-setup').open = true; return; }
   if (!start || !end) { alert('请选择起止日期'); return; }
   if (new Date(start) > new Date(end)) { alert('起始日期不能晚于结束日期'); return; }
 
@@ -10458,95 +10460,127 @@ async function newsSearch() {
   const spin = document.getElementById('news-search-spin');
   const res  = document.getElementById('news-result');
   btn.disabled = true; spin.textContent = '⏳';
-  res.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ 正在检索文章，请稍候…</div>';
+  res.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ 正在抓取信息源，请稍候（约30-60秒）…</div>';
 
-  // 从 TAX_SOURCES 提取唯一域名，分批构造 site: 查询
-  const domains = [...new Set(TAX_SOURCES.map(s => {
-    try { return new URL(s.url).hostname.replace(/^www\./, ''); } catch(e) { return ''; }
-  }).filter(Boolean))];
+  // 关键词列表（空则不过滤标题）
+  const kwWords = kw ? kw.split(/[\s，,、]+/).filter(Boolean) : [];
 
-  const baseKw = kw || '税务 政策 合规 家办 传承 信托';
+  // 日期边界
+  const startDate = new Date(start);
+  const endDate   = new Date(end); endDate.setHours(23, 59, 59, 999);
+
   const allItems = [];
+  const seenUrls = new Set();
 
-  // Jina Search — 小批次(3域名) + 并行 + 失败重试一次
-  // 查询串只用关键词，不加日期修饰（日期修饰会导致大量匹配失败）
-  const BATCH = 3;
-  const jinaHeaders = {
-    'Accept': 'application/json',
-    'Authorization': `Bearer ${key}`,
-    'X-Retain-Images': 'none'
-  };
-
-  // 构造全部批次
-  const batches = [];
-  for (let i = 0; i < domains.length; i += BATCH) {
-    const chunk = domains.slice(i, i + BATCH);
-    const siteQ = chunk.map(d => `site:${d}`).join(' OR ');
-    batches.push(encodeURIComponent(`(${siteQ}) ${baseKw}`));
-  }
-
-  // 单次 fetch（失败返回 null）
-  async function fetchBatch(query) {
+  // 用 Jina Reader 抓取单个信息源首页，解析 markdown 链接
+  async function fetchSource(src) {
     try {
-      const r = await fetch(`https://s.jina.ai/${query}`, { headers: jinaHeaders });
-      if (!r.ok) return null;
-      const data = await r.json();
-      return data.data || [];
-    } catch(e) { return null; }
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 18000);
+      const resp = await fetch(`https://r.jina.ai/${encodeURIComponent(src.url)}`, {
+        headers: {
+          'Accept': 'text/plain',
+          'X-Return-Format': 'text',
+          'Authorization': `Bearer ${key}`
+        },
+        signal: ctrl.signal
+      });
+      clearTimeout(timer);
+      if (!resp.ok) return [];
+      const text = await resp.text();
+
+      // 解析 markdown 链接：[标题](url)
+      const linkRe = /\[([^\]]{6,150})\]\((https?:\/\/[^)\s]{10,})\)/g;
+      const found  = [];
+      let m;
+      while ((m = linkRe.exec(text)) !== null) {
+        const title = m[1].trim();
+        const url   = m[2].trim();
+
+        // 跳过已见过的 URL
+        if (seenUrls.has(url)) continue;
+
+        // 跳过明显的导航/菜单链接（太短，或典型导航词）
+        if (title.length < 8) continue;
+        if (/^(首页|关于我们|联系我们|English|登录|注册|更多|返回顶部|网站地图|法律声明|隐私政策|[<>«»←→▶■])/.test(title)) continue;
+
+        // 同域名检查（链接必须属于该信息源的域名，避免抓到外链广告）
+        try {
+          const srcHost  = new URL(src.url).hostname.replace(/^www\./, '');
+          const linkHost = new URL(url).hostname.replace(/^www\./, '');
+          if (!linkHost.endsWith(srcHost) && !srcHost.endsWith(linkHost)) continue;
+        } catch(e) { continue; }
+
+        // 关键词匹配（标题含任意关键词；无关键词时全部收录）
+        if (kwWords.length > 0) {
+          const hay = title.toLowerCase();
+          if (!kwWords.some(w => hay.includes(w.toLowerCase()))) continue;
+        }
+
+        // 从 URL 中提取日期
+        let dateStr = '';
+        const dm = url.match(/[\/\-_](\d{4})[\/\-_](\d{2})[\/\-_](\d{2})/);
+        if (dm) {
+          dateStr = `${dm[1]}-${dm[2]}-${dm[3]}`;
+        } else {
+          // 从标题中提取日期（如"2025-01-15"或"2025年1月15日"）
+          const tm = title.match(/(\d{4})[年\-\/](\d{1,2})[月\-\/](\d{1,2})/);
+          if (tm) dateStr = `${tm[1]}-${tm[2].padStart(2,'0')}-${tm[3].padStart(2,'0')}`;
+        }
+
+        // 日期过滤（有明确日期才过滤，无日期的宽容保留）
+        if (dateStr && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+          const d = new Date(dateStr);
+          if (d < startDate || d > endDate) continue;
+        }
+
+        seenUrls.add(url);
+        found.push({ url, title, date: dateStr, snippet: `${src.name}｜${src.dim}`, source: src.name });
+      }
+      return found;
+    } catch(e) {
+      return [];
+    }
   }
 
-  // 并发控制（最多4个同时）
-  const CONCURRENCY = 4;
+  // 并发抓取，每批 5 个信息源
+  const CONCURRENCY = 5;
   let done = 0;
-  for (let i = 0; i < batches.length; i += CONCURRENCY) {
-    const group = batches.slice(i, i + CONCURRENCY);
-    const results = await Promise.all(group.map(async q => {
-      let items = await fetchBatch(q);
-      if (items === null) items = await fetchBatch(q); // 失败重试一次
-      return items || [];
-    }));
-    results.flat().forEach(it => {
-      if (!it.url) return;
-      // 客户端日期过滤：只过滤有明确日期且明显超出范围的（Jina date字段格式不稳定，宽容处理）
-      const rawDate = it.publishedTime || it.date || '';
-      const dateStr = rawDate ? rawDate.slice(0, 10) : '';
-      if (dateStr && dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        if (dateStr < start || dateStr > end) return;
-      }
-      allItems.push({
-        url:     it.url,
-        title:   it.title || it.url,
-        snippet: it.description || it.content?.slice(0, 200) || '',
-        date:    dateStr
-      });
-    });
+  for (let i = 0; i < TAX_SOURCES.length; i += CONCURRENCY) {
+    const group = TAX_SOURCES.slice(i, i + CONCURRENCY);
+    const results = await Promise.all(group.map(src => fetchSource(src)));
+    results.forEach(items => allItems.push(...items));
     done += group.length;
+    const pct = Math.round(done / TAX_SOURCES.length * 100);
     res.innerHTML = `<div style="padding:16px;text-align:center;color:#6b7280;font-size:13px;">
-      ⏳ 正在检索… ${done}/${batches.length} 批完成，已找到 ${allItems.length} 篇</div>`;
+      ⏳ 正在抓取… ${done}/${TAX_SOURCES.length} 个信息源完成（${pct}%），已找到 ${allItems.length} 篇</div>`;
   }
 
   btn.disabled = false; spin.textContent = '🔍';
 
-  // 去重
-  const seen = new Set();
-  const items = allItems.filter(it => { if (seen.has(it.url)) return false; seen.add(it.url); return true; });
+  // 按日期降序排列（无日期的放末尾）
+  allItems.sort((a, b) => {
+    if (!a.date && !b.date) return 0;
+    if (!a.date) return 1;
+    if (!b.date) return -1;
+    return b.date.localeCompare(a.date);
+  });
 
-  if (!items.length) {
+  if (!allItems.length) {
     res.innerHTML = `<div style="padding:24px;text-align:center;color:#9ca3af;font-size:13px;">
       未找到符合条件的文章。<br>
-      <span style="font-size:12px;">建议：扩大日期范围，或更换关键词后重试</span></div>`;
+      <span style="font-size:12px;line-height:2;">可尝试：① 扩大日期范围 &nbsp;② 减少关键词（或留空抓取全部）&nbsp;③ 直接点击上方来源标签浏览原网站</span></div>`;
     return;
   }
 
   // 写入缓存
   try {
     localStorage.setItem('news_search_cache', JSON.stringify({
-      items, start, end, kw, savedAt: new Date().toISOString()
+      items: allItems, start, end, kw, savedAt: new Date().toISOString()
     }));
   } catch(e) { console.warn('缓存写入失败:', e.message); }
 
-  // 渲染（不传 savedAt，代表是新鲜结果，不显示缓存提示条）
-  newsRenderItems(items, start, end, kw, null);
+  newsRenderItems(allItems, start, end, kw, null);
 }
 
 async function newsExtractScene(url, title) {
