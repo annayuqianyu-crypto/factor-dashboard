@@ -3087,7 +3087,13 @@ tr:hover td { background: #fafafa; }
       <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
           <div style="font-size:12px;font-weight:700;color:#1d4ed8;">💼 Tax 场景池</div>
-          <button onclick="clearPool('tax')" style="font-size:10px;color:#6b7280;background:none;border:none;cursor:pointer;">清空</button>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button onclick="importAllFromPool('tax')"
+              style="font-size:11px;color:#fff;background:#1d4ed8;border:none;border-radius:5px;padding:3px 10px;cursor:pointer;white-space:nowrap;">
+              导入痛点生成 →
+            </button>
+            <button onclick="clearPool('tax')" style="font-size:10px;color:#6b7280;background:none;border:none;cursor:pointer;">清空</button>
+          </div>
         </div>
         <div id="pool-tax-items"><div style="text-align:center;padding:20px 0;font-size:12px;color:#9ca3af;">暂无场景，点击上方「更新信息」生成</div></div>
       </div>
@@ -10626,7 +10632,8 @@ ${articleText}
           痛点方向：${s.pain_direction}
         </div>
         <div style="margin-top:10px;display:flex;gap:8px;">
-          <button onclick="newsSendScene('${s.scene.replace(/'/g,"\\'")}','${s.pain_direction.replace(/'/g,"\\'")}','tax')"
+          <button onclick="newsSendScene(this.dataset.scene, this.dataset.dir, 'tax', this)"
+            data-scene="${s.scene.replace(/"/g,'&quot;')}" data-dir="${s.pain_direction.replace(/"/g,'&quot;')}"
             style="padding:5px 14px;background:#2d6a4f;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">
             ＋ 加入 Tax 场景池
           </button>
@@ -10656,29 +10663,21 @@ function poolToggle(bu, checkbox, scene) {
   if (badge) badge.textContent = sel.length || '';
 }
 
-function newsSendScene(scene, painDir, bu) {
-  // 复用现有场景池逻辑
-  const pool = document.getElementById(`pool-${bu}-items`);
-  if (!pool) return;
-  // 清除空状态提示
-  if (pool.querySelector('[style*="暂无场景"]') || pool.children.length === 0 ||
-      pool.innerHTML.includes('暂无场景') || pool.innerHTML.includes('上线后')) {
-    pool.innerHTML = '';
+function newsSendScene(scene, painDir, bu, btnEl) {
+  // 写入 localStorage 场景池（与雷达池共用同一套存储）
+  addToPool(bu, { scene, reason: painDir });
+  // 按钮反馈：变绿显示"已加入"，弹窗保持不变
+  if (btnEl) {
+    const orig = btnEl.textContent;
+    btnEl.textContent = '✓ 已加入';
+    btnEl.style.background = '#16a34a';
+    btnEl.disabled = true;
+    setTimeout(() => {
+      btnEl.textContent = orig;
+      btnEl.style.background = '#2d6a4f';
+      btnEl.disabled = false;
+    }, 2000);
   }
-  const id = 'news-scene-' + Date.now();
-  const el = document.createElement('div');
-  el.id = id;
-  el.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:#fff;border:1px solid #ddd6fe;border-radius:6px;margin-bottom:6px;gap:6px;';
-  el.innerHTML = `
-    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex:1;min-width:0;">
-      <input type="checkbox" style="flex-shrink:0;" onchange="poolToggle('${bu}',this,'${scene.replace(/'/g,"\\'")}')"/>
-      <span style="font-size:12px;color:#374151;line-height:1.4;">${scene}</span>
-    </label>
-    <button onclick="document.getElementById('${id}').remove()"
-      style="flex-shrink:0;background:none;border:none;color:#9ca3af;font-size:14px;cursor:pointer;padding:0 2px;">×</button>`;
-  pool.appendChild(el);
-  document.getElementById('news-extract-modal').style.display = 'none';
-  alert(`"${scene}" 已加入 Tax 场景池`);
 }
 
 // ── Tax 雷达：调用 AI 生成场景 ───────────────────────────────
@@ -11008,6 +11007,24 @@ function addToPool(bu, scene) {
   pool.unshift(scene);
   localStorage.setItem(_poolKey(bu), JSON.stringify(pool));
   renderPool(bu);
+}
+
+function importAllFromPool(bu) {
+  const pool = JSON.parse(localStorage.getItem(_poolKey(bu)) || '[]');
+  if (!pool.length) { alert('场景池为空，请先加入场景'); return; }
+  showPage('pain-generate');
+  setTimeout(() => {
+    const ta = document.getElementById('manualScenesInput');
+    if (!ta) return;
+    const existing = ta.value.trim();
+    const newScenes = pool.map(s => s.scene).join('\n');
+    ta.value = existing ? existing + '\n' + newScenes : newScenes;
+    ta.dispatchEvent(new Event('input'));
+    ta.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // 高亮提示
+    ta.style.border = '2px solid #1d4ed8';
+    setTimeout(() => ta.style.border = '', 2000);
+  }, 300);
 }
 
 function clearPool(bu) {
