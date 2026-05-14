@@ -10473,35 +10473,38 @@ async function newsSearch() {
     } catch(e) { return url; }
   }
 
+  // Jina Search 只支持 GET，日期靠关键词辅助引导
+  const startYear  = start.slice(0, 4);
+  const startMonth = parseInt(start.slice(5, 7));
+  const endMonth   = parseInt(end.slice(5, 7));
+  const monthHint  = startYear + (startMonth === endMonth
+    ? `年${startMonth}月`
+    : `年${startMonth}-${endMonth}月`);
+
   for (let i = 0; i < domains.length; i += BATCH) {
     const chunk = domains.slice(i, i + BATCH);
     const siteQ = chunk.map(d => `site:${d}`).join(' OR ');
-    const query = `(${siteQ}) ${baseKw}`;
+    const query = encodeURIComponent(`(${siteQ}) ${baseKw} ${monthHint}`);
     try {
-      // Jina Search 使用 POST + JSON body，日期过滤用 startDate/endDate 参数
-      const resp = await fetch('https://s.jina.ai/', {
-        method: 'POST',
+      const resp = await fetch(`https://s.jina.ai/${query}`, {
         headers: {
           'Accept': 'application/json',
           'Authorization': `Bearer ${key}`,
-          'Content-Type': 'application/json',
           'X-Retain-Images': 'none'
-        },
-        body: JSON.stringify({
-          q: query,
-          numResults: 5,
-          startDate: start,
-          endDate: end
-        })
+        }
       });
       if (!resp.ok) { console.warn(`批次 ${i} 失败: HTTP ${resp.status}`); continue; }
       const data = await resp.json();
       (data.data || []).forEach(it => {
-        if (it.url) allItems.push({
+        if (!it.url) return;
+        // 客户端按日期过滤（有 publishedTime 才过滤，否则保留）
+        const d = it.publishedTime || it.date || '';
+        if (d && (d < start || d > end + 'T')) return;
+        allItems.push({
           url:     it.url,
           title:   it.title || it.url,
           snippet: it.description || it.content?.slice(0, 200) || '',
-          date:    it.publishedTime || ''
+          date:    d
         });
       });
     } catch(e) { console.warn('批次失败:', e.message); }
