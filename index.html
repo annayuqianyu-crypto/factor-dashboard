@@ -3005,20 +3005,11 @@ tr:hover td { background: #fafafa; }
     <!-- Tax 时事新闻面板（腾讯云混元联网搜索） -->
     <div id="radar-panel-news" style="display:none;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
 
-      <!-- 腾讯云 WSA 状态栏 -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;
-        background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:9px 14px;">
-        <div style="font-size:12px;color:#166534;display:flex;align-items:center;gap:8px;">
-          ✅ 腾讯云 Web Search API（wsa）· SecretId &amp; SecretKey 已由系统内置
-        </div>
-        <button onclick="newsTxTest()"
-          style="padding:5px 14px;background:#16a34a;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">
-          测试连通
-        </button>
+      <!-- SCF 代理状态栏 -->
+      <div id="news-scf-bar" style="margin-bottom:16px;">
+        <!-- 动态渲染，由 newsInitScfBar() 填充 -->
       </div>
       <div id="news-tx-test-result" style="margin-bottom:12px;font-size:12px;display:none;"></div>
-      <details id="news-tx-setup" style="display:none;"></details>
-      <input id="news-tx-apikey" type="hidden"/>
 
       <!-- 搜索条件行 -->
       <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
@@ -10370,78 +10361,134 @@ function newsInit() {
   const kw = localStorage.getItem('news_last_kw') || '';
   const ki = document.getElementById('news-keyword');
   if (ki && kw && !ki.value) ki.value = kw;
+  // 初始化 SCF 状态栏
+  newsInitScfBar();
   try {
     const cache = JSON.parse(localStorage.getItem('news_ai_cache') || 'null');
     if (cache && cache.html) document.getElementById('news-ai-result').innerHTML = cache.html;
   } catch(er) {}
 }
 
-// ── TC3-HMAC-SHA256 签名（浏览器 SubtleCrypto）───────────────
-async function tcBuildRequest(secretId, secretKey, service, action, region, version, bodyStr) {
-  const host      = `${service}.tencentcloudapi.com`;
-  const algorithm = 'TC3-HMAC-SHA256';
-  const nowTs     = Math.floor(Date.now() / 1000);
-  const date      = new Date(nowTs * 1000).toISOString().slice(0, 10);
-  const enc       = new TextEncoder();
+// ── SCF 代理 URL 管理 ────────────────────────────────────────
+const NEWS_SCF_KEY = 'news_scf_proxy_url';
 
-  async function hexDigest(str) {
-    const buf = await crypto.subtle.digest('SHA-256', enc.encode(str));
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+function newsGetScfUrl() {
+  return localStorage.getItem(NEWS_SCF_KEY) || '';
+}
+
+function newsSaveScfUrl() {
+  const v = (document.getElementById('news-scf-input')?.value || '').trim();
+  if (!v) return;
+  localStorage.setItem(NEWS_SCF_KEY, v);
+  newsInitScfBar();
+}
+
+function newsClearScfUrl() {
+  localStorage.removeItem(NEWS_SCF_KEY);
+  newsInitScfBar();
+}
+
+function newsInitScfBar() {
+  const bar = document.getElementById('news-scf-bar');
+  if (!bar) return;
+  const url = newsGetScfUrl();
+  if (url) {
+    bar.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;
+        background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:9px 14px;">
+        <div style="font-size:12px;color:#166534;flex:1;min-width:0;">
+          ✅ 腾讯云 SCF 代理 · <span style="color:#15803d;word-break:break-all;"
+            title="${url}">${url.length > 55 ? url.slice(0,52)+'…' : url}</span>
+        </div>
+        <div style="display:flex;gap:6px;margin-left:10px;flex-shrink:0;">
+          <button onclick="newsTxTest()"
+            style="padding:5px 12px;background:#16a34a;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">
+            测试连通
+          </button>
+          <button onclick="newsClearScfUrl()"
+            style="padding:5px 10px;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;cursor:pointer;">
+            修改
+          </button>
+        </div>
+      </div>`;
+  } else {
+    bar.innerHTML = `
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 14px;">
+        <div style="font-size:12px;color:#92400e;margin-bottom:8px;">
+          ⚠️ 请先部署腾讯云 SCF 代理函数，并将触发器 URL 填入下方（<a href="#" onclick="newsShowScfGuide();return false;"
+            style="color:#b45309;text-decoration:underline;">查看部署指南</a>）
+        </div>
+        <div style="display:flex;gap:8px;">
+          <input id="news-scf-input" type="text" placeholder="https://service-xxx.gz.apigw.tencentcs.com/release/news-proxy"
+            style="flex:1;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;"/>
+          <button onclick="newsSaveScfUrl()"
+            style="padding:7px 16px;background:#d97706;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">
+            保存并启用
+          </button>
+        </div>
+      </div>`;
   }
-  async function hmacBytes(keyBuf, msg) {
-    const k = await crypto.subtle.importKey(
-      'raw', keyBuf instanceof Uint8Array ? keyBuf : enc.encode(keyBuf),
-      { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
-    );
-    return new Uint8Array(await crypto.subtle.sign('HMAC', k, enc.encode(msg)));
-  }
+}
 
-  const ct            = 'application/json; charset=utf-8';
-  const canonHeaders  = `content-type:${ct}\nhost:${host}\nx-tc-action:${action.toLowerCase()}\n`;
-  const signedHeaders = 'content-type;host;x-tc-action';
-  const payloadHash   = await hexDigest(bodyStr);
-  const canonReq      = `POST\n/\n\n${canonHeaders}\n${signedHeaders}\n${payloadHash}`;
-  const credScope     = `${date}/${service}/tc3_request`;
-  const stringToSign  = `${algorithm}\n${nowTs}\n${credScope}\n${await hexDigest(canonReq)}`;
-
-  const kDate    = await hmacBytes(enc.encode('TC3' + secretKey), date);
-  const kService = await hmacBytes(kDate, service);
-  const kSigning = await hmacBytes(kService, 'tc3_request');
-  const kSig     = await hmacBytes(kSigning, stringToSign);
-  const signature = Array.from(kSig).map(b => b.toString(16).padStart(2,'0')).join('');
-
-  return {
-    url: `https://${host}`,
-    headers: {
-      'Authorization': `${algorithm} Credential=${secretId}/${credScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`,
-      'Content-Type':   ct,
-      'X-TC-Action':    action,
-      'X-TC-Region':    region,
-      'X-TC-Timestamp': String(nowTs),
-      'X-TC-Version':   version
-    }
-  };
+function newsShowScfGuide() {
+  const steps = [
+    '① 登录腾讯云控制台 → 搜索「云函数 SCF」→ 新建函数',
+    '② 选择「从头开始」→ 运行环境 Python 3.9 → 函数名 wsa-news-proxy',
+    '③ 将本地 scf_news_proxy/index.py 的内容粘贴到编辑器 → 保存部署',
+    '④ 进入「触发器」→ 新建触发器 → 类型选 API 网关 → 开启「启用集成响应」',
+    '⑤ 触发器创建后复制「访问路径（URL）」',
+    '⑥ 将 URL 粘贴到驾驶舱输入框 → 保存并启用',
+  ];
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:12px;padding:28px;max-width:520px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+      <div style="font-size:15px;font-weight:700;color:#1e293b;margin-bottom:16px;">📋 腾讯云 SCF 部署指南</div>
+      <ol style="margin:0;padding-left:20px;font-size:13px;color:#374151;line-height:2;">
+        ${steps.map(s=>`<li>${s}</li>`).join('')}
+      </ol>
+      <div style="margin-top:14px;padding:10px;background:#f8fafc;border-radius:6px;font-size:12px;color:#64748b;">
+        💡 SCF 每月 <strong>100 万次</strong>免费调用，正常使用基本零费用
+      </div>
+      <button onclick="this.closest('div[style*=fixed]').remove()"
+        style="margin-top:16px;width:100%;padding:9px;background:#1e293b;color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;">
+        知道了
+      </button>
+    </div>`;
+  document.body.appendChild(modal);
 }
 
 // ── 测试连通性 ────────────────────────────────────────────────
 async function newsTxTest() {
   const box = document.getElementById('news-tx-test-result');
   box.style.display = 'block';
-  box.style.color = '#6b7280'; box.textContent = '⏳ 正在测试 wsa.tencentcloudapi.com …';
+  box.style.color = '#6b7280';
+  box.textContent = '⏳ 正在测试 SCF 代理连通性…';
+
+  const scfUrl = newsGetScfUrl();
+  if (!scfUrl) {
+    box.style.color = '#dc2626';
+    box.textContent = '✗ 未配置 SCF 代理 URL，请先填写';
+    return;
+  }
+
   try {
-    const bodyStr = JSON.stringify({ Query: '税务', PageNumber: 1, PageSize: 1 });
-    const req = await tcBuildRequest(
-      COMPANY_TX_ID, COMPANY_TX_KEY, 'wsa', 'Search', 'ap-guangzhou', '2023-01-01', bodyStr
-    );
-    const resp = await fetch(req.url, { method: 'POST', headers: req.headers, body: bodyStr });
+    const resp = await fetch(scfUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: '税务', count: 1 })
+    });
     const data = await resp.json();
     if (data.Response?.Error) {
-      // 有 Response 说明 CORS 通了，只是参数可能需调整
-      box.style.color = data.Response.Error.Code === 'AuthFailure' ? '#dc2626' : '#f59e0b';
-      box.textContent = `API 响应：${data.Response.Error.Code} — ${data.Response.Error.Message}`;
+      const code = data.Response.Error.Code;
+      box.style.color = code === 'AuthFailure' ? '#dc2626' : '#f59e0b';
+      box.textContent = `SCF 通了✓，但 WSA 报错：${code} — ${data.Response.Error.Message}`;
+    } else if (data.error) {
+      box.style.color = '#dc2626';
+      box.textContent = `✗ SCF 内部错误：${data.error}`;
     } else {
       box.style.color = '#16a34a';
-      box.textContent = '✓ 连接正常，WSA 联网搜索可用';
+      box.textContent = '✅ SCF 代理 + WSA 联网搜索均正常！';
     }
   } catch(e) {
     box.style.color = '#dc2626';
@@ -10449,8 +10496,17 @@ async function newsTxTest() {
   }
 }
 
-// ── WSA 联网搜索主函数 ────────────────────────────────────────
+// ── WSA 联网搜索主函数（通过 SCF 代理） ───────────────────────
 async function newsAISearch() {
+  const scfUrl = newsGetScfUrl();
+  if (!scfUrl) {
+    document.getElementById('news-ai-result').innerHTML =
+      `<div style="padding:20px;color:#b45309;background:#fffbeb;border-radius:8px;font-size:13px;">
+        ⚠️ 请先配置 SCF 代理 URL 并保存，再执行搜索
+       </div>`;
+    return;
+  }
+
   const kw    = (document.getElementById('news-keyword').value || '').trim();
   const start = document.getElementById('news-date-start').value;
   const end   = document.getElementById('news-date-end').value;
@@ -10465,37 +10521,38 @@ async function newsAISearch() {
 
   const query = kw || '家族信托 税务合规 跨境规划 资产保护';
 
-  // 构造 WSA 请求体
-  const payload = {
-    Query:      query,
-    PageNumber: 1,
-    PageSize:   count
-  };
-  // 如有日期范围，附加过滤（具体字段名以实际 API 文档为准）
-  if (start) payload.StartTime = start.replace(/-/g, '');
-  if (end)   payload.EndTime   = end.replace(/-/g, '');
+  const payload = { query, count };
+  if (start) payload.startTime = start.replace(/-/g, '');
+  if (end)   payload.endTime   = end.replace(/-/g, '');
 
   try {
-    const bodyStr = JSON.stringify(payload);
-    const req = await tcBuildRequest(
-      COMPANY_TX_ID, COMPANY_TX_KEY, 'wsa', 'Search', 'ap-guangzhou', '2023-01-01', bodyStr
-    );
-    const resp = await fetch(req.url, { method: 'POST', headers: req.headers, body: bodyStr });
+    const resp = await fetch(scfUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
 
     btn.disabled = false; spin.textContent = '🔍';
 
     const data = await resp.json();
 
-    if (data.Response?.Error) {
-      res.innerHTML = `<div style="padding:20px;background:#fef9c3;border-radius:8px;font-size:13px;color:#713f12;">
-        <strong>API 错误：</strong>${data.Response.Error.Code} — ${data.Response.Error.Message}<br>
-        <span style="font-size:11px;color:#92400e;margin-top:4px;display:block;">
-          RequestId：${data.Response.RequestId || '—'}
-        </span></div>`;
+    if (data.error) {
+      res.innerHTML = `<div style="padding:20px;background:#fee2e2;border-radius:8px;font-size:13px;color:#991b1b;">
+        <strong>SCF 错误：</strong>${data.error}<br>
+        ${data.detail ? `<pre style="margin-top:8px;font-size:11px;white-space:pre-wrap;">${data.detail.slice(0,400)}</pre>` : ''}
+      </div>`;
       return;
     }
 
-    // 解析 WSA 返回结果（字段名以实际响应为准）
+    if (data.Response?.Error) {
+      res.innerHTML = `<div style="padding:20px;background:#fef9c3;border-radius:8px;font-size:13px;color:#713f12;">
+        <strong>WSA API 错误：</strong>${data.Response.Error.Code} — ${data.Response.Error.Message}<br>
+        <span style="font-size:11px;color:#92400e;margin-top:4px;display:block;">RequestId：${data.Response.RequestId || '—'}</span>
+      </div>`;
+      return;
+    }
+
+    // 尝试多种 WSA 返回字段结构
     const rawList = data.Response?.ResultList
                  || data.Response?.Results
                  || data.Response?.SearchResults
@@ -10503,27 +10560,24 @@ async function newsAISearch() {
                  || [];
 
     if (!rawList.length) {
-      // 展示原始响应供调试
       res.innerHTML = `<div style="padding:20px;font-size:12px;color:#6b7280;">
-        未获取到结果，原始响应：<br>
-        <pre style="background:#f8fafc;padding:10px;border-radius:6px;overflow:auto;font-size:11px;max-height:200px;">${JSON.stringify(data.Response, null, 2)}</pre>
+        未获取到结果，原始响应（供调试）：<br>
+        <pre style="background:#f8fafc;padding:10px;border-radius:6px;overflow:auto;font-size:11px;max-height:200px;">${JSON.stringify(data.Response ?? data, null, 2)}</pre>
       </div>`;
       return;
     }
 
-    // 标准化字段（WSA 可能用 Title/Url/Abstract/Time 等）
     const items = rawList.map(r => ({
-      title:     r.Title     || r.title     || r.Name  || '',
-      url:       r.Url       || r.url       || r.Link  || '',
-      source:    r.SiteName  || r.siteName  || r.Source|| '',
-      date:      r.Time      || r.time      || r.Date  || r.PublishTime || '',
-      summary:   r.Abstract  || r.abstract  || r.Desc  || r.Summary || '',
+      title:     r.Title    || r.title    || r.Name        || '',
+      url:       r.Url      || r.url      || r.Link        || '',
+      source:    r.SiteName || r.siteName || r.Source      || '',
+      date:      r.Time     || r.time     || r.Date        || r.PublishTime || '',
+      summary:   r.Abstract || r.abstract || r.Desc        || r.Summary || '',
       tags:      [],
       relevance: ''
     })).filter(it => it.title);
 
     newsRenderCards(items, kw, start, end);
-
     if (kw) localStorage.setItem('news_last_kw', kw);
 
   } catch(e) {
