@@ -10469,13 +10469,7 @@ async function newsSearch() {
   const allItems = [];
 
   // Jina Search — 小批次(3域名) + 并行 + 失败重试一次
-  const startYear  = start.slice(0, 4);
-  const startMonth = parseInt(start.slice(5, 7));
-  const endMonth   = parseInt(end.slice(5, 7));
-  const monthHint  = startYear + (startMonth === endMonth
-    ? `年${startMonth}月`
-    : `年${startMonth}-${endMonth}月`);
-
+  // 查询串只用关键词，不加日期修饰（日期修饰会导致大量匹配失败）
   const BATCH = 3;
   const jinaHeaders = {
     'Accept': 'application/json',
@@ -10488,7 +10482,7 @@ async function newsSearch() {
   for (let i = 0; i < domains.length; i += BATCH) {
     const chunk = domains.slice(i, i + BATCH);
     const siteQ = chunk.map(d => `site:${d}`).join(' OR ');
-    batches.push(encodeURIComponent(`(${siteQ}) ${baseKw} ${monthHint}`));
+    batches.push(encodeURIComponent(`(${siteQ}) ${baseKw}`));
   }
 
   // 单次 fetch（失败返回 null）
@@ -10513,13 +10507,17 @@ async function newsSearch() {
     }));
     results.flat().forEach(it => {
       if (!it.url) return;
-      const d = it.publishedTime || it.date || '';
-      if (d && (d.slice(0,10) < start || d.slice(0,10) > end)) return;
+      // 客户端日期过滤：只过滤有明确日期且明显超出范围的（Jina date字段格式不稳定，宽容处理）
+      const rawDate = it.publishedTime || it.date || '';
+      const dateStr = rawDate ? rawDate.slice(0, 10) : '';
+      if (dateStr && dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        if (dateStr < start || dateStr > end) return;
+      }
       allItems.push({
         url:     it.url,
         title:   it.title || it.url,
         snippet: it.description || it.content?.slice(0, 200) || '',
-        date:    d
+        date:    dateStr
       });
     });
     done += group.length;
