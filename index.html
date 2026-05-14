@@ -10561,8 +10561,10 @@ async function newsAISearch() {
       return;
     }
 
-    // WSA SearchPro 返回 Response.Pages 数组
-    const rawList = data.Response?.Pages || [];
+    // WSA SearchPro 返回 Response.Pages 数组（每项是 JSON 字符串，需先 parse）
+    const rawList = (data.Response?.Pages || []).map(p => {
+      try { return typeof p === 'string' ? JSON.parse(p) : p; } catch { return {}; }
+    });
 
     if (!rawList.length) {
       res.innerHTML = `<div style="padding:20px;font-size:12px;color:#6b7280;">
@@ -10661,7 +10663,6 @@ function newsRenderCards(items, kw, start, end) {
                 ${it.relevance ? `<span style="font-size:10px;background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:10px;">↪ ${it.relevance}</span>` : ''}
               </div>
               <div style="font-size:12px;color:#475569;line-height:1.7;">${it.summary||''}</div>
-              ${it.title==='(无标题)' ? `<pre style="font-size:10px;color:#94a3b8;margin-top:4px;white-space:pre-wrap;">${JSON.stringify(it._raw).slice(0,300)}</pre>` : ''}
             </div>
             <button onclick="newsAIExtract('${safeTitle}','${safeSrc}','${safeDate}','${safeSumm}','${safeRel}')"
               style="flex-shrink:0;padding:6px 14px;background:#2d6a4f;color:#fff;border:none;border-radius:7px;
