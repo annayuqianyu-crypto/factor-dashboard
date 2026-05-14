@@ -3002,39 +3002,73 @@ tr:hover td { background: #fafafa; }
       </div>
     </div>
 
-    <!-- Tax 时事新闻面板（DeepSeek AI 搜索） -->
+    <!-- Tax 时事新闻面板（腾讯云混元联网搜索） -->
     <div id="radar-panel-news" style="display:none;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
 
-      <!-- 搜索主区 -->
+      <!-- 腾讯云 SecretId 配置 -->
+      <details id="news-tx-setup" style="margin-bottom:16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;">
+        <summary style="font-size:12px;font-weight:600;color:#475569;cursor:pointer;user-select:none;list-style:none;display:flex;align-items:center;gap:6px;">
+          <span id="news-tx-arrow">▶</span> 腾讯云 API 配置
+          <span id="news-tx-status" style="margin-left:6px;font-size:11px;font-weight:400;color:#94a3b8;"></span>
+        </summary>
+        <div style="margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <div style="flex:1;min-width:200px;">
+            <div style="font-size:11px;color:#64748b;margin-bottom:3px;">SecretId <span style="color:#dc2626;">*</span>（格式：AKIDxxxxxxxxx）</div>
+            <input id="news-tx-id" type="text" placeholder="请输入您的腾讯云 SecretId"
+              style="width:100%;box-sizing:border-box;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px;"/>
+          </div>
+          <div style="flex:1;min-width:160px;">
+            <div style="font-size:11px;color:#64748b;margin-bottom:3px;">SecretKey（已由系统内置）</div>
+            <input type="password" value="76tVwDIAsa8UfhYGnANOFwUq0ueEbmlY" disabled
+              style="width:100%;box-sizing:border-box;padding:7px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;background:#f1f5f9;color:#94a3b8;"/>
+          </div>
+          <div style="display:flex;gap:6px;align-self:flex-end;">
+            <button onclick="newsTxSave()"
+              style="padding:7px 16px;background:#0f172a;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">保存</button>
+            <button onclick="newsTxTest()"
+              style="padding:7px 16px;background:#0369a1;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">测试</button>
+          </div>
+        </div>
+        <div id="news-tx-test-result" style="margin-top:7px;font-size:12px;display:none;"></div>
+        <div style="margin-top:6px;font-size:11px;color:#94a3b8;">
+          SecretId 可在腾讯云控制台 → 访问密钥 中找到，仅存储在本地浏览器，不会上传服务器。
+        </div>
+      </details>
+
+      <!-- 搜索条件行 -->
       <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
-        <div style="flex:1;min-width:220px;">
-          <div style="font-size:11px;color:#64748b;margin-bottom:4px;">主题关键词（如：个税 信托 减持 跨境 家族传承…）</div>
-          <input id="news-keyword" type="text" placeholder="留空则搜索家办全领域热点"
-            style="width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;"
+        <div>
+          <div style="font-size:11px;color:#64748b;margin-bottom:4px;">起始日期</div>
+          <input id="news-date-start" type="date" style="padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;"/>
+        </div>
+        <div>
+          <div style="font-size:11px;color:#64748b;margin-bottom:4px;">结束日期</div>
+          <input id="news-date-end" type="date" style="padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;"/>
+        </div>
+        <div style="flex:1;min-width:180px;">
+          <div style="font-size:11px;color:#64748b;margin-bottom:4px;">关键词（留空则搜家办全领域）</div>
+          <input id="news-keyword" type="text" placeholder="如：个税 信托 减持 跨境规划…"
+            style="width:100%;box-sizing:border-box;padding:8px 11px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;"
             onkeydown="if(event.key==='Enter') newsAISearch()"/>
         </div>
         <div>
           <div style="font-size:11px;color:#64748b;margin-bottom:4px;">数量</div>
-          <select id="news-count" style="padding:9px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;background:#fff;">
+          <select id="news-count" style="padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;background:#fff;">
             <option value="8">8 条</option>
             <option value="12" selected>12 条</option>
             <option value="16">16 条</option>
           </select>
         </div>
         <button onclick="newsAISearch()" id="news-search-btn"
-          style="padding:9px 26px;background:#2d6a4f;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px;">
-          <span id="news-search-spin">🤖</span> AI 搜索新闻
-        </button>
-        <button onclick="window.open('https://cn.bing.com/news/search?q='+encodeURIComponent((document.getElementById('news-keyword').value||'家族信托 税务合规 跨境规划')+' 政策')+'&qft=sortbydate%3D%221%22','_blank')"
-          style="padding:9px 16px;background:#f1f5f9;color:#374151;border:1px solid #cbd5e1;border-radius:8px;font-size:12px;cursor:pointer;white-space:nowrap;">
-          必应实时搜索 ↗
+          style="padding:9px 24px;background:#006eff;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px;">
+          <span id="news-search-spin">🔍</span> 联网搜索
         </button>
       </div>
       <div style="font-size:11px;color:#94a3b8;margin-bottom:18px;">
-        🤖 由 DeepSeek AI 根据知识库生成 · 如需最新实时资讯可点击「必应实时搜索」
+        由腾讯云混元大模型实时联网搜索 · 结果来自互联网真实文章
       </div>
 
-      <!-- AI 搜索结果区 -->
+      <!-- 搜索结果区 -->
       <div id="news-ai-result" style="min-height:60px;"></div>
 
       <!-- 分割线 -->
@@ -8772,6 +8806,9 @@ const COMPANY_API_KEY   = 'sk-603a729e51d54a82bf8b8de3e06530b4';
 const COMPANY_API_BASE  = 'https://api.deepseek.com';
 const COMPANY_API_MODEL = 'deepseek-v4-pro';
 const COMPANY_JINA_KEY  = 'jina_bb7fd8384f8740009e33867a7ecfa3d5C6ANntz0CxjUtSumMPbphypLkS5V';
+// 腾讯云混元联网搜索
+const COMPANY_TX_KEY    = '76tVwDIAsa8UfhYGnANOFwUq0ueEbmlY';  // SecretKey（已内置）
+const COMPANY_TX_ID     = '';  // SecretId 由用户配置（AKID…）
 
 function pgGetConfig() {
 
@@ -10333,160 +10370,302 @@ function switchBuRadar(bu) {
 }
 
 // ══════════════════════════════════════════════════════════════
-// Tax 时事新闻模块（DeepSeek AI 搜索 + 手动提炼）
+// Tax 时事新闻模块（腾讯云混元联网搜索 + TC3-HMAC-SHA256）
 // ══════════════════════════════════════════════════════════════
 
+// ── 初始化 ────────────────────────────────────────────────────
 function newsInit() {
-  // 恢复上次关键词
-  const saved = localStorage.getItem('news_last_kw') || '';
-  const inp = document.getElementById('news-keyword');
-  if (inp && saved && !inp.value) inp.value = saved;
-  // 恢复缓存的 AI 搜索结果
+  const today = new Date();
+  const ago30 = new Date(today); ago30.setDate(ago30.getDate() - 30);
+  const fmt = d => d.toISOString().slice(0, 10);
+  const s = document.getElementById('news-date-start');
+  const e = document.getElementById('news-date-end');
+  if (s && !s.value) s.value = fmt(ago30);
+  if (e && !e.value) e.value = fmt(today);
+
+  // 恢复 SecretId
+  const sid = localStorage.getItem('tx_secret_id') || COMPANY_TX_ID;
+  const inp = document.getElementById('news-tx-id');
+  if (inp && sid) inp.value = sid;
+  const st = document.getElementById('news-tx-status');
+  if (st) st.textContent = sid ? '✓ 已配置' : '⚠ 请填写 SecretId';
+  if (st) st.style.color = sid ? '#16a34a' : '#f59e0b';
+
+  // 恢复缓存关键词
+  const kw = localStorage.getItem('news_last_kw') || '';
+  const ki = document.getElementById('news-keyword');
+  if (ki && kw && !ki.value) ki.value = kw;
+
+  // 恢复缓存搜索结果
   try {
     const cache = JSON.parse(localStorage.getItem('news_ai_cache') || 'null');
-    if (cache && cache.html) {
-      document.getElementById('news-ai-result').innerHTML = cache.html;
-    }
-  } catch(e) {}
-  // 展开箭头联动
-  const det = document.getElementById('news-manual-details');
+    if (cache && cache.html) document.getElementById('news-ai-result').innerHTML = cache.html;
+  } catch(er) {}
+
+  // details 箭头
+  const det = document.getElementById('news-tx-setup');
   if (det) det.addEventListener('toggle', () => {
-    const arrow = det.querySelector('span');
-    if (arrow) arrow.textContent = det.open ? '▼' : '▶';
+    const arr = document.getElementById('news-tx-arrow');
+    if (arr) arr.textContent = det.open ? '▼' : '▶';
+  });
+  const det2 = document.getElementById('news-manual-details');
+  if (det2) det2.addEventListener('toggle', () => {
+    const arr2 = det2.querySelector('span');
+    if (arr2) arr2.textContent = det2.open ? '▼' : '▶';
   });
 }
 
-// ── DeepSeek AI 搜索新闻 ──────────────────────────────────────
+function newsTxSave() {
+  const v = (document.getElementById('news-tx-id').value || '').trim();
+  if (!v) { alert('请输入 SecretId'); return; }
+  localStorage.setItem('tx_secret_id', v);
+  const st = document.getElementById('news-tx-status');
+  if (st) { st.textContent = '✓ 已配置'; st.style.color = '#16a34a'; }
+  document.getElementById('news-tx-setup').open = false;
+}
+
+// ── TC3-HMAC-SHA256 签名（纯浏览器 SubtleCrypto）──────────────
+async function tcBuildRequest(secretId, secretKey, service, action, region, version, body) {
+  const host      = `${service}.tencentcloudapi.com`;
+  const algorithm = 'TC3-HMAC-SHA256';
+  const nowTs     = Math.floor(Date.now() / 1000);
+  const date      = new Date(nowTs * 1000).toISOString().slice(0, 10);
+  const enc       = new TextEncoder();
+
+  async function hexDigest(str) {
+    const buf = await crypto.subtle.digest('SHA-256', enc.encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+  async function hmacBytes(keyBuf, msg) {
+    const k = await crypto.subtle.importKey(
+      'raw', keyBuf instanceof Uint8Array ? keyBuf : enc.encode(keyBuf),
+      { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+    );
+    return new Uint8Array(await crypto.subtle.sign('HMAC', k, enc.encode(msg)));
+  }
+
+  const ct            = 'application/json; charset=utf-8';
+  const canonHeaders  = `content-type:${ct}\nhost:${host}\nx-tc-action:${action.toLowerCase()}\n`;
+  const signedHeaders = 'content-type;host;x-tc-action';
+  const payloadHash   = await hexDigest(body);
+  const canonReq      = `POST\n/\n\n${canonHeaders}\n${signedHeaders}\n${payloadHash}`;
+  const credScope     = `${date}/${service}/tc3_request`;
+  const stringToSign  = `${algorithm}\n${nowTs}\n${credScope}\n${await hexDigest(canonReq)}`;
+
+  const kDate    = await hmacBytes(enc.encode('TC3' + secretKey), date);
+  const kService = await hmacBytes(kDate, service);
+  const kSigning = await hmacBytes(kService, 'tc3_request');
+  const kSig     = await hmacBytes(kSigning, stringToSign);
+  const signature = Array.from(kSig).map(b => b.toString(16).padStart(2,'0')).join('');
+
+  return {
+    url: `https://${host}`,
+    headers: {
+      'Authorization': `${algorithm} Credential=${secretId}/${credScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`,
+      'Content-Type':   ct,
+      'Host':           host,
+      'X-TC-Action':    action,
+      'X-TC-Region':    region,
+      'X-TC-Timestamp': String(nowTs),
+      'X-TC-Version':   version
+    }
+  };
+}
+
+// ── 测试连通性 ────────────────────────────────────────────────
+async function newsTxTest() {
+  const secretId  = (document.getElementById('news-tx-id').value || '').trim()
+                 || localStorage.getItem('tx_secret_id') || COMPANY_TX_ID;
+  const box = document.getElementById('news-tx-test-result');
+  box.style.display = 'block';
+  if (!secretId) { box.style.color='#dc2626'; box.textContent='请先填写 SecretId'; return; }
+  box.style.color='#6b7280'; box.textContent='⏳ 正在测试…';
+  try {
+    const body = JSON.stringify({ Model:'hunyuan-turbo',
+      Messages:[{Role:'user',Content:'你好'}], Stream:false, MaxTokens:10 });
+    const req = await tcBuildRequest(secretId, COMPANY_TX_KEY,
+      'hunyuan','ChatCompletions','ap-guangzhou','2023-09-01', body);
+    const resp = await fetch(req.url, { method:'POST', headers:req.headers, body });
+    const data = await resp.json();
+    if (data.Response?.Error) {
+      box.style.color='#dc2626';
+      box.textContent=`✗ API 错误：${data.Response.Error.Code} - ${data.Response.Error.Message}`;
+    } else {
+      box.style.color='#16a34a';
+      box.textContent='✓ 连接正常，混元 API 可用';
+    }
+  } catch(e) {
+    box.style.color='#dc2626'; box.textContent=`✗ 请求失败：${e.message}`;
+  }
+}
+
+// ── 混元联网搜索主函数 ────────────────────────────────────────
 async function newsAISearch() {
+  const secretId  = (document.getElementById('news-tx-id')?.value || '').trim()
+                 || localStorage.getItem('tx_secret_id') || COMPANY_TX_ID;
+  const secretKey = COMPANY_TX_KEY;
+
+  if (!secretId) {
+    document.getElementById('news-tx-setup').open = true;
+    document.getElementById('news-tx-id').focus();
+    alert('请先填写并保存腾讯云 SecretId（点击页面上方的「腾讯云 API 配置」）');
+    return;
+  }
+
   const kw    = (document.getElementById('news-keyword').value || '').trim();
-  const count = parseInt(document.getElementById('news-count').value || '12', 10);
+  const start = document.getElementById('news-date-start').value;
+  const end   = document.getElementById('news-date-end').value;
+  const count = document.getElementById('news-count').value || '12';
   const btn   = document.getElementById('news-search-btn');
   const spin  = document.getElementById('news-search-spin');
   const res   = document.getElementById('news-ai-result');
 
-  const apiBase = localStorage.getItem('pg_api_base') || COMPANY_API_BASE;
-  const apiKey  = localStorage.getItem('pg_api_key')  || COMPANY_API_KEY;
-
   btn.disabled = true; spin.textContent = '⏳';
-  res.innerHTML = `<div style="padding:28px;text-align:center;color:#6b7280;font-size:13px;">
-    ⏳ DeepSeek AI 正在检索相关新闻与政策动态，请稍候…</div>`;
+  res.innerHTML = `<div style="padding:32px;text-align:center;color:#6b7280;font-size:13px;">
+    ⏳ 腾讯云混元联网搜索中，请稍候…</div>`;
 
-  const topic = kw || '家族信托、个人所得税、跨境税务规划、股权架构、资产保护';
+  const topic     = kw || '家族信托 个人所得税 跨境税务规划 资产保护 股权架构';
+  const dateRange = (start && end) ? `时间范围：${start} 至 ${end}。` : '';
 
-  const prompt = `你是一位专注于中国高净值客户服务的家族办公室顾问助手。请列出${count}条与以下主题相关的重要新闻、政策文件或行业动态，优先选取近期（2023年至今）的内容。
+  const prompt = `请联网搜索以下主题的真实新闻和政策动态，列出${count}条结果。${dateRange}
 
-主题：${topic}
-重点关注领域：税务合规、家族传承、跨境规划、资产保护、股权架构、信托、保险、资本市场监管
+搜索主题：${topic}
+重点关注：税务合规、家族传承、跨境规划、资产保护、信托、股权架构、资本市场监管
 
-请严格按照以下 JSON 数组格式输出，不要输出其他内容：
+请严格按照以下 JSON 数组格式输出，每条来自互联网真实文章，不要输出其他内容：
 [
   {
-    "title": "新闻/政策标题（15-50字，尽量准确）",
-    "source": "来源机构（如：国家税务总局、香港证监会、财联社、中国证监会等）",
-    "date": "大概日期（YYYY-MM 格式，如不确定写最可能的时间）",
-    "summary": "内容摘要（80-150字，重点说明政策要点、监管变化或事件影响，突出与高净值客户/家办的关联）",
-    "url": "如确知官方 URL 则填写，否则填空字符串",
-    "tags": ["标签1", "标签2"],
-    "relevance": "与家办业务的核心关联点（20字内）"
+    "title": "文章真实标题（15-60字）",
+    "source": "来源媒体或机构",
+    "date": "发布日期（YYYY-MM-DD，如不确定写YYYY-MM）",
+    "url": "文章真实URL（尽量填写，无则留空）",
+    "summary": "内容摘要（100-150字，说明政策要点或事件意义，突出与高净值客户/家办的关联）",
+    "tags": ["标签1","标签2"],
+    "relevance": "与家办业务的关联点（20字内）"
   }
 ]`;
 
   try {
-    const resp = await fetch(`${apiBase}/v1/chat/completions`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: COMPANY_API_MODEL,
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.4,
-        max_tokens: 4000
-      })
+    const bodyStr = JSON.stringify({
+      Model:            'hunyuan-turbo',
+      Messages:         [{ Role: 'user', Content: prompt }],
+      Stream:           false,
+      EnableEnhancement: true,
+      MaxTokens:        4096
     });
-    const data = await resp.json();
-    let raw = data.choices?.[0]?.message?.content || '[]';
 
-    // 容错解析：去掉 markdown 代码块标记
+    const req = await tcBuildRequest(
+      secretId, secretKey, 'hunyuan', 'ChatCompletions', 'ap-guangzhou', '2023-09-01', bodyStr
+    );
+    const resp = await fetch(req.url, { method: 'POST', headers: req.headers, body: bodyStr });
+    const data = await resp.json();
+
+    btn.disabled = false; spin.textContent = '🔍';
+
+    if (data.Response?.Error) {
+      res.innerHTML = `<div style="padding:20px;color:#dc2626;font-size:13px;">
+        ✗ 腾讯云错误：${data.Response.Error.Code} — ${data.Response.Error.Message}</div>`;
+      return;
+    }
+
+    let raw = data.Response?.Choices?.[0]?.Message?.Content || '[]';
+    // 去掉 markdown 代码块
     raw = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+
+    // 如有 SearchInfo，补充 URL
+    const searchResults = data.Response?.SearchInfo?.SearchResults || [];
+    const urlMap = {};
+    searchResults.forEach(r => { if (r.Title && r.Url) urlMap[r.Title] = r.Url; });
+
     let items = [];
     try {
       const parsed = JSON.parse(raw);
       items = Array.isArray(parsed) ? parsed : (parsed.items || parsed.news || parsed.results || []);
     } catch(e2) {
-      const m = raw.match(/\[[\s\S]*\]/);
+      const m = raw.match(/\[[\s\S]*?\]/s);
       if (m) { try { items = JSON.parse(m[0]); } catch(e3) {} }
     }
 
-    btn.disabled = false; spin.textContent = '🤖';
+    // 用 SearchInfo 补全 URL
+    items.forEach(it => {
+      if (!it.url && urlMap[it.title]) it.url = urlMap[it.title];
+    });
 
     if (!items.length) {
       res.innerHTML = `<div style="padding:24px;text-align:center;color:#9ca3af;font-size:13px;">
-        AI 未返回有效结果，请更换关键词重试。</div>`;
+        未找到结果，请更换关键词或调整日期范围重试。</div>`;
       return;
     }
 
-    const tagColors = ['#dbeafe:#1d4ed8','#dcfce7:#15803d','#fef3c7:#92400e',
-                       '#ede9fe:#6d28d9','#fee2e2:#991b1b','#fce7f3:#9d174d'];
-
-    const html = `
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <div style="font-size:12px;color:#64748b;">
-          🤖 AI 检索到 <strong>${items.length}</strong> 条相关动态
-          ${kw ? `· 主题：<em style="color:#2d6a4f;">${kw}</em>` : '· 家办全领域热点'}
-          <span style="margin-left:8px;color:#94a3b8;font-size:11px;">（基于 DeepSeek 知识库，供参考）</span>
-        </div>
-        <button onclick="document.getElementById('news-ai-result').innerHTML='';localStorage.removeItem('news_ai_cache');"
-          style="padding:3px 10px;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;border-radius:4px;font-size:11px;cursor:pointer;">
-          清除
-        </button>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        ${items.map((it, idx) => {
-          const tags = (it.tags || []).slice(0, 3);
-          const tagHtml = tags.map((t, i) => {
-            const [bg, col] = (tagColors[i % tagColors.length]).split(':');
-            return `<span style="padding:2px 8px;background:${bg};color:${col};border-radius:10px;font-size:10px;font-weight:500;">${t}</span>`;
-          }).join('');
-          const safeTitle = (it.title||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
-          const safeSrc   = (it.source||'').replace(/'/g,"\\'");
-          const safeDate  = (it.date||'').replace(/'/g,"\\'");
-          const safeSumm  = (it.summary||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
-          const safeRel   = (it.relevance||'').replace(/'/g,"\\'");
-          return `
-          <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;transition:box-shadow .15s;"
-            onmouseover="this.style.boxShadow='0 2px 12px rgba(0,0,0,.08)'" onmouseout="this.style.boxShadow='none'">
-            <div style="display:flex;align-items:flex-start;gap:10px;">
-              <div style="flex:1;min-width:0;">
-                <div style="font-size:13.5px;font-weight:700;color:#1e293b;line-height:1.5;margin-bottom:5px;">
-                  ${it.url ? `<a href="${it.url}" target="_blank" rel="noopener"
-                    style="color:#1e293b;text-decoration:none;"
-                    onmouseover="this.style.color='#2d6a4f'" onmouseout="this.style.color='#1e293b'">${it.title}</a>`
-                    : it.title}
-                </div>
-                <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
-                  <span style="font-size:11px;color:#64748b;">📌 ${it.source || '未知来源'}</span>
-                  ${it.date ? `<span style="font-size:11px;color:#94a3b8;">· ${it.date}</span>` : ''}
-                  ${tagHtml}
-                  ${it.relevance ? `<span style="font-size:10px;background:#f0fdf4;color:#166534;padding:2px 8px;border-radius:10px;">↪ ${it.relevance}</span>` : ''}
-                </div>
-                <div style="font-size:12px;color:#475569;line-height:1.7;">${it.summary || ''}</div>
-              </div>
-              <button onclick="newsAIExtract('${safeTitle}','${safeSrc}','${safeDate}','${safeSumm}','${safeRel}')"
-                style="flex-shrink:0;padding:6px 14px;background:#2d6a4f;color:#fff;border:none;border-radius:7px;font-size:12px;cursor:pointer;white-space:nowrap;margin-top:2px;">
-                提炼场景
-              </button>
-            </div>
-          </div>`;
-        }).join('')}
-      </div>`;
-
-    res.innerHTML = html;
-    if (kw) localStorage.setItem('news_last_kw', kw);
-    try { localStorage.setItem('news_ai_cache', JSON.stringify({ html })); } catch(e) {}
+    newsRenderCards(items, kw, start, end);
 
   } catch(e) {
-    btn.disabled = false; spin.textContent = '🤖';
-    res.innerHTML = `<div style="padding:20px;color:#dc2626;font-size:13px;">搜索失败：${e.message}</div>`;
+    btn.disabled = false; spin.textContent = '🔍';
+    res.innerHTML = `<div style="padding:20px;color:#dc2626;font-size:13px;">请求失败：${e.message}</div>`;
   }
+}
+
+// ── 渲染新闻卡片 ─────────────────────────────────────────────
+function newsRenderCards(items, kw, start, end) {
+  const res = document.getElementById('news-ai-result');
+  const tagColors = ['#dbeafe:#1d4ed8','#dcfce7:#15803d','#fef3c7:#92400e',
+                     '#ede9fe:#6d28d9','#fee2e2:#991b1b','#fce7f3:#9d174d'];
+
+  const html = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div style="font-size:12px;color:#64748b;">
+        🌐 联网搜索到 <strong>${items.length}</strong> 条动态
+        ${kw ? `· 关键词：<em style="color:#006eff;">${kw}</em>` : ''}
+        ${start && end ? `· ${start} ~ ${end}` : ''}
+      </div>
+      <button onclick="document.getElementById('news-ai-result').innerHTML='';localStorage.removeItem('news_ai_cache');"
+        style="padding:3px 10px;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;border-radius:4px;font-size:11px;cursor:pointer;">清除</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      ${items.map(it => {
+        const tags    = (it.tags || []).slice(0, 3);
+        const tagHtml = tags.map((t, i) => {
+          const [bg, col] = (tagColors[i % tagColors.length]).split(':');
+          return `<span style="padding:2px 8px;background:${bg};color:${col};border-radius:10px;font-size:10px;font-weight:500;">${t}</span>`;
+        }).join('');
+        const safeTitle = (it.title||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+        const safeSrc   = (it.source||'').replace(/'/g,"\\'");
+        const safeDate  = (it.date||'').replace(/'/g,"\\'");
+        const safeSumm  = (it.summary||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+        const safeRel   = (it.relevance||'').replace(/'/g,"\\'");
+        return `
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;
+          transition:box-shadow .15s;" onmouseover="this.style.boxShadow='0 2px 12px rgba(0,0,0,.08)'"
+          onmouseout="this.style.boxShadow='none'">
+          <div style="display:flex;align-items:flex-start;gap:10px;">
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13.5px;font-weight:700;color:#1e293b;line-height:1.5;margin-bottom:5px;">
+                ${it.url
+                  ? `<a href="${it.url}" target="_blank" rel="noopener" style="color:#1e293b;text-decoration:none;"
+                      onmouseover="this.style.color='#006eff'" onmouseout="this.style.color='#1e293b'">${it.title}</a>`
+                  : it.title}
+              </div>
+              <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+                <span style="font-size:11px;color:#64748b;">📌 ${it.source||'未知来源'}</span>
+                ${it.date ? `<span style="font-size:11px;color:#94a3b8;">· ${it.date}</span>` : ''}
+                ${tagHtml}
+                ${it.relevance ? `<span style="font-size:10px;background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:10px;">↪ ${it.relevance}</span>` : ''}
+              </div>
+              <div style="font-size:12px;color:#475569;line-height:1.7;">${it.summary||''}</div>
+            </div>
+            <button onclick="newsAIExtract('${safeTitle}','${safeSrc}','${safeDate}','${safeSumm}','${safeRel}')"
+              style="flex-shrink:0;padding:6px 14px;background:#2d6a4f;color:#fff;border:none;border-radius:7px;
+                font-size:12px;cursor:pointer;white-space:nowrap;margin-top:2px;">
+              提炼场景
+            </button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+
+  res.innerHTML = html;
+  if (kw) localStorage.setItem('news_last_kw', kw);
+  try { localStorage.setItem('news_ai_cache', JSON.stringify({ html })); } catch(e) {}
 }
 
 // ── 从 AI 新闻卡片提炼场景（使用摘要，无需抓取 URL）──────────
