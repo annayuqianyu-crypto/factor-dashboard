@@ -3040,7 +3040,7 @@ tr:hover td { background: #fafafa; }
           <input id="news-keyword" type="text" placeholder="如：个税 减持 信托…" style="width:100%;box-sizing:border-box;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;"/>
         </div>
         <button onclick="newsSearch()" id="news-search-btn"
-          style="padding:8px 22px;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;">
+          style="padding:8px 22px;background:#2d6a4f;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;">
           <span id="news-search-spin">🔍</span> 搜索
         </button>
       </div>
@@ -3133,7 +3133,7 @@ tr:hover td { background: #fafafa; }
       <div style="font-size:12px;color:#64748b;margin-top:4px;">会议总数</div>
     </div>
     <div style="background:#fdf4ff;border-radius:10px;padding:14px 10px;text-align:center;">
-      <div style="font-size:26px;font-weight:700;color:#7c3aed;">11</div>
+      <div style="font-size:26px;font-weight:700;color:#2d6a4f;">11</div>
       <div style="font-size:12px;color:#64748b;margin-top:4px;">税务合规</div>
     </div>
     <div style="background:#fff7f0;border-radius:10px;padding:14px 10px;text-align:center;">
@@ -4610,7 +4610,7 @@ function initBusinessCharts() {
 
     const biz = [
 
-      { name: '身份规划', score: 10, coverage: 'L6.3（431行）深度覆盖，43条相关痛点',           color: '#7c3aed', gradient: 'linear-gradient(to right, #f5f3ff, #c084fc)' },
+      { name: '身份规划', score: 10, coverage: 'L6.3（431行）深度覆盖，43条相关痛点',           color: '#2d6a4f', gradient: 'linear-gradient(to right, #f5f3ff, #c084fc)' },
 
       { name: '税务规划', score: 9,  coverage: 'L6.2（139行）+ L6.1（110行），65条税务痛点',    color: '#dc2626', gradient: 'linear-gradient(to right, #fff5f5, #fca5a5)' },
 
@@ -4618,7 +4618,7 @@ function initBusinessCharts() {
 
       { name: '法律架构', score: 8,  coverage: 'L6.4（122行）+ L5.1/L5.2（69行），19条法律痛点', color: '#059669', gradient: 'linear-gradient(to right, #f0fdf4, #86efac)' },
 
-      { name: '财富传承', score: 8,  coverage: 'L6.4（122行）+ L1.1B（55行），17条传承痛点',    color: '#7c3aed', gradient: 'linear-gradient(to right, #faf5ff, #d8b4fe)' },
+      { name: '财富传承', score: 8,  coverage: 'L6.4（122行）+ L1.1B（55行），17条传承痛点',    color: '#2d6a4f', gradient: 'linear-gradient(to right, #faf5ff, #d8b4fe)' },
 
       { name: '健康管理', score: 6,  coverage: 'L6.6（32行，新增），与传承/保险场景交叉覆盖不足', color: '#db2777', gradient: 'linear-gradient(to right, #fdf2f8, #f9a8d4)' },
 
@@ -8716,6 +8716,7 @@ function pgLoadKey() {
 const COMPANY_API_KEY   = 'sk-603a729e51d54a82bf8b8de3e06530b4';
 const COMPANY_API_BASE  = 'https://api.deepseek.com';
 const COMPANY_API_MODEL = 'deepseek-v4-pro';
+const COMPANY_JINA_KEY  = 'jina_bb7fd8384f8740009e33867a7ecfa3d5C6ANntz0CxjUtSumMPbphypLkS5V';
 
 function pgGetConfig() {
 
@@ -10255,7 +10256,7 @@ function radarInitSources() {
 
 // ── 二级 tab 切换 ─────────────────────────────────────────────
 function switchBuRadar(bu) {
-  const tabColors = {tax:'#0369a1', legal:'#15803d', cm:'#c2410c', news:'#7c3aed'};
+  const tabColors = {tax:'#0369a1', legal:'#15803d', cm:'#c2410c', news:'#2d6a4f'};
   ['tax','legal','cm','news'].forEach(b => {
     const panel = document.getElementById('radar-panel-' + b);
     const tab   = document.getElementById('bu-tab-' + b);
@@ -10305,7 +10306,7 @@ function newsSaveKey() {
 
 function newsGetKey() {
   return (document.getElementById('news-jina-key')?.value || '').trim()
-      || localStorage.getItem('jina_search_key') || '';
+      || localStorage.getItem('jina_search_key') || COMPANY_JINA_KEY;
 }
 
 async function newsTestKey() {
@@ -10353,8 +10354,6 @@ async function newsSearch() {
   }).filter(Boolean))];
 
   const baseKw = kw || '税务 政策 合规 家办 传承 信托';
-  // 在查询中加入日期范围提示，帮助搜索引擎过滤
-  const dateHint = `after:${start} before:${end}`;
   const BATCH = 5;
   const allItems = [];
 
@@ -10371,12 +10370,25 @@ async function newsSearch() {
   for (let i = 0; i < domains.length; i += BATCH) {
     const chunk = domains.slice(i, i + BATCH);
     const siteQ = chunk.map(d => `site:${d}`).join(' OR ');
-    const query = encodeURIComponent(`(${siteQ}) ${baseKw} ${dateHint}`);
+    const query = `(${siteQ}) ${baseKw}`;
     try {
-      const resp = await fetch(`https://s.jina.ai/${query}`, {
-        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${key}`, 'X-Retain-Images': 'none' }
+      // Jina Search 使用 POST + JSON body，日期过滤用 startDate/endDate 参数
+      const resp = await fetch('https://s.jina.ai/', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${key}`,
+          'Content-Type': 'application/json',
+          'X-Retain-Images': 'none'
+        },
+        body: JSON.stringify({
+          q: query,
+          numResults: 5,
+          startDate: start,
+          endDate: end
+        })
       });
-      if (!resp.ok) continue;
+      if (!resp.ok) { console.warn(`批次 ${i} 失败: HTTP ${resp.status}`); continue; }
       const data = await resp.json();
       (data.data || []).forEach(it => {
         if (it.url) allItems.push({
@@ -10417,7 +10429,7 @@ async function newsSearch() {
             <div style="flex:1;">
               <a href="${it.url}" target="_blank" rel="noopener"
                 style="font-size:13.5px;font-weight:600;color:#1e293b;text-decoration:none;line-height:1.4;display:block;"
-                onmouseover="this.style.color='#7c3aed'" onmouseout="this.style.color='#1e293b'">
+                onmouseover="this.style.color='#2d6a4f'" onmouseout="this.style.color='#1e293b'">
                 ${it.title}
               </a>
               <div style="font-size:11px;color:#94a3b8;margin-top:3px;">
@@ -10425,7 +10437,7 @@ async function newsSearch() {
               </div>
             </div>
             <button onclick="newsExtractScene('${safeUrl}','${safeTitle}')"
-              style="flex-shrink:0;padding:5px 13px;background:#7c3aed;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">
+              style="flex-shrink:0;padding:5px 13px;background:#2d6a4f;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">
               提炼场景
             </button>
           </div>
@@ -10445,16 +10457,25 @@ async function newsExtractScene(url, title) {
   acts.style.display = 'none';
   body.innerHTML   = '<div style="text-align:center;padding:20px;color:#6b7280;">⏳ 正在读取文章内容…</div>';
 
-  // 用 Jina Reader 获取文章正文
+  // 用 Jina Reader 获取文章正文（15s 超时保护）
   let articleText = '';
   try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 15000);
     const jinaResp = await fetch(`https://r.jina.ai/${encodeURIComponent(url)}`, {
-      headers: { 'Accept': 'text/plain', 'X-Return-Format': 'text' }
+      headers: { 'Accept': 'text/plain', 'X-Return-Format': 'text',
+                 'Authorization': `Bearer ${COMPANY_JINA_KEY}` },
+      signal: ctrl.signal
     });
+    clearTimeout(timer);
     articleText = await jinaResp.text();
     if (articleText.length > 6000) articleText = articleText.slice(0, 6000) + '\n…（已截断）';
   } catch(e) {
-    body.innerHTML = `<div style="color:#dc2626;">文章读取失败：${e.message}<br><a href="${url}" target="_blank" style="color:#7c3aed;">点此在新标签页查看原文</a></div>`;
+    const reason = e.name === 'AbortError' ? '读取超时（>15s），该网站响应较慢' : `读取失败：${e.message}`;
+    body.innerHTML = `<div style="color:#dc2626;">${reason}</div>
+      <div style="margin-top:8px;"><a href="${url}" target="_blank"
+        style="color:#2d6a4f;font-size:13px;text-decoration:underline;">点此在新标签页查看原文后手动复制内容</a></div>`;
+    acts.style.display = 'none';
     return;
   }
 
@@ -10514,12 +10535,12 @@ ${articleText}
       <div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:8px;padding:14px;margin-bottom:10px;">
         <div style="font-size:14px;font-weight:700;color:#6d28d9;margin-bottom:4px;">${s.scene}</div>
         <div style="font-size:12px;color:#475569;margin-bottom:6px;">${s.rationale}</div>
-        <div style="font-size:12px;color:#7c3aed;background:#ede9fe;padding:4px 10px;border-radius:4px;display:inline-block;">
+        <div style="font-size:12px;color:#2d6a4f;background:#ede9fe;padding:4px 10px;border-radius:4px;display:inline-block;">
           痛点方向：${s.pain_direction}
         </div>
         <div style="margin-top:10px;display:flex;gap:8px;">
           <button onclick="newsSendScene('${s.scene.replace(/'/g,"\\'")}','${s.pain_direction.replace(/'/g,"\\'")}','tax')"
-            style="padding:5px 14px;background:#7c3aed;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">
+            style="padding:5px 14px;background:#2d6a4f;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">
             ＋ 加入 Tax 场景池
           </button>
           <button onclick="hgjSendToPainGenerate('${s.scene.replace(/'/g,"\\'")}');document.getElementById('news-extract-modal').style.display='none';"
@@ -10531,6 +10552,21 @@ ${articleText}
   } catch(e) {
     body.innerHTML = `<div style="color:#dc2626;">AI 提炼失败：${e.message}</div>`;
   }
+}
+
+// 场景池勾选联动（Tax/Legal/CM 雷达用）
+function poolToggle(bu, checkbox, scene) {
+  const key = `pool_selected_${bu}`;
+  let sel = JSON.parse(localStorage.getItem(key) || '[]');
+  if (checkbox.checked) {
+    if (!sel.includes(scene)) sel.push(scene);
+  } else {
+    sel = sel.filter(s => s !== scene);
+  }
+  localStorage.setItem(key, JSON.stringify(sel));
+  // 同步到痛点生成页的已选场景计数（如有显示）
+  const badge = document.getElementById(`pool-${bu}-badge`);
+  if (badge) badge.textContent = sel.length || '';
 }
 
 function newsSendScene(scene, painDir, bu) {
