@@ -3009,11 +3009,11 @@ tr:hover td { background: #fafafa; }
       <details id="news-api-setup" style="margin-bottom:16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;">
         <summary style="font-size:12px;font-weight:600;color:#475569;cursor:pointer;user-select:none;">
           🔑 Jina Search API 配置
-          <span id="news-key-status" style="margin-left:8px;font-size:11px;color:#16a34a;font-weight:400;"></span>
+          <span style="margin-left:8px;font-size:11px;color:#16a34a;font-weight:400;">✓ 系统已配置</span>
         </summary>
         <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
-          <input id="news-jina-key" type="password" placeholder="粘贴 Jina API Key（jina_xxxxxx 格式）"
-            style="flex:1;padding:7px 11px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px;"/>
+          <input id="news-jina-key" type="password" placeholder="留空则使用系统默认配置，也可粘贴自定义 Key 覆盖"
+            style="flex:1;padding:7px 11px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px;color:#374151;"/>
           <button onclick="newsSaveKey()"
             style="padding:7px 16px;background:#0f172a;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">保存</button>
           <button onclick="newsTestKey()"
@@ -3021,7 +3021,7 @@ tr:hover td { background: #fafafa; }
         </div>
         <div id="news-test-result" style="margin-top:7px;font-size:12px;display:none;"></div>
         <div style="margin-top:6px;font-size:11px;color:#94a3b8;">
-          获取方式：访问 <a href="https://jina.ai" target="_blank" style="color:#16a34a;">jina.ai</a> → 右上角 Get API Key → 邮箱注册即得，免费额度充足，无需信用卡
+          系统已内置 Jina Search API，无需手动配置即可直接使用。如需使用个人额度，可在上方输入自定义 Key 后点击保存。
         </div>
       </details>
 
