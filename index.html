@@ -10526,7 +10526,7 @@ async function newsAISearch() {
 
   btn.disabled = true; spin.textContent = '⏳';
   res.innerHTML = `<div style="padding:32px;text-align:center;color:#6b7280;font-size:13px;">
-    ⏳ 腾讯云 WSA 联网搜索中，将自动标注 <strong style="color:#15803d;">37 个重点信息源</strong> 来源…</div>`;
+    ⏳ 正在对 <strong style="color:#0369a1;">37 个重点信息源</strong> 并行搜索，约 20 秒请稍候…</div>`;
 
   const query = kw || '家族信托 税务合规 跨境规划 资产保护';
 
@@ -10601,6 +10601,24 @@ async function newsAISearch() {
       const summary = r.passage || r.Passage || r.content || r.Content || r.abstract || r.desc || r.snippet || '';
       return { title, url, source, date, summary, trusted: isTrusted(url), tags: [], relevance: '', _raw: r };
     });
+
+    // 日期过滤（WSA 日期格式："YYYY-MM-DD HH:MM:SS"）
+    function parseWsaDate(s) {
+      if (!s) return null;
+      const d = new Date(s.trim().replace(' ', 'T'));
+      return isNaN(d) ? null : d;
+    }
+    if (start || end) {
+      const startD = start ? new Date(start) : null;
+      const endD   = end   ? new Date(end + 'T23:59:59') : null;
+      items = items.filter(it => {
+        const d = parseWsaDate(it.date);
+        if (!d) return true;                        // 无日期的保留
+        if (startD && d < startD) return false;
+        if (endD   && d > endD)   return false;
+        return true;
+      });
+    }
 
     // 可信源排前面
     items.sort((a, b) => (b.trusted ? 1 : 0) - (a.trusted ? 1 : 0));
