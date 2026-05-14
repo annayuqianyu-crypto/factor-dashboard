@@ -10564,7 +10564,8 @@ async function newsAISearch() {
       return;
     }
 
-    const items = rawList.map(r => ({
+    // 标准化字段
+    let items = rawList.map(r => ({
       title:     r.title   || '',
       url:       r.url     || '',
       source:    r.site    || '',
@@ -10573,6 +10574,18 @@ async function newsAISearch() {
       tags:      [],
       relevance: ''
     })).filter(it => it.title);
+
+    // 前端按日期过滤（WSA 标准版不支持 FromTime/ToTime）
+    if (start || end) {
+      items = items.filter(it => {
+        if (!it.date) return true;
+        const d = new Date(it.date);
+        if (isNaN(d)) return true;
+        if (start && d < new Date(start)) return false;
+        if (end   && d > new Date(end + 'T23:59:59')) return false;
+        return true;
+      });
+    }
 
     newsRenderCards(items, kw, start, end);
     if (kw) localStorage.setItem('news_last_kw', kw);
