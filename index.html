@@ -10294,6 +10294,82 @@ function newsInit() {
   if (inp && saved) inp.value = saved;
   if (document.getElementById('news-key-status'))
     document.getElementById('news-key-status').textContent = saved ? '✓ 已配置' : '';
+
+  // 恢复缓存结果
+  try {
+    const cache = JSON.parse(localStorage.getItem('news_search_cache') || 'null');
+    if (cache && cache.items && cache.items.length) {
+      if (s && cache.start) s.value = cache.start;
+      if (e && cache.end)   e.value = cache.end;
+      newsRenderItems(cache.items, cache.start, cache.end, cache.kw, cache.savedAt);
+    }
+  } catch(err) { /* 忽略损坏的缓存 */ }
+}
+
+function newsClearCache() {
+  localStorage.removeItem('news_search_cache');
+  document.getElementById('news-result').innerHTML =
+    '<div style="padding:16px;text-align:center;color:#9ca3af;font-size:13px;">缓存已清除</div>';
+}
+
+function newsRenderItems(items, start, end, kw, savedAt) {
+  const res = document.getElementById('news-result');
+  if (!res) return;
+
+  const cacheBar = savedAt ? `
+    <div style="display:flex;align-items:center;justify-content:space-between;
+      background:#fefce8;border:1px solid #fde68a;border-radius:6px;
+      padding:7px 12px;margin-bottom:12px;font-size:12px;color:#92400e;">
+      <span>📦 缓存结果 · 上次搜索于 ${new Date(savedAt).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>
+      <button onclick="newsClearCache()"
+        style="padding:3px 10px;background:#fbbf24;color:#78350f;border:none;border-radius:4px;font-size:11px;cursor:pointer;">
+        清除缓存
+      </button>
+    </div>` : '';
+
+  function matchSource(url) {
+    try {
+      const host = new URL(url).hostname.replace(/^www\./, '');
+      const hit = TAX_SOURCES.find(s => {
+        try { return new URL(s.url).hostname.replace(/^www\./, '') === host; } catch(e) { return false; }
+      });
+      return hit ? hit.name : host;
+    } catch(e) { return url; }
+  }
+
+  res.innerHTML = cacheBar + `
+    <div style="font-size:12px;color:#64748b;margin-bottom:12px;">
+      找到 <strong>${items.length}</strong> 篇文章（${start} 至 ${end}）
+      ${kw ? `· 关键词：<em>${kw}</em>` : ''}
+      · 点击标题访问原文，点击「提炼场景」提取业务场景
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      ${items.map(it => {
+        const src = matchSource(it.url);
+        const safeUrl   = it.url.replace(/'/g, '%27');
+        const safeTitle = (it.title || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        return `
+        <div style="background:#fafafa;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px;">
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:6px;">
+            <div style="flex:1;">
+              <a href="${it.url}" target="_blank" rel="noopener"
+                style="font-size:13.5px;font-weight:600;color:#1e293b;text-decoration:none;line-height:1.4;display:block;"
+                onmouseover="this.style.color='#2d6a4f'" onmouseout="this.style.color='#1e293b'">
+                ${it.title}
+              </a>
+              <div style="font-size:11px;color:#94a3b8;margin-top:3px;">
+                📌 ${src}${it.date ? '  ·  ' + it.date.slice(0,10) : ''}
+              </div>
+            </div>
+            <button onclick="newsExtractScene('${safeUrl}','${safeTitle}')"
+              style="flex-shrink:0;padding:5px 13px;background:#2d6a4f;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">
+              提炼场景
+            </button>
+          </div>
+          <div style="font-size:12px;color:#475569;line-height:1.6;">${it.snippet}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
 }
 
 function newsSaveKey() {
@@ -10414,37 +10490,15 @@ async function newsSearch() {
     return;
   }
 
-  res.innerHTML = `
-    <div style="font-size:12px;color:#64748b;margin-bottom:12px;">
-      找到 <strong>${items.length}</strong> 篇文章（${start} 至 ${end}）· 点击标题访问原文，点击「提炼场景」提取业务场景
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      ${items.map(it => {
-        const src = matchSource(it.url);
-        const safeUrl   = it.url.replace(/'/g, '%27');
-        const safeTitle = (it.title || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        return `
-        <div style="background:#fafafa;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px;">
-          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:6px;">
-            <div style="flex:1;">
-              <a href="${it.url}" target="_blank" rel="noopener"
-                style="font-size:13.5px;font-weight:600;color:#1e293b;text-decoration:none;line-height:1.4;display:block;"
-                onmouseover="this.style.color='#2d6a4f'" onmouseout="this.style.color='#1e293b'">
-                ${it.title}
-              </a>
-              <div style="font-size:11px;color:#94a3b8;margin-top:3px;">
-                📌 ${src}${it.date ? '  ·  ' + it.date.slice(0,10) : ''}
-              </div>
-            </div>
-            <button onclick="newsExtractScene('${safeUrl}','${safeTitle}')"
-              style="flex-shrink:0;padding:5px 13px;background:#2d6a4f;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">
-              提炼场景
-            </button>
-          </div>
-          <div style="font-size:12px;color:#475569;line-height:1.6;">${it.snippet}</div>
-        </div>`;
-      }).join('')}
-    </div>`;
+  // 写入缓存
+  try {
+    localStorage.setItem('news_search_cache', JSON.stringify({
+      items, start, end, kw, savedAt: new Date().toISOString()
+    }));
+  } catch(e) { console.warn('缓存写入失败:', e.message); }
+
+  // 渲染（不传 savedAt，代表是新鲜结果，不显示缓存提示条）
+  newsRenderItems(items, start, end, kw, null);
 }
 
 async function newsExtractScene(url, title) {
