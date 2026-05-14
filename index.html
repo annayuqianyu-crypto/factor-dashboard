@@ -10553,12 +10553,8 @@ async function newsAISearch() {
       return;
     }
 
-    // 尝试多种 WSA 返回字段结构
-    const rawList = data.Response?.ResultList
-                 || data.Response?.Results
-                 || data.Response?.SearchResults
-                 || data.Response?.Data?.List
-                 || [];
+    // WSA SearchPro 返回 Response.Pages 数组
+    const rawList = data.Response?.Pages || [];
 
     if (!rawList.length) {
       res.innerHTML = `<div style="padding:20px;font-size:12px;color:#6b7280;">
@@ -10569,11 +10565,11 @@ async function newsAISearch() {
     }
 
     const items = rawList.map(r => ({
-      title:     r.Title    || r.title    || r.Name        || '',
-      url:       r.Url      || r.url      || r.Link        || '',
-      source:    r.SiteName || r.siteName || r.Source      || '',
-      date:      r.Time     || r.time     || r.Date        || r.PublishTime || '',
-      summary:   r.Abstract || r.abstract || r.Desc        || r.Summary || '',
+      title:     r.title   || '',
+      url:       r.url     || '',
+      source:    r.site    || '',
+      date:      r.date    || '',
+      summary:   r.passage || r.content || '',
       tags:      [],
       relevance: ''
     })).filter(it => it.title);
