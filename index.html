@@ -3858,7 +3858,7 @@ tr:hover td { background: #fafafa; }
       <span id="learn-status" style="font-size:12px;color:#6b7280;"></span>
     </div>
     <div style="font-size:11px;color:#9ca3af;margin-top:8px;">
-      分析流程：① 腾讯云联网搜索相关法规资讯 → ② DeepSeek 生成六维深度报告 → ③ 开放 AI 对话 · 仅支持从「痛点结果」逐条推送
+      分析流程：① 腾讯云联网搜索相关法规资讯 → ② DeepSeek 生成六维深度报告 → ③ 开放 AI 对话
     </div>
   </div>
 
@@ -11639,12 +11639,24 @@ function learnRenderOutput(d, pain, wsaCtx) {
       <div style="font-size:12px;color:#4b5563;line-height:1.6;">${a.evidence || ''}</div>
     </div>`).join('');
 
-  const regHtml = (d.regulations || []).map(r => `
+  window._learnRegMap = {};   // 存每条法规元数据供展开使用
+  const regHtml = (d.regulations || []).map((r, ri) => {
+    const regId = 'lr-' + Date.now() + '-' + ri;
+    window._learnRegMap[regId] = { name: r.name || '', article: r.article || '', excerpt: r.excerpt || '', summary: d.summary || '' };
+    return `
     <div style="margin-bottom:10px;padding:12px;background:#fff;border:1px solid #ede9fe;border-radius:8px;">
-      <div style="font-size:13px;font-weight:700;color:#8b5cf6;margin-bottom:4px;">${r.name || ''} ${r.article ? `· ${r.article}` : ''}</div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:4px;">
+        <div style="font-size:13px;font-weight:700;color:#8b5cf6;">${r.name || ''} ${r.article ? `· ${r.article}` : ''}</div>
+        <button onclick="learnExpandReg('${regId}',this)"
+          style="flex-shrink:0;padding:3px 11px;font-size:11.5px;font-weight:600;color:#8b5cf6;background:#faf5ff;border:1px solid #ddd6fe;border-radius:20px;cursor:pointer;white-space:nowrap;transition:all .15s;">
+          展开原文 ▾
+        </button>
+      </div>
       <div style="font-size:12px;color:#374151;background:#faf5ff;padding:8px 10px;border-radius:6px;line-height:1.6;font-style:italic;margin-bottom:6px;">"${r.excerpt || ''}"</div>
       ${r.url ? `<a href="${r.url}" target="_blank" style="font-size:11px;color:#8b5cf6;text-decoration:none;">🔗 查看来源</a>` : ''}
-    </div>`).join('');
+      <div id="${regId}-body" style="display:none;margin-top:10px;padding:12px 14px;background:#f9f7ff;border:1px solid #ede9fe;border-radius:8px;font-size:12.5px;color:#374151;line-height:1.8;white-space:pre-wrap;"></div>
+    </div>`;
+  }).join('');
 
   const solHtml = (d.solutions || []).map((s, i) => `
     <div style="margin-bottom:12px;padding:14px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;">
@@ -11849,6 +11861,103 @@ async function learnStreamChat(bubbleId) {
   if (fullText) {
     _learnState.chatHistory.push({ role: 'assistant', content: fullText });
   }
+}
+
+// ── 法规原文展开（流式） ──────────────────────────────────────
+async function learnExpandReg(regId, btn) {
+  const body = document.getElementById(regId + '-body');
+  if (!body) return;
+
+  // 收起
+  if (body.style.display !== 'none') {
+    body.style.display = 'none';
+    btn.textContent = '展开原文 ▾';
+    btn.style.background = '#faf5ff';
+    return;
+  }
+
+  // 展开（已加载则直接显示）
+  body.style.display = 'block';
+  btn.textContent = '收起 ▴';
+  btn.style.background = '#ede9fe';
+
+  if (body.dataset.loaded === '1') return;   // 已有内容，不重复请求
+
+  const reg = (window._learnRegMap || {})[regId];
+  if (!reg) { body.textContent = '（法规数据丢失，请重新分析）'; return; }
+
+  body.innerHTML = '<span style="color:#9ca3af;font-size:12px;">⏳ 正在加载原文…</span>';
+
+  const apiBase = localStorage.getItem('pg_api_base') || COMPANY_API_BASE;
+  const apiKey  = localStorage.getItem('pg_api_key')  || COMPANY_API_KEY;
+
+  const prompt = `你是中国法律法规专家，熟悉现行有效法规原文。请完成以下任务：
+
+法规名称：《${reg.name}》
+涉及条款：${reg.article || '相关条款'}
+摘录提示：${reg.excerpt}
+
+**任务要求：**
+1. 首行注明该法规最新现行版本（修正时间、施行日期）
+2. 逐条展示指定条款的完整原文，每条之间用"---"分隔，条款标题用"### **第X条**"格式
+3. 最后单独列"**与痛点关联解读**"章节，针对以下痛点背景逐条解释法律依据：
+
+痛点背景：${reg.summary}
+
+输出用 Markdown 格式，语言精准，直接引用法条原文，不要省略或重写。`;
+
+  try {
+    const resp = await fetch(`${apiBase}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: COMPANY_API_MODEL,
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.1,
+        max_tokens: 3000,
+        stream: true,
+      }),
+      signal: AbortSignal.timeout(60000),
+    });
+    if (!resp.ok) throw new Error(`API HTTP ${resp.status}`);
+
+    const reader  = resp.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let md = '';
+    body.innerHTML = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      for (const line of chunk.split('\n')) {
+        if (!line.startsWith('data: ')) continue;
+        const raw = line.slice(6).trim();
+        if (raw === '[DONE]') break;
+        try {
+          const delta = JSON.parse(raw).choices?.[0]?.delta?.content || '';
+          if (delta) {
+            md += delta;
+            body.innerHTML = learnMd2Html(md);
+          }
+        } catch(_) {}
+      }
+    }
+    body.dataset.loaded = '1';
+  } catch(e) {
+    body.innerHTML = `<span style="color:#dc2626;">加载失败：${e.message}</span>`;
+  }
+}
+
+// ── 极简 Markdown → HTML（供法规原文渲染）─────────────────────
+function learnMd2Html(md) {
+  return md
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/^### (.+)$/gm,'<div style="font-size:13.5px;font-weight:700;color:#6d28d9;margin:14px 0 6px;">$1</div>')
+    .replace(/^## (.+)$/gm, '<div style="font-size:14px;font-weight:700;color:#374151;margin:12px 0 5px;">$1</div>')
+    .replace(/^---$/gm,'<hr style="border:none;border-top:1px dashed #ddd6fe;margin:10px 0;">')
+    .replace(/\n/g,'<br>');
 }
 
 
