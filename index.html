@@ -10370,10 +10370,11 @@ function newsInit() {
 }
 
 // ── SCF 代理 URL 管理 ────────────────────────────────────────
-const NEWS_SCF_KEY = 'news_scf_proxy_url';
+const NEWS_SCF_KEY     = 'news_scf_proxy_url';
+const NEWS_SCF_DEFAULT = 'https://1433058101-f7b95iay41.ap-guangzhou.tencentscf.com';
 
 function newsGetScfUrl() {
-  return localStorage.getItem(NEWS_SCF_KEY) || '';
+  return localStorage.getItem(NEWS_SCF_KEY) || NEWS_SCF_DEFAULT;
 }
 
 function newsSaveScfUrl() {
