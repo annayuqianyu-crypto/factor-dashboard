@@ -10491,11 +10491,12 @@ async function newsTxTest() {
       const pages = data.Response?.Pages || [];
       if (pages.length > 0) {
         box.style.color = '#16a34a';
-        box.textContent = `✅ 正常！WSA 返回 ${pages.length} 条结果，第1条：「${pages[0].title||'(无标题)'}」`;
+        box.innerHTML = `✅ WSA 返回 ${pages.length} 条，第1条原始字段：<br>
+          <pre style="font-size:11px;background:#f0fdf4;padding:8px;border-radius:4px;margin-top:4px;overflow:auto;max-height:160px;">${JSON.stringify(pages[0], null, 2)}</pre>`;
       } else {
         box.style.color = '#f59e0b';
-        box.innerHTML = `⚠️ SCF 连通但 WSA 返回 0 条结果。<br>
-          <span style="font-size:11px;">原始响应：${JSON.stringify(data.Response).slice(0,200)}</span>`;
+        box.innerHTML = `⚠️ SCF 连通但 WSA 返回 0 条。原始响应：<br>
+          <pre style="font-size:11px;">${JSON.stringify(data.Response).slice(0,300)}</pre>`;
       }
     }
   } catch(e) {
