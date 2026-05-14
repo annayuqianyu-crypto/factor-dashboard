@@ -2957,6 +2957,10 @@ tr:hover td { background: #fafafa; }
         style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#f3f4f6;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">
         📰 Tax 时事新闻
       </button>
+      <button id="bu-tab-learn" onclick="switchBuRadar('learn')"
+        style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#f3f4f6;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">
+        📖 痛点学习
+      </button>
     </div>
 
     <!-- Tax 雷达面板 -->
@@ -3090,6 +3094,52 @@ tr:hover td { background: #fafafa; }
           <div id="news-extract-body" style="font-size:13px;color:#374151;line-height:1.7;"></div>
           <div id="news-extract-actions" style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;"></div>
         </div>
+      </div>
+
+    </div>
+
+    <!-- 痛点学习面板 -->
+    <div id="radar-panel-learn" style="display:none;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
+
+      <!-- 输入区 -->
+      <div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:10px;padding:16px;margin-bottom:16px;">
+        <div style="font-size:13px;font-weight:700;color:#6d28d9;margin-bottom:8px;">📌 请输入要深度学习的痛点</div>
+        <textarea id="learn-pain-input" rows="3" placeholder="粘贴或输入痛点描述，例如：高净值客户持有境外资产，面临CRS自动交换带来的税务申报合规问题，缺乏合规架构安排…"
+          style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #ddd6fe;border-radius:8px;font-size:13px;line-height:1.6;resize:vertical;font-family:inherit;"></textarea>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:10px;">
+          <button onclick="learnAnalyze()" id="learn-analyze-btn"
+            style="padding:9px 24px;background:#6d28d9;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;">
+            <span id="learn-analyze-spin">🔬</span> 深度分析
+          </button>
+          <button onclick="learnLoadLastPainPoint()"
+            style="padding:9px 16px;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:8px;font-size:12px;cursor:pointer;">
+            📋 载入最近生成的痛点
+          </button>
+          <span id="learn-status" style="font-size:12px;color:#6b7280;"></span>
+        </div>
+      </div>
+
+      <!-- 分析输出区 -->
+      <div id="learn-analysis-output" style="min-height:40px;"></div>
+
+      <!-- 对话区（分析完成后显示） -->
+      <div id="learn-chat-section" style="display:none;margin-top:20px;">
+        <div style="border-top:2px dashed #e9d5ff;margin-bottom:16px;"></div>
+        <div style="font-size:13px;font-weight:700;color:#6d28d9;margin-bottom:10px;">💬 与 DeepSeek 深度对话</div>
+        <div id="learn-chat-messages"
+          style="min-height:120px;max-height:480px;overflow-y:auto;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:12px;font-size:13px;line-height:1.7;">
+          <div style="text-align:center;color:#9ca3af;font-size:12px;padding:16px 0;">分析完成后，可在此向 AI 进一步提问</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <textarea id="learn-chat-input" rows="2" placeholder="继续提问，例如：这个方案在香港落地的具体步骤是什么？税务局有无明文规定？"
+            style="flex:1;padding:10px 12px;border:1px solid #ddd6fe;border-radius:8px;font-size:13px;line-height:1.5;resize:none;font-family:inherit;"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();learnChatSend();}"></textarea>
+          <button onclick="learnChatSend()" id="learn-chat-send-btn"
+            style="padding:0 20px;background:#6d28d9;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;align-self:stretch;">
+            发送
+          </button>
+        </div>
+        <div style="font-size:11px;color:#9ca3af;margin-top:6px;">Enter 发送 · Shift+Enter 换行 · 对话上下文已包含完整分析结果</div>
       </div>
 
     </div>
@@ -10320,8 +10370,8 @@ function radarInitSources() {
 
 // ── 二级 tab 切换 ─────────────────────────────────────────────
 function switchBuRadar(bu) {
-  const tabColors = {tax:'#0369a1', legal:'#15803d', cm:'#c2410c', news:'#2d6a4f'};
-  ['tax','legal','cm','news'].forEach(b => {
+  const tabColors = {tax:'#0369a1', legal:'#15803d', cm:'#c2410c', news:'#2d6a4f', learn:'#6d28d9'};
+  ['tax','legal','cm','news','learn'].forEach(b => {
     const panel = document.getElementById('radar-panel-' + b);
     const tab   = document.getElementById('bu-tab-' + b);
     if (!panel || !tab) return;
@@ -10339,6 +10389,7 @@ function switchBuRadar(bu) {
   });
   if (bu === 'tax')  radarInitSources();
   if (bu === 'news') newsInit();
+  if (bu === 'learn') learnInit();
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -11282,6 +11333,428 @@ function renderPool(bu) {
   ['tax','legal','cm'].forEach(b => renderPool(b));
   radarInitSources();
 })();
+
+
+// ══════════════════════════════════════════════════════════════
+// 痛点学习模块（WSA 联网检索 + DeepSeek 深度分析 + 对话）
+// ══════════════════════════════════════════════════════════════
+
+const _learnState = {
+  chatHistory: [],      // [{role, content}, ...]
+  systemContext: '',    // 完整分析结果作为系统上下文
+  analyzing: false,
+};
+
+// ── 切换到 learn tab 时初始化 ─────────────────────────────────
+function learnInit() {
+  // 仅首次或面板为空时重置
+}
+
+// ── 载入最近生成的痛点 ────────────────────────────────────────
+function learnLoadLastPainPoint() {
+  // 尝试从最近一次痛点生成的输出中获取
+  const pgResult = localStorage.getItem('pg_last_pain_point') || '';
+  const ta = document.getElementById('learn-pain-input');
+  if (!ta) return;
+  if (pgResult) {
+    ta.value = pgResult;
+    document.getElementById('learn-status').textContent = '✓ 已载入最近痛点';
+    setTimeout(() => { document.getElementById('learn-status').textContent = ''; }, 2000);
+  } else {
+    // 也尝试场景池里的第一条
+    const pool = JSON.parse(localStorage.getItem('pain_pool_tax') || '[]');
+    if (pool.length) {
+      ta.value = pool[pool.length - 1].scene || '';
+      document.getElementById('learn-status').textContent = '✓ 已从场景池载入';
+      setTimeout(() => { document.getElementById('learn-status').textContent = ''; }, 2000);
+    } else {
+      document.getElementById('learn-status').textContent = '暂无历史痛点，请手动输入';
+      setTimeout(() => { document.getElementById('learn-status').textContent = ''; }, 2500);
+    }
+  }
+}
+
+// ── 主分析入口 ────────────────────────────────────────────────
+async function learnAnalyze() {
+  const pain = (document.getElementById('learn-pain-input').value || '').trim();
+  if (!pain) {
+    document.getElementById('learn-status').textContent = '请先输入痛点内容';
+    return;
+  }
+  if (_learnState.analyzing) return;
+  _learnState.analyzing = true;
+
+  const btn  = document.getElementById('learn-analyze-btn');
+  const spin = document.getElementById('learn-analyze-spin');
+  const out  = document.getElementById('learn-analysis-output');
+  const st   = document.getElementById('learn-status');
+  btn.disabled = true;
+  spin.textContent = '⏳';
+  out.innerHTML = '';
+  document.getElementById('learn-chat-section').style.display = 'none';
+  _learnState.chatHistory = [];
+  _learnState.systemContext = '';
+
+  // Step 1 — WSA 联网搜索相关法规与资讯
+  st.textContent = '⏳ 联网检索相关法规与案例…';
+  out.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ 正在联网搜索相关法规、监管文件与实务案例…</div>';
+
+  let wsaContext = '';
+  try {
+    wsaContext = await learnSearchRegs(pain);
+  } catch(e) {
+    console.warn('[learn] WSA 搜索失败:', e.message);
+    wsaContext = '（联网搜索暂时不可用，将基于模型内置知识进行分析）';
+  }
+
+  // Step 2 — DeepSeek 六层分析
+  st.textContent = '⏳ DeepSeek 深度分析中…';
+  out.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ DeepSeek 正在深度分析痛点，生成六维论证报告…</div>';
+
+  try {
+    const result = await learnBuildAnalysis(pain, wsaContext);
+    learnRenderOutput(result, pain, wsaContext);
+  } catch(e) {
+    out.innerHTML = `<div style="padding:16px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;font-size:13px;color:#991b1b;">
+      ❌ 分析失败：${e.message}
+    </div>`;
+  }
+
+  spin.textContent = '🔬';
+  btn.disabled = false;
+  _learnState.analyzing = false;
+  st.textContent = '';
+}
+
+// ── WSA 联网搜索相关法规与资讯 ───────────────────────────────
+async function learnSearchRegs(pain) {
+  const scfUrl = (localStorage.getItem('news_scf_url') || '').trim();
+  if (!scfUrl) return '（未配置 SCF 代理，跳过联网搜索）';
+
+  // 提取关键词（取前80字）
+  const kw = pain.slice(0, 80);
+
+  const resp = await fetch(scfUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query: kw }),
+    signal: AbortSignal.timeout(30000),
+  });
+  if (!resp.ok) throw new Error(`SCF HTTP ${resp.status}`);
+  const data = await resp.json();
+
+  const pages = data?.Response?.Pages || [];
+  if (!pages.length) return '（联网搜索无结果）';
+
+  // 取前8条，格式化为文本
+  const items = pages.slice(0, 8).map((p, i) => {
+    const item  = typeof p === 'string' ? JSON.parse(p) : p;
+    const title = item.title || item.Title || '(无标题)';
+    const url   = item.url || item.Url || '';
+    const snip  = item.snippet || item.Snippet || item.summary || item.Summary || '';
+    const src   = item._trusted_name || item.site || '';
+    return `[${i+1}] ${title}\n来源：${src || url}\n摘要：${snip.slice(0, 200)}`;
+  });
+  return items.join('\n\n');
+}
+
+// ── DeepSeek 六层分析 ─────────────────────────────────────────
+async function learnBuildAnalysis(pain, wsaCtx) {
+  const apiBase = localStorage.getItem('pg_api_base') || COMPANY_API_BASE;
+  const apiKey  = localStorage.getItem('pg_api_key')  || COMPANY_API_KEY;
+
+  const prompt = `你是朝曦家族办公室的资深法律与税务顾问。请对以下痛点进行系统性深度分析，输出严格 JSON，不要输出任何其他文字。
+
+痛点描述：
+${pain}
+
+联网检索到的相关法规与资讯（可作为论据，请引用具体条款）：
+${wsaCtx || '（无联网数据）'}
+
+请按以下 JSON 结构输出：
+{
+  "summary": "一句话概括痛点本质（30字以内）",
+  "conflict": {
+    "who": "涉及主体（如：境外受控外国公司CFC的中国居民股东）",
+    "asset": "核心资产类型（如：境外持股架构、离岸信托）",
+    "trigger": "触发事件（如：CRS首次信息交换、股权转让、移民居留权变更）",
+    "constraint": "核心约束或合规要求（如：个税法第8条、CRS申报义务）"
+  },
+  "arguments": [
+    {
+      "point": "论点（15字内）",
+      "evidence": "具体论据，引用法规条款或案例事实（100字内）"
+    }
+  ],
+  "regulations": [
+    {
+      "name": "法规/政策全称",
+      "article": "具体条款（如第8条第2款）",
+      "excerpt": "关键原文摘录（60字内）",
+      "url": "来源URL（若联网数据中有则填写，否则填空字符串）"
+    }
+  ],
+  "solutions": [
+    {
+      "name": "方案名称（10字内）",
+      "description": "具体操作路径（80字内）",
+      "pros": "核心优势（40字内）",
+      "cons": "主要风险或局限（40字内）"
+    }
+  ],
+  "effects": {
+    "if_solved": "解决后预期效果（60字内）",
+    "if_not": "不解决的后果与风险（60字内）"
+  }
+}`;
+
+  const resp = await fetch(`${apiBase}/v1/chat/completions`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: COMPANY_API_MODEL,
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.25,
+      max_tokens: 3000,
+    }),
+  });
+  if (!resp.ok) throw new Error(`API HTTP ${resp.status}`);
+  const data = await resp.json();
+  let raw = (data.choices?.[0]?.message?.content || '').replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+
+  // 兜底：提取第一个 {}
+  const m = raw.match(/\{[\s\S]*\}/);
+  if (!m) throw new Error('AI 返回内容无法解析为 JSON');
+  let parsed;
+  try { parsed = JSON.parse(m[0]); } catch(e) {
+    // 尝试修复常见 JSON 错误
+    const fixed = m[0].replace(/,(\s*[}\]])/g, '$1');
+    parsed = JSON.parse(fixed);
+  }
+  return parsed;
+}
+
+// ── 渲染六层分析卡片 ──────────────────────────────────────────
+function learnRenderOutput(d, pain, wsaCtx) {
+  const out = document.getElementById('learn-analysis-output');
+
+  const argHtml = (d.arguments || []).map((a, i) => `
+    <div style="margin-bottom:10px;padding:10px 14px;background:#f9fafb;border-left:3px solid #6d28d9;border-radius:0 6px 6px 0;">
+      <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:3px;">论点 ${i+1}：${a.point || ''}</div>
+      <div style="font-size:12px;color:#4b5563;line-height:1.6;">${a.evidence || ''}</div>
+    </div>`).join('');
+
+  const regHtml = (d.regulations || []).map(r => `
+    <div style="margin-bottom:10px;padding:12px;background:#fff;border:1px solid #e9d5ff;border-radius:8px;">
+      <div style="font-size:13px;font-weight:700;color:#6d28d9;margin-bottom:4px;">${r.name || ''} ${r.article ? `· ${r.article}` : ''}</div>
+      <div style="font-size:12px;color:#374151;background:#faf5ff;padding:8px 10px;border-radius:6px;line-height:1.6;font-style:italic;margin-bottom:6px;">"${r.excerpt || ''}"</div>
+      ${r.url ? `<a href="${r.url}" target="_blank" style="font-size:11px;color:#7c3aed;text-decoration:none;">🔗 查看来源</a>` : ''}
+    </div>`).join('');
+
+  const solHtml = (d.solutions || []).map((s, i) => `
+    <div style="margin-bottom:12px;padding:14px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;">
+      <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:8px;">方案 ${i+1}：${s.name || ''}</div>
+      <div style="font-size:12px;color:#374151;margin-bottom:8px;line-height:1.6;">${s.description || ''}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:11px;padding:3px 10px;background:#dcfce7;color:#166534;border-radius:20px;">✅ ${s.pros || ''}</span>
+        <span style="font-size:11px;padding:3px 10px;background:#fef2f2;color:#991b1b;border-radius:20px;">⚠️ ${s.cons || ''}</span>
+      </div>
+    </div>`).join('');
+
+  const c = d.conflict || {};
+
+  out.innerHTML = `
+    <!-- ① 痛点概述 -->
+    <div style="background:linear-gradient(135deg,#6d28d9,#7c3aed);color:#fff;border-radius:10px;padding:16px 20px;margin-bottom:14px;">
+      <div style="font-size:11px;opacity:.75;margin-bottom:4px;font-weight:600;letter-spacing:.05em;">① 痛点概述</div>
+      <div style="font-size:15px;font-weight:700;line-height:1.5;">${d.summary || ''}</div>
+    </div>
+
+    <!-- ② 核心冲突 -->
+    <div style="border:1px solid #e9d5ff;border-radius:10px;padding:14px 16px;margin-bottom:14px;background:#faf5ff;">
+      <div style="font-size:11px;color:#7c3aed;font-weight:700;letter-spacing:.05em;margin-bottom:10px;">② 核心冲突矩阵</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div style="background:#fff;border-radius:8px;padding:10px 12px;border:1px solid #ede9fe;">
+          <div style="font-size:10px;color:#9ca3af;margin-bottom:3px;">涉及主体</div>
+          <div style="font-size:13px;color:#374151;font-weight:600;">${c.who || '—'}</div>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:10px 12px;border:1px solid #ede9fe;">
+          <div style="font-size:10px;color:#9ca3af;margin-bottom:3px;">核心资产</div>
+          <div style="font-size:13px;color:#374151;font-weight:600;">${c.asset || '—'}</div>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:10px 12px;border:1px solid #ede9fe;">
+          <div style="font-size:10px;color:#9ca3af;margin-bottom:3px;">触发事件</div>
+          <div style="font-size:13px;color:#374151;font-weight:600;">${c.trigger || '—'}</div>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:10px 12px;border:1px solid #ede9fe;">
+          <div style="font-size:10px;color:#9ca3af;margin-bottom:3px;">核心约束</div>
+          <div style="font-size:13px;color:#374151;font-weight:600;">${c.constraint || '—'}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ③ 论点与论据 -->
+    <div style="border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;margin-bottom:14px;">
+      <div style="font-size:11px;color:#6d28d9;font-weight:700;letter-spacing:.05em;margin-bottom:10px;">③ 论点与论据</div>
+      ${argHtml || '<div style="color:#9ca3af;font-size:12px;">暂无</div>'}
+    </div>
+
+    <!-- ④ 法规依据 -->
+    <div style="border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;margin-bottom:14px;">
+      <div style="font-size:11px;color:#6d28d9;font-weight:700;letter-spacing:.05em;margin-bottom:10px;">④ 法规依据</div>
+      ${regHtml || '<div style="color:#9ca3af;font-size:12px;">暂无法规数据</div>'}
+    </div>
+
+    <!-- ⑤ 解决方案 -->
+    <div style="border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;margin-bottom:14px;">
+      <div style="font-size:11px;color:#6d28d9;font-weight:700;letter-spacing:.05em;margin-bottom:10px;">⑤ 解决方案</div>
+      ${solHtml || '<div style="color:#9ca3af;font-size:12px;">暂无</div>'}
+    </div>
+
+    <!-- ⑥ 预期效果 -->
+    <div style="border-radius:10px;overflow:hidden;margin-bottom:6px;">
+      <div style="background:#f0fdf4;padding:14px 16px;border:1px solid #bbf7d0;border-radius:10px 10px 0 0;">
+        <div style="font-size:11px;color:#15803d;font-weight:700;margin-bottom:4px;">⑥ 解决后预期效果</div>
+        <div style="font-size:13px;color:#166534;line-height:1.6;">${(d.effects || {}).if_solved || '—'}</div>
+      </div>
+      <div style="background:#fef2f2;padding:14px 16px;border:1px solid #fca5a5;border-radius:0 0 10px 10px;">
+        <div style="font-size:11px;color:#991b1b;font-weight:700;margin-bottom:4px;">若不解决的后果</div>
+        <div style="font-size:13px;color:#7f1d1d;line-height:1.6;">${(d.effects || {}).if_not || '—'}</div>
+      </div>
+    </div>`;
+
+  // 构建系统上下文（供对话使用）
+  _learnState.systemContext = `你是朝曦家族办公室的资深顾问，正在针对以下痛点与用户进行深度专业对话。
+
+【痛点描述】
+${pain}
+
+【深度分析报告】
+痛点概述：${d.summary || ''}
+核心冲突：主体=${c.who || ''}，资产=${c.asset || ''}，触发=${c.trigger || ''}，约束=${c.constraint || ''}
+论点：${(d.arguments || []).map(a => a.point + '——' + a.evidence).join('；')}
+法规：${(d.regulations || []).map(r => r.name + r.article + '：' + r.excerpt).join('；')}
+解决方案：${(d.solutions || []).map(s => s.name + '——' + s.description).join('；')}
+预期效果：解决后=${(d.effects || {}).if_solved || ''}；不解决=${(d.effects || {}).if_not || ''}
+
+【联网检索法规资讯】
+${wsaCtx || '（无联网数据）'}
+
+请基于以上背景，专业、具体地回答用户的进一步提问。如需引用法规，请给出条款原文。`;
+
+  _learnState.chatHistory = [];
+
+  // 显示对话区
+  const chatSection = document.getElementById('learn-chat-section');
+  chatSection.style.display = 'block';
+  const msgBox = document.getElementById('learn-chat-messages');
+  msgBox.innerHTML = '<div style="text-align:center;color:#9ca3af;font-size:12px;padding:8px 0;">分析完成 · 可在此向 AI 进一步提问</div>';
+}
+
+// ── 发送对话消息 ──────────────────────────────────────────────
+async function learnChatSend() {
+  const inputEl = document.getElementById('learn-chat-input');
+  const sendBtn = document.getElementById('learn-chat-send-btn');
+  const msg = (inputEl.value || '').trim();
+  if (!msg) return;
+
+  inputEl.value = '';
+  sendBtn.disabled = true;
+
+  // 渲染用户消息
+  const msgBox = document.getElementById('learn-chat-messages');
+  msgBox.innerHTML += `
+    <div style="margin-bottom:12px;text-align:right;">
+      <div style="display:inline-block;max-width:80%;background:#6d28d9;color:#fff;padding:10px 14px;border-radius:14px 14px 4px 14px;font-size:13px;line-height:1.6;text-align:left;">${msg.replace(/</g,'&lt;')}</div>
+    </div>`;
+  msgBox.scrollTop = msgBox.scrollHeight;
+
+  // 添加到历史
+  _learnState.chatHistory.push({ role: 'user', content: msg });
+
+  // 创建 AI 回复气泡
+  const bubbleId = 'learn-bubble-' + Date.now();
+  msgBox.innerHTML += `
+    <div style="margin-bottom:12px;" id="${bubbleId}">
+      <div style="display:inline-block;max-width:85%;background:#f3f0ff;border:1px solid #e9d5ff;padding:10px 14px;border-radius:14px 14px 14px 4px;font-size:13px;line-height:1.6;color:#1e1b4b;">
+        <span class="learn-typing">⏳ 思考中…</span>
+      </div>
+    </div>`;
+  msgBox.scrollTop = msgBox.scrollHeight;
+
+  try {
+    await learnStreamChat(bubbleId);
+  } catch(e) {
+    const bubble = document.getElementById(bubbleId);
+    if (bubble) bubble.querySelector('div').innerHTML = `<span style="color:#dc2626;">❌ ${e.message}</span>`;
+  }
+
+  sendBtn.disabled = false;
+  inputEl.focus();
+}
+
+// ── 流式对话（Streaming） ─────────────────────────────────────
+async function learnStreamChat(bubbleId) {
+  const apiBase = localStorage.getItem('pg_api_base') || COMPANY_API_BASE;
+  const apiKey  = localStorage.getItem('pg_api_key')  || COMPANY_API_KEY;
+
+  const messages = [
+    { role: 'system', content: _learnState.systemContext },
+    ..._learnState.chatHistory,
+  ];
+
+  const resp = await fetch(`${apiBase}/v1/chat/completions`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: COMPANY_API_MODEL,
+      messages,
+      temperature: 0.3,
+      max_tokens: 2000,
+      stream: true,
+    }),
+    signal: AbortSignal.timeout(60000),
+  });
+  if (!resp.ok) throw new Error(`API HTTP ${resp.status}`);
+
+  const bubble = document.getElementById(bubbleId);
+  const inner  = bubble ? bubble.querySelector('div') : null;
+  if (!inner) return;
+
+  const reader  = resp.body.getReader();
+  const decoder = new TextDecoder('utf-8');
+  let fullText  = '';
+  inner.innerHTML = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    const chunk = decoder.decode(value, { stream: true });
+    const lines = chunk.split('\n');
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const raw = line.slice(6).trim();
+      if (raw === '[DONE]') break;
+      try {
+        const obj = JSON.parse(raw);
+        const delta = obj.choices?.[0]?.delta?.content || '';
+        if (delta) {
+          fullText += delta;
+          inner.innerHTML = fullText
+            .replace(/</g,'&lt;')
+            .replace(/\n/g,'<br>');
+          const msgBox = document.getElementById('learn-chat-messages');
+          if (msgBox) msgBox.scrollTop = msgBox.scrollHeight;
+        }
+      } catch(_) {}
+    }
+  }
+
+  // 保存完整回复到历史
+  if (fullText) {
+    _learnState.chatHistory.push({ role: 'assistant', content: fullText });
+  }
+}
 
 
 </script>
