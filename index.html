@@ -10471,8 +10471,10 @@ async function newsSearch() {
 
   const allItems = [];
   const seenUrls = new Set();
+  let errCount   = 0;
 
   // 用 Jina Reader 抓取单个信息源首页，解析 markdown 链接
+  // ⚠️ 不带 Authorization header —— 走匿名免费通道，避免 key 额度耗尽触发 402
   async function fetchSource(src) {
     try {
       const ctrl = new AbortController();
@@ -10480,13 +10482,13 @@ async function newsSearch() {
       const resp = await fetch(`https://r.jina.ai/${encodeURIComponent(src.url)}`, {
         headers: {
           'Accept': 'text/plain',
-          'X-Return-Format': 'text',
-          'Authorization': `Bearer ${key}`
+          'X-Return-Format': 'text'
+          // 故意不传 Authorization，使用匿名免费层
         },
         signal: ctrl.signal
       });
       clearTimeout(timer);
-      if (!resp.ok) return [];
+      if (!resp.ok) { errCount++; console.warn(`[newsSearch] ${src.name} → HTTP ${resp.status}`); return []; }
       const text = await resp.text();
 
       // 解析 markdown 链接：[标题](url)
@@ -10539,12 +10541,14 @@ async function newsSearch() {
       }
       return found;
     } catch(e) {
+      errCount++;
+      if (e.name !== 'AbortError') console.warn(`[newsSearch] ${src.name} 异常:`, e.message);
       return [];
     }
   }
 
-  // 并发抓取，每批 5 个信息源
-  const CONCURRENCY = 5;
+  // 并发抓取，每批 4 个信息源（避免匿名限流）
+  const CONCURRENCY = 4;
   let done = 0;
   for (let i = 0; i < TAX_SOURCES.length; i += CONCURRENCY) {
     const group = TAX_SOURCES.slice(i, i + CONCURRENCY);
@@ -10553,7 +10557,8 @@ async function newsSearch() {
     done += group.length;
     const pct = Math.round(done / TAX_SOURCES.length * 100);
     res.innerHTML = `<div style="padding:16px;text-align:center;color:#6b7280;font-size:13px;">
-      ⏳ 正在抓取… ${done}/${TAX_SOURCES.length} 个信息源完成（${pct}%），已找到 ${allItems.length} 篇</div>`;
+      ⏳ 正在抓取… ${done}/${TAX_SOURCES.length} 个信息源（${pct}%），已找到 ${allItems.length} 篇
+      ${errCount ? `<span style="color:#f59e0b;margin-left:6px;">（${errCount}个超时/失败）</span>` : ''}</div>`;
   }
 
   btn.disabled = false; spin.textContent = '🔍';
@@ -10567,9 +10572,16 @@ async function newsSearch() {
   });
 
   if (!allItems.length) {
+    const errHint = errCount >= TAX_SOURCES.length * 0.8
+      ? `<div style="margin-top:10px;padding:10px;background:#fef9c3;border-radius:6px;font-size:12px;color:#713f12;">
+           ⚠️ 共 ${errCount}/${TAX_SOURCES.length} 个信息源未响应，可能原因：<br>
+           ① 网络访问受限（部分政府网站需要VPN）&nbsp; ② r.jina.ai 服务繁忙，请稍后重试<br>
+           请打开浏览器 <strong>F12 → Console</strong> 查看具体错误信息
+         </div>` : '';
     res.innerHTML = `<div style="padding:24px;text-align:center;color:#9ca3af;font-size:13px;">
-      未找到符合条件的文章。<br>
-      <span style="font-size:12px;line-height:2;">可尝试：① 扩大日期范围 &nbsp;② 减少关键词（或留空抓取全部）&nbsp;③ 直接点击上方来源标签浏览原网站</span></div>`;
+      未找到符合条件的文章（${done}个信息源，${errCount}个失败）。<br>
+      <span style="font-size:12px;line-height:2;">可尝试：① 扩大日期范围 &nbsp;② 关键词留空抓取全部 &nbsp;③ 直接点击上方来源标签浏览原网站</span>
+      ${errHint}</div>`;
     return;
   }
 
@@ -10599,8 +10611,9 @@ async function newsExtractScene(url, title) {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 15000);
     const jinaResp = await fetch(`https://r.jina.ai/${encodeURIComponent(url)}`, {
-      headers: { 'Accept': 'text/plain', 'X-Return-Format': 'text',
-                 'Authorization': `Bearer ${COMPANY_JINA_KEY}` },
+      headers: { 'Accept': 'text/plain', 'X-Return-Format': 'text'
+                 // 不传 Authorization，走匿名免费层，避免 key 额度耗尽触发 402
+               },
       signal: ctrl.signal
     });
     clearTimeout(timer);
