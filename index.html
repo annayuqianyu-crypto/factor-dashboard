@@ -10530,9 +10530,9 @@ async function newsAISearch() {
 
   const query = kw; // 留空时 SCF 直接用域名搜索，无关键词限制
 
-  const payload = { query, count };
-  if (start) payload.startTime = start.replace(/-/g, '');
-  if (end)   payload.endTime   = end.replace(/-/g, '');
+  const payload = { query };
+  if (start) payload.startDate = start;
+  if (end)   payload.endDate   = end;
 
   try {
     const resp = await fetch(scfUrl, {
@@ -10602,24 +10602,7 @@ async function newsAISearch() {
       return { title, url, source, date, summary, trusted: !!(r._trusted_name) || isTrusted(url), tags: [], relevance: '', _raw: r };
     });
 
-    // 日期过滤（WSA 日期格式："YYYY-MM-DD HH:MM:SS"）
-    function parseWsaDate(s) {
-      if (!s) return null;
-      const d = new Date(s.trim().replace(' ', 'T'));
-      return isNaN(d) ? null : d;
-    }
-    if (start || end) {
-      const startD = start ? new Date(start) : null;
-      const endD   = end   ? new Date(end + 'T23:59:59') : null;
-      items = items.filter(it => {
-        const d = parseWsaDate(it.date);
-        if (!d) return true;                        // 无日期的保留
-        if (startD && d < startD) return false;
-        if (endD   && d > endD)   return false;
-        return true;
-      });
-    }
-
+    // 日期过滤已在 SCF 服务端完成，前端直接展示
     // 可信源排前面
     items.sort((a, b) => (b.trusted ? 1 : 0) - (a.trusted ? 1 : 0));
 
