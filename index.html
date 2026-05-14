@@ -10596,10 +10596,10 @@ async function newsAISearch() {
     let items = rawList.map(r => {
       const title   = r.title   || r.Title   || r.name    || r.Name    || r.headline || '(无标题)';
       const url     = r.url     || r.Url     || r.link    || r.Link    || '';
-      const source  = r._source_name || r.site || r.Site || r.source || r.Source || r.domain || '';
+      const source  = r._trusted_name || r.site || r.Site || r.source || r.Source || r.domain || '';
       const date    = r.date    || r.Date    || r.time    || r.Time    || r.pubDate  || '';
       const summary = r.passage || r.Passage || r.content || r.Content || r.abstract || r.desc || r.snippet || '';
-      return { title, url, source, date, summary, trusted: isTrusted(url), tags: [], relevance: '', _raw: r };
+      return { title, url, source, date, summary, trusted: !!(r._trusted_name) || isTrusted(url), tags: [], relevance: '', _raw: r };
     });
 
     // 日期过滤（WSA 日期格式："YYYY-MM-DD HH:MM:SS"）
