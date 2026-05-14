@@ -11855,7 +11855,7 @@ async function learnStreamChat(bubbleId) {
       max_tokens: 2000,
       stream: true,
     }),
-    signal: AbortSignal.timeout(60000),
+    signal: AbortSignal.timeout(120000),
   });
   if (!resp.ok) throw new Error(`API HTTP ${resp.status}`);
 
@@ -11952,7 +11952,7 @@ async function learnExpandReg(regId, btn) {
         max_tokens: 3000,
         stream: true,
       }),
-      signal: AbortSignal.timeout(60000),
+      signal: AbortSignal.timeout(120000),   // 法规原文较长，给 120s
     });
     if (!resp.ok) throw new Error(`API HTTP ${resp.status}`);
 
@@ -11978,9 +11978,18 @@ async function learnExpandReg(regId, btn) {
         } catch(_) {}
       }
     }
-    body.dataset.loaded = '1';
+    body.dataset.loaded = '1';   // 只在成功完成后标记
   } catch(e) {
-    body.innerHTML = `<span style="color:#dc2626;">加载失败：${e.message}</span>`;
+    // 不设 loaded=1，保留重试能力
+    const isTimeout = e.name === 'TimeoutError' || e.name === 'AbortError';
+    body.innerHTML = `
+      <div style="color:#dc2626;font-size:12px;margin-bottom:8px;">
+        ${isTimeout ? '⏱ 响应超时（原文内容较长，请重试）' : `加载失败：${e.message}`}
+      </div>
+      <button onclick="learnRetryReg('${regId}')"
+        style="padding:4px 14px;font-size:12px;color:#8b5cf6;background:#faf5ff;border:1px solid #ddd6fe;border-radius:6px;cursor:pointer;">
+        🔄 重试
+      </button>`;
   }
 }
 
@@ -12160,6 +12169,15 @@ function learnDoExport(rec) {
   const safeName = (rec.title || '痛点学习').replace(/[\/\\:*?"<>|]/g, '_').slice(0, 40);
   const dateStr  = new Date().toLocaleDateString('zh-CN').replace(/\//g, '-');
   XLSX.writeFile(wb, `痛点学习_${safeName}_${dateStr}.xlsx`);
+}
+
+// ── 重试展开（点击重试按钮时调用）───────────────────────────────
+function learnRetryReg(regId) {
+  const body = document.getElementById(regId + '-body');
+  if (body) body.dataset.loaded = '';   // 清除 loaded 标记
+  // 找到对应的展开按钮（通过 onclick 属性定位）
+  const btn = document.querySelector(`[onclick="learnExpandReg('${regId}',this)"]`);
+  learnExpandReg(regId, btn);
 }
 
 // ── 极简 Markdown → HTML（供法规原文渲染）─────────────────────
