@@ -3002,82 +3002,78 @@ tr:hover td { background: #fafafa; }
       </div>
     </div>
 
-    <!-- Tax 时事新闻面板（必应快捷入口 + 手动场景提炼） -->
+    <!-- Tax 时事新闻面板（DeepSeek AI 搜索） -->
     <div id="radar-panel-news" style="display:none;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
 
-      <!-- 说明横幅 -->
-      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:11px 15px;margin-bottom:18px;font-size:12px;color:#166534;display:flex;align-items:flex-start;gap:8px;">
-        <span style="font-size:15px;flex-shrink:0;">💡</span>
+      <!-- 搜索主区 -->
+      <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
+        <div style="flex:1;min-width:220px;">
+          <div style="font-size:11px;color:#64748b;margin-bottom:4px;">主题关键词（如：个税 信托 减持 跨境 家族传承…）</div>
+          <input id="news-keyword" type="text" placeholder="留空则搜索家办全领域热点"
+            style="width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;"
+            onkeydown="if(event.key==='Enter') newsAISearch()"/>
+        </div>
         <div>
-          <strong>使用说明：</strong>境外搜索 API 在中国大陆不可访问，本功能已切换为「<strong>必应新闻快速入口</strong>」模式。<br>
-          ① 输入关键词 → 点击生成搜索链接 → 点击各来源在必应中搜索最新文章；<br>
-          ② 在必应中找到感兴趣的文章后，复制标题和正文 → 粘贴到下方「手动场景提炼」区域 → AI 自动提炼业务场景。
+          <div style="font-size:11px;color:#64748b;margin-bottom:4px;">数量</div>
+          <select id="news-count" style="padding:9px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;background:#fff;">
+            <option value="8">8 条</option>
+            <option value="12" selected>12 条</option>
+            <option value="16">16 条</option>
+          </select>
         </div>
-      </div>
-
-      <!-- 关键词搜索行 -->
-      <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:18px;">
-        <div style="flex:1;min-width:200px;">
-          <div style="font-size:11px;color:#64748b;margin-bottom:4px;">搜索关键词（留空则使用各来源默认关键词）</div>
-          <input id="news-keyword" type="text" placeholder="如：个人所得税 信托 减持 家办…"
-            style="width:100%;box-sizing:border-box;padding:8px 11px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;"/>
-        </div>
-        <button onclick="newsGenLinks()"
-          style="padding:9px 24px;background:#2d6a4f;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">
-          🔍 生成搜索链接
+        <button onclick="newsAISearch()" id="news-search-btn"
+          style="padding:9px 26px;background:#2d6a4f;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px;">
+          <span id="news-search-spin">🤖</span> AI 搜索新闻
         </button>
-        <button onclick="window.open('https://cn.bing.com/news/search?q='
-            +encodeURIComponent((document.getElementById('news-keyword').value||'税务 家族信托 个税 减持 跨境规划')
-            +' 政策')+'&qft=sortbydate%3D%221%22','_blank')"
-          style="padding:9px 18px;background:#0369a1;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">
-          ⚡ 必应综合搜索
+        <button onclick="window.open('https://cn.bing.com/news/search?q='+encodeURIComponent((document.getElementById('news-keyword').value||'家族信托 税务合规 跨境规划')+' 政策')+'&qft=sortbydate%3D%221%22','_blank')"
+          style="padding:9px 16px;background:#f1f5f9;color:#374151;border:1px solid #cbd5e1;border-radius:8px;font-size:12px;cursor:pointer;white-space:nowrap;">
+          必应实时搜索 ↗
         </button>
       </div>
+      <div style="font-size:11px;color:#94a3b8;margin-bottom:18px;">
+        🤖 由 DeepSeek AI 根据知识库生成 · 如需最新实时资讯可点击「必应实时搜索」
+      </div>
 
-      <!-- 搜索链接结果区 -->
-      <div id="news-links-result" style="margin-bottom:24px;"></div>
+      <!-- AI 搜索结果区 -->
+      <div id="news-ai-result" style="min-height:60px;"></div>
 
       <!-- 分割线 -->
-      <div style="border-top:2px dashed #e2e8f0;margin:20px 0;"></div>
+      <div style="border-top:2px dashed #e2e8f0;margin:24px 0 18px;"></div>
 
-      <!-- 手动场景提炼区 -->
-      <div style="background:#fafafa;border:1px solid #e2e8f0;border-radius:10px;padding:18px;">
-        <div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:14px;display:flex;align-items:center;gap:7px;">
-          ✨ 手动场景提炼
-          <span style="font-size:11px;font-weight:400;color:#94a3b8;">· 从必应找到文章后，粘贴内容至此，AI 自动提炼业务场景</span>
-        </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
-          <div style="flex:1;min-width:200px;">
-            <div style="font-size:11px;color:#64748b;margin-bottom:4px;">文章标题 <span style="color:#dc2626;">*</span></div>
-            <input id="news-manual-title" type="text" placeholder="粘贴文章标题…"
-              style="width:100%;box-sizing:border-box;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;"/>
+      <!-- 手动粘贴补充区（折叠） -->
+      <details id="news-manual-details">
+        <summary style="font-size:12px;font-weight:600;color:#64748b;cursor:pointer;user-select:none;list-style:none;display:flex;align-items:center;gap:5px;">
+          <span>▶</span> 手动粘贴场景提炼（从必应找到文章后，复制正文粘贴至此）
+        </summary>
+        <div style="margin-top:14px;background:#fafafa;border:1px solid #e2e8f0;border-radius:10px;padding:16px;">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+            <div style="flex:1;min-width:180px;">
+              <div style="font-size:11px;color:#64748b;margin-bottom:4px;">文章标题 *</div>
+              <input id="news-manual-title" type="text" placeholder="粘贴文章标题…"
+                style="width:100%;box-sizing:border-box;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;"/>
+            </div>
+            <div style="flex:1;min-width:160px;">
+              <div style="font-size:11px;color:#64748b;margin-bottom:4px;">来源/URL（选填）</div>
+              <input id="news-manual-url" type="text" placeholder="https://…"
+                style="width:100%;box-sizing:border-box;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;"/>
+            </div>
           </div>
-          <div style="flex:1;min-width:180px;">
-            <div style="font-size:11px;color:#64748b;margin-bottom:4px;">文章来源/URL（选填）</div>
-            <input id="news-manual-url" type="text" placeholder="https://…"
-              style="width:100%;box-sizing:border-box;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;"/>
+          <textarea id="news-manual-content" rows="5" placeholder="粘贴文章正文…"
+            style="width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;line-height:1.6;resize:vertical;margin-bottom:10px;"></textarea>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <button onclick="newsManualExtract()"
+              style="padding:8px 20px;background:#2d6a4f;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;">
+              ✨ AI 提炼场景
+            </button>
+            <button onclick="document.getElementById('news-manual-title').value='';document.getElementById('news-manual-url').value='';document.getElementById('news-manual-content').value='';document.getElementById('news-manual-result').innerHTML='';"
+              style="padding:8px 14px;background:#f1f5f9;color:#64748b;border:1px solid #cbd5e1;border-radius:7px;font-size:12px;cursor:pointer;">清空</button>
+            <span id="news-manual-status" style="font-size:12px;color:#6b7280;"></span>
           </div>
+          <div id="news-manual-result" style="margin-top:12px;"></div>
         </div>
-        <div style="margin-bottom:12px;">
-          <div style="font-size:11px;color:#64748b;margin-bottom:4px;">文章正文 <span style="color:#dc2626;">*</span>（复制文章全文或关键段落，粘贴于此）</div>
-          <textarea id="news-manual-content" rows="6" placeholder="在必应/百度新闻中打开文章，Ctrl+A 全选文字后复制，粘贴到此处即可…"
-            style="width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;line-height:1.6;resize:vertical;"></textarea>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <button onclick="newsManualExtract()"
-            style="padding:9px 24px;background:#2d6a4f;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
-            ✨ AI 提炼场景
-          </button>
-          <button onclick="document.getElementById('news-manual-title').value='';document.getElementById('news-manual-url').value='';document.getElementById('news-manual-content').value='';document.getElementById('news-manual-result').innerHTML='';"
-            style="padding:9px 16px;background:#f1f5f9;color:#64748b;border:1px solid #cbd5e1;border-radius:8px;font-size:12px;cursor:pointer;">
-            清空
-          </button>
-          <span id="news-manual-status" style="font-size:12px;color:#6b7280;"></span>
-        </div>
-        <div id="news-manual-result" style="margin-top:14px;"></div>
-      </div>
+      </details>
 
-      <!-- 场景提炼浮层（保留，供历史兼容） -->
+      <!-- 场景提炼浮层 -->
       <div id="news-extract-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
         <div style="background:#fff;border-radius:14px;padding:28px;max-width:640px;width:90%;max-height:80vh;overflow-y:auto;position:relative;">
           <button onclick="document.getElementById('news-extract-modal').style.display='none'"
@@ -10337,8 +10333,7 @@ function switchBuRadar(bu) {
 }
 
 // ══════════════════════════════════════════════════════════════
-// Tax 时事新闻模块（必应新闻快捷入口 + DeepSeek 手动场景提炼）
-// 注：境外抓取 API（Jina/Exa 等）在中国大陆不可达，改为链接直达模式
+// Tax 时事新闻模块（DeepSeek AI 搜索 + 手动提炼）
 // ══════════════════════════════════════════════════════════════
 
 function newsInit() {
@@ -10346,108 +10341,174 @@ function newsInit() {
   const saved = localStorage.getItem('news_last_kw') || '';
   const inp = document.getElementById('news-keyword');
   if (inp && saved && !inp.value) inp.value = saved;
-  // 如有上次搜索结果，自动恢复展示
+  // 恢复缓存的 AI 搜索结果
   try {
-    const cache = JSON.parse(localStorage.getItem('news_links_cache') || 'null');
+    const cache = JSON.parse(localStorage.getItem('news_ai_cache') || 'null');
     if (cache && cache.html) {
-      document.getElementById('news-links-result').innerHTML = cache.html;
+      document.getElementById('news-ai-result').innerHTML = cache.html;
     }
   } catch(e) {}
-}
-
-// 按维度分组生成必应新闻搜索链接卡片
-function newsGenLinks() {
-  const kw  = (document.getElementById('news-keyword').value || '').trim();
-  const res = document.getElementById('news-links-result');
-
-  // 按 dim 分组
-  const groups = {};
-  TAX_SOURCES.forEach(src => {
-    if (!groups[src.dim]) groups[src.dim] = [];
-    groups[src.dim].push(src);
+  // 展开箭头联动
+  const det = document.getElementById('news-manual-details');
+  if (det) det.addEventListener('toggle', () => {
+    const arrow = det.querySelector('span');
+    if (arrow) arrow.textContent = det.open ? '▼' : '▶';
   });
-
-  const dimColors = {
-    '证券行业':               '#dbeafe:#1d4ed8',
-    '银行业':                 '#dcfce7:#15803d',
-    '聚合财经':               '#fef3c7:#92400e',
-    '家企架构与资本市场':     '#ede9fe:#6d28d9',
-    '家族财富传承与全球税务规划': '#fee2e2:#991b1b',
-    '保险行业':               '#fce7f3:#9d174d',
-    '信托行业':               '#e0f2fe:#0369a1',
-    '全球法律与新兴业务':     '#f1f5f9:#475569',
-    '组织效能与ESG价值':      '#ecfdf5:#065f46',
-  };
-
-  const html = Object.entries(groups).map(([dim, srcs]) => {
-    const [bg, color] = (dimColors[dim] || '#f3f4f6:#374151').split(':');
-    const cards = srcs.map(src => {
-      const q = encodeURIComponent(`"${src.name}" ${kw || src.keywords.split('、')[0]}`);
-      const bingUrl = `https://cn.bing.com/news/search?q=${q}&qft=sortbydate%3D%221%22`;
-      return `
-        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
-          <div style="flex:1;min-width:0;">
-            <div style="font-size:13px;font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${src.name}</div>
-            <div style="font-size:11px;color:#94a3b8;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${src.keywords}</div>
-          </div>
-          <div style="display:flex;gap:6px;flex-shrink:0;">
-            <a href="${src.url}" target="_blank"
-              style="padding:4px 10px;background:#f1f5f9;color:#475569;border-radius:5px;font-size:11px;text-decoration:none;white-space:nowrap;">官网</a>
-            <a href="${bingUrl}" target="_blank"
-              style="padding:4px 12px;background:#2d6a4f;color:#fff;border-radius:5px;font-size:11px;text-decoration:none;white-space:nowrap;font-weight:600;">必应搜索</a>
-          </div>
-        </div>`;
-    }).join('');
-
-    return `
-      <div style="margin-bottom:14px;">
-        <div style="font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;display:inline-block;
-          background:${bg};color:${color};margin-bottom:8px;">${dim}</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;">
-          ${cards}
-        </div>
-      </div>`;
-  }).join('');
-
-  const banner = `
-    <div style="font-size:12px;color:#64748b;margin-bottom:14px;padding:8px 12px;background:#f8fafc;border-radius:6px;">
-      🔍 共 <strong>${TAX_SOURCES.length}</strong> 个信息源 · 点击「必应搜索」在新标签页查看最新文章
-      ${kw ? `· 关键词：<em style="color:#2d6a4f;">${kw}</em>` : '· <span style="color:#94a3b8;">已使用各来源默认关键词</span>'}
-    </div>`;
-
-  const fullHtml = banner + html;
-  res.innerHTML = fullHtml;
-
-  // 缓存本次结果
-  if (kw) localStorage.setItem('news_last_kw', kw);
-  try { localStorage.setItem('news_links_cache', JSON.stringify({ html: fullHtml })); } catch(e) {}
 }
 
-// 手动粘贴文章内容 → DeepSeek 提炼场景
-async function newsManualExtract() {
-  const title   = (document.getElementById('news-manual-title').value   || '').trim();
-  const url     = (document.getElementById('news-manual-url').value     || '').trim();
-  const content = (document.getElementById('news-manual-content').value || '').trim();
-  const status  = document.getElementById('news-manual-status');
-  const resEl   = document.getElementById('news-manual-result');
-
-  if (!title) { status.style.color = '#dc2626'; status.textContent = '请填写文章标题'; return; }
-  if (!content) { status.style.color = '#dc2626'; status.textContent = '请粘贴文章正文'; return; }
-
-  status.style.color = '#6b7280'; status.textContent = '⏳ AI 提炼中…';
-  resEl.innerHTML = '';
+// ── DeepSeek AI 搜索新闻 ──────────────────────────────────────
+async function newsAISearch() {
+  const kw    = (document.getElementById('news-keyword').value || '').trim();
+  const count = parseInt(document.getElementById('news-count').value || '12', 10);
+  const btn   = document.getElementById('news-search-btn');
+  const spin  = document.getElementById('news-search-spin');
+  const res   = document.getElementById('news-ai-result');
 
   const apiBase = localStorage.getItem('pg_api_base') || COMPANY_API_BASE;
   const apiKey  = localStorage.getItem('pg_api_key')  || COMPANY_API_KEY;
 
-  const prompt = `你是朝曦家族办公室的场景分析师。请阅读以下文章，提炼1-3个与高净值客户（家企传承、税务合规、跨境规划、资产保护、股权架构）相关的业务场景。
+  btn.disabled = true; spin.textContent = '⏳';
+  res.innerHTML = `<div style="padding:28px;text-align:center;color:#6b7280;font-size:13px;">
+    ⏳ DeepSeek AI 正在检索相关新闻与政策动态，请稍候…</div>`;
 
-文章标题：${title}
-${url ? `文章来源：${url}` : ''}
-文章内容：
-${content.slice(0, 6000)}${content.length > 6000 ? '\n…（已截断）' : ''}
+  const topic = kw || '家族信托、个人所得税、跨境税务规划、股权架构、资产保护';
 
-请用以下 JSON 数组格式输出，若文章与家办业务无关则返回空数组 []：
+  const prompt = `你是一位专注于中国高净值客户服务的家族办公室顾问助手。请列出${count}条与以下主题相关的重要新闻、政策文件或行业动态，优先选取近期（2023年至今）的内容。
+
+主题：${topic}
+重点关注领域：税务合规、家族传承、跨境规划、资产保护、股权架构、信托、保险、资本市场监管
+
+请严格按照以下 JSON 数组格式输出，不要输出其他内容：
+[
+  {
+    "title": "新闻/政策标题（15-50字，尽量准确）",
+    "source": "来源机构（如：国家税务总局、香港证监会、财联社、中国证监会等）",
+    "date": "大概日期（YYYY-MM 格式，如不确定写最可能的时间）",
+    "summary": "内容摘要（80-150字，重点说明政策要点、监管变化或事件影响，突出与高净值客户/家办的关联）",
+    "url": "如确知官方 URL 则填写，否则填空字符串",
+    "tags": ["标签1", "标签2"],
+    "relevance": "与家办业务的核心关联点（20字内）"
+  }
+]`;
+
+  try {
+    const resp = await fetch(`${apiBase}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: COMPANY_API_MODEL,
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.4,
+        max_tokens: 4000
+      })
+    });
+    const data = await resp.json();
+    let raw = data.choices?.[0]?.message?.content || '[]';
+
+    // 容错解析：去掉 markdown 代码块标记
+    raw = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+    let items = [];
+    try {
+      const parsed = JSON.parse(raw);
+      items = Array.isArray(parsed) ? parsed : (parsed.items || parsed.news || parsed.results || []);
+    } catch(e2) {
+      const m = raw.match(/\[[\s\S]*\]/);
+      if (m) { try { items = JSON.parse(m[0]); } catch(e3) {} }
+    }
+
+    btn.disabled = false; spin.textContent = '🤖';
+
+    if (!items.length) {
+      res.innerHTML = `<div style="padding:24px;text-align:center;color:#9ca3af;font-size:13px;">
+        AI 未返回有效结果，请更换关键词重试。</div>`;
+      return;
+    }
+
+    const tagColors = ['#dbeafe:#1d4ed8','#dcfce7:#15803d','#fef3c7:#92400e',
+                       '#ede9fe:#6d28d9','#fee2e2:#991b1b','#fce7f3:#9d174d'];
+
+    const html = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="font-size:12px;color:#64748b;">
+          🤖 AI 检索到 <strong>${items.length}</strong> 条相关动态
+          ${kw ? `· 主题：<em style="color:#2d6a4f;">${kw}</em>` : '· 家办全领域热点'}
+          <span style="margin-left:8px;color:#94a3b8;font-size:11px;">（基于 DeepSeek 知识库，供参考）</span>
+        </div>
+        <button onclick="document.getElementById('news-ai-result').innerHTML='';localStorage.removeItem('news_ai_cache');"
+          style="padding:3px 10px;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;border-radius:4px;font-size:11px;cursor:pointer;">
+          清除
+        </button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        ${items.map((it, idx) => {
+          const tags = (it.tags || []).slice(0, 3);
+          const tagHtml = tags.map((t, i) => {
+            const [bg, col] = (tagColors[i % tagColors.length]).split(':');
+            return `<span style="padding:2px 8px;background:${bg};color:${col};border-radius:10px;font-size:10px;font-weight:500;">${t}</span>`;
+          }).join('');
+          const safeTitle = (it.title||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+          const safeSrc   = (it.source||'').replace(/'/g,"\\'");
+          const safeDate  = (it.date||'').replace(/'/g,"\\'");
+          const safeSumm  = (it.summary||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+          const safeRel   = (it.relevance||'').replace(/'/g,"\\'");
+          return `
+          <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;transition:box-shadow .15s;"
+            onmouseover="this.style.boxShadow='0 2px 12px rgba(0,0,0,.08)'" onmouseout="this.style.boxShadow='none'">
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13.5px;font-weight:700;color:#1e293b;line-height:1.5;margin-bottom:5px;">
+                  ${it.url ? `<a href="${it.url}" target="_blank" rel="noopener"
+                    style="color:#1e293b;text-decoration:none;"
+                    onmouseover="this.style.color='#2d6a4f'" onmouseout="this.style.color='#1e293b'">${it.title}</a>`
+                    : it.title}
+                </div>
+                <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+                  <span style="font-size:11px;color:#64748b;">📌 ${it.source || '未知来源'}</span>
+                  ${it.date ? `<span style="font-size:11px;color:#94a3b8;">· ${it.date}</span>` : ''}
+                  ${tagHtml}
+                  ${it.relevance ? `<span style="font-size:10px;background:#f0fdf4;color:#166534;padding:2px 8px;border-radius:10px;">↪ ${it.relevance}</span>` : ''}
+                </div>
+                <div style="font-size:12px;color:#475569;line-height:1.7;">${it.summary || ''}</div>
+              </div>
+              <button onclick="newsAIExtract('${safeTitle}','${safeSrc}','${safeDate}','${safeSumm}','${safeRel}')"
+                style="flex-shrink:0;padding:6px 14px;background:#2d6a4f;color:#fff;border:none;border-radius:7px;font-size:12px;cursor:pointer;white-space:nowrap;margin-top:2px;">
+                提炼场景
+              </button>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`;
+
+    res.innerHTML = html;
+    if (kw) localStorage.setItem('news_last_kw', kw);
+    try { localStorage.setItem('news_ai_cache', JSON.stringify({ html })); } catch(e) {}
+
+  } catch(e) {
+    btn.disabled = false; spin.textContent = '🤖';
+    res.innerHTML = `<div style="padding:20px;color:#dc2626;font-size:13px;">搜索失败：${e.message}</div>`;
+  }
+}
+
+// ── 从 AI 新闻卡片提炼场景（使用摘要，无需抓取 URL）──────────
+async function newsAIExtract(title, source, date, summary, relevance) {
+  const modal = document.getElementById('news-extract-modal');
+  const body  = document.getElementById('news-extract-body');
+  const src   = document.getElementById('news-extract-source');
+  modal.style.display = 'flex';
+  src.textContent = `${source}${date ? '  ·  ' + date : ''}`;
+  body.innerHTML  = '<div style="text-align:center;padding:20px;color:#6b7280;">⏳ AI 正在提炼场景…</div>';
+
+  const apiBase = localStorage.getItem('pg_api_base') || COMPANY_API_BASE;
+  const apiKey  = localStorage.getItem('pg_api_key')  || COMPANY_API_KEY;
+
+  const prompt = `你是朝曦家族办公室的场景分析师。请根据以下新闻/政策动态，提炼1-3个与高净值客户（家企传承、税务合规、跨境规划、资产保护、股权架构）相关的具体业务场景。
+
+新闻标题：${title}
+来源：${source}  日期：${date}
+摘要：${summary}
+${relevance ? `家办关联：${relevance}` : ''}
+
+请用以下 JSON 数组格式输出，每个场景要具体、可操作：
 [
   {
     "scene": "场景名称（10-20字）",
@@ -10470,25 +10531,22 @@ ${content.slice(0, 6000)}${content.length > 6000 ? '\n…（已截断）' : ''}
     });
     const data = await resp.json();
     let raw = data.choices?.[0]?.message?.content || '[]';
+    raw = raw.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
     let scenes = [];
     try {
       const parsed = JSON.parse(raw);
       scenes = Array.isArray(parsed) ? parsed : (parsed.scenes || parsed.result || []);
     } catch(e2) {
       const m = raw.match(/\[[\s\S]*\]/);
-      if (m) scenes = JSON.parse(m[0]);
+      if (m) { try { scenes = JSON.parse(m[0]); } catch(e3) {} }
     }
 
-    status.textContent = '';
-
     if (!scenes.length) {
-      resEl.innerHTML = '<div style="color:#94a3b8;padding:10px 0;font-size:13px;">该文章暂未发现与家办业务直接相关的场景，请换一篇更有针对性的文章。</div>';
+      body.innerHTML = '<div style="color:#94a3b8;padding:16px 0;">该动态暂未发现与家办业务直接相关的场景。</div>';
       return;
     }
 
-    resEl.innerHTML = `
-      <div style="font-size:12px;color:#64748b;margin-bottom:10px;">提炼到 <strong>${scenes.length}</strong> 个场景：</div>
-      ${scenes.map(s => `
+    body.innerHTML = scenes.map(s => `
       <div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:8px;padding:14px;margin-bottom:10px;">
         <div style="font-size:14px;font-weight:700;color:#6d28d9;margin-bottom:4px;">${s.scene}</div>
         <div style="font-size:12px;color:#475569;margin-bottom:6px;">${s.rationale}</div>
@@ -10496,7 +10554,78 @@ ${content.slice(0, 6000)}${content.length > 6000 ? '\n…（已截断）' : ''}
           痛点方向：${s.pain_direction}
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button onclick="newsSendScene(this.dataset.scene, this.dataset.dir, 'tax', this)"
+          <button onclick="newsSendScene(this.dataset.scene,this.dataset.dir,'tax',this)"
+            data-scene="${s.scene.replace(/"/g,'&quot;')}" data-dir="${s.pain_direction.replace(/"/g,'&quot;')}"
+            style="padding:5px 14px;background:#2d6a4f;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">
+            ＋ 加入 Tax 场景池
+          </button>
+          <button onclick="hgjSendToPainGenerate('${s.scene.replace(/'/g,"\\'")}');document.getElementById('news-extract-modal').style.display='none';"
+            style="padding:5px 14px;background:#1a56db;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">
+            直接生成痛点
+          </button>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    body.innerHTML = `<div style="color:#dc2626;">提炼失败：${e.message}</div>`;
+  }
+}
+
+// ── 手动粘贴文章 → DeepSeek 提炼场景 ────────────────────────
+async function newsManualExtract() {
+  const title   = (document.getElementById('news-manual-title').value   || '').trim();
+  const url     = (document.getElementById('news-manual-url').value     || '').trim();
+  const content = (document.getElementById('news-manual-content').value || '').trim();
+  const status  = document.getElementById('news-manual-status');
+  const resEl   = document.getElementById('news-manual-result');
+
+  if (!title)   { status.style.color='#dc2626'; status.textContent='请填写文章标题'; return; }
+  if (!content) { status.style.color='#dc2626'; status.textContent='请粘贴文章正文'; return; }
+  status.style.color='#6b7280'; status.textContent='⏳ AI 提炼中…';
+  resEl.innerHTML = '';
+
+  const apiBase = localStorage.getItem('pg_api_base') || COMPANY_API_BASE;
+  const apiKey  = localStorage.getItem('pg_api_key')  || COMPANY_API_KEY;
+
+  const prompt = `你是朝曦家族办公室的场景分析师。请阅读以下文章，提炼1-3个与高净值客户相关的业务场景。
+
+文章标题：${title}
+${url ? `来源：${url}` : ''}
+正文：
+${content.slice(0, 6000)}${content.length > 6000 ? '\n…（截断）' : ''}
+
+JSON 数组格式输出（与家办无关则返回 []）：
+[{"scene":"场景名称（10-20字）","rationale":"关联理由（30字内）","pain_direction":"痛点方向（20字内）"}]
+只输出 JSON。`;
+
+  try {
+    const resp = await fetch(`${apiBase}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: COMPANY_API_MODEL,
+        messages: [{ role:'user', content: prompt }],
+        temperature: 0.3, max_tokens: 800 })
+    });
+    const data = await resp.json();
+    let raw = (data.choices?.[0]?.message?.content || '[]')
+      .replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+    let scenes = [];
+    try { const p=JSON.parse(raw); scenes=Array.isArray(p)?p:(p.scenes||p.result||[]); }
+    catch(e2){ const m=raw.match(/\[[\s\S]*\]/); if(m){try{scenes=JSON.parse(m[0]);}catch(e3){}} }
+
+    status.textContent = '';
+    if (!scenes.length) {
+      resEl.innerHTML = '<div style="color:#94a3b8;font-size:13px;padding:8px 0;">未发现明显家办业务场景。</div>';
+      return;
+    }
+    resEl.innerHTML = scenes.map(s => `
+      <div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:8px;padding:14px;margin-bottom:10px;">
+        <div style="font-size:14px;font-weight:700;color:#6d28d9;margin-bottom:4px;">${s.scene}</div>
+        <div style="font-size:12px;color:#475569;margin-bottom:6px;">${s.rationale}</div>
+        <div style="font-size:12px;color:#2d6a4f;background:#ede9fe;padding:4px 10px;border-radius:4px;display:inline-block;margin-bottom:10px;">
+          痛点方向：${s.pain_direction}
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="newsSendScene(this.dataset.scene,this.dataset.dir,'tax',this)"
             data-scene="${s.scene.replace(/"/g,'&quot;')}" data-dir="${s.pain_direction.replace(/"/g,'&quot;')}"
             style="padding:5px 14px;background:#2d6a4f;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">
             ＋ 加入 Tax 场景池
@@ -10506,11 +10635,9 @@ ${content.slice(0, 6000)}${content.length > 6000 ? '\n…（已截断）' : ''}
             直接生成痛点
           </button>
         </div>
-      </div>`).join('')}`;
-
+      </div>`).join('');
   } catch(e) {
-    status.style.color = '#dc2626';
-    status.textContent = `提炼失败：${e.message}`;
+    status.style.color='#dc2626'; status.textContent=`提炼失败：${e.message}`;
   }
 }
 
