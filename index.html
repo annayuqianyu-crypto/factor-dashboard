@@ -4016,6 +4016,13 @@ function showPage(pageId) {
             </button>
           </div>`;
           container.innerHTML = bar + cache.html;
+          // 恢复原始数据对象，确保推送痛点学习和 Excel 导出可用
+          if (Array.isArray(cache.points))  window._pgAllPoints = cache.points;
+          if (Array.isArray(cache.results)) {
+            _pgLastPoints  = cache.results;
+            _pgLastNewSkus = cache.newSkus || [];
+            _pgLastBu      = cache.bu || 'All Department';
+          }
         }
       } catch(e) { /* 忽略损坏缓存 */ }
     }
@@ -8770,11 +8777,15 @@ function pgRenderResults(results, newSkus, bu, failNote) {
 
   document.getElementById('pgResultsContent').innerHTML = html;
 
-  // 写入缓存
+  // 写入缓存（同时存原始数据，供 Excel 导出和推送痛点学习使用）
   try {
     localStorage.setItem('pain_results_cache', JSON.stringify({
       html,
-      savedAt: new Date().toISOString()
+      savedAt:  new Date().toISOString(),
+      points:   window._pgAllPoints || [],   // 推送痛点学习按钮索引
+      results:  results || [],               // Excel 导出
+      newSkus:  newSkus || [],
+      bu:       bu || 'All Department',
     }));
   } catch(e) { console.warn('痛点缓存写入失败:', e.message); }
 
