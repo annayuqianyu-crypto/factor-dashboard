@@ -10479,7 +10479,7 @@ async function newsSearch() {
     } catch(e) { return url; }
   }
 
-  // Jina Search 只支持 GET，日期靠关键词辅助引导
+  // Jina Search — 小批次(3域名) + 并行 + 失败重试一次
   const startYear  = start.slice(0, 4);
   const startMonth = parseInt(start.slice(5, 7));
   const endMonth   = parseInt(end.slice(5, 7));
@@ -10487,33 +10487,55 @@ async function newsSearch() {
     ? `年${startMonth}月`
     : `年${startMonth}-${endMonth}月`);
 
+  const BATCH = 3;
+  const jinaHeaders = {
+    'Accept': 'application/json',
+    'Authorization': `Bearer ${key}`,
+    'X-Retain-Images': 'none'
+  };
+
+  // 构造全部批次
+  const batches = [];
   for (let i = 0; i < domains.length; i += BATCH) {
     const chunk = domains.slice(i, i + BATCH);
     const siteQ = chunk.map(d => `site:${d}`).join(' OR ');
-    const query = encodeURIComponent(`(${siteQ}) ${baseKw} ${monthHint}`);
+    batches.push(encodeURIComponent(`(${siteQ}) ${baseKw} ${monthHint}`));
+  }
+
+  // 单次 fetch（失败返回 null）
+  async function fetchBatch(query) {
     try {
-      const resp = await fetch(`https://s.jina.ai/${query}`, {
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${key}`,
-          'X-Retain-Images': 'none'
-        }
+      const r = await fetch(`https://s.jina.ai/${query}`, { headers: jinaHeaders });
+      if (!r.ok) return null;
+      const data = await r.json();
+      return data.data || [];
+    } catch(e) { return null; }
+  }
+
+  // 并发控制（最多4个同时）
+  const CONCURRENCY = 4;
+  let done = 0;
+  for (let i = 0; i < batches.length; i += CONCURRENCY) {
+    const group = batches.slice(i, i + CONCURRENCY);
+    const results = await Promise.all(group.map(async q => {
+      let items = await fetchBatch(q);
+      if (items === null) items = await fetchBatch(q); // 失败重试一次
+      return items || [];
+    }));
+    results.flat().forEach(it => {
+      if (!it.url) return;
+      const d = it.publishedTime || it.date || '';
+      if (d && (d.slice(0,10) < start || d.slice(0,10) > end)) return;
+      allItems.push({
+        url:     it.url,
+        title:   it.title || it.url,
+        snippet: it.description || it.content?.slice(0, 200) || '',
+        date:    d
       });
-      if (!resp.ok) { console.warn(`批次 ${i} 失败: HTTP ${resp.status}`); continue; }
-      const data = await resp.json();
-      (data.data || []).forEach(it => {
-        if (!it.url) return;
-        // 客户端按日期过滤（有 publishedTime 才过滤，否则保留）
-        const d = it.publishedTime || it.date || '';
-        if (d && (d < start || d > end + 'T')) return;
-        allItems.push({
-          url:     it.url,
-          title:   it.title || it.url,
-          snippet: it.description || it.content?.slice(0, 200) || '',
-          date:    d
-        });
-      });
-    } catch(e) { console.warn('批次失败:', e.message); }
+    });
+    done += group.length;
+    res.innerHTML = `<div style="padding:16px;text-align:center;color:#6b7280;font-size:13px;">
+      ⏳ 正在检索… ${done}/${batches.length} 批完成，已找到 ${allItems.length} 篇</div>`;
   }
 
   btn.disabled = false; spin.textContent = '🔍';
