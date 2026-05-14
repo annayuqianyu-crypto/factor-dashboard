@@ -3843,8 +3843,8 @@ tr:hover td { background: #fafafa; }
   </div>
 
   <!-- 输入区 -->
-  <div class="card" style="border-left:4px solid #6d28d9;">
-    <div style="font-size:14px;font-weight:700;color:#6d28d9;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+  <div class="card" style="border-left:4px solid #c4b5fd;">
+    <div style="font-size:14px;font-weight:700;color:#7c3aed;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
       <span>📌</span> 请输入要深度学习的痛点
     </div>
     <textarea id="learn-pain-input" rows="4"
@@ -3852,17 +3852,13 @@ tr:hover td { background: #fafafa; }
       style="width:100%;box-sizing:border-box;padding:11px 13px;border:1px solid #ddd6fe;border-radius:8px;font-size:13.5px;line-height:1.7;resize:vertical;font-family:inherit;"></textarea>
     <div style="display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap;">
       <button onclick="learnAnalyze()" id="learn-analyze-btn"
-        style="padding:10px 28px;background:#6d28d9;color:#fff;border:none;border-radius:8px;font-size:13.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;">
+        style="padding:10px 28px;background:linear-gradient(135deg,#a78bfa,#8b5cf6);color:#fff;border:none;border-radius:8px;font-size:13.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(139,92,246,.25);">
         <span id="learn-analyze-spin">🔬</span> 深度分析
-      </button>
-      <button onclick="learnLoadLastPainPoint()"
-        style="padding:10px 18px;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:8px;font-size:12.5px;cursor:pointer;">
-        📋 载入最近生成的痛点
       </button>
       <span id="learn-status" style="font-size:12px;color:#6b7280;"></span>
     </div>
     <div style="font-size:11px;color:#9ca3af;margin-top:8px;">
-      分析流程：① 腾讯云联网搜索相关法规资讯 → ② DeepSeek 生成六维深度报告 → ③ 开放 AI 对话
+      分析流程：① 腾讯云联网搜索相关法规资讯 → ② DeepSeek 生成六维深度报告 → ③ 开放 AI 对话 · 仅支持从「痛点结果」逐条推送
     </div>
   </div>
 
@@ -3871,12 +3867,12 @@ tr:hover td { background: #fafafa; }
 
   <!-- 对话区（分析完成后显示） -->
   <div id="learn-chat-section" style="display:none;margin-top:24px;">
-    <div class="card" style="border-left:4px solid #6d28d9;padding-bottom:16px;">
-      <div style="font-size:14px;font-weight:700;color:#6d28d9;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+    <div class="card" style="border-left:4px solid #c4b5fd;padding-bottom:16px;">
+      <div style="font-size:14px;font-weight:700;color:#7c3aed;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
         <span>💬</span> 与 DeepSeek 深度对话
       </div>
       <div id="learn-chat-messages"
-        style="min-height:140px;max-height:520px;overflow-y:auto;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:14px;font-size:13px;line-height:1.75;">
+        style="min-height:140px;max-height:520px;overflow-y:auto;background:#faf5ff;border:1px solid #ede9fe;border-radius:10px;padding:16px;margin-bottom:14px;font-size:13px;line-height:1.75;">
         <div style="text-align:center;color:#9ca3af;font-size:12px;padding:20px 0;">分析完成后，可在此向 AI 进一步提问</div>
       </div>
       <div style="display:flex;gap:10px;">
@@ -3885,7 +3881,7 @@ tr:hover td { background: #fafafa; }
           style="flex:1;padding:10px 13px;border:1px solid #ddd6fe;border-radius:8px;font-size:13px;line-height:1.5;resize:none;font-family:inherit;"
           onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();learnChatSend();}"></textarea>
         <button onclick="learnChatSend()" id="learn-chat-send-btn"
-          style="padding:0 24px;background:#6d28d9;color:#fff;border:none;border-radius:8px;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap;align-self:stretch;">
+          style="padding:0 24px;background:linear-gradient(135deg,#a78bfa,#8b5cf6);color:#fff;border:none;border-radius:8px;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap;align-self:stretch;box-shadow:0 2px 8px rgba(139,92,246,.2);">
           发送
         </button>
       </div>
@@ -8660,7 +8656,7 @@ function pgRenderResults(results, newSkus, bu, failNote) {
 
         <div style="margin-top:14px;padding-top:12px;border-top:1px solid #f3f4f6;display:flex;justify-content:flex-end;">
           <button onclick="sendToLearn(${globalIdx})"
-            style="padding:7px 18px;background:#6d28d9;color:#fff;border:none;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;"
+            style="padding:7px 18px;background:linear-gradient(135deg,#c4b5fd,#a78bfa);color:#fff;border:none;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 2px 6px rgba(167,139,250,.3);"
             onmouseover="this.style.opacity='.82'" onmouseout="this.style.opacity='1'">
             📖 推送痛点学习
           </button>
@@ -11407,7 +11403,7 @@ function sendToLearn(idx) {
   const ta = document.getElementById('learn-pain-input');
   if (ta) {
     ta.value = text;
-    ta.style.border = '2px solid #6d28d9';
+    ta.style.border = '2px solid #a78bfa';
     setTimeout(() => { ta.style.border = ''; }, 1800);
   }
 
@@ -11627,16 +11623,16 @@ function learnRenderOutput(d, pain, wsaCtx) {
   const out = document.getElementById('learn-analysis-output');
 
   const argHtml = (d.arguments || []).map((a, i) => `
-    <div style="margin-bottom:10px;padding:10px 14px;background:#f9fafb;border-left:3px solid #6d28d9;border-radius:0 6px 6px 0;">
+    <div style="margin-bottom:10px;padding:10px 14px;background:#f9fafb;border-left:3px solid #c4b5fd;border-radius:0 6px 6px 0;">
       <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:3px;">论点 ${i+1}：${a.point || ''}</div>
       <div style="font-size:12px;color:#4b5563;line-height:1.6;">${a.evidence || ''}</div>
     </div>`).join('');
 
   const regHtml = (d.regulations || []).map(r => `
-    <div style="margin-bottom:10px;padding:12px;background:#fff;border:1px solid #e9d5ff;border-radius:8px;">
-      <div style="font-size:13px;font-weight:700;color:#6d28d9;margin-bottom:4px;">${r.name || ''} ${r.article ? `· ${r.article}` : ''}</div>
+    <div style="margin-bottom:10px;padding:12px;background:#fff;border:1px solid #ede9fe;border-radius:8px;">
+      <div style="font-size:13px;font-weight:700;color:#8b5cf6;margin-bottom:4px;">${r.name || ''} ${r.article ? `· ${r.article}` : ''}</div>
       <div style="font-size:12px;color:#374151;background:#faf5ff;padding:8px 10px;border-radius:6px;line-height:1.6;font-style:italic;margin-bottom:6px;">"${r.excerpt || ''}"</div>
-      ${r.url ? `<a href="${r.url}" target="_blank" style="font-size:11px;color:#7c3aed;text-decoration:none;">🔗 查看来源</a>` : ''}
+      ${r.url ? `<a href="${r.url}" target="_blank" style="font-size:11px;color:#8b5cf6;text-decoration:none;">🔗 查看来源</a>` : ''}
     </div>`).join('');
 
   const solHtml = (d.solutions || []).map((s, i) => `
@@ -11653,14 +11649,14 @@ function learnRenderOutput(d, pain, wsaCtx) {
 
   out.innerHTML = `
     <!-- ① 痛点概述 -->
-    <div style="background:linear-gradient(135deg,#6d28d9,#7c3aed);color:#fff;border-radius:10px;padding:16px 20px;margin-bottom:14px;">
-      <div style="font-size:11px;opacity:.75;margin-bottom:4px;font-weight:600;letter-spacing:.05em;">① 痛点概述</div>
+    <div style="background:linear-gradient(135deg,#c4b5fd 0%,#a78bfa 60%,#8b5cf6 100%);color:#fff;border-radius:10px;padding:16px 20px;margin-bottom:14px;box-shadow:0 2px 12px rgba(167,139,250,.3);">
+      <div style="font-size:11px;opacity:.8;margin-bottom:4px;font-weight:600;letter-spacing:.05em;">① 痛点概述</div>
       <div style="font-size:15px;font-weight:700;line-height:1.5;">${d.summary || ''}</div>
     </div>
 
     <!-- ② 核心冲突 -->
-    <div style="border:1px solid #e9d5ff;border-radius:10px;padding:14px 16px;margin-bottom:14px;background:#faf5ff;">
-      <div style="font-size:11px;color:#7c3aed;font-weight:700;letter-spacing:.05em;margin-bottom:10px;">② 核心冲突矩阵</div>
+    <div style="border:1px solid #ede9fe;border-radius:10px;padding:14px 16px;margin-bottom:14px;background:linear-gradient(180deg,#faf5ff 0%,#fff 100%);">
+      <div style="font-size:11px;color:#8b5cf6;font-weight:700;letter-spacing:.05em;margin-bottom:10px;">② 核心冲突矩阵</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <div style="background:#fff;border-radius:8px;padding:10px 12px;border:1px solid #ede9fe;">
           <div style="font-size:10px;color:#9ca3af;margin-bottom:3px;">涉及主体</div>
@@ -11682,20 +11678,20 @@ function learnRenderOutput(d, pain, wsaCtx) {
     </div>
 
     <!-- ③ 论点与论据 -->
-    <div style="border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;margin-bottom:14px;">
-      <div style="font-size:11px;color:#6d28d9;font-weight:700;letter-spacing:.05em;margin-bottom:10px;">③ 论点与论据</div>
+    <div style="border:1px solid #ede9fe;border-radius:10px;padding:14px 16px;margin-bottom:14px;">
+      <div style="font-size:11px;color:#8b5cf6;font-weight:700;letter-spacing:.05em;margin-bottom:10px;">③ 论点与论据</div>
       ${argHtml || '<div style="color:#9ca3af;font-size:12px;">暂无</div>'}
     </div>
 
     <!-- ④ 法规依据 -->
-    <div style="border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;margin-bottom:14px;">
-      <div style="font-size:11px;color:#6d28d9;font-weight:700;letter-spacing:.05em;margin-bottom:10px;">④ 法规依据</div>
+    <div style="border:1px solid #ede9fe;border-radius:10px;padding:14px 16px;margin-bottom:14px;">
+      <div style="font-size:11px;color:#8b5cf6;font-weight:700;letter-spacing:.05em;margin-bottom:10px;">④ 法规依据</div>
       ${regHtml || '<div style="color:#9ca3af;font-size:12px;">暂无法规数据</div>'}
     </div>
 
     <!-- ⑤ 解决方案 -->
-    <div style="border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;margin-bottom:14px;">
-      <div style="font-size:11px;color:#6d28d9;font-weight:700;letter-spacing:.05em;margin-bottom:10px;">⑤ 解决方案</div>
+    <div style="border:1px solid #ede9fe;border-radius:10px;padding:14px 16px;margin-bottom:14px;">
+      <div style="font-size:11px;color:#8b5cf6;font-weight:700;letter-spacing:.05em;margin-bottom:10px;">⑤ 解决方案</div>
       ${solHtml || '<div style="color:#9ca3af;font-size:12px;">暂无</div>'}
     </div>
 
@@ -11753,7 +11749,7 @@ async function learnChatSend() {
   const msgBox = document.getElementById('learn-chat-messages');
   msgBox.innerHTML += `
     <div style="margin-bottom:12px;text-align:right;">
-      <div style="display:inline-block;max-width:80%;background:#6d28d9;color:#fff;padding:10px 14px;border-radius:14px 14px 4px 14px;font-size:13px;line-height:1.6;text-align:left;">${msg.replace(/</g,'&lt;')}</div>
+      <div style="display:inline-block;max-width:80%;background:linear-gradient(135deg,#a78bfa,#8b5cf6);color:#fff;padding:10px 14px;border-radius:14px 14px 4px 14px;font-size:13px;line-height:1.6;text-align:left;">${msg.replace(/</g,'&lt;')}</div>
     </div>`;
   msgBox.scrollTop = msgBox.scrollHeight;
 
@@ -11764,7 +11760,7 @@ async function learnChatSend() {
   const bubbleId = 'learn-bubble-' + Date.now();
   msgBox.innerHTML += `
     <div style="margin-bottom:12px;" id="${bubbleId}">
-      <div style="display:inline-block;max-width:85%;background:#f3f0ff;border:1px solid #e9d5ff;padding:10px 14px;border-radius:14px 14px 14px 4px;font-size:13px;line-height:1.6;color:#1e1b4b;">
+      <div style="display:inline-block;max-width:85%;background:#faf5ff;border:1px solid #ddd6fe;padding:10px 14px;border-radius:14px 14px 14px 4px;font-size:13px;line-height:1.6;color:#3b0764;">
         <span class="learn-typing">⏳ 思考中…</span>
       </div>
     </div>`;
