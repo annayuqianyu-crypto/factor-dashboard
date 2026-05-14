@@ -3889,6 +3889,27 @@ tr:hover td { background: #fafafa; }
     </div>
   </div>
 
+  <!-- 历史记录面板 -->
+  <div style="margin-top:24px;">
+    <div class="card" style="border-left:4px solid #c4b5fd;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="font-size:14px;font-weight:700;color:#7c3aed;display:flex;align-items:center;gap:8px;">
+          <span>📚</span> 学习历史记录
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span id="learn-history-count" style="font-size:12px;color:#9ca3af;"></span>
+          <button onclick="learnClearAllHistory()"
+            style="padding:4px 12px;font-size:11.5px;color:#dc2626;background:#fff;border:1px solid #fca5a5;border-radius:6px;cursor:pointer;">
+            清空全部
+          </button>
+        </div>
+      </div>
+      <div id="learn-history-list">
+        <div style="text-align:center;color:#9ca3af;font-size:12px;padding:20px 0;">暂无历史记录 · 完成分析后自动保存</div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 
@@ -11376,6 +11397,7 @@ function renderPool(bu) {
 (function initRadarOnLoad() {
   ['tax','legal','cm'].forEach(b => renderPool(b));
   radarInitSources();
+  learnRenderHistory();   // 初始化痛点学习历史面板
 })();
 
 
@@ -11442,7 +11464,7 @@ const _learnState = {
 
 // ── 切换到 learn tab 时初始化 ─────────────────────────────────
 function learnInit() {
-  // 仅首次或面板为空时重置
+  learnRenderHistory();
 }
 
 // ── 载入最近生成的痛点 ────────────────────────────────────────
@@ -11756,6 +11778,19 @@ ${wsaCtx || '（无联网数据）'}
   chatSection.style.display = 'block';
   const msgBox = document.getElementById('learn-chat-messages');
   msgBox.innerHTML = '<div style="text-align:center;color:#9ca3af;font-size:12px;padding:8px 0;">分析完成 · 可在此向 AI 进一步提问</div>';
+
+  // 导出按钮（追加在分析结果底部）
+  out.innerHTML += `
+    <div style="margin-top:16px;display:flex;justify-content:flex-end;gap:10px;">
+      <button onclick="learnExportCurrent()"
+        style="padding:8px 20px;background:#16a34a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
+        📥 导出 Excel
+      </button>
+    </div>`;
+
+  // 存当前记录供导出 & 历史
+  window._learnCurrentRecord = { pain, analysis: d, wsaCtx };
+  window._learnCurrentId = learnAutoSave(pain, d, wsaCtx);
 }
 
 // ── 发送对话消息 ──────────────────────────────────────────────
@@ -11947,6 +11982,184 @@ async function learnExpandReg(regId, btn) {
   } catch(e) {
     body.innerHTML = `<span style="color:#dc2626;">加载失败：${e.message}</span>`;
   }
+}
+
+// ══════════════════════════════════════════════════════════════
+// 痛点学习 · 历史记录 & 导出
+// ══════════════════════════════════════════════════════════════
+
+const LEARN_HISTORY_KEY = 'learn_history';
+
+function learnGetHistory() {
+  try { return JSON.parse(localStorage.getItem(LEARN_HISTORY_KEY) || '[]'); }
+  catch(e) { return []; }
+}
+
+// 自动保存（返回新记录 ID）
+function learnAutoSave(pain, analysis, wsaCtx) {
+  const records = learnGetHistory();
+  const id      = 'lh-' + Date.now();
+  const title   = pain.replace(/【.*?】\s*/g, '').trim().slice(0, 50) || '未命名痛点';
+  records.unshift({ id, title, savedAt: new Date().toISOString(), pain, analysis, wsaCtx, chatHistory: [] });
+  if (records.length > 60) records.splice(60);   // 上限 60 条
+  try { localStorage.setItem(LEARN_HISTORY_KEY, JSON.stringify(records)); }
+  catch(e) { console.warn('[learn] 历史保存失败:', e.message); }
+  learnRenderHistory();
+  return id;
+}
+
+// 渲染历史列表
+function learnRenderHistory() {
+  const container = document.getElementById('learn-history-list');
+  const countEl   = document.getElementById('learn-history-count');
+  if (!container) return;
+  const records = learnGetHistory();
+  if (countEl) countEl.textContent = records.length ? `共 ${records.length} 条` : '';
+  if (!records.length) {
+    container.innerHTML = '<div style="text-align:center;color:#9ca3af;font-size:12px;padding:20px 0;">暂无历史记录 · 完成分析后自动保存</div>';
+    return;
+  }
+  container.innerHTML = records.map(r => {
+    const isActive = r.id === window._learnCurrentId;
+    return `
+    <div style="padding:12px 14px;border:1px solid ${isActive ? '#a78bfa' : '#ede9fe'};border-radius:8px;margin-bottom:8px;background:${isActive ? '#f5f0ff' : '#faf5ff'};">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${r.title.replace(/"/g,'&quot;')}">${r.title}</div>
+          <div style="font-size:11px;color:#9ca3af;">${new Date(r.savedAt).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
+          ${r.analysis?.summary ? `<div style="font-size:12px;color:#6b7280;margin-top:4px;line-height:1.5;">${r.analysis.summary}</div>` : ''}
+        </div>
+        <div style="display:flex;gap:5px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
+          <button onclick="learnLoadRecord('${r.id}')"
+            style="padding:4px 11px;font-size:11.5px;font-weight:600;color:#8b5cf6;background:#fff;border:1px solid #ddd6fe;border-radius:6px;cursor:pointer;">载入</button>
+          <button onclick="learnExportRecord('${r.id}')"
+            style="padding:4px 11px;font-size:11.5px;font-weight:600;color:#16a34a;background:#fff;border:1px solid #bbf7d0;border-radius:6px;cursor:pointer;">导出</button>
+          <button onclick="learnDeleteRecord('${r.id}')"
+            style="padding:4px 11px;font-size:11.5px;font-weight:600;color:#dc2626;background:#fff;border:1px solid #fca5a5;border-radius:6px;cursor:pointer;">删除</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// 载入某条历史记录
+function learnLoadRecord(id) {
+  const records = learnGetHistory();
+  const rec = records.find(r => r.id === id);
+  if (!rec) { alert('记录不存在'); return; }
+  document.getElementById('learn-pain-input').value = rec.pain || '';
+  window._learnCurrentRecord = { pain: rec.pain, analysis: rec.analysis, wsaCtx: rec.wsaCtx };
+  window._learnCurrentId     = id;
+  _learnState.chatHistory    = rec.chatHistory || [];
+  learnRenderOutput(rec.analysis, rec.pain, rec.wsaCtx || '');
+  learnRenderHistory();   // 刷新高亮
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// 删除单条记录
+function learnDeleteRecord(id) {
+  if (!confirm('确认删除这条学习记录？')) return;
+  let records = learnGetHistory().filter(r => r.id !== id);
+  localStorage.setItem(LEARN_HISTORY_KEY, JSON.stringify(records));
+  if (window._learnCurrentId === id) window._learnCurrentId = null;
+  learnRenderHistory();
+}
+
+// 清空全部
+function learnClearAllHistory() {
+  if (!confirm('确认清空全部学习历史？此操作不可恢复。')) return;
+  localStorage.removeItem(LEARN_HISTORY_KEY);
+  window._learnCurrentId = null;
+  learnRenderHistory();
+}
+
+// 导出当前分析（含最新对话）
+function learnExportCurrent() {
+  const rec = window._learnCurrentRecord;
+  if (!rec) { alert('请先完成分析'); return; }
+  // 将最新对话写回历史
+  if (window._learnCurrentId) {
+    const records = learnGetHistory();
+    const hit = records.find(r => r.id === window._learnCurrentId);
+    if (hit) {
+      hit.chatHistory = _learnState.chatHistory || [];
+      try { localStorage.setItem(LEARN_HISTORY_KEY, JSON.stringify(records)); } catch(e) {}
+    }
+  }
+  learnDoExport({
+    title:       (rec.pain || '').replace(/【.*?】\s*/g,'').trim().slice(0,50),
+    savedAt:     new Date().toISOString(),
+    pain:        rec.pain,
+    analysis:    rec.analysis,
+    wsaCtx:      rec.wsaCtx,
+    chatHistory: _learnState.chatHistory || [],
+  });
+}
+
+// 导出历史记录
+function learnExportRecord(id) {
+  const records = learnGetHistory();
+  const rec = records.find(r => r.id === id);
+  if (!rec) { alert('记录不存在'); return; }
+  learnDoExport(rec);
+}
+
+// 核心导出逻辑
+function learnDoExport(rec) {
+  if (typeof XLSX === 'undefined') { alert('Excel 库未加载，请刷新页面后重试'); return; }
+  const wb = XLSX.utils.book_new();
+  const a  = rec.analysis || {};
+  const c  = a.conflict   || {};
+  const ef = a.effects    || {};
+
+  const addSheet = (name, rows) => {
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    // 设列宽
+    ws['!cols'] = rows[0].map(() => ({ wch: 36 }));
+    XLSX.utils.book_append_sheet(wb, ws, name);
+  };
+
+  addSheet('① 痛点概述', [
+    ['字段', '内容'],
+    ['记录时间',   new Date(rec.savedAt || Date.now()).toLocaleString('zh-CN')],
+    ['痛点摘要',   rec.title  || ''],
+    ['痛点全文',   rec.pain   || ''],
+    ['一句话概述', a.summary  || ''],
+  ]);
+
+  addSheet('② 核心冲突', [
+    ['维度',   '内容'],
+    ['涉及主体', c.who        || ''],
+    ['核心资产', c.asset      || ''],
+    ['触发事件', c.trigger    || ''],
+    ['核心约束', c.constraint || ''],
+  ]);
+
+  const argRows = [['#', '论点', '论据']];
+  (a.arguments || []).forEach((arg, i) => argRows.push([i + 1, arg.point || '', arg.evidence || '']));
+  addSheet('③ 论点与论据', argRows);
+
+  const regRows = [['#', '法规名称', '具体条款', '原文摘录', '来源URL']];
+  (a.regulations || []).forEach((r, i) => regRows.push([i + 1, r.name || '', r.article || '', r.excerpt || '', r.url || '']));
+  addSheet('④ 法规依据', regRows);
+
+  const solRows = [['#', '方案名称', '操作路径', '核心优势', '主要风险']];
+  (a.solutions || []).forEach((s, i) => solRows.push([i + 1, s.name || '', s.description || '', s.pros || '', s.cons || '']));
+  addSheet('⑤ 解决方案', solRows);
+
+  addSheet('⑥ 预期效果', [
+    ['维度',       '内容'],
+    ['解决后效果', ef.if_solved || ''],
+    ['不解决后果', ef.if_not   || ''],
+  ]);
+
+  const chatRows = [['角色', '内容']];
+  (rec.chatHistory || []).forEach(m => chatRows.push([m.role === 'user' ? '用户提问' : 'AI 回复', m.content || '']));
+  if (chatRows.length > 1) addSheet('对话记录', chatRows);
+
+  const safeName = (rec.title || '痛点学习').replace(/[\/\\:*?"<>|]/g, '_').slice(0, 40);
+  const dateStr  = new Date().toLocaleDateString('zh-CN').replace(/\//g, '-');
+  XLSX.writeFile(wb, `痛点学习_${safeName}_${dateStr}.xlsx`);
 }
 
 // ── 极简 Markdown → HTML（供法规原文渲染）─────────────────────
