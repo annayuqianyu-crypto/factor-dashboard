@@ -10518,7 +10518,7 @@ async function newsAISearch() {
 
   btn.disabled = true; spin.textContent = '⏳';
   res.innerHTML = `<div style="padding:32px;text-align:center;color:#6b7280;font-size:13px;">
-    ⏳ 正在对 <strong style="color:#0369a1;">37 个税务重点信息源</strong> 并行搜索，约 15 秒…</div>`;
+    ⏳ 腾讯云 WSA 联网搜索中，将自动标注 <strong style="color:#15803d;">37 个重点信息源</strong> 来源…</div>`;
 
   const query = kw || '家族信托 税务合规 跨境规划 资产保护';
 
@@ -10564,16 +10564,38 @@ async function newsAISearch() {
       return;
     }
 
-    // 标准化字段
+    // 37 个税务重点信息源域名（用于来源标注）
+    const TRUSTED_DOMAINS = [
+      'csrc.gov.cn','cs.com.cn','stcn.com','sac.net.cn',
+      'chinabanking.com.cn','china-cba.net','chinamoney.com.cn','pcac.org.cn','banklaw.com',
+      'cls.cn','wallstreetcn.com','cn.reuters.com','bloomberg.com','eastmoney.com',
+      'hexun.com','01caijing.com',
+      'cninfo.com.cn','chinaventure.com.cn','sse.com.cn','research.pedaily.cn',
+      'chinatax.gov.cn','irs.gov','sfc.hk','mas.gov.sg','step.org',
+      'cbimc.cn','huibaoxiang.com','jinribao.cn','iamac.org.cn',
+      'xtxh.net','yanglee.com','xinruizhoukan.com',
+      'coindesk.com','mohrss.gov.cn','hbrchina.org',
+      'iras.gov.sg','ird.gov.hk'
+    ];
+    function isTrusted(url) {
+      try { return TRUSTED_DOMAINS.some(d => new URL(url).hostname.includes(d)); }
+      catch { return false; }
+    }
+
+    // 标准化字段，标注来源可信度
     let items = rawList.map(r => ({
       title:     r.title   || '',
       url:       r.url     || '',
       source:    r.site    || '',
       date:      r.date    || '',
       summary:   r.passage || r.content || '',
+      trusted:   isTrusted(r.url || ''),
       tags:      [],
       relevance: ''
     })).filter(it => it.title);
+
+    // 可信源排前面
+    items.sort((a, b) => (b.trusted ? 1 : 0) - (a.trusted ? 1 : 0));
 
     // 前端按日期过滤（WSA 标准版不支持 FromTime/ToTime）
     if (start || end) {
@@ -10608,6 +10630,7 @@ function newsRenderCards(items, kw, start, end) {
         🌐 联网搜索到 <strong>${items.length}</strong> 条动态
         ${kw ? `· 关键词：<em style="color:#006eff;">${kw}</em>` : ''}
         ${start && end ? `· ${start} ~ ${end}` : ''}
+        · <span style="color:#15803d;font-weight:600;">${items.filter(i=>i.trusted).length} 条来自重点信息源</span>
       </div>
       <button onclick="document.getElementById('news-ai-result').innerHTML='';localStorage.removeItem('news_ai_cache');"
         style="padding:3px 10px;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;border-radius:4px;font-size:11px;cursor:pointer;">清除</button>
@@ -10625,7 +10648,7 @@ function newsRenderCards(items, kw, start, end) {
         const safeSumm  = (it.summary||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
         const safeRel   = (it.relevance||'').replace(/'/g,"\\'");
         return `
-        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;
+        <div style="background:#fff;border:1px solid ${it.trusted ? '#bbf7d0' : '#e2e8f0'};border-radius:10px;padding:16px;
           transition:box-shadow .15s;" onmouseover="this.style.boxShadow='0 2px 12px rgba(0,0,0,.08)'"
           onmouseout="this.style.boxShadow='none'">
           <div style="display:flex;align-items:flex-start;gap:10px;">
@@ -10639,6 +10662,7 @@ function newsRenderCards(items, kw, start, end) {
               <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
                 <span style="font-size:11px;color:#64748b;">📌 ${it.source||'未知来源'}</span>
                 ${it.date ? `<span style="font-size:11px;color:#94a3b8;">· ${it.date}</span>` : ''}
+                ${it.trusted ? `<span style="font-size:10px;background:#dcfce7;color:#15803d;padding:2px 7px;border-radius:10px;font-weight:600;">✓ 重点源</span>` : ''}
                 ${tagHtml}
                 ${it.relevance ? `<span style="font-size:10px;background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:10px;">↪ ${it.relevance}</span>` : ''}
               </div>
