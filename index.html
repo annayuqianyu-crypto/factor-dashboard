@@ -10528,7 +10528,7 @@ async function newsAISearch() {
   res.innerHTML = `<div style="padding:32px;text-align:center;color:#6b7280;font-size:13px;">
     ⏳ 正在对 <strong style="color:#0369a1;">37 个重点信息源</strong> 并行搜索，约 20 秒请稍候…</div>`;
 
-  const query = kw || '家族信托 税务合规 跨境规划 资产保护';
+  const query = kw; // 留空时 SCF 直接用域名搜索，无关键词限制
 
   const payload = { query, count };
   if (start) payload.startTime = start.replace(/-/g, '');
