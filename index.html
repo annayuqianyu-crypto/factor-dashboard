@@ -10488,8 +10488,15 @@ async function newsTxTest() {
       box.style.color = '#dc2626';
       box.textContent = `✗ SCF 内部错误：${data.error}`;
     } else {
-      box.style.color = '#16a34a';
-      box.textContent = '✅ SCF 代理 + WSA 联网搜索均正常！';
+      const pages = data.Response?.Pages || [];
+      if (pages.length > 0) {
+        box.style.color = '#16a34a';
+        box.textContent = `✅ 正常！WSA 返回 ${pages.length} 条结果，第1条：「${pages[0].title||'(无标题)'}」`;
+      } else {
+        box.style.color = '#f59e0b';
+        box.innerHTML = `⚠️ SCF 连通但 WSA 返回 0 条结果。<br>
+          <span style="font-size:11px;">原始响应：${JSON.stringify(data.Response).slice(0,200)}</span>`;
+      }
     }
   } catch(e) {
     box.style.color = '#dc2626';
