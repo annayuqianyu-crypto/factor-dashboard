@@ -10590,17 +10590,15 @@ async function newsAISearch() {
       catch { return false; }
     }
 
-    // 标准化字段，标注来源可信度
-    let items = rawList.map(r => ({
-      title:     r.title   || '',
-      url:       r.url     || '',
-      source:    r.site    || '',
-      date:      r.date    || '',
-      summary:   r.passage || r.content || '',
-      trusted:   isTrusted(r.url || ''),
-      tags:      [],
-      relevance: ''
-    })).filter(it => it.title);
+    // 标准化字段（兼容 WSA 各种大小写和字段别名）
+    let items = rawList.map(r => {
+      const title   = r.title   || r.Title   || r.name    || r.Name    || r.headline || '(无标题)';
+      const url     = r.url     || r.Url     || r.link    || r.Link    || '';
+      const source  = r.site    || r.Site    || r.source  || r.Source  || r.domain   || '';
+      const date    = r.date    || r.Date    || r.time    || r.Time    || r.pubDate  || '';
+      const summary = r.passage || r.Passage || r.content || r.Content || r.abstract || r.desc || r.snippet || '';
+      return { title, url, source, date, summary, trusted: isTrusted(url), tags: [], relevance: '', _raw: r };
+    });
 
     // 可信源排前面
     items.sort((a, b) => (b.trusted ? 1 : 0) - (a.trusted ? 1 : 0));
@@ -10663,6 +10661,7 @@ function newsRenderCards(items, kw, start, end) {
                 ${it.relevance ? `<span style="font-size:10px;background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:10px;">↪ ${it.relevance}</span>` : ''}
               </div>
               <div style="font-size:12px;color:#475569;line-height:1.7;">${it.summary||''}</div>
+              ${it.title==='(无标题)' ? `<pre style="font-size:10px;color:#94a3b8;margin-top:4px;white-space:pre-wrap;">${JSON.stringify(it._raw).slice(0,300)}</pre>` : ''}
             </div>
             <button onclick="newsAIExtract('${safeTitle}','${safeSrc}','${safeDate}','${safeSumm}','${safeRel}')"
               style="flex-shrink:0;padding:6px 14px;background:#2d6a4f;color:#fff;border:none;border-radius:7px;
