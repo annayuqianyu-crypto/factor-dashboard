@@ -3466,7 +3466,9 @@ tr:hover td { background: #fafafa; }
   function renderCards(data){
     const container = document.getElementById('hgjCards');
     if(!container) return;
-    container.innerHTML = data.map((d,i) => {
+    // 按出现次数降序排列
+    const sorted = [...data].sort((a,b) => sceneHits(b).size - sceneHits(a).size);
+    container.innerHTML = sorted.map((d,i) => {
       const hits = sceneHits(d);
       const hitCount = hits.size;
       // 生成文件索引列表（每条一行）
