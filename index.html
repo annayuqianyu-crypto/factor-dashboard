@@ -3454,13 +3454,15 @@ tr:hover td { background: #fafafa; }
   const TOTAL_FILES = new Set(ALL_HGJ_DATA.map(d=>d.file)).size; // = 67
   function sceneHits(card){
     const tagSet = new Set(card.tags);
-    const fileMap = new Map(); // file -> title（取第一个匹配条目的title）
+    const fileMap = new Map(); // file -> title
     ALL_HGJ_DATA.forEach(d=>{
-      if(d.tags.some(t=>tagSet.has(t)) && !fileMap.has(d.file)){
+      // 至少2个tag重叠才算该场景真实出现在该会议，防止单一宽泛tag误配
+      const overlap = d.tags.filter(t=>tagSet.has(t)).length;
+      if(overlap >= 2 && !fileMap.has(d.file)){
         fileMap.set(d.file, d.title);
       }
     });
-    return fileMap; // Map<file, title>
+    return fileMap;
   }
 
   function renderCards(data){
