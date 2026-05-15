@@ -639,6 +639,97 @@ tr:hover td { background: #fafafa; }
 
 <body>
 
+<!-- ══ 登录遮罩 ══ -->
+<div id="loginMask" style="
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 60%,#0f2027 100%);
+  display:flex;align-items:center;justify-content:center;
+">
+  <div style="
+    background:#fff;border-radius:16px;padding:48px 44px 40px;
+    width:420px;box-shadow:0 24px 80px rgba(0,0,0,.45);
+    font-family:'PingFang SC','Microsoft YaHei',sans-serif;
+  ">
+    <!-- Logo + 标题 -->
+    <div style="text-align:center;margin-bottom:32px;">
+      <svg width="48" height="48" viewBox="0 0 32 32" style="margin-bottom:10px;display:block;margin-left:auto;margin-right:auto;">
+        <rect width="32" height="32" rx="7" fill="#1a56db"/>
+        <path d="M9 22 Q9 10 16 8 Q23 10 23 22" stroke="#93c5fd" stroke-width="1.5" fill="none"/>
+        <path d="M16 8 L16 24" stroke="#60a5fa" stroke-width="1.5"/>
+        <path d="M16 14 Q11 12 9 15" stroke="#bfdbfe" stroke-width="1.2" fill="none"/>
+        <path d="M16 18 Q21 15 23 18" stroke="#bfdbfe" stroke-width="1.2" fill="none"/>
+      </svg>
+      <div style="font-size:20px;font-weight:700;color:#0f172a;letter-spacing:.5px;">朝曦家办 · 数据驾驶舱</div>
+      <div style="font-size:13px;color:#94a3b8;margin-top:4px;">内部专属访问，请先登录</div>
+    </div>
+
+    <!-- 表单 -->
+    <div style="margin-bottom:16px;">
+      <label style="font-size:13px;color:#475569;font-weight:600;display:block;margin-bottom:6px;">企业邮箱</label>
+      <input id="loginEmail" type="email" placeholder="xxx@zxpro.com.cn" autocomplete="username"
+        style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:11px 14px;
+               font-size:14px;color:#1e293b;outline:none;transition:border .15s;"
+        onfocus="this.style.borderColor='#1a56db'"
+        onblur="this.style.borderColor='#e2e8f0'"
+        onkeydown="if(event.key==='Enter')document.getElementById('loginPwd').focus()"/>
+    </div>
+    <div style="margin-bottom:24px;">
+      <label style="font-size:13px;color:#475569;font-weight:600;display:block;margin-bottom:6px;">登录密码</label>
+      <input id="loginPwd" type="password" placeholder="请输入密码" autocomplete="current-password"
+        style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:11px 14px;
+               font-size:14px;color:#1e293b;outline:none;transition:border .15s;"
+        onfocus="this.style.borderColor='#1a56db'"
+        onblur="this.style.borderColor='#e2e8f0'"
+        onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+
+    <div id="loginErr" style="display:none;background:#fef2f2;color:#dc2626;border-radius:8px;
+      padding:10px 14px;font-size:13px;margin-bottom:16px;"></div>
+
+    <button onclick="doLogin()" style="
+      width:100%;background:#1a56db;color:#fff;border:none;border-radius:8px;
+      padding:13px;font-size:15px;font-weight:600;cursor:pointer;
+      transition:background .15s;letter-spacing:.5px;
+    " onmouseover="this.style.background='#1648c0'" onmouseout="this.style.background='#1a56db'">
+      登 录
+    </button>
+
+    <div style="text-align:center;margin-top:20px;font-size:12px;color:#cbd5e1;">
+      仅限 @zxpro.com.cn 邮箱账号登录
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // 会话内已登录则直接隐藏遮罩
+  if(sessionStorage.getItem('zx_auth')==='ok'){
+    document.getElementById('loginMask').style.display='none';
+  }
+
+  window.doLogin = function(){
+    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+    const pwd   = document.getElementById('loginPwd').value;
+    const err   = document.getElementById('loginErr');
+
+    if(!email || !pwd){
+      err.textContent='请填写邮箱和密码'; err.style.display='block'; return;
+    }
+    if(!email.endsWith('@zxpro.com.cn')){
+      err.textContent='邮箱格式不正确，须为 @zxpro.com.cn 后缀'; err.style.display='block'; return;
+    }
+    if(pwd !== 'ZXpro@2026'){
+      err.textContent='密码错误，请重新输入'; err.style.display='block'; return;
+    }
+    sessionStorage.setItem('zx_auth','ok');
+    const mask = document.getElementById('loginMask');
+    mask.style.transition='opacity .3s';
+    mask.style.opacity='0';
+    setTimeout(()=>mask.style.display='none', 300);
+  };
+})();
+</script>
+
 
 
 <!-- 顶栏 -->
@@ -3197,15 +3288,15 @@ tr:hover td { background: #fafafa; }
 
   <!-- 筛选栏 -->
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;" id="hgjFilters">
-    <button class="hgj-filter-btn active" data-filter="全部" onclick="hgjFilter(this,'全部')">全部（67）</button>
-    <button class="hgj-filter-btn" data-filter="税务合规" onclick="hgjFilter(this,'税务合规')">税务合规</button>
-    <button class="hgj-filter-btn" data-filter="合规诉讼" onclick="hgjFilter(this,'合规诉讼')">合规诉讼</button>
-    <button class="hgj-filter-btn" data-filter="跨境规划" onclick="hgjFilter(this,'跨境规划')">跨境规划</button>
-    <button class="hgj-filter-btn" data-filter="劳动用工" onclick="hgjFilter(this,'劳动用工')">劳动用工</button>
-    <button class="hgj-filter-btn" data-filter="股权架构" onclick="hgjFilter(this,'股权架构')">股权架构</button>
-    <button class="hgj-filter-btn" data-filter="财富传承" onclick="hgjFilter(this,'财富传承')">财富传承</button>
-    <button class="hgj-filter-btn" data-filter="资产保护" onclick="hgjFilter(this,'资产保护')">资产保护</button>
-    <button class="hgj-filter-btn" data-filter="高新颖度" onclick="hgjFilter(this,'高新颖度')">⭐ 高新颖度</button>
+    <button class="hgj-filter-btn active" data-filter="全部"   data-label="全部"   onclick="hgjFilter(this,'全部')">全部</button>
+    <button class="hgj-filter-btn" data-filter="税务合规" data-label="税务合规" onclick="hgjFilter(this,'税务合规')">税务合规</button>
+    <button class="hgj-filter-btn" data-filter="合规诉讼" data-label="合规诉讼" onclick="hgjFilter(this,'合规诉讼')">合规诉讼</button>
+    <button class="hgj-filter-btn" data-filter="跨境规划" data-label="跨境规划" onclick="hgjFilter(this,'跨境规划')">跨境规划</button>
+    <button class="hgj-filter-btn" data-filter="劳动用工" data-label="劳动用工" onclick="hgjFilter(this,'劳动用工')">劳动用工</button>
+    <button class="hgj-filter-btn" data-filter="股权架构" data-label="股权架构" onclick="hgjFilter(this,'股权架构')">股权架构</button>
+    <button class="hgj-filter-btn" data-filter="财富传承" data-label="财富传承" onclick="hgjFilter(this,'财富传承')">财富传承</button>
+    <button class="hgj-filter-btn" data-filter="资产保护" data-label="资产保护" onclick="hgjFilter(this,'资产保护')">资产保护</button>
+    <button class="hgj-filter-btn" data-filter="高新颖度" data-label="⭐ 高新颖度" onclick="hgjFilter(this,'高新颖度')">⭐ 高新颖度</button>
   </div>
 
   <!-- 场景卡片列表 -->
@@ -3281,33 +3372,34 @@ tr:hover td { background: #fafafa; }
 <script>
 (function(){
   const HGJ_DATA = [
-    {title:"小规模企业注销税务清算",who:"北京小规模贸易公司法人黄总",asset:"库存商品、固定资产、账面现金及股东超额出资",event:"计划注销公司，需处理存货、固定资产、债务及税务清算",friction:"注销前需处理存货和固定资产，涉及视同销售及税务申报",dirs:["存货处置方式选择及税务影响","固定资产处置的税务处理","股东超额出资的清偿与税务合规"],tags:["小规模纳税人","注销清算","视同销售"],cat:"税务合规",novelty:"低",source:"Neil",file:"北京20260327-企业注销.docx"},
-    {title:"涉美传承资金出境规划",who:"中国籍父亲",asset:"2000万现金",event:"希望将资金传承给美国绿卡子女，面临外汇管制和税务问题",friction:"中国外汇管制与美国税务申报的冲突",dirs:["资金出境合规路径复杂","美国税务申报义务","保险金出境政策不确定性"],tags:["外汇管理","美国赠与税","美国税务申报"],cat:"跨境规划",novelty:"中",file:"北京260324-涉美传承.docx"},
-    {title:"建筑分包增值税政策咨询",who:"北京建筑公司财务负责人",asset:"机电安装分包业务，一般纳税人",event:"咨询增值税法实施后分包发票及差额计税变化",friction:"新法下简易计税分包只能开普票，影响差额扣除",dirs:["分包发票类型变化导致抵扣方式调整","预缴税款时分包款扣除规则不明确","一般计税与简易计税适用场景混淆"],tags:["增值税法","分包差额计税","简易计税"],cat:"税务合规",novelty:"中",file:"北京260326-建工财税.docx"},
-    {title:"香港公司税务筹划咨询",who:"南京特种阀内贸企业主朱总",asset:"新设香港公司，主营三国贸易",event:"已收第一笔款，需了解香港会计、税务及离岸豁免政策",friction:"香港离岸豁免与大陆常设机构风险并存",dirs:["香港公司年费及会计维护成本","离岸豁免申请条件与通过率","利润汇回大陆的个人所得税处理"],tags:["离岸豁免","利得税","常设机构"],cat:"税务合规",novelty:"中",file:"南京20260317-香港公司.docx"},
-    {title:"股票索赔维权咨询",who:"个人投资者",asset:"暮光高科股票",event:"因虚假陈述导致投资损失，已委托律师但进展缓慢",friction:"证券虚假陈述索赔周期长，法院处理方式不确定",dirs:["索赔周期过长，缺乏明确时间表","与律师沟通不畅，信任度下降","担心赔偿比例及优先顺序"],tags:["证券虚假陈述","最高院司法解释","代表人诉讼"],cat:"合规诉讼",novelty:"中",file:"南昌20260303-A股索赔.docx"},
-    {title:"家族企业控制权纠纷",who:"家族企业二代（儿子）",asset:"母亲持股51%的北京总公司及下属生产公司",event:"夫妻股东经营分歧，男方扰乱市场，欲离婚分产，需免去男方法人职务",friction:"公司章程规定过半数可免法人，但工商局设置额外障碍",dirs:["法人免职受阻于工商局","销售公司股权被转移至男方亲戚","男方利用销售公司扰乱市场"],tags:["公司法","公司章程","工商变更"],cat:"合规诉讼",novelty:"中",file:"合肥260409-公司纠纷.docx"},
-    {title:"信托产品违约维权咨询",who:"成都信托投资人",asset:"中融信托等7款信托产品，本金约300万",event:"信托产品到期未兑付，寻求维权方案",friction:"信托产品违约后，投资人维权路径与信托公司责任界定不清",dirs:["信托产品违约后如何维权","受益人大会投票决策无实质影响","底层资产回收困难，诉讼成本高"],tags:["信托违约","受益人大会","诉讼维权"],cat:"合规诉讼",novelty:"中",file:"成都20260304-信托暴雷.docx"},
-    {title:"游戏出海日本税务合规",who:"成都游戏公司负责人",asset:"国内游戏发行主体，计划与日本第三方合作发行游戏",event:"拟向日本合作方支付服务费，并接收日本玩家收入回流",friction:"中日跨境支付中的代扣代缴义务与日本消费税合规",dirs:["对外付汇代扣代缴增值税及所得税","日本消费税的纳税义务与平台扣缴","服务费定价与转让定价风险"],tags:["日本消费税","对外付汇代扣代缴","增值税进项抵扣"],cat:"税务合规",novelty:"中",file:"成都20260326-游戏出海.docx"},
-    {title:"游戏出海日本税务架构",who:"成都游戏公司高管",asset:"境内游戏版权及香港子公司",event:"计划将游戏发行至日本，需选择合规且税负最低的架构",friction:"日本资金决算法要求发行主体备案，与境外主体税务优化存在冲突",dirs:["日本资金决算法备案合规要求","跨境架构下的税负成本优化","香港与日本间特许权使用费代扣税"],tags:["资金决算法","日本消费税","中日税收协定"],cat:"跨境规划",novelty:"高",file:"成都20260416-游戏出海.docx"},
-    {title:"餐饮企业用工合规与主体变更",who:"成都餐饮连锁企业HR及管理层",asset:"跨店跨省经营的多家餐饮门店",event:"面临社保未足额缴纳、员工主体变更及劳动争议仲裁",friction:"社保未足额缴纳的合规风险与员工签署声明的法律效力冲突",dirs:["社保公积金未足额缴纳的合规风险","员工劳动关系主体变更的协议设计","劳动争议仲裁应对与成本控制"],tags:["社保合规","劳动合同法","劳动争议仲裁"],cat:"劳动用工",novelty:"中",file:"成都20260429-用工困惑.docx"},
-    {title:"餐饮企业用工合规与制度优化",who:"成都餐饮企业负责人谢总",asset:"400多名全职员工的劳动密集型企业",event:"面临员工劳动仲裁风险，希望完善民主流程和内部制度",friction:"民主流程合法性不足，制度内容不完整，员工利用自媒体维权",dirs:["民主流程如何合法合规","病假管理漏洞与虚假病假","加班制度与赔偿条款的合法性"],tags:["工会","民主流程","劳动仲裁"],cat:"劳动用工",novelty:"中",file:"成都260409-用工困惑.docx"},
-    {title:"电商企业股东借款归还税务合规",who:"武汉电商公司股东万总",asset:"公司账上3000万其他应付款（股东借款）",event:"业务转让给总公司后，希望将公司资金合理转至个人账户",friction:"股东借款长期挂账，归还时可能被税务局视为隐瞒收入或分红",dirs:["如何证明借款真实性避免被认定为账外收入","大额资金归还触发银行和税务预警","历史凭证不全难以追溯借款来源"],tags:["财税[2003]158号","久亏不倒企业预警","简易注销税务清算"],cat:"税务合规",novelty:"中",file:"武汉20260411-电商税务.docx"},
-    {title:"家政公司财税合规与分账",who:"武汉家政公司财务负责人",asset:"年流水过亿的家政中介业务，收款中含服务费与代收阿姨工资",event:"收款进入对公账户需全额报税，成本缺失导致税负高；希望实现资金分账",friction:"家政中介代收工资无法拆分报税，全额纳税导致企业所得税虚高",dirs:["公转私收款税务风险高","代收工资无法合规分账","阿姨不配合个税申报"],tags:["家政服务业税收优惠","反向开票","灵活用工"],cat:"税务合规",novelty:"高",file:"武汉20260424-家政税务.docx"},
-    {title:"中港税务与公司运营合规",who:"武汉创始人及配偶",asset:"内地公司和香港公司，夫妻共同持股",event:"希望利用香港公司开展业务，但面临税务和运营合规问题",friction:"中港两地税务居民身份重叠及关联交易定价合规",dirs:["个人中港双重税务居民身份下的CRS申报","内地与香港公司关联交易的转让定价风险","香港公司运营合规"],tags:["CRS 2.0","金税四期","关联交易转让定价"],cat:"税务合规",novelty:"中",file:"武汉20260508-香港公司.docx"},
-    {title:"连锁教培机构税务架构优化",who:"武汉连锁教培机构负责人",asset:"16个校区，主营托管及学科培训",event:"收入增长接近一般纳税人边界，希望优化税务结构降低税负",friction:"小规模与一般纳税人边界税负差异，企业所得税累进与利润分配矛盾",dirs:["增值税纳税人身份转换的税负影响","企业所得税利润控制在300万以下","功能拆分架构的税务合规性"],tags:["增值税法2026","非学历教育简易征收","小型微利企业所得税优惠"],cat:"税务合规",novelty:"中",file:"武汉260202-连锁教培.docx"},
-    {title:"煤炭贸易海南双15政策咨询",who:"武汉煤炭贸易企业主及财务",asset:"海南两家公司，年收入约1亿元",event:"计划享受海南双15%税收优惠，但担心两头在外业务被拒",friction:"海南双15政策对实质经营要求与煤炭贸易两头在外模式冲突",dirs:["企业所得税15%政策执行口径不一","个人所得税15%先征后退兑现困难","实质经营条件成本与风险"],tags:["海南自由贸易港","企业所得税15%","两头在外"],cat:"税务合规",novelty:"中",file:"武汉260206-煤炭贸易.docx"},
-    {title:"试用期员工解除纠纷",who:"深圳某企业主",asset:"中小企业，有员工管理及薪酬发放权",event:"因试用期员工不符合录用条件解除劳动关系，员工不认可并威胁仲裁",friction:"试用期解除合法性举证责任与薪酬支付策略的平衡",dirs:["解除通知书瑕疵风险","绩效扣款争议与证据不足","工资支付时机与仲裁筹码权衡"],tags:["劳动合同法第三十九条","试用期解除","绩效工资争议"],cat:"劳动用工",novelty:"中",file:"深圳260227-劳动纠纷.docx"},
-    {title:"房地产资产剥离税务筹划",who:"香港控股公司实控人杨姐",asset:"广西桂林房地产公司，持有未开发土地和自持物业",event:"计划将未开发土地和自持物业剥离至新公司，由原股东持有",friction:"房地产开发资质限制税收优惠适用，资产转让税负高",dirs:["资产剥离税务成本高","房地产开发资质影响税收优惠","外资母公司架构增加复杂性"],tags:["资产重组税收优惠","土地增值税","企业所得税"],cat:"税务合规",novelty:"中",file:"深圳260319-房产涉税.docx"},
-    {title:"黄金交易税务合规咨询",who:"上海黄金交易所机构客户",asset:"通过会员单位进行黄金延期交易，涉及法人个人黄金出借",event:"黄金税收新政后，法人借入黄金出库开票及交易收益税务处理存疑",friction:"黄金新政下个人与公司间黄金流转的税务定性及凭证认可矛盾",dirs:["法人借入黄金出库开票后归还的税务处理","场内交易收益免增值税但税务局不认可日结单凭证","浮动盈亏导致月度税负波动及申报困难"],tags:["黄金税收新政","增值税免税","印花税"],cat:"税务合规",novelty:"高",file:"西安20260422-黄金交易.docx"},
-    {title:"机械加工企业合资架构设计",who:"重庆机械加工企业实际控制人",asset:"具备机加工能力的现有公司，但缺乏冷挤压和铸造工艺",event:"获得新业务订单，计划与两家外地公司合资成立新公司",friction:"客户希望以合资公司形式满足客户资质要求，但实际能力依赖股东，存在合规风险",dirs:["合资公司能力依赖股东，合规性存疑","多地生产基地管理及法律风险","关联交易定价与利润分配争议"],tags:["国有企业采购合规","关联交易","合资公司架构"],cat:"股权架构",novelty:"中",file:"重庆20260427-业务扩张.docx"},
-    {title:"美国信托迁移香港税务合规",who:"重庆高净值客户杜总",asset:"美国不可撤销信托持有加州房产及银行账户",event:"计划出售房产将资金转至香港信托账户",friction:"美国信托转香港需避免触发赠与税及税务居民申报义务",dirs:["信托架构调整与税务合规","美国税务居民身份认定与申报","资产跨境转移的税务优化"],tags:["美国信托税法","赠与税","海外账户申报FBAR/FATCA"],cat:"跨境规划",novelty:"高",file:"重庆20260430-美国房产.docx"},
-    {title:"电缆追款与股权稀释咨询",who:"重庆电缆经销商胡总",asset:"电缆经销业务，持有鱼峰电缆原始股",event:"追讨泰山电缆居间费欠款，并咨询股权稀释问题",friction:"小额欠款诉讼流程不熟悉，股权稀释缺乏协议保障",dirs:["网上立案操作困难","证据收集不完整","股权稀释风险不明"],tags:["人民法院在线服务","强制执行","新三板股权稀释"],cat:"合规诉讼",novelty:"中",file:"重庆260209-电缆追款.docx"},
-    {title:"个人借贷欠款追讨咨询",who:"重庆教师邓老师",asset:"30万出借款项，有借条、转账凭证和微信记录",event:"借款人拖欠本金和利息，态度好但不还钱，希望尽快追回本金",friction:"民间借贷利息超标，诉讼时效及保全程序需专业指导",dirs:["借款人无固定单位且行踪不定","借款人可能资不抵债，面临其他债权人","客户缺乏法律知识，担心诉讼时效和成本"],tags:["民间借贷利率上限","诉讼时效","财产保全"],cat:"合规诉讼",novelty:"低",source:"Neil",file:"重庆260226-欠款追讨.docx"}
-  ].map(d=>({...d, source: d.source||'Neil'}));
+    {title:"小规模企业注销税务清算",questions:["存货和固定资产在注销前如何处置才能降低视同销售税负？","注销税务清算时，哪些资金流动会被认定为视同分红并补缴个税？","股东超额出资在清算中如何合规回收而不被认定为收入？"],tags:["小规模纳税人","注销清算","视同销售"],cat:"税务合规",novelty:"低",source:"Neil",file:"北京20260327-企业注销.docx"},
+    {title:"国内资金境外赠与美国子女规划",questions:["国内2000万现金通过哪些合规路径可以赠与持美国绿卡的子女？","通过保险金出境与直接汇款赠与相比，合规性和税务风险各有何不同？","每年5万美元购汇额度如何配合大额传承需求逐步安排？"],tags:["外汇管理","境外赠与","美国绿卡"],cat:"跨境规划",novelty:"中",source:"Neil",file:"北京260324-涉美传承.docx"},
+    {title:"美籍子女收到境外赠与的申报义务",questions:["中国父母赠与美国子女超过10万美元，子女是否需要向IRS申报Form 3520？","受赠资金在美国该如何申报才不会被认定为境外应税收入？","以保险受益金形式给付与直接现金赠与，在美国税务处理上有何本质区别？"],tags:["Form 3520","美国税务申报","境外赠与"],cat:"跨境规划",novelty:"高",source:"Neil",file:"北京260324-涉美传承.docx"},
+    {title:"建筑分包增值税政策咨询",questions:["增值税法施行后分包方只能开普票，差额计税和给甲方开专票受到哪些影响？","一般纳税人建筑企业在什么条件下可以选用简易计税3%，好处是什么？","预缴税款时分包款能否从销售额中扣除？与总包发票类型有什么关联？"],tags:["增值税法","分包差额计税","简易计税"],cat:"税务合规",novelty:"中",source:"Neil",file:"北京260326-建工财税.docx"},
+    {title:"香港公司税务筹划咨询",questions:["香港公司申请离岸豁免的条件是什么，实操中通过率大概多高？","香港利润汇回大陆分红时，个人需缴纳多少税？有无合规降低方式？","内地实际管理的香港公司是否面临常设机构认定风险，如何避免？"],tags:["离岸豁免","利得税","常设机构"],cat:"税务合规",novelty:"中",source:"Neil",file:"南京20260317-香港公司.docx"},
+    {title:"股票虚假陈述索赔维权",questions:["购买虚假陈述股票亏损后，起算时效如何计算，现在提起索赔是否还来得及？","新司法解释下，赔偿比例和免责事由相比旧规有哪些变化？","代表人诉讼和普通诉讼各有什么优劣，律师费占赔偿金额一般多少？"],tags:["证券虚假陈述","最高院司法解释","代表人诉讼"],cat:"合规诉讼",novelty:"中",source:"Neil",file:"南昌20260303-A股索赔.docx"},
+    {title:"家族企业夫妻股东控制权争夺",questions:["公司章程赋予超半数股东免职法定代表人的权利，工商局还能额外设置障碍吗？","对方伪造签名已完成股权转让工商变更，追回被恶意转移股权的法律路径是什么？","另一股东利用关联销售公司扰乱市场，可以提出哪些反制法律主张？"],tags:["公司法","公司章程","工商变更"],cat:"合规诉讼",novelty:"中",source:"Neil",file:"合肥260409-公司纠纷.docx"},
+    {title:"信托产品违约后受益人维权",questions:["中融信托等产品到期未兑付，直接起诉信托公司还是通过受益人大会施压更有效？","底层资产回收困难时，受益人是否可以越过信托公司直接追索底层债务人？","多只信托同时违约，如何在不同信托之间协调维权策略？"],tags:["信托违约","受益人大会","诉讼维权"],cat:"合规诉讼",novelty:"中",source:"Neil",file:"成都20260304-信托暴雷.docx"},
+    {title:"游戏出海日本代扣代缴与消费税",questions:["向日本合作方支付服务费，在中国应如何代扣代缴增值税和企业所得税？","日本消费税平台倒扣新规下，中国发行商是否需要在日本注册纳税？","向日本方的服务费定价是否面临转让定价风险，定价区间应如何设定？"],tags:["日本消费税","对外付汇代扣代缴","转让定价"],cat:"税务合规",novelty:"中",source:"Neil",file:"成都20260326-游戏出海.docx"},
+    {title:"游戏出海日本架构选择",questions:["日本资金决算法备案要求下，香港、新加坡或境内主体哪种发行架构税负最低？","境外公司发行游戏是否构成日本常设机构？如何设计避免缴纳日本法人税？","向香港子公司支付游戏特许权使用费，中日税收协定能将代扣税率降至多少？"],tags:["资金决算法","日本消费税","中日税收协定"],cat:"跨境规划",novelty:"高",source:"Neil",file:"成都20260416-游戏出海.docx"},
+    {title:"餐饮连锁社保合规与员工主体变更",questions:["社保未按实际工资足额缴纳，被稽查时补缴压力和滞纳金有多大？","员工劳动合同主体变更时，如何设计协议避免工龄补偿金积累？","劳动争议仲裁中，哪些常见错误会导致企业直接败诉？"],tags:["社保合规","劳动合同法","劳动争议仲裁"],cat:"劳动用工",novelty:"中",source:"Neil",file:"成都20260429-用工困惑.docx"},
+    {title:"餐饮企业员工手册民主程序合规",questions:["员工手册未经过民主程序，里面的制度条款对员工是否有法律约束力？","员工在家休病假，公司如何设计管理制度来有效识别和防范虚假病假？","员工通过自媒体发帖投诉企业，企业可以采取哪些合法的应对手段？"],tags:["民主流程","病假管理","劳动仲裁"],cat:"劳动用工",novelty:"中",source:"Neil",file:"成都260409-用工困惑.docx"},
+    {title:"电商企业店铺转让后公转私税务合规",questions:["将店铺和货品转让给总公司后，已开出的2000万增值税票如何与退货冲红处理？","业务出售过程中当月税负激增至200万，有哪些合规的减缓措施？","以服务费名义取费来替代分红公转私，税务局是否认可这种安排？"],tags:["增值税票冲红","股东借款归还","公转私"],cat:"税务合规",novelty:"中",source:"Neil",file:"武汉20260411-电商税务.docx"},
+    {title:"家政公司代收工资分账与税务合规",questions:["家政公司代收的阿姨工资能否从应税收入中拆分出去，税务局的认定标准是什么？","对公账户收到含代收工资的混合款项，以全额申报会多交多少税？","灵活用工平台+反向开票模式能否帮家政企业解决进项不足问题？"],tags:["家政服务业","反向开票","灵活用工"],cat:"税务合规",novelty:"高",source:"Neil",file:"武汉20260424-家政税务.docx"},
+    {title:"中港双公司架构CRS与转让定价",questions:["内地+香港双公司架构下，本人的CRS信息会被交换到哪些税务局？","内地公司向香港关联方支付服务费，金额多大会被认定为转让定价风险？","香港公司实质经营如何证明？管理人在内地是否影响常设机构认定？"],tags:["CRS 2.0","关联交易转让定价","常设机构"],cat:"税务合规",novelty:"中",source:"Neil",file:"武汉20260508-香港公司.docx"},
+    {title:"连锁教培机构增值税纳税人身份优化",questions:["校区年收入接近500万门槛，能否通过主体拆分避免升级为一般纳税人？","托管、学科培训等不同业务，分别适用哪些增值税优惠或简易计税政策？","控制企业所得税利润在300万小型微利线以下，有哪些合规做法？"],tags:["增值税法","非学历教育简易计税","小型微利所得税"],cat:"税务合规",novelty:"中",source:"Neil",file:"武汉260202-连锁教培.docx"},
+    {title:"煤炭贸易享受海南双15税收优惠",questions:["煤炭贸易企业在海南注册，两头在外的模式能否通过实质经营认定？","企业所得税15%需满足的产业目录要求和实际操作难点是什么？","个人所得税15%先征后退的申请流程和实际兑现率通常有多高？"],tags:["海南自由贸易港","企业所得税15%","实质经营"],cat:"税务合规",novelty:"中",source:"Neil",file:"武汉260206-煤炭贸易.docx"},
+    {title:"试用期解除劳动合同举证策略",questions:["以'不符合录用条件'为由解除试用期员工，用人单位需要举哪些类型的证据？","绩效工资的克扣条款在未经民主程序的情况下，仲裁庭如何认定其合法性？","最后一个月工资的发放时机如何影响劳动仲裁的谈判筹码？"],tags:["劳动合同法第三十九条","试用期解除","绩效工资"],cat:"劳动用工",novelty:"中",source:"Neil",file:"深圳260227-劳动纠纷.docx"},
+    {title:"房地产资产重组剥离税务筹划",questions:["土地和自持物业从原公司剥离至新公司，如何申请重组特殊性税务处理免征所得税？","外资母公司架构下境内子公司做资产重组，是否仍可享受税收优惠？","房地产开发资质是否影响重组税收优惠资格？资质保留方案如何设计？"],tags:["资产重组","土地增值税","特殊性税务处理"],cat:"税务合规",novelty:"中",source:"Neil",file:"深圳260319-房产涉税.docx"},
+    {title:"黄金交易所新政下涉税问题",questions:["法人从上金所借入实物黄金再归还时，交易所开具的发票如何进行进项抵扣处理？","黄金延期交易的浮动盈亏如何申报增值税？税务局是否认可日结单作为合法凭证？","旧政下的免税黄金资产进入新政应税范围，是否需要做进项税额转出？"],tags:["黄金税收新政","增值税免税","进项抵扣"],cat:"税务合规",novelty:"高",source:"Neil",file:"西安20260422-黄金交易.docx"},
+    {title:"机械加工企业合资公司设计",questions:["以合资公司名义承接订单、实际生产依赖各股东公司，是否涉及资质挂靠的合规风险？","多地生产基地跨省经营，税务主体如何布局才能避免重复税收和管理混乱？","合资公司与股东关联企业的定价原则应如何设计才能合理分配利润？"],tags:["合资公司架构","关联交易","国有采购合规"],cat:"股权架构",novelty:"中",source:"Neil",file:"重庆20260427-业务扩张.docx"},
+    {title:"美国不可撤销信托迁移香港规划",questions:["美国不可撤销信托将资产迁移至香港，是否触发美国赠与税或遗产税申报义务？","出售美国信托内的房产后资金转入香港，美国税务居民是否仍需继续申报？","FBAR和Form 8938分别要申报哪些境外资产？门槛和截止日期各是什么？"],tags:["美国信托","FBAR/FATCA","赠与税"],cat:"跨境规划",novelty:"高",source:"Neil",file:"重庆20260430-美国房产.docx"},
+    {title:"小额商业欠款诉讼追索",questions:["居间费欠款约16万元，网上立案的具体步骤和材料要求是什么？","仅有合同和转账记录作为证据，诉讼胜算有多大？法院会如何判决？","判决后对方无力偿还，申请强制执行的流程和实际效果如何？"],tags:["网上立案","强制执行","居间合同"],cat:"合规诉讼",novelty:"中",source:"Neil",file:"重庆260209-电缆追款.docx"},
+    {title:"民间借贷逾期追讨与财产保全",questions:["借款利率超过年化24%，超出部分利息在诉讼中是否被支持？","债务人行踪不定、无固定单位，如何在起诉前申请财产保全？","多个债权人并存的情况下，个人债权如何在竞争中优先受偿？"],tags:["民间借贷","诉讼时效","财产保全"],cat:"合规诉讼",novelty:"低",source:"Neil",file:"重庆260226-欠款追讨.docx"}
+  ];
 
   const HANS_DATA = [
-    {title:"配偶涉诉期间多层信托隔离传承",dirs:["配偶涉诉期间直接设信托可被认定逃债，需'子代设托'多层结构","股票账户以子女名义代持，婚后投资收益面临被认定夫妻共同财产风险","双子年龄差异导致信托结构选择与监察权限设计困难"],tags:["家族信托","逃债认定","代持股票","婚前财产协议"],cat:"资产保护",novelty:"高",source:"Hans",file:"Darren 杭州 资产隔离传承-转写结果.docx"},
+    {title:"配偶涉诉期间多层信托隔离传承",questions:["配偶面临民事诉讼期间，直接设立信托是否会被认定为逃避债务而无效？","以子女名义代持的股票账户，婚后收益是否会被认定为夫妻共同财产？","信托委托人和受益人由谁担任，对债权人追索和传承控制权影响各有何不同？"],tags:["家族信托","逃债认定","代持股票","婚前财产协议"],cat:"资产保护",novelty:"高",source:"Hans",file:"Darren 杭州 资产隔离传承-转写结果.docx"},
     {title:"VIE架构港股期权行权境内个税筹划",dirs:["VIE架构下境外股权激励无法适用境内年终奖优惠计税，需逐案与税务局沟通","行权后资金留港受外汇登记方式约束，若已登记则强制回境","财产转让所得纳税地点可选择，存在换居住地享受财政扶持的筹划空间"],tags:["股权激励","VIE架构","个税筹划","年终奖优惠"],cat:"税务合规",novelty:"中",source:"Hans",file:"26.2.3 Allen 宁波 股权激励个税-转写结果.docx"},
     {title:"中美双边税务叠加与CRS信息申报",dirs:["美国税务居民将境外资产赠与中国父母：受赠方无税负但赠与方须申报706表","孩子从美国税务居民退出的时间节点切割与双份税表申报问题","香港账户CRS信息交换至中国税务局，母亲已被追税含滞纳金"],tags:["美国税务居民","CRS","FBAR","跨境赠与"],cat:"跨境规划",novelty:"中",source:"Hans",file:"杨晔 美国税、香港投资、CRS等-转写结果.docx"},
     {title:"教培加盟小股东退出与套壳营收转移",dirs:["大股东代持协议无法直接办工商变更，司法解散周期长且成本高","对方未足额出资叠加营收转移到关联子公司，构成查账和职务侵占施压点","身陷两家问题公司影响个人信用及新业务开展"],tags:["股东退出","司法解散","套壳转移营收","职务侵占"],cat:"股权架构",novelty:"中",source:"Hans",file:"26.2.26 陈晓锋 股东利益保障-转写结果.docx"},
@@ -3369,15 +3461,31 @@ tr:hover td { background: #fafafa; }
           <span class="hgj-cat-tag">${d.cat}</span>
         </div>
         <div style="font-size:11px;color:#94a3b8;margin-bottom:10px;margin-top:-4px;">📁 ${d.file.replace(/-转写结果\.docx|\.docx/g,'')}</div>
-        <div style="font-size:12px;color:#64748b;margin-bottom:6px;">痛点方向：</div>
-        <div class="hgj-pain-dir">
-          ${d.dirs.map(dir=>`<span class="hgj-pain-chip" onclick="hgjSendToPainGenerate('${dir.replace(/'/g,"\\'")}')">＋ ${dir}</span>`).join('')}
-        </div>
-        <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px;">
+        <div style="font-size:12px;color:#64748b;margin-bottom:5px;">客户关注的问题：</div>
+        <ul style="margin:0 0 8px 0;padding-left:16px;">
+          ${(d.questions||d.dirs).map(q=>`<li style="font-size:12px;color:#334155;margin-bottom:4px;line-height:1.55;">${q}</li>`).join('')}
+        </ul>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;">
           ${d.tags.map(t=>`<span style="font-size:11px;background:#f1f5f9;color:#64748b;padding:2px 7px;border-radius:4px;">${t}</span>`).join('')}
         </div>
       </div>
     `).join('');
+  }
+
+  function updateFilterBadges(){
+    const TOTAL_MEETINGS = new Set(ALL_HGJ_DATA.map(d=>d.file)).size;
+    document.querySelectorAll('.hgj-filter-btn').forEach(btn=>{
+      const f = btn.dataset.filter;
+      const label = btn.dataset.label || btn.textContent.replace(/\s*\d.*$/,'').trim();
+      if(!f) return;
+      if(f==='全部'){
+        btn.textContent = `${label}（${ALL_HGJ_DATA.length} 场景 / ${TOTAL_MEETINGS} 会议）`;
+      } else {
+        const subset = f==='高新颖度' ? ALL_HGJ_DATA.filter(d=>d.novelty==='高') : ALL_HGJ_DATA.filter(d=>d.cat===f);
+        const uniqFiles = new Set(subset.map(d=>d.file)).size;
+        btn.textContent = `${label} ${uniqFiles}/${TOTAL_MEETINGS}`;
+      }
+    });
   }
 
   function hgjFilter(btn, f){
@@ -3403,7 +3511,7 @@ tr:hover td { background: #fafafa; }
   const origShowPage = window.showPage;
   window.showPage = function(pageId){
     origShowPage && origShowPage.apply(this, arguments);
-    if(pageId==='hgj') renderCards(ALL_HGJ_DATA);
+    if(pageId==='hgj'){ renderCards(ALL_HGJ_DATA); updateFilterBadges(); }
   };
 })();
 </script>
