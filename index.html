@@ -3198,8 +3198,6 @@ tr:hover td { background: #fafafa; }
   <!-- 筛选栏 -->
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;" id="hgjFilters">
     <button class="hgj-filter-btn active" data-filter="全部" onclick="hgjFilter(this,'全部')">全部（67）</button>
-    <button class="hgj-filter-btn" data-filter="Neil" onclick="hgjFilter(this,'Neil')">📋 Neil（23）</button>
-    <button class="hgj-filter-btn" data-filter="Hans" onclick="hgjFilter(this,'Hans')">📋 Hans（44）</button>
     <button class="hgj-filter-btn" data-filter="税务合规" onclick="hgjFilter(this,'税务合规')">税务合规</button>
     <button class="hgj-filter-btn" data-filter="合规诉讼" onclick="hgjFilter(this,'合规诉讼')">合规诉讼</button>
     <button class="hgj-filter-btn" data-filter="跨境规划" onclick="hgjFilter(this,'跨境规划')">跨境规划</button>
@@ -3387,7 +3385,6 @@ tr:hover td { background: #fafafa; }
     btn.classList.add('active');
     const filtered = f==='全部'    ? ALL_HGJ_DATA :
                      f==='高新颖度' ? ALL_HGJ_DATA.filter(d=>d.novelty==='高') :
-                     (f==='Neil'||f==='Hans') ? ALL_HGJ_DATA.filter(d=>d.source===f) :
                      ALL_HGJ_DATA.filter(d=>d.cat===f);
     renderCards(filtered);
   }
