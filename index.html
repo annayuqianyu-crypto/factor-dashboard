@@ -3453,14 +3453,28 @@ tr:hover td { background: #fafafa; }
   function renderCards(data){
     const container = document.getElementById('hgjCards');
     if(!container) return;
-    container.innerHTML = data.map((d,i) => `
+    const TOTAL_FILES = new Set(ALL_HGJ_DATA.map(d=>d.file)).size;
+    // 预计算每个 cat 和 novelty 的唯一文件数
+    const catCount = {};
+    ALL_HGJ_DATA.forEach(d=>{
+      if(!catCount[d.cat]) catCount[d.cat] = new Set();
+      catCount[d.cat].add(d.file);
+    });
+    const highCount = new Set(ALL_HGJ_DATA.filter(d=>d.novelty==='高').map(d=>d.file)).size;
+
+    container.innerHTML = data.map((d,i) => {
+      const cnt = catCount[d.cat] ? catCount[d.cat].size : 0;
+      return `
       <div class="hgj-card" data-cat="${d.cat}" data-novelty="${d.novelty}">
         <div class="hgj-card-header">
           <span style="font-size:15px;font-weight:700;color:#1e293b;flex:1;cursor:pointer;text-decoration:underline;text-decoration-color:#cbd5e1;text-underline-offset:3px;" onclick="hgjSendToPainGenerate(this.dataset.title)" data-title="${d.title.replace(/"/g,'&quot;')}" title="点击添加为场景">${d.title}</span>
           <span class="hgj-tag ${noveltyClass(d.novelty)}">${noveltyLabel(d.novelty)}</span>
           <span class="hgj-cat-tag">${d.cat}</span>
         </div>
-        <div style="font-size:11px;color:#94a3b8;margin-bottom:10px;margin-top:-4px;">📁 ${d.file.replace(/-转写结果\.docx|\.docx/g,'')}</div>
+        <div style="font-size:11px;color:#94a3b8;margin-bottom:8px;margin-top:-4px;display:flex;align-items:center;gap:12px;">
+          <span>📁 ${d.file.replace(/-转写结果\.docx|\.docx/g,'')}</span>
+          <span style="background:#eff6ff;color:#1d4ed8;border-radius:20px;padding:1px 9px;font-size:11px;font-weight:600;white-space:nowrap;">「${d.cat}」出现在 ${cnt}/${TOTAL_FILES} 份会议</span>
+        </div>
         <div style="font-size:12px;color:#64748b;margin-bottom:5px;">客户关注的问题：</div>
         <ul style="margin:0 0 8px 0;padding-left:16px;">
           ${(d.questions||d.dirs).map(q=>`<li style="font-size:12px;color:#334155;margin-bottom:4px;line-height:1.55;">${q}</li>`).join('')}
@@ -3468,8 +3482,8 @@ tr:hover td { background: #fafafa; }
         <div style="display:flex;flex-wrap:wrap;gap:5px;">
           ${d.tags.map(t=>`<span style="font-size:11px;background:#f1f5f9;color:#64748b;padding:2px 7px;border-radius:4px;">${t}</span>`).join('')}
         </div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
   }
 
   function updateFilterBadges(){
@@ -3513,6 +3527,9 @@ tr:hover td { background: #fafafa; }
     origShowPage && origShowPage.apply(this, arguments);
     if(pageId==='hgj'){ renderCards(ALL_HGJ_DATA); updateFilterBadges(); }
   };
+
+  // 页面加载后立即计算计数（兜底）
+  setTimeout(updateFilterBadges, 300);
 })();
 </script>
 
