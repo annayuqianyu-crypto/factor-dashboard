@@ -3450,20 +3450,22 @@ tr:hover td { background: #fafafa; }
   function noveltyLabel(n){ return n==='高'?'⭐ 高新颖度':n==='中'?'中等':' 常见'; }
   function noveltyClass(n){ return n==='高'?'hgj-novelty-high':n==='中'?'hgj-novelty-mid':'hgj-novelty-low'; }
 
+  // 预计算：对每个场景卡片，统计67份会议中有多少份含有至少1个相同tag
+  const TOTAL_FILES = new Set(ALL_HGJ_DATA.map(d=>d.file)).size; // = 67
+  function sceneHitCount(card){
+    const tagSet = new Set(card.tags);
+    const matched = new Set();
+    ALL_HGJ_DATA.forEach(d=>{
+      if(d.tags.some(t=>tagSet.has(t))) matched.add(d.file);
+    });
+    return matched.size;
+  }
+
   function renderCards(data){
     const container = document.getElementById('hgjCards');
     if(!container) return;
-    const TOTAL_FILES = new Set(ALL_HGJ_DATA.map(d=>d.file)).size;
-    // 预计算每个 cat 和 novelty 的唯一文件数
-    const catCount = {};
-    ALL_HGJ_DATA.forEach(d=>{
-      if(!catCount[d.cat]) catCount[d.cat] = new Set();
-      catCount[d.cat].add(d.file);
-    });
-    const highCount = new Set(ALL_HGJ_DATA.filter(d=>d.novelty==='高').map(d=>d.file)).size;
-
     container.innerHTML = data.map((d,i) => {
-      const cnt = catCount[d.cat] ? catCount[d.cat].size : 0;
+      const hits = sceneHitCount(d);
       return `
       <div class="hgj-card" data-cat="${d.cat}" data-novelty="${d.novelty}">
         <div class="hgj-card-header">
@@ -3473,7 +3475,7 @@ tr:hover td { background: #fafafa; }
         </div>
         <div style="font-size:11px;color:#94a3b8;margin-bottom:8px;margin-top:-4px;display:flex;align-items:center;gap:12px;">
           <span>📁 ${d.file.replace(/-转写结果\.docx|\.docx/g,'')}</span>
-          <span style="background:#eff6ff;color:#1d4ed8;border-radius:20px;padding:1px 9px;font-size:11px;font-weight:600;white-space:nowrap;">「${d.cat}」出现在 ${cnt}/${TOTAL_FILES} 份会议</span>
+          <span style="background:#eff6ff;color:#1d4ed8;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;white-space:nowrap;">此场景出现 ${hits}/${TOTAL_FILES} 次</span>
         </div>
         <div style="font-size:12px;color:#64748b;margin-bottom:5px;">客户关注的问题：</div>
         <ul style="margin:0 0 8px 0;padding-left:16px;">
