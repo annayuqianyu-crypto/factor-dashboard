@@ -9904,14 +9904,16 @@ async function piStartEnrich() {
 
 
 
+  const factorPathsText = (typeof FACTOR_PATHS !== 'undefined' ? FACTOR_PATHS : []).join('\n');
+
   const buildPrompt = (batch, batchIdx) => {
 
     const pointsJson = JSON.stringify(batch.map((p, i) => ({id: batchIdx * PI_BATCH_SIZE + i + 1, ...p})), null, 2);
 
     return `你是朝曦家办的资深业务顾问，专长跨境财富规划、企业股权架构、税务合规、家族传承。
 ${buInstructions ? '\n' + buInstructions + '\n' : ''}
-以下是已有痛点数据（已包含 code/title/desc），请为每条痛点补全 6 个分析字段：tags / skus / conflict / risk / solution / effect。
-**保持原始 code 和 title 完全不变**；如原 desc 超过 60 字则压缩到 60 字内，否则原样。
+以下是已有痛点数据（已包含 code/title/desc），请为每条痛点补全 8 个分析字段：factors_chain / tags / skus / laws / conflict / risk / solution / effect。
+**保持原始 code、scene、title 完全不变**；如原 desc 超过 60 字则压缩到 60 字内，否则原样。
 
 【已有痛点】：
 ${pointsJson}
@@ -9922,20 +9924,25 @@ ${pointsJson}
   "scene":"原场景（不变）",
   "title":"原痛点标题（不变）",
   "desc":"痛点说明（≤60字）",
+  "factors_chain":"【硬性规则】从下方【因子库路径表】中精确选取恰好 4 条与该痛点最匹配的完整路径，用中文分号「；」拼接。路径必须与因子库中完全一致，禁止编造或修改。4 条路径必须分别属于以下 4 个不同维度，每个维度恰好 1 条：①谁（必以「商业/职业身份」「家庭角色」「核心家庭成员」「核心员工」开头）②有什么（必以「资产类型」「财富标的」「持有形式」「持有结构」「所在地」「财富规模」「公司架构」「金融账户」开头）③发生了什么（必以「资本动作」「流动性管理」「价值管理」「架构搭建」「身份规划」「身份优化」「成长动作」「健康管理」「个人税务申报」「企业税务申报」开头）④约束条件（必以「外部监管触发」「税务合规」「法律风险」「合规要求」「政策变化」「身份维护」开头）",
   "tags":[{"label":"标签短语","dim":"主体|资产|动作|约束","weight":"C|B|A"}],
   "skus":[{"id":"SKU_ID","name":"SKU名称"}],
-  "conflict":"核心冲突（≤25字，[客户诉求]与[客观约束/风险]的矛盾）",
-  "risk":"潜在风险（≤100字，具体化后果）",
-  "solution":"解决方案（≤120字，分步骤，平实语言；可提及服务名称，但【严禁出现任何SKU编号或产品代码，如Legal-xxxx/Tax-xxxx/CM-xxxx等】）",
-  "effect":"预期效果（≤80字，平实语言）"
+  "laws":"相关法律法规（列举与本痛点直接相关的法规/规章/政策名称，用顿号「、」分隔，格式：《法规全称》，若有政策性文件可不加书名号；仅列名称，不解释条款）",
+  "conflict":"核心冲突（≤25字，格式：[客户诉求]与[客观约束/风险]之间的矛盾）",
+  "risk":"潜在风险（若不解决最坏情况，100字内，具体化风险后果，体现专业壁垒）",
+  "solution":"解决方案（专业行动建议，120字内，分步骤，平实语言；可提及服务名称，但【严禁出现任何SKU编号或产品代码，如Legal-xxxx/Tax-xxxx/CM-xxxx等】）",
+  "effect":"预期效果（成功实施后正面价值，80字内，平实语言，不拔高）"
 }
 
 标签规则：dim 取值 主体/资产/动作/约束；weight C=核心 B=中等 A=弱；每痛点 4-6 个。
 SKU 规则：从下方知识库选 1-3 个最相关 ID，name 字段必须与 ID 对应。
-合规：禁用 结构化/委托贷款/QFLP/筹划/避税/减税/节税/完全解决/保证/一定/帮助/陪伴/助力/护航；不引用具体法条；solution字段严禁出现SKU编号（Legal-xxxx/Tax-xxxx/CM-xxxx等产品代码）。
+合规：禁用 结构化/委托贷款/QFLP/筹划/避税/减税/节税/完全解决/保证/一定/帮助/陪伴/助力/护航；laws 字段仅列法规名称不解释条款；solution 字段严禁出现 SKU 编号。
 
 SKU 知识库${buPrefix?'（已按 '+buPrefix+' BU 过滤）':'（全量）'}：
 ${skuLines}
+
+【因子库路径表】（共 ${(typeof FACTOR_PATHS !== 'undefined' ? FACTOR_PATHS : []).length} 条，为每个痛点的 factors_chain 从此表精确选取恰好 4 条完整路径，分别且仅分别覆盖「谁/有什么/发生了什么/约束条件」四维，每维 1 条不可重复，复制原文不可修改）：
+${factorPathsText}
 
 严格只输出 JSON 对象，不要其他文字。`;
 
