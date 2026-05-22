@@ -9747,7 +9747,7 @@ function piRenderMapping() {
 
 // ── AI 补全（自动分批）────────────────────────────────────
 
-const PI_BATCH_SIZE = 8;   // 每批条数（从 20 降到 8，避免 JSON 输出被截断）
+const PI_BATCH_SIZE = 5;   // 每批条数（新增factors_chain因子库注入后载荷增大，从8降到5防截断）
 
 
 
