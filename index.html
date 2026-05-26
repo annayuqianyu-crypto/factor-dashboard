@@ -11066,10 +11066,6 @@ ${relevance ? `家办关联：${relevance}` : ''}
             style="padding:5px 14px;background:#2d6a4f;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">
             ＋ 加入 Tax 场景池
           </button>
-          <button onclick="hgjSendToPainGenerate('${s.scene.replace(/'/g,"\\'")}');document.getElementById('news-extract-modal').style.display='none';"
-            style="padding:5px 14px;background:#1a56db;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">
-            直接生成痛点
-          </button>
         </div>
       </div>`).join('');
   } catch(e) {
@@ -11136,10 +11132,6 @@ JSON 数组格式输出（与家办无关则返回 []）：
             data-scene="${s.scene.replace(/"/g,'&quot;')}" data-dir="${s.pain_direction.replace(/"/g,'&quot;')}"
             style="padding:5px 14px;background:#2d6a4f;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">
             ＋ 加入 Tax 场景池
-          </button>
-          <button onclick="hgjSendToPainGenerate('${s.scene.replace(/'/g,"\\'")}');"
-            style="padding:5px 14px;background:#1a56db;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">
-            直接生成痛点
           </button>
         </div>
       </div>`).join('');
