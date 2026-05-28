@@ -2615,8 +2615,12 @@ tr:hover td { background: #fafafa; }
       <span style="font-size:11px;font-weight:400;color:#9ca3af;margin-left:4px;">各BU基于偏好信息源生成建议场景</span>
     </div>
     <div style="display:flex;gap:4px;margin-bottom:0;border-bottom:2px solid #e5e7eb;">
+      <button id="bu-tab-news" onclick="switchBuRadar('news')"
+        style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#2d6a4f;color:#fff;border-bottom:2px solid #2d6a4f;margin-bottom:-2px;">
+        📰 Tax 时事新闻
+      </button>
       <button id="bu-tab-tax" onclick="switchBuRadar('tax')"
-        style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#0369a1;color:#fff;border-bottom:2px solid #0369a1;margin-bottom:-2px;">
+        style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#f3f4f6;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">
         💼 Tax 专项场景
       </button>
       <button id="bu-tab-legal" onclick="switchBuRadar('legal')"
@@ -2627,14 +2631,10 @@ tr:hover td { background: #fafafa; }
         style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#f3f4f6;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">
         📈 CM 专项场景
       </button>
-      <button id="bu-tab-news" onclick="switchBuRadar('news')"
-        style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#f3f4f6;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">
-        📰 Tax 时事新闻
-      </button>
     </div>
 
     <!-- Tax 雷达面板 -->
-    <div id="radar-panel-tax" style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
+    <div id="radar-panel-tax" style="display:none;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
         <div>
           <div style="font-size:13.5px;font-weight:700;color:#0369a1;">税务专项场景雷达</div>
@@ -2677,7 +2677,18 @@ tr:hover td { background: #fafafa; }
     </div>
 
     <!-- Tax 时事新闻面板（腾讯云混元联网搜索） -->
-    <div id="radar-panel-news" style="display:none;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
+    <div id="radar-panel-news" style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
+
+      <!-- 信息源列表（重点关注网站清单） -->
+      <details style="margin-bottom:14px;border:1px solid #d1fae5;border-radius:8px;padding:8px 12px;background:#f0fdf4;">
+        <summary style="font-size:12.5px;color:#065f46;cursor:pointer;user-select:none;font-weight:600;">
+          📋 当前重点关注的 <span id="news-source-count">40</span> 个信息源（点击展开/按领域分组）
+        </summary>
+        <div id="news-sources-grouped" style="margin-top:10px;display:flex;flex-direction:column;gap:8px;"></div>
+        <div style="font-size:11px;color:#047857;margin-top:8px;padding-top:8px;border-top:1px dashed #6ee7b7;">
+          💡 搜索结果中，来自上述信息源的条目会标记为<span style="color:#15803d;font-weight:600;">「重点信息源」</span>，便于优先关注权威与官方内容。
+        </div>
+      </details>
 
       <!-- SCF 代理状态栏 -->
       <div id="news-scf-bar" style="margin-bottom:16px;">
@@ -11210,25 +11221,52 @@ const TAX_SOURCES = [
 ];
 
 // ── 初始化信息源标签 ─────────────────────────────────────────
+const RADAR_DIM_COLORS = {
+  '证券行业':'#dbeafe:#1d4ed8', '银行业':'#dcfce7:#15803d',
+  '聚合财经':'#fef3c7:#92400e', '家企架构与资本市场':'#ede9fe:#6d28d9',
+  '家族财富传承与全球税务规划':'#fee2e2:#991b1b',
+  '保险行业':'#fce7f3:#9d174d', '信托行业':'#e0f2fe:#0369a1',
+  '全球法律与新兴业务':'#f1f5f9:#475569',
+  '组织效能与ESG价值':'#ecfdf5:#065f46',
+};
+
 function radarInitSources() {
   const el = document.getElementById('radar-tax-sources');
   if (!el || el.children.length > 0) return;
-  const dimColors = {
-    '证券行业':'#dbeafe:#1d4ed8', '银行业':'#dcfce7:#15803d',
-    '聚合财经':'#fef3c7:#92400e', '家企架构与资本市场':'#ede9fe:#6d28d9',
-    '家族财富传承与全球税务规划':'#fee2e2:#991b1b',
-    '保险行业':'#fce7f3:#9d174d', '信托行业':'#e0f2fe:#0369a1',
-    '全球法律与新兴业务':'#f1f5f9:#475569',
-    '组织效能与ESG价值':'#ecfdf5:#065f46',
-  };
   TAX_SOURCES.forEach(s => {
-    const [bg, color] = (dimColors[s.dim]||'#f3f4f6:#374151').split(':');
+    const [bg, color] = (RADAR_DIM_COLORS[s.dim]||'#f3f4f6:#374151').split(':');
     const chip = document.createElement('a');
     chip.href = s.url; chip.target = '_blank';
     chip.title = s.section + '｜' + s.keywords;
     chip.style.cssText = `display:inline-block;padding:3px 9px;background:${bg};color:${color};border-radius:20px;font-size:11px;font-weight:500;text-decoration:none;`;
     chip.textContent = s.name;
     el.appendChild(chip);
+  });
+}
+
+// 新闻面板：按领域分组展示信息源
+function newsInitSources() {
+  const el = document.getElementById('news-sources-grouped');
+  if (!el || el.children.length > 0) return;
+  // 按 dim 分组
+  const groups = {};
+  TAX_SOURCES.forEach(s => {
+    if (!groups[s.dim]) groups[s.dim] = [];
+    groups[s.dim].push(s);
+  });
+  const cntEl = document.getElementById('news-source-count');
+  if (cntEl) cntEl.textContent = TAX_SOURCES.length;
+
+  Object.entries(groups).forEach(([dim, list]) => {
+    const [bg, color] = (RADAR_DIM_COLORS[dim]||'#f3f4f6:#374151').split(':');
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.7;';
+    row.innerHTML = `<span style="flex-shrink:0;display:inline-block;padding:2px 9px;background:${bg};color:${color};border-radius:12px;font-size:11px;font-weight:600;min-width:auto;">${dim} · ${list.length}</span>
+      <div style="flex:1;display:flex;flex-wrap:wrap;gap:5px;">
+        ${list.map(s => `<a href="${s.url}" target="_blank" title="${s.section}｜${s.keywords}"
+          style="display:inline-block;padding:2px 8px;background:#fff;color:#374151;border:1px solid #e5e7eb;border-radius:4px;font-size:11.5px;text-decoration:none;">${s.name}</a>`).join('')}
+      </div>`;
+    el.appendChild(row);
   });
 }
 
@@ -11252,7 +11290,7 @@ function switchBuRadar(bu) {
     }
   });
   if (bu === 'tax')  radarInitSources();
-  if (bu === 'news') newsInit();
+  if (bu === 'news') { newsInit(); newsInitSources(); }
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -12204,6 +12242,8 @@ function renderPool(bu) {
 (function initRadarOnLoad() {
   ['tax','legal','cm'].forEach(b => renderPool(b));
   radarInitSources();
+  // news 现在是默认tab，初始化时也要渲染源列表+SCF bar
+  setTimeout(() => { if (typeof newsInit === 'function') newsInit(); if (typeof newsInitSources === 'function') newsInitSources(); }, 100);
   learnRenderHistory();   // 初始化痛点学习历史面板
 })();
 
