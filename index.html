@@ -4642,7 +4642,7 @@ tr:hover td { background: #fafafa; }
     </div>
     <textarea id="learn-pain-input" rows="4"
       placeholder="粘贴或输入痛点描述，例如：高净值客户持有境外资产，面临 CRS 自动交换带来的税务申报合规问题，缺乏合规架构安排…"
-      style="width:100%;box-sizing:border-box;padding:11px 13px;border:1px solid #ddd6fe;border-radius:8px;font-size:13.5px;line-height:1.7;resize:vertical;font-family:inherit;"></textarea>
+      style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #ddd6fe;border-radius:8px;font-size:15px;line-height:1.75;resize:vertical;font-family:inherit;"></textarea>
     <div style="display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap;">
       <button onclick="learnAnalyze()" id="learn-analyze-btn"
         style="padding:10px 28px;background:linear-gradient(135deg,#a78bfa,#8b5cf6);color:#fff;border:none;border-radius:8px;font-size:13.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(139,92,246,.25);">
@@ -4665,13 +4665,13 @@ tr:hover td { background: #fafafa; }
         <span>💬</span> 与 DeepSeek 深度对话
       </div>
       <div id="learn-chat-messages"
-        style="min-height:140px;max-height:520px;overflow-y:auto;background:#faf5ff;border:1px solid #ede9fe;border-radius:10px;padding:16px;margin-bottom:14px;font-size:13px;line-height:1.75;">
+        style="min-height:140px;max-height:520px;overflow-y:auto;background:#faf5ff;border:1px solid #ede9fe;border-radius:10px;padding:16px;margin-bottom:14px;font-size:15px;line-height:1.8;">
         <div style="text-align:center;color:#9ca3af;font-size:12px;padding:20px 0;">分析完成后，可在此向 AI 进一步提问</div>
       </div>
       <div style="display:flex;gap:10px;">
         <textarea id="learn-chat-input" rows="2"
           placeholder="继续提问，例如：这个方案在香港落地的具体步骤是什么？税务局有无明文规定？"
-          style="flex:1;padding:10px 13px;border:1px solid #ddd6fe;border-radius:8px;font-size:13px;line-height:1.5;resize:none;font-family:inherit;"
+          style="flex:1;padding:11px 14px;border:1px solid #ddd6fe;border-radius:8px;font-size:15px;line-height:1.65;resize:none;font-family:inherit;"
           onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();learnChatSend();}"></textarea>
         <button onclick="learnChatSend()" id="learn-chat-send-btn"
           style="padding:0 24px;background:linear-gradient(135deg,#a78bfa,#8b5cf6);color:#fff;border:none;border-radius:8px;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap;align-self:stretch;box-shadow:0 2px 8px rgba(139,92,246,.2);">
@@ -12510,9 +12510,9 @@ function learnRenderOutput(d, pain, wsaCtx) {
   const out = document.getElementById('learn-analysis-output');
 
   const argHtml = (d.arguments || []).map((a, i) => `
-    <div style="margin-bottom:10px;padding:10px 14px;background:#f9fafb;border-left:3px solid #c4b5fd;border-radius:0 6px 6px 0;">
-      <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:3px;">论点 ${i+1}：${a.point || ''}</div>
-      <div style="font-size:12px;color:#4b5563;line-height:1.6;">${a.evidence || ''}</div>
+    <div style="margin-bottom:12px;padding:12px 16px;background:#f9fafb;border-left:3px solid #c4b5fd;border-radius:0 6px 6px 0;">
+      <div style="font-size:15px;font-weight:700;color:#374151;margin-bottom:5px;">论点 ${i+1}：${a.point || ''}</div>
+      <div style="font-size:14px;color:#4b5563;line-height:1.75;">${a.evidence || ''}</div>
     </div>`).join('');
 
   window._learnRegMap = {};   // 存每条法规元数据供展开使用
@@ -12520,27 +12520,27 @@ function learnRenderOutput(d, pain, wsaCtx) {
     const regId = 'lr-' + Date.now() + '-' + ri;
     window._learnRegMap[regId] = { name: r.name || '', article: r.article || '', excerpt: r.excerpt || '', summary: d.summary || '' };
     return `
-    <div style="margin-bottom:10px;padding:12px;background:#fff;border:1px solid #ede9fe;border-radius:8px;">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:4px;">
-        <div style="font-size:13px;font-weight:700;color:#8b5cf6;">${r.name || ''} ${r.article ? `· ${r.article}` : ''}</div>
+    <div style="margin-bottom:12px;padding:14px;background:#fff;border:1px solid #ede9fe;border-radius:8px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:6px;">
+        <div style="font-size:15px;font-weight:700;color:#8b5cf6;">${r.name || ''} ${r.article ? `· ${r.article}` : ''}</div>
         <button onclick="learnExpandReg('${regId}',this)"
-          style="flex-shrink:0;padding:3px 11px;font-size:11.5px;font-weight:600;color:#8b5cf6;background:#faf5ff;border:1px solid #ddd6fe;border-radius:20px;cursor:pointer;white-space:nowrap;transition:all .15s;">
+          style="flex-shrink:0;padding:4px 13px;font-size:13px;font-weight:600;color:#8b5cf6;background:#faf5ff;border:1px solid #ddd6fe;border-radius:20px;cursor:pointer;white-space:nowrap;transition:all .15s;">
           展开原文 ▾
         </button>
       </div>
-      <div style="font-size:12px;color:#374151;background:#faf5ff;padding:8px 10px;border-radius:6px;line-height:1.6;font-style:italic;margin-bottom:6px;">"${r.excerpt || ''}"</div>
-      ${r.url ? `<a href="${r.url}" target="_blank" style="font-size:11px;color:#8b5cf6;text-decoration:none;">🔗 查看来源</a>` : ''}
-      <div id="${regId}-body" style="display:none;margin-top:10px;padding:12px 14px;background:#f9f7ff;border:1px solid #ede9fe;border-radius:8px;font-size:12.5px;color:#374151;line-height:1.8;white-space:pre-wrap;"></div>
+      <div style="font-size:14px;color:#374151;background:#faf5ff;padding:10px 12px;border-radius:6px;line-height:1.75;font-style:italic;margin-bottom:6px;">"${r.excerpt || ''}"</div>
+      ${r.url ? `<a href="${r.url}" target="_blank" style="font-size:13px;color:#8b5cf6;text-decoration:none;">🔗 查看来源</a>` : ''}
+      <div id="${regId}-body" style="display:none;margin-top:10px;padding:14px 16px;background:#f9f7ff;border:1px solid #ede9fe;border-radius:8px;font-size:14.5px;color:#374151;line-height:1.85;white-space:pre-wrap;"></div>
     </div>`;
   }).join('');
 
   const solHtml = (d.solutions || []).map((s, i) => `
-    <div style="margin-bottom:12px;padding:14px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;">
-      <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:8px;">方案 ${i+1}：${s.name || ''}</div>
-      <div style="font-size:12px;color:#374151;margin-bottom:8px;line-height:1.6;">${s.description || ''}</div>
+    <div style="margin-bottom:14px;padding:16px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;">
+      <div style="font-size:15px;font-weight:700;color:#1e293b;margin-bottom:10px;">方案 ${i+1}：${s.name || ''}</div>
+      <div style="font-size:14px;color:#374151;margin-bottom:10px;line-height:1.75;">${s.description || ''}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <span style="font-size:11px;padding:3px 10px;background:#dcfce7;color:#166534;border-radius:20px;">✅ ${s.pros || ''}</span>
-        <span style="font-size:11px;padding:3px 10px;background:#fef2f2;color:#991b1b;border-radius:20px;">⚠️ ${s.cons || ''}</span>
+        <span style="font-size:13px;padding:4px 12px;background:#dcfce7;color:#166534;border-radius:20px;">✅ ${s.pros || ''}</span>
+        <span style="font-size:13px;padding:4px 12px;background:#fef2f2;color:#991b1b;border-radius:20px;">⚠️ ${s.cons || ''}</span>
       </div>
     </div>`).join('');
 
@@ -12548,61 +12548,61 @@ function learnRenderOutput(d, pain, wsaCtx) {
 
   out.innerHTML = `
     <!-- ① 痛点概述 -->
-    <div style="background:linear-gradient(135deg,#c4b5fd 0%,#a78bfa 60%,#8b5cf6 100%);color:#fff;border-radius:10px;padding:16px 20px;margin-bottom:14px;box-shadow:0 2px 12px rgba(167,139,250,.3);">
-      <div style="font-size:11px;opacity:.8;margin-bottom:4px;font-weight:600;letter-spacing:.05em;">① 痛点概述</div>
-      <div style="font-size:15px;font-weight:700;line-height:1.5;">${d.summary || ''}</div>
+    <div style="background:linear-gradient(135deg,#c4b5fd 0%,#a78bfa 60%,#8b5cf6 100%);color:#fff;border-radius:10px;padding:18px 22px;margin-bottom:14px;box-shadow:0 2px 12px rgba(167,139,250,.3);">
+      <div style="font-size:13px;opacity:.85;margin-bottom:6px;font-weight:600;letter-spacing:.05em;">① 痛点概述</div>
+      <div style="font-size:17px;font-weight:700;line-height:1.6;">${d.summary || ''}</div>
     </div>
 
     <!-- ② 核心冲突 -->
-    <div style="border:1px solid #ede9fe;border-radius:10px;padding:14px 16px;margin-bottom:14px;background:linear-gradient(180deg,#faf5ff 0%,#fff 100%);">
-      <div style="font-size:11px;color:#8b5cf6;font-weight:700;letter-spacing:.05em;margin-bottom:10px;">② 核心冲突矩阵</div>
+    <div style="border:1px solid #ede9fe;border-radius:10px;padding:16px 18px;margin-bottom:14px;background:linear-gradient(180deg,#faf5ff 0%,#fff 100%);">
+      <div style="font-size:13px;color:#8b5cf6;font-weight:700;letter-spacing:.05em;margin-bottom:12px;">② 核心冲突矩阵</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div style="background:#fff;border-radius:8px;padding:10px 12px;border:1px solid #ede9fe;">
-          <div style="font-size:10px;color:#9ca3af;margin-bottom:3px;">涉及主体</div>
-          <div style="font-size:13px;color:#374151;font-weight:600;">${c.who || '—'}</div>
+        <div style="background:#fff;border-radius:8px;padding:12px 14px;border:1px solid #ede9fe;">
+          <div style="font-size:12px;color:#9ca3af;margin-bottom:4px;">涉及主体</div>
+          <div style="font-size:15px;color:#374151;font-weight:600;line-height:1.5;">${c.who || '—'}</div>
         </div>
-        <div style="background:#fff;border-radius:8px;padding:10px 12px;border:1px solid #ede9fe;">
-          <div style="font-size:10px;color:#9ca3af;margin-bottom:3px;">核心资产</div>
-          <div style="font-size:13px;color:#374151;font-weight:600;">${c.asset || '—'}</div>
+        <div style="background:#fff;border-radius:8px;padding:12px 14px;border:1px solid #ede9fe;">
+          <div style="font-size:12px;color:#9ca3af;margin-bottom:4px;">核心资产</div>
+          <div style="font-size:15px;color:#374151;font-weight:600;line-height:1.5;">${c.asset || '—'}</div>
         </div>
-        <div style="background:#fff;border-radius:8px;padding:10px 12px;border:1px solid #ede9fe;">
-          <div style="font-size:10px;color:#9ca3af;margin-bottom:3px;">触发事件</div>
-          <div style="font-size:13px;color:#374151;font-weight:600;">${c.trigger || '—'}</div>
+        <div style="background:#fff;border-radius:8px;padding:12px 14px;border:1px solid #ede9fe;">
+          <div style="font-size:12px;color:#9ca3af;margin-bottom:4px;">触发事件</div>
+          <div style="font-size:15px;color:#374151;font-weight:600;line-height:1.5;">${c.trigger || '—'}</div>
         </div>
-        <div style="background:#fff;border-radius:8px;padding:10px 12px;border:1px solid #ede9fe;">
-          <div style="font-size:10px;color:#9ca3af;margin-bottom:3px;">核心约束</div>
-          <div style="font-size:13px;color:#374151;font-weight:600;">${c.constraint || '—'}</div>
+        <div style="background:#fff;border-radius:8px;padding:12px 14px;border:1px solid #ede9fe;">
+          <div style="font-size:12px;color:#9ca3af;margin-bottom:4px;">核心约束</div>
+          <div style="font-size:15px;color:#374151;font-weight:600;line-height:1.5;">${c.constraint || '—'}</div>
         </div>
       </div>
     </div>
 
     <!-- ③ 论点与论据 -->
-    <div style="border:1px solid #ede9fe;border-radius:10px;padding:14px 16px;margin-bottom:14px;">
-      <div style="font-size:11px;color:#8b5cf6;font-weight:700;letter-spacing:.05em;margin-bottom:10px;">③ 论点与论据</div>
-      ${argHtml || '<div style="color:#9ca3af;font-size:12px;">暂无</div>'}
+    <div style="border:1px solid #ede9fe;border-radius:10px;padding:16px 18px;margin-bottom:14px;">
+      <div style="font-size:13px;color:#8b5cf6;font-weight:700;letter-spacing:.05em;margin-bottom:12px;">③ 论点与论据</div>
+      ${argHtml || '<div style="color:#9ca3af;font-size:14px;">暂无</div>'}
     </div>
 
     <!-- ④ 法规依据 -->
-    <div style="border:1px solid #ede9fe;border-radius:10px;padding:14px 16px;margin-bottom:14px;">
-      <div style="font-size:11px;color:#8b5cf6;font-weight:700;letter-spacing:.05em;margin-bottom:10px;">④ 法规依据</div>
-      ${regHtml || '<div style="color:#9ca3af;font-size:12px;">暂无法规数据</div>'}
+    <div style="border:1px solid #ede9fe;border-radius:10px;padding:16px 18px;margin-bottom:14px;">
+      <div style="font-size:13px;color:#8b5cf6;font-weight:700;letter-spacing:.05em;margin-bottom:12px;">④ 法规依据</div>
+      ${regHtml || '<div style="color:#9ca3af;font-size:14px;">暂无法规数据</div>'}
     </div>
 
     <!-- ⑤ 解决方案 -->
-    <div style="border:1px solid #ede9fe;border-radius:10px;padding:14px 16px;margin-bottom:14px;">
-      <div style="font-size:11px;color:#8b5cf6;font-weight:700;letter-spacing:.05em;margin-bottom:10px;">⑤ 解决方案</div>
-      ${solHtml || '<div style="color:#9ca3af;font-size:12px;">暂无</div>'}
+    <div style="border:1px solid #ede9fe;border-radius:10px;padding:16px 18px;margin-bottom:14px;">
+      <div style="font-size:13px;color:#8b5cf6;font-weight:700;letter-spacing:.05em;margin-bottom:12px;">⑤ 解决方案</div>
+      ${solHtml || '<div style="color:#9ca3af;font-size:14px;">暂无</div>'}
     </div>
 
     <!-- ⑥ 预期效果 -->
     <div style="border-radius:10px;overflow:hidden;margin-bottom:6px;">
-      <div style="background:#f0fdf4;padding:14px 16px;border:1px solid #bbf7d0;border-radius:10px 10px 0 0;">
-        <div style="font-size:11px;color:#15803d;font-weight:700;margin-bottom:4px;">⑥ 解决后预期效果</div>
-        <div style="font-size:13px;color:#166534;line-height:1.6;">${(d.effects || {}).if_solved || '—'}</div>
+      <div style="background:#f0fdf4;padding:16px 18px;border:1px solid #bbf7d0;border-radius:10px 10px 0 0;">
+        <div style="font-size:13px;color:#15803d;font-weight:700;margin-bottom:6px;">⑥ 解决后预期效果</div>
+        <div style="font-size:15px;color:#166534;line-height:1.75;">${(d.effects || {}).if_solved || '—'}</div>
       </div>
-      <div style="background:#fef2f2;padding:14px 16px;border:1px solid #fca5a5;border-radius:0 0 10px 10px;">
-        <div style="font-size:11px;color:#991b1b;font-weight:700;margin-bottom:4px;">若不解决的后果</div>
-        <div style="font-size:13px;color:#7f1d1d;line-height:1.6;">${(d.effects || {}).if_not || '—'}</div>
+      <div style="background:#fef2f2;padding:16px 18px;border:1px solid #fca5a5;border-radius:0 0 10px 10px;">
+        <div style="font-size:13px;color:#991b1b;font-weight:700;margin-bottom:6px;">若不解决的后果</div>
+        <div style="font-size:15px;color:#7f1d1d;line-height:1.75;">${(d.effects || {}).if_not || '—'}</div>
       </div>
     </div>`;
 
@@ -12661,7 +12661,7 @@ async function learnChatSend() {
   const msgBox = document.getElementById('learn-chat-messages');
   msgBox.innerHTML += `
     <div style="margin-bottom:12px;text-align:right;">
-      <div style="display:inline-block;max-width:80%;background:linear-gradient(135deg,#a78bfa,#8b5cf6);color:#fff;padding:10px 14px;border-radius:14px 14px 4px 14px;font-size:13px;line-height:1.6;text-align:left;">${msg.replace(/</g,'&lt;')}</div>
+      <div style="display:inline-block;max-width:80%;background:linear-gradient(135deg,#a78bfa,#8b5cf6);color:#fff;padding:11px 16px;border-radius:14px 14px 4px 14px;font-size:15px;line-height:1.75;text-align:left;">${msg.replace(/</g,'&lt;')}</div>
     </div>`;
   msgBox.scrollTop = msgBox.scrollHeight;
 
@@ -12672,7 +12672,7 @@ async function learnChatSend() {
   const bubbleId = 'learn-bubble-' + Date.now();
   msgBox.innerHTML += `
     <div style="margin-bottom:12px;" id="${bubbleId}">
-      <div style="display:inline-block;max-width:85%;background:#faf5ff;border:1px solid #ddd6fe;padding:10px 14px;border-radius:14px 14px 14px 4px;font-size:13px;line-height:1.6;color:#3b0764;">
+      <div style="display:inline-block;max-width:85%;background:#faf5ff;border:1px solid #ddd6fe;padding:11px 16px;border-radius:14px 14px 14px 4px;font-size:15px;line-height:1.8;color:#3b0764;">
         <span class="learn-typing">⏳ 思考中…</span>
       </div>
     </div>`;
