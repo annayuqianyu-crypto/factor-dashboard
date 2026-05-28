@@ -2608,6 +2608,220 @@ tr:hover td { background: #fafafa; }
 
 
 
+  <!-- ══ 专项场景雷达 ══ -->
+  <div style="margin-top:32px;">
+    <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+      <span>📡</span> 专项场景雷达
+      <span style="font-size:11px;font-weight:400;color:#9ca3af;margin-left:4px;">各BU基于偏好信息源生成建议场景</span>
+    </div>
+    <div style="display:flex;gap:4px;margin-bottom:0;border-bottom:2px solid #e5e7eb;">
+      <button id="bu-tab-tax" onclick="switchBuRadar('tax')"
+        style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#0369a1;color:#fff;border-bottom:2px solid #0369a1;margin-bottom:-2px;">
+        💼 Tax 专项场景
+      </button>
+      <button id="bu-tab-legal" onclick="switchBuRadar('legal')"
+        style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#f3f4f6;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">
+        ⚖️ Legal 专项场景
+      </button>
+      <button id="bu-tab-cm" onclick="switchBuRadar('cm')"
+        style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#f3f4f6;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">
+        📈 CM 专项场景
+      </button>
+      <button id="bu-tab-news" onclick="switchBuRadar('news')"
+        style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#f3f4f6;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">
+        📰 Tax 时事新闻
+      </button>
+    </div>
+
+    <!-- Tax 雷达面板 -->
+    <div id="radar-panel-tax" style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div>
+          <div style="font-size:13.5px;font-weight:700;color:#0369a1;">税务专项场景雷达</div>
+          <div style="font-size:12px;color:#6b7280;margin-top:3px;">基于 40 个税务重点信息源，AI 合成当前值得关注的场景建议</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span id="radar-tax-lastupd" style="font-size:11px;color:#9ca3af;"></span>
+          <button onclick="radarRefresh('tax')"
+            style="padding:8px 18px;background:#0369a1;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
+            <span id="radar-tax-spin">⟳</span> 更新信息
+          </button>
+        </div>
+      </div>
+      <details style="margin-bottom:14px;">
+        <summary style="font-size:12px;color:#6b7280;cursor:pointer;user-select:none;">📋 查看全部 40 个信息源</summary>
+        <div id="radar-tax-sources" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;"></div>
+      </details>
+      <div style="margin:10px 0;padding:8px 12px;background:#fffbeb;border-left:3px solid #f59e0b;border-radius:4px;font-size:11px;color:#78350f;line-height:1.6;">
+        💡 <strong>佐证链接说明</strong>：AI 不再直接给出文章 URL（避免 404 / 编造），改为给出<strong>信息源 + 关键词组合</strong>，链接点击后进入该信息源的 <strong>Bing 站内搜索结果</strong>，由你直接看到该网站内符合关键词的真实文章列表。如果搜索结果为空，可能是该信息源近期没有相关文章——可换信息源或调整关键词重新生成。
+      </div>
+      <div id="radar-tax-result" style="min-height:80px;"></div>
+    </div>
+
+    <!-- Legal 雷达面板（占位） -->
+    <div id="radar-panel-legal" style="display:none;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
+      <div style="text-align:center;padding:40px 0;color:#9ca3af;">
+        <div style="font-size:28px;margin-bottom:10px;">⚖️</div>
+        <div style="font-size:14px;font-weight:600;">Legal 专项场景雷达</div>
+        <div style="font-size:12px;margin-top:6px;">法律 BU 信息源配置完成后上线，敬请期待</div>
+      </div>
+    </div>
+
+    <!-- CM 雷达面板（占位） -->
+    <div id="radar-panel-cm" style="display:none;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
+      <div style="text-align:center;padding:40px 0;color:#9ca3af;">
+        <div style="font-size:28px;margin-bottom:10px;">📈</div>
+        <div style="font-size:14px;font-weight:600;">CM 专项场景雷达</div>
+        <div style="font-size:12px;margin-top:6px;">资本市场 BU 信息源配置完成后上线，敬请期待</div>
+      </div>
+    </div>
+
+    <!-- Tax 时事新闻面板（腾讯云混元联网搜索） -->
+    <div id="radar-panel-news" style="display:none;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
+
+      <!-- SCF 代理状态栏 -->
+      <div id="news-scf-bar" style="margin-bottom:16px;">
+        <!-- 动态渲染，由 newsInitScfBar() 填充 -->
+      </div>
+      <div id="news-tx-test-result" style="margin-bottom:12px;font-size:12px;display:none;"></div>
+
+      <!-- 搜索条件行 -->
+      <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
+        <div>
+          <div style="font-size:11px;color:#64748b;margin-bottom:4px;">起始日期</div>
+          <input id="news-date-start" type="date" style="padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;"/>
+        </div>
+        <div>
+          <div style="font-size:11px;color:#64748b;margin-bottom:4px;">结束日期</div>
+          <input id="news-date-end" type="date" style="padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;"/>
+        </div>
+        <div style="flex:1;min-width:180px;">
+          <div style="font-size:11px;color:#64748b;margin-bottom:4px;">正向关键词（留空则不做限定）</div>
+          <input id="news-keyword" type="text" placeholder="如：个税 信托 减持 跨境规划…"
+            style="width:100%;box-sizing:border-box;padding:8px 11px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;"
+            onkeydown="if(event.key==='Enter') newsAISearch()"/>
+        </div>
+        <div style="flex:1;min-width:180px;">
+          <div style="font-size:11px;color:#64748b;margin-bottom:4px;">负向关键词（含此词的结果将被剔除）</div>
+          <input id="news-keyword-neg" type="text" placeholder="如：股市 加密币 …多个用空格"
+            style="width:100%;box-sizing:border-box;padding:8px 11px;border:1px solid #fecaca;border-radius:8px;font-size:13px;background:#fff5f5;"
+            onkeydown="if(event.key==='Enter') newsAISearch()"/>
+        </div>
+        <div>
+          <div style="font-size:11px;color:#64748b;margin-bottom:4px;">数量（留空不限）</div>
+          <input id="news-count" type="number" min="1" placeholder="不限"
+            style="padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;width:88px;background:#fff;"/>
+        </div>
+        <button onclick="newsAISearch()" id="news-search-btn"
+          style="padding:9px 24px;background:#006eff;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px;">
+          <span id="news-search-spin">🔍</span> 联网搜索
+        </button>
+      </div>
+      <div style="font-size:11px;color:#94a3b8;margin-bottom:18px;">
+        由腾讯云混元大模型实时联网搜索 · 结果来自互联网真实文章
+      </div>
+
+      <!-- 搜索结果区 -->
+      <div id="news-ai-result" style="min-height:60px;"></div>
+
+      <!-- 分割线 -->
+      <div style="border-top:2px dashed #e2e8f0;margin:24px 0 18px;"></div>
+
+      <!-- 手动粘贴补充区（折叠） -->
+      <details id="news-manual-details">
+        <summary style="font-size:12px;font-weight:600;color:#64748b;cursor:pointer;user-select:none;list-style:none;display:flex;align-items:center;gap:5px;">
+          <span>▶</span> 手动粘贴场景提炼（从必应找到文章后，复制正文粘贴至此）
+        </summary>
+        <div style="margin-top:14px;background:#fafafa;border:1px solid #e2e8f0;border-radius:10px;padding:16px;">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+            <div style="flex:1;min-width:180px;">
+              <div style="font-size:11px;color:#64748b;margin-bottom:4px;">文章标题 *</div>
+              <input id="news-manual-title" type="text" placeholder="粘贴文章标题…"
+                style="width:100%;box-sizing:border-box;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;"/>
+            </div>
+            <div style="flex:1;min-width:160px;">
+              <div style="font-size:11px;color:#64748b;margin-bottom:4px;">来源/URL（选填）</div>
+              <input id="news-manual-url" type="text" placeholder="https://…"
+                style="width:100%;box-sizing:border-box;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;"/>
+            </div>
+          </div>
+          <textarea id="news-manual-content" rows="5" placeholder="粘贴文章正文…"
+            style="width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;line-height:1.6;resize:vertical;margin-bottom:10px;"></textarea>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <button onclick="newsManualExtract()"
+              style="padding:8px 20px;background:#2d6a4f;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;">
+              ✨ AI 提炼场景
+            </button>
+            <button onclick="document.getElementById('news-manual-title').value='';document.getElementById('news-manual-url').value='';document.getElementById('news-manual-content').value='';document.getElementById('news-manual-result').innerHTML='';"
+              style="padding:8px 14px;background:#f1f5f9;color:#64748b;border:1px solid #cbd5e1;border-radius:7px;font-size:12px;cursor:pointer;">清空</button>
+            <span id="news-manual-status" style="font-size:12px;color:#6b7280;"></span>
+          </div>
+          <div id="news-manual-result" style="margin-top:12px;"></div>
+        </div>
+      </details>
+
+      <!-- 场景提炼浮层 -->
+      <div id="news-extract-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:14px;padding:28px;max-width:640px;width:90%;max-height:80vh;overflow-y:auto;position:relative;">
+          <button onclick="document.getElementById('news-extract-modal').style.display='none'"
+            style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:18px;color:#94a3b8;cursor:pointer;">✕</button>
+          <div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:4px;">场景提炼</div>
+          <div id="news-extract-source" style="font-size:11px;color:#94a3b8;margin-bottom:16px;"></div>
+          <div id="news-extract-body" style="font-size:13px;color:#374151;line-height:1.7;"></div>
+          <div id="news-extract-actions" style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ 待用场景池 ══ -->
+  <div style="margin-top:32px;border:2px solid #dbeafe;border-radius:12px;background:#f8faff;padding:20px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <div style="font-size:15px;font-weight:700;color:#1e40af;display:flex;align-items:center;gap:7px;">
+          📥 待用场景池
+        </div>
+        <div style="font-size:12px;color:#6b7280;margin-top:3px;">各 BU 雷达生成的场景暂存于此，点击「导入」后直接进入痛点生成</div>
+      </div>
+      <button onclick="clearAllPools()"
+        style="padding:6px 14px;font-size:12px;color:#dc2626;background:#fff;border:1px solid #fca5a5;border-radius:6px;cursor:pointer;">
+        清空全部
+      </button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:12px;font-weight:700;color:#1d4ed8;">💼 Tax 场景池</div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button onclick="importAllFromPool('tax')"
+              style="font-size:11px;color:#fff;background:#1d4ed8;border:none;border-radius:5px;padding:3px 10px;cursor:pointer;white-space:nowrap;">
+              导入痛点生成 →
+            </button>
+            <button onclick="clearPool('tax')" style="font-size:10px;color:#6b7280;background:none;border:none;cursor:pointer;">清空</button>
+          </div>
+        </div>
+        <div id="pool-tax-items"><div style="text-align:center;padding:20px 0;font-size:12px;color:#9ca3af;">暂无场景，点击上方「更新信息」生成</div></div>
+      </div>
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:12px;font-weight:700;color:#15803d;">⚖️ Legal 场景池</div>
+          <button onclick="clearPool('legal')" style="font-size:10px;color:#6b7280;background:none;border:none;cursor:pointer;">清空</button>
+        </div>
+        <div id="pool-legal-items"><div style="text-align:center;padding:20px 0;font-size:12px;color:#9ca3af;">Legal 雷达上线后可生成</div></div>
+      </div>
+      <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:12px;font-weight:700;color:#c2410c;">📈 CM 场景池</div>
+          <button onclick="clearPool('cm')" style="font-size:10px;color:#6b7280;background:none;border:none;cursor:pointer;">清空</button>
+        </div>
+        <div id="pool-cm-items"><div style="text-align:center;padding:20px 0;font-size:12px;color:#9ca3af;">CM 雷达上线后可生成</div></div>
+      </div>
+    </div>
+  </div>
+
+
+
   <div class="card">
 
     <div class="card-title">重点预测场景详解</div>
@@ -3030,220 +3244,6 @@ tr:hover td { background: #fafafa; }
 
     </div>
 
-  </div>
-
-
-
-  <!-- ══ 专项场景雷达 ══ -->
-  <div style="margin-top:32px;">
-    <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
-      <span>📡</span> 专项场景雷达
-      <span style="font-size:11px;font-weight:400;color:#9ca3af;margin-left:4px;">各BU基于偏好信息源生成建议场景</span>
-    </div>
-    <div style="display:flex;gap:4px;margin-bottom:0;border-bottom:2px solid #e5e7eb;">
-      <button id="bu-tab-tax" onclick="switchBuRadar('tax')"
-        style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#0369a1;color:#fff;border-bottom:2px solid #0369a1;margin-bottom:-2px;">
-        💼 Tax 专项场景
-      </button>
-      <button id="bu-tab-legal" onclick="switchBuRadar('legal')"
-        style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#f3f4f6;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">
-        ⚖️ Legal 专项场景
-      </button>
-      <button id="bu-tab-cm" onclick="switchBuRadar('cm')"
-        style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#f3f4f6;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">
-        📈 CM 专项场景
-      </button>
-      <button id="bu-tab-news" onclick="switchBuRadar('news')"
-        style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#f3f4f6;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">
-        📰 Tax 时事新闻
-      </button>
-    </div>
-
-    <!-- Tax 雷达面板 -->
-    <div id="radar-panel-tax" style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-        <div>
-          <div style="font-size:13.5px;font-weight:700;color:#0369a1;">税务专项场景雷达</div>
-          <div style="font-size:12px;color:#6b7280;margin-top:3px;">基于 40 个税务重点信息源，AI 合成当前值得关注的场景建议</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <span id="radar-tax-lastupd" style="font-size:11px;color:#9ca3af;"></span>
-          <button onclick="radarRefresh('tax')"
-            style="padding:8px 18px;background:#0369a1;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
-            <span id="radar-tax-spin">⟳</span> 更新信息
-          </button>
-        </div>
-      </div>
-      <details style="margin-bottom:14px;">
-        <summary style="font-size:12px;color:#6b7280;cursor:pointer;user-select:none;">📋 查看全部 40 个信息源</summary>
-        <div id="radar-tax-sources" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;"></div>
-      </details>
-      <div style="margin:10px 0;padding:8px 12px;background:#fffbeb;border-left:3px solid #f59e0b;border-radius:4px;font-size:11px;color:#78350f;line-height:1.6;">
-        💡 <strong>佐证链接说明</strong>：AI 不再直接给出文章 URL（避免 404 / 编造），改为给出<strong>信息源 + 关键词组合</strong>，链接点击后进入该信息源的 <strong>Bing 站内搜索结果</strong>，由你直接看到该网站内符合关键词的真实文章列表。如果搜索结果为空，可能是该信息源近期没有相关文章——可换信息源或调整关键词重新生成。
-      </div>
-      <div id="radar-tax-result" style="min-height:80px;"></div>
-    </div>
-
-    <!-- Legal 雷达面板（占位） -->
-    <div id="radar-panel-legal" style="display:none;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
-      <div style="text-align:center;padding:40px 0;color:#9ca3af;">
-        <div style="font-size:28px;margin-bottom:10px;">⚖️</div>
-        <div style="font-size:14px;font-weight:600;">Legal 专项场景雷达</div>
-        <div style="font-size:12px;margin-top:6px;">法律 BU 信息源配置完成后上线，敬请期待</div>
-      </div>
-    </div>
-
-    <!-- CM 雷达面板（占位） -->
-    <div id="radar-panel-cm" style="display:none;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
-      <div style="text-align:center;padding:40px 0;color:#9ca3af;">
-        <div style="font-size:28px;margin-bottom:10px;">📈</div>
-        <div style="font-size:14px;font-weight:600;">CM 专项场景雷达</div>
-        <div style="font-size:12px;margin-top:6px;">资本市场 BU 信息源配置完成后上线，敬请期待</div>
-      </div>
-    </div>
-
-    <!-- Tax 时事新闻面板（腾讯云混元联网搜索） -->
-    <div id="radar-panel-news" style="display:none;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
-
-      <!-- SCF 代理状态栏 -->
-      <div id="news-scf-bar" style="margin-bottom:16px;">
-        <!-- 动态渲染，由 newsInitScfBar() 填充 -->
-      </div>
-      <div id="news-tx-test-result" style="margin-bottom:12px;font-size:12px;display:none;"></div>
-
-      <!-- 搜索条件行 -->
-      <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
-        <div>
-          <div style="font-size:11px;color:#64748b;margin-bottom:4px;">起始日期</div>
-          <input id="news-date-start" type="date" style="padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;"/>
-        </div>
-        <div>
-          <div style="font-size:11px;color:#64748b;margin-bottom:4px;">结束日期</div>
-          <input id="news-date-end" type="date" style="padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;"/>
-        </div>
-        <div style="flex:1;min-width:180px;">
-          <div style="font-size:11px;color:#64748b;margin-bottom:4px;">正向关键词（留空则不做限定）</div>
-          <input id="news-keyword" type="text" placeholder="如：个税 信托 减持 跨境规划…"
-            style="width:100%;box-sizing:border-box;padding:8px 11px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;"
-            onkeydown="if(event.key==='Enter') newsAISearch()"/>
-        </div>
-        <div style="flex:1;min-width:180px;">
-          <div style="font-size:11px;color:#64748b;margin-bottom:4px;">负向关键词（含此词的结果将被剔除）</div>
-          <input id="news-keyword-neg" type="text" placeholder="如：股市 加密币 …多个用空格"
-            style="width:100%;box-sizing:border-box;padding:8px 11px;border:1px solid #fecaca;border-radius:8px;font-size:13px;background:#fff5f5;"
-            onkeydown="if(event.key==='Enter') newsAISearch()"/>
-        </div>
-        <div>
-          <div style="font-size:11px;color:#64748b;margin-bottom:4px;">数量（留空不限）</div>
-          <input id="news-count" type="number" min="1" placeholder="不限"
-            style="padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;width:88px;background:#fff;"/>
-        </div>
-        <button onclick="newsAISearch()" id="news-search-btn"
-          style="padding:9px 24px;background:#006eff;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px;">
-          <span id="news-search-spin">🔍</span> 联网搜索
-        </button>
-      </div>
-      <div style="font-size:11px;color:#94a3b8;margin-bottom:18px;">
-        由腾讯云混元大模型实时联网搜索 · 结果来自互联网真实文章
-      </div>
-
-      <!-- 搜索结果区 -->
-      <div id="news-ai-result" style="min-height:60px;"></div>
-
-      <!-- 分割线 -->
-      <div style="border-top:2px dashed #e2e8f0;margin:24px 0 18px;"></div>
-
-      <!-- 手动粘贴补充区（折叠） -->
-      <details id="news-manual-details">
-        <summary style="font-size:12px;font-weight:600;color:#64748b;cursor:pointer;user-select:none;list-style:none;display:flex;align-items:center;gap:5px;">
-          <span>▶</span> 手动粘贴场景提炼（从必应找到文章后，复制正文粘贴至此）
-        </summary>
-        <div style="margin-top:14px;background:#fafafa;border:1px solid #e2e8f0;border-radius:10px;padding:16px;">
-          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
-            <div style="flex:1;min-width:180px;">
-              <div style="font-size:11px;color:#64748b;margin-bottom:4px;">文章标题 *</div>
-              <input id="news-manual-title" type="text" placeholder="粘贴文章标题…"
-                style="width:100%;box-sizing:border-box;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;"/>
-            </div>
-            <div style="flex:1;min-width:160px;">
-              <div style="font-size:11px;color:#64748b;margin-bottom:4px;">来源/URL（选填）</div>
-              <input id="news-manual-url" type="text" placeholder="https://…"
-                style="width:100%;box-sizing:border-box;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;"/>
-            </div>
-          </div>
-          <textarea id="news-manual-content" rows="5" placeholder="粘贴文章正文…"
-            style="width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;line-height:1.6;resize:vertical;margin-bottom:10px;"></textarea>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <button onclick="newsManualExtract()"
-              style="padding:8px 20px;background:#2d6a4f;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;">
-              ✨ AI 提炼场景
-            </button>
-            <button onclick="document.getElementById('news-manual-title').value='';document.getElementById('news-manual-url').value='';document.getElementById('news-manual-content').value='';document.getElementById('news-manual-result').innerHTML='';"
-              style="padding:8px 14px;background:#f1f5f9;color:#64748b;border:1px solid #cbd5e1;border-radius:7px;font-size:12px;cursor:pointer;">清空</button>
-            <span id="news-manual-status" style="font-size:12px;color:#6b7280;"></span>
-          </div>
-          <div id="news-manual-result" style="margin-top:12px;"></div>
-        </div>
-      </details>
-
-      <!-- 场景提炼浮层 -->
-      <div id="news-extract-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
-        <div style="background:#fff;border-radius:14px;padding:28px;max-width:640px;width:90%;max-height:80vh;overflow-y:auto;position:relative;">
-          <button onclick="document.getElementById('news-extract-modal').style.display='none'"
-            style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:18px;color:#94a3b8;cursor:pointer;">✕</button>
-          <div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:4px;">场景提炼</div>
-          <div id="news-extract-source" style="font-size:11px;color:#94a3b8;margin-bottom:16px;"></div>
-          <div id="news-extract-body" style="font-size:13px;color:#374151;line-height:1.7;"></div>
-          <div id="news-extract-actions" style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;"></div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ══ 待用场景池 ══ -->
-  <div style="margin-top:32px;border:2px solid #dbeafe;border-radius:12px;background:#f8faff;padding:20px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-      <div>
-        <div style="font-size:15px;font-weight:700;color:#1e40af;display:flex;align-items:center;gap:7px;">
-          📥 待用场景池
-        </div>
-        <div style="font-size:12px;color:#6b7280;margin-top:3px;">各 BU 雷达生成的场景暂存于此，点击「导入」后直接进入痛点生成</div>
-      </div>
-      <button onclick="clearAllPools()"
-        style="padding:6px 14px;font-size:12px;color:#dc2626;background:#fff;border:1px solid #fca5a5;border-radius:6px;cursor:pointer;">
-        清空全部
-      </button>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
-      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <div style="font-size:12px;font-weight:700;color:#1d4ed8;">💼 Tax 场景池</div>
-          <div style="display:flex;gap:6px;align-items:center;">
-            <button onclick="importAllFromPool('tax')"
-              style="font-size:11px;color:#fff;background:#1d4ed8;border:none;border-radius:5px;padding:3px 10px;cursor:pointer;white-space:nowrap;">
-              导入痛点生成 →
-            </button>
-            <button onclick="clearPool('tax')" style="font-size:10px;color:#6b7280;background:none;border:none;cursor:pointer;">清空</button>
-          </div>
-        </div>
-        <div id="pool-tax-items"><div style="text-align:center;padding:20px 0;font-size:12px;color:#9ca3af;">暂无场景，点击上方「更新信息」生成</div></div>
-      </div>
-      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <div style="font-size:12px;font-weight:700;color:#15803d;">⚖️ Legal 场景池</div>
-          <button onclick="clearPool('legal')" style="font-size:10px;color:#6b7280;background:none;border:none;cursor:pointer;">清空</button>
-        </div>
-        <div id="pool-legal-items"><div style="text-align:center;padding:20px 0;font-size:12px;color:#9ca3af;">Legal 雷达上线后可生成</div></div>
-      </div>
-      <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:14px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <div style="font-size:12px;font-weight:700;color:#c2410c;">📈 CM 场景池</div>
-          <button onclick="clearPool('cm')" style="font-size:10px;color:#6b7280;background:none;border:none;cursor:pointer;">清空</button>
-        </div>
-        <div id="pool-cm-items"><div style="text-align:center;padding:20px 0;font-size:12px;color:#9ca3af;">CM 雷达上线后可生成</div></div>
-      </div>
-    </div>
   </div>
 
 </div>
