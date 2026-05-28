@@ -3307,6 +3307,19 @@ tr:hover td { background: #fafafa; }
     </div>
   </div>
 
+  <!-- 搜索栏 -->
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    <div style="position:relative;flex:1;">
+      <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:14px;pointer-events:none;">🔍</span>
+      <input type="text" id="hgjSearchInput" placeholder="搜索场景标题、tag、客户问题、文件名…"
+        style="width:100%;box-sizing:border-box;padding:10px 38px 10px 36px;border:1px solid #cbd5e1;border-radius:8px;font-size:13.5px;background:#fff;"
+        oninput="hgjSearch()" />
+      <span id="hgjSearchClear" onclick="document.getElementById('hgjSearchInput').value='';hgjSearch();"
+        style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#cbd5e1;font-size:16px;cursor:pointer;display:none;">✕</span>
+    </div>
+    <div id="hgjSearchHint" style="font-size:12px;color:#94a3b8;white-space:nowrap;"></div>
+  </div>
+
   <!-- 筛选栏 -->
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;" id="hgjFilters">
     <button class="hgj-filter-btn active" data-filter="全部"   data-label="全部"   onclick="hgjFilter(this,'全部')">全部</button>
@@ -4017,16 +4030,55 @@ tr:hover td { background: #fafafa; }
     });
   }
 
+  // 当前分类筛选（默认全部）
+  window._hgjActiveFilter = '全部';
+
+  function applyHgjFilters(){
+    const f = window._hgjActiveFilter || '全部';
+    let data = f==='全部'    ? ALL_HGJ_DATA :
+               f==='高新颖度' ? ALL_HGJ_DATA.filter(d=>d.novelty==='高') :
+               ALL_HGJ_DATA.filter(d=>d.cat===f);
+
+    const kw = (document.getElementById('hgjSearchInput')?.value || '').trim().toLowerCase();
+    const clearBtn = document.getElementById('hgjSearchClear');
+    const hint = document.getElementById('hgjSearchHint');
+    if(clearBtn) clearBtn.style.display = kw ? 'block' : 'none';
+
+    if(kw){
+      // 支持空格分隔多关键词（AND）
+      const terms = kw.split(/\s+/).filter(Boolean);
+      data = data.filter(d=>{
+        const blob = [
+          d.title||'',
+          (d.tags||[]).join(' '),
+          ((d.questions||d.dirs)||[]).join(' '),
+          d.file||'',
+          d.cat||'',
+          d.source||''
+        ].join(' ').toLowerCase();
+        return terms.every(t => blob.includes(t));
+      });
+    }
+
+    if(hint){
+      hint.textContent = kw ? `搜索到 ${data.length} 条` : '';
+    }
+    renderCards(data);
+  }
+
   function hgjFilter(btn, f){
     document.querySelectorAll('.hgj-filter-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
-    const filtered = f==='全部'    ? ALL_HGJ_DATA :
-                     f==='高新颖度' ? ALL_HGJ_DATA.filter(d=>d.novelty==='高') :
-                     ALL_HGJ_DATA.filter(d=>d.cat===f);
-    renderCards(filtered);
+    window._hgjActiveFilter = f;
+    applyHgjFilters();
+  }
+
+  function hgjSearch(){
+    applyHgjFilters();
   }
 
   window.hgjFilter = hgjFilter;
+  window.hgjSearch = hgjSearch;
 
   window.hgjSendToPainGenerate = function(dir){
     showPage('pain-generate');
