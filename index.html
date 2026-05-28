@@ -4842,6 +4842,11 @@ function showPage(pageId) {
     }
   }
 
+  // 痛点学习页：每次进入刷新历史列表（修复初次加载因 TDZ 导致历史为空）
+  if (pageId === 'pain-learn' && typeof learnRenderHistory === 'function') {
+    try { learnRenderHistory(); } catch(e) {}
+  }
+
   // resize 所有此页图表
 
   setTimeout(() => {
@@ -12251,7 +12256,8 @@ function renderPool(bu) {
   radarInitSources();
   // news 现在是默认tab，初始化时也要渲染源列表+SCF bar
   setTimeout(() => { if (typeof newsInit === 'function') newsInit(); if (typeof newsInitSources === 'function') newsInitSources(); }, 100);
-  learnRenderHistory();   // 初始化痛点学习历史面板
+  // 延迟到 LEARN_HISTORY_KEY 等 const 声明执行后再渲染（避免 TDZ 导致历史读取失败）
+  setTimeout(() => { try { learnRenderHistory(); } catch(e) {} }, 0);
 })();
 
 
