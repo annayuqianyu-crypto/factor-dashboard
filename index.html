@@ -2807,7 +2807,7 @@ tr:hover td { background: #fafafa; }
           <div style="display:flex;gap:6px;align-items:center;">
             <button onclick="importAllFromPool('tax')"
               style="font-size:11px;color:#fff;background:#1d4ed8;border:none;border-radius:5px;padding:3px 10px;cursor:pointer;white-space:nowrap;">
-              导入痛点生成 →
+              导入场景选择 →
             </button>
             <button onclick="clearPool('tax')" style="font-size:10px;color:#6b7280;background:none;border:none;cursor:pointer;">清空</button>
           </div>
@@ -12153,12 +12153,23 @@ function addToPool(bu, scene) {
 function importAllFromPool(bu) {
   const pool = JSON.parse(localStorage.getItem(_poolKey(bu)) || '[]');
   if (!pool.length) { alert('场景池为空，请先加入场景'); return; }
+
+  // 取被勾选的索引
+  const container = document.getElementById('pool-' + bu + '-items');
+  const checked = container ? [...container.querySelectorAll('.pool-checkbox:checked')].map(c => parseInt(c.dataset.idx,10)) : [];
+
+  if (!checked.length) {
+    alert('请先勾选要导入的场景（点击左侧勾选框）');
+    return;
+  }
+
+  const selected = checked.map(i => pool[i]).filter(Boolean);
   showPage('pain-generate');
   setTimeout(() => {
     const ta = document.getElementById('manualScenesInput');
     if (!ta) return;
     const existing = ta.value.trim();
-    const newScenes = pool.map(s => s.scene).join('\n');
+    const newScenes = selected.map(s => s.scene).join('\n');
     ta.value = existing ? existing + '\n' + newScenes : newScenes;
     ta.dispatchEvent(new Event('input'));
     ta.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -12217,25 +12228,21 @@ function renderPool(bu) {
     return;
   }
   container.innerHTML = pool.map((s,i) => `
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px;margin-bottom:8px;">
-      <div style="display:flex;align-items:flex-start;gap:6px;">
-        <div style="flex:1;">
+    <label style="display:block;background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px;margin-bottom:8px;cursor:pointer;" onclick="event.target.tagName==='BUTTON' && event.preventDefault();">
+      <div style="display:flex;align-items:flex-start;gap:8px;">
+        <input type="checkbox" class="pool-checkbox" data-bu="${bu}" data-idx="${i}"
+          style="margin-top:3px;flex-shrink:0;width:16px;height:16px;cursor:pointer;accent-color:#1d4ed8;" />
+        <div style="flex:1;min-width:0;">
           <div style="font-size:12.5px;font-weight:700;color:#111827;margin-bottom:4px;">${s.scene||''}</div>
           <div style="font-size:11px;color:#6b7280;margin-bottom:6px;line-height:1.5;">${s.reason||''}</div>
           <div style="font-size:10px;color:#9ca3af;">${s._addedAt||''}</div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
-          <button onclick="importSceneFromPool('${bu}',${i})"
-            style="padding:5px 10px;background:#0369a1;color:#fff;border:none;border-radius:5px;font-size:11px;cursor:pointer;white-space:nowrap;">
-            导入
-          </button>
-          <button onclick="removeFromPool('${bu}',${i})"
-            style="padding:5px 10px;background:#f9fafb;color:#6b7280;border:1px solid #e5e7eb;border-radius:5px;font-size:11px;cursor:pointer;">
-            删除
-          </button>
-        </div>
+        <button onclick="event.preventDefault();event.stopPropagation();removeFromPool('${bu}',${i})"
+          style="padding:4px 9px;background:#f9fafb;color:#6b7280;border:1px solid #e5e7eb;border-radius:5px;font-size:11px;cursor:pointer;flex-shrink:0;">
+          删除
+        </button>
       </div>
-    </div>`).join('');
+    </label>`).join('');
 }
 
 // ── 页面初始化时渲染场景池 ────────────────────────────────────
