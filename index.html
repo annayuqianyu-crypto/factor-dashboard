@@ -3264,27 +3264,46 @@ tr:hover td { background: #fafafa; }
     <p class="page-desc" id="hgjPageDesc">基于渠道会议纪要的智能分析，提炼场景结构与痛点方向</p>
   </div>
 
-  <!-- 统计概览（动态） -->
-  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px;">
-    <div style="background:#f0f7ff;border-radius:10px;padding:14px 10px;text-align:center;">
-      <div id="sum-total" style="font-size:26px;font-weight:700;color:#1a56db;">-</div>
-      <div style="font-size:12px;color:#64748b;margin-top:4px;">会议总数</div>
+  <!-- 统计概览：上排总量 + 下排分类（按场景数） -->
+  <div style="margin-bottom:22px;">
+    <!-- 上排：两个总量横幅 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border-radius:10px;padding:16px 18px;display:flex;align-items:center;gap:14px;">
+        <div style="font-size:30px;">📁</div>
+        <div>
+          <div style="font-size:11px;color:#1e40af;font-weight:600;letter-spacing:.5px;">会议总数</div>
+          <div><span id="sum-total" style="font-size:28px;font-weight:700;color:#1a56db;">-</span>
+               <span style="font-size:13px;color:#475569;margin-left:6px;">份会议纪要</span></div>
+        </div>
+      </div>
+      <div style="background:linear-gradient(135deg,#fdf4ff,#fae8ff);border-radius:10px;padding:16px 18px;display:flex;align-items:center;gap:14px;">
+        <div style="font-size:30px;">🎯</div>
+        <div>
+          <div style="font-size:11px;color:#7c2d92;font-weight:600;letter-spacing:.5px;">场景总数</div>
+          <div><span id="sum-scenes" style="font-size:28px;font-weight:700;color:#a855f7;">-</span>
+               <span style="font-size:13px;color:#475569;margin-left:6px;">个独立业务场景</span></div>
+        </div>
+      </div>
     </div>
-    <div style="background:#fdf4ff;border-radius:10px;padding:14px 10px;text-align:center;">
-      <div id="sum-tax" style="font-size:26px;font-weight:700;color:#2d6a4f;">-</div>
-      <div style="font-size:12px;color:#64748b;margin-top:4px;">税务合规</div>
-    </div>
-    <div style="background:#fff7f0;border-radius:10px;padding:14px 10px;text-align:center;">
-      <div id="sum-law" style="font-size:26px;font-weight:700;color:#ea580c;">-</div>
-      <div style="font-size:12px;color:#64748b;margin-top:4px;">合规诉讼</div>
-    </div>
-    <div style="background:#f0fff4;border-radius:10px;padding:14px 10px;text-align:center;">
-      <div id="sum-cross" style="font-size:26px;font-weight:700;color:#16a34a;">-</div>
-      <div style="font-size:12px;color:#64748b;margin-top:4px;">跨境规划</div>
-    </div>
-    <div style="background:#f5f3ff;border-radius:10px;padding:14px 10px;text-align:center;">
-      <div id="sum-other" style="font-size:26px;font-weight:700;color:#7c3aed;">-</div>
-      <div style="font-size:12px;color:#64748b;margin-top:4px;">传承/股权/用工/资产保护</div>
+    <!-- 下排：4 个分类（按场景数） -->
+    <div style="font-size:11px;color:#94a3b8;margin-bottom:8px;letter-spacing:.5px;">📊 按业务分类拆分（场景数）</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+      <div style="background:#fdf4ff;border-radius:10px;padding:14px 10px;text-align:center;">
+        <div id="sum-tax" style="font-size:26px;font-weight:700;color:#2d6a4f;">-</div>
+        <div style="font-size:12px;color:#64748b;margin-top:4px;">税务合规 场景</div>
+      </div>
+      <div style="background:#fff7f0;border-radius:10px;padding:14px 10px;text-align:center;">
+        <div id="sum-law" style="font-size:26px;font-weight:700;color:#ea580c;">-</div>
+        <div style="font-size:12px;color:#64748b;margin-top:4px;">合规诉讼 场景</div>
+      </div>
+      <div style="background:#f0fff4;border-radius:10px;padding:14px 10px;text-align:center;">
+        <div id="sum-cross" style="font-size:26px;font-weight:700;color:#16a34a;">-</div>
+        <div style="font-size:12px;color:#64748b;margin-top:4px;">跨境规划 场景</div>
+      </div>
+      <div style="background:#f5f3ff;border-radius:10px;padding:14px 10px;text-align:center;">
+        <div id="sum-other" style="font-size:26px;font-weight:700;color:#7c3aed;">-</div>
+        <div style="font-size:12px;color:#64748b;margin-top:4px;">传承/股权/用工/资产保护 场景</div>
+      </div>
     </div>
   </div>
 
@@ -3964,6 +3983,7 @@ tr:hover td { background: #fafafa; }
     const sumOther = (counts['财富传承']||0) + (counts['股权架构']||0) + (counts['劳动用工']||0) + (counts['资产保护']||0);
     const setText = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
     setText('sum-total',   totalMeetings);
+    setText('sum-scenes',  ALL_HGJ_DATA.length);
     setText('sum-tax',     counts['税务合规']||0);
     setText('sum-law',     counts['合规诉讼']||0);
     setText('sum-cross',   counts['跨境规划']||0);
