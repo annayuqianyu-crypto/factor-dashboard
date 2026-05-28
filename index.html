@@ -3313,10 +3313,10 @@ tr:hover td { background: #fafafa; }
     <button class="hgj-filter-btn" data-filter="税务合规" data-label="税务合规" onclick="hgjFilter(this,'税务合规')">税务合规</button>
     <button class="hgj-filter-btn" data-filter="合规诉讼" data-label="合规诉讼" onclick="hgjFilter(this,'合规诉讼')">合规诉讼</button>
     <button class="hgj-filter-btn" data-filter="跨境规划" data-label="跨境规划" onclick="hgjFilter(this,'跨境规划')">跨境规划</button>
-    <button class="hgj-filter-btn" data-filter="劳动用工" data-label="劳动用工" onclick="hgjFilter(this,'劳动用工')">劳动用工</button>
     <button class="hgj-filter-btn" data-filter="股权架构" data-label="股权架构" onclick="hgjFilter(this,'股权架构')">股权架构</button>
     <button class="hgj-filter-btn" data-filter="财富传承" data-label="财富传承" onclick="hgjFilter(this,'财富传承')">财富传承</button>
     <button class="hgj-filter-btn" data-filter="资产保护" data-label="资产保护" onclick="hgjFilter(this,'资产保护')">资产保护</button>
+    <button class="hgj-filter-btn" data-filter="劳动用工" data-label="劳动用工" onclick="hgjFilter(this,'劳动用工')">劳动用工</button>
     <button class="hgj-filter-btn" data-filter="高新颖度" data-label="⭐ 高新颖度" onclick="hgjFilter(this,'高新颖度')">⭐ 高新颖度</button>
   </div>
 
@@ -4043,8 +4043,12 @@ tr:hover td { background: #fafafa; }
     if(pageId==='hgj'){ renderCards(ALL_HGJ_DATA); updateFilterBadges(); updateHgjSummary(); }
   };
 
-  // 页面加载后立即计算计数（兜底）
-  setTimeout(()=>{ updateFilterBadges(); updateHgjSummary(); }, 300);
+  // 页面加载后立即计算计数+渲染卡片（兜底，避免全部按钮初次无内容）
+  setTimeout(()=>{
+    renderCards(ALL_HGJ_DATA);
+    updateFilterBadges();
+    updateHgjSummary();
+  }, 300);
 })();
 </script>
 
