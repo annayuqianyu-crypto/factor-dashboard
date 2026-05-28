@@ -3255,33 +3255,33 @@ tr:hover td { background: #fafafa; }
 <div id="page-hgj" class="page">
   <div class="page-header">
     <h2>渠道场景来源</h2>
-    <p class="page-desc">基于渠道会议纪要的智能分析，共整理 <strong>67</strong> 场会议（Neil×23 · Hans×44），提炼场景结构与痛点方向</p>
+    <p class="page-desc" id="hgjPageDesc">基于渠道会议纪要的智能分析，提炼场景结构与痛点方向</p>
   </div>
 
-  <!-- 统计概览 -->
+  <!-- 统计概览（动态） -->
   <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:22px;">
     <div style="background:#f0f7ff;border-radius:10px;padding:14px 10px;text-align:center;">
-      <div style="font-size:26px;font-weight:700;color:#1a56db;">67</div>
+      <div id="sum-total" style="font-size:26px;font-weight:700;color:#1a56db;">-</div>
       <div style="font-size:12px;color:#64748b;margin-top:4px;">会议总数</div>
     </div>
     <div style="background:#fdf4ff;border-radius:10px;padding:14px 10px;text-align:center;">
-      <div style="font-size:26px;font-weight:700;color:#2d6a4f;">30</div>
+      <div id="sum-tax" style="font-size:26px;font-weight:700;color:#2d6a4f;">-</div>
       <div style="font-size:12px;color:#64748b;margin-top:4px;">税务合规</div>
     </div>
     <div style="background:#fff7f0;border-radius:10px;padding:14px 10px;text-align:center;">
-      <div style="font-size:26px;font-weight:700;color:#ea580c;">10</div>
+      <div id="sum-law" style="font-size:26px;font-weight:700;color:#ea580c;">-</div>
       <div style="font-size:12px;color:#64748b;margin-top:4px;">合规诉讼</div>
     </div>
     <div style="background:#f0fff4;border-radius:10px;padding:14px 10px;text-align:center;">
-      <div style="font-size:26px;font-weight:700;color:#16a34a;">13</div>
+      <div id="sum-cross" style="font-size:26px;font-weight:700;color:#16a34a;">-</div>
       <div style="font-size:12px;color:#64748b;margin-top:4px;">跨境规划</div>
     </div>
     <div style="background:#f5f3ff;border-radius:10px;padding:14px 10px;text-align:center;">
-      <div style="font-size:26px;font-weight:700;color:#7c3aed;">9</div>
-      <div style="font-size:12px;color:#64748b;margin-top:4px;">传承/股权/用工</div>
+      <div id="sum-other" style="font-size:26px;font-weight:700;color:#7c3aed;">-</div>
+      <div style="font-size:12px;color:#64748b;margin-top:4px;">传承/股权/用工/资产保护</div>
     </div>
     <div style="background:#fff8f0;border-radius:10px;padding:14px 10px;text-align:center;">
-      <div style="font-size:26px;font-weight:700;color:#d97706;">12</div>
+      <div id="sum-novelty" style="font-size:26px;font-weight:700;color:#d97706;">-</div>
       <div style="font-size:12px;color:#64748b;margin-top:4px;">高新颖度场景</div>
     </div>
   </div>
@@ -3552,6 +3552,32 @@ tr:hover td { background: #fafafa; }
     }).join('');
   }
 
+  function updateHgjSummary(){
+    const totalMeetings = new Set(ALL_HGJ_DATA.map(d=>d.file)).size;
+    const counts = {};
+    ALL_HGJ_DATA.forEach(d=>{ counts[d.cat] = (counts[d.cat]||0)+1; });
+    const noveltyHigh = ALL_HGJ_DATA.filter(d=>d.novelty==='高').length;
+    const sumOther = (counts['财富传承']||0) + (counts['股权架构']||0) + (counts['劳动用工']||0) + (counts['资产保护']||0);
+    const setText = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+    setText('sum-total',   totalMeetings);
+    setText('sum-tax',     counts['税务合规']||0);
+    setText('sum-law',     counts['合规诉讼']||0);
+    setText('sum-cross',   counts['跨境规划']||0);
+    setText('sum-other',   sumOther);
+    setText('sum-novelty', noveltyHigh);
+    // 更新页面描述
+    const desc = document.getElementById('hgjPageDesc');
+    if(desc){
+      const bySource = {};
+      ALL_HGJ_DATA.forEach(d=>{
+        if(!bySource[d.source]) bySource[d.source] = new Set();
+        bySource[d.source].add(d.file);
+      });
+      const parts = Object.entries(bySource).map(([k,v])=>`${k}×${v.size}`).join(' · ');
+      desc.innerHTML = `基于渠道会议纪要的智能分析，共整理 <strong>${totalMeetings}</strong> 场会议（${parts}），提炼场景结构与痛点方向`;
+    }
+  }
+
   function updateFilterBadges(){
     const TOTAL_MEETINGS = new Set(ALL_HGJ_DATA.map(d=>d.file)).size;
     document.querySelectorAll('.hgj-filter-btn').forEach(btn=>{
@@ -3591,11 +3617,11 @@ tr:hover td { background: #fafafa; }
   const origShowPage = window.showPage;
   window.showPage = function(pageId){
     origShowPage && origShowPage.apply(this, arguments);
-    if(pageId==='hgj'){ renderCards(ALL_HGJ_DATA); updateFilterBadges(); }
+    if(pageId==='hgj'){ renderCards(ALL_HGJ_DATA); updateFilterBadges(); updateHgjSummary(); }
   };
 
   // 页面加载后立即计算计数（兜底）
-  setTimeout(updateFilterBadges, 300);
+  setTimeout(()=>{ updateFilterBadges(); updateHgjSummary(); }, 300);
 })();
 </script>
 
