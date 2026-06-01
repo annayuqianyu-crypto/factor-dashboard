@@ -853,7 +853,7 @@ tr:hover td { background: #fafafa; }
 
     <h2>因子库总览</h2>
 
-    <p>朝曦家办 C端因子库 v6.2（2026-06-01）· 核心指标 / 维度详细说明 / 业务契合分析</p>
+    <p>朝曦家办 C端因子库 v6.1（2026-06-01）· 核心指标 / 维度详细说明 / 业务契合分析</p>
 
   </div>
 
@@ -1081,15 +1081,15 @@ tr:hover td { background: #fafafa; }
 
           <tr>
 
-            <td><strong>L4.1</strong> <span class="tag tag-expand">v6.2 正名</span></td>
+            <td><strong>L4.1</strong></td>
 
-            <td>所在地</td>
+            <td>财富标的（一级）</td>
 
             <td><strong>13</strong></td>
 
-            <td>主体/资产的地理位置维度（居住或注册所在地）。v6.2 正名前误标为"财富标的"，与 L4.2 资产类型并非父子关系而是并列维度</td>
+            <td>最顶层资产类别区分，如股权类、不动产类、金融资产类等大类</td>
 
-            <td>居住/注册于中国大陆、香港、新加坡、美国、加拿大、瑞士、百慕大等</td>
+            <td>A股股权、境外房产、金融资产组合</td>
 
             <td><span class="tag tag-mid">中等</span></td>
 
@@ -1097,13 +1097,13 @@ tr:hover td { background: #fafafa; }
 
           <tr>
 
-            <td><strong>L4.2</strong> <span class="tag tag-expand">v6.1 扩充</span> <span class="tag tag-expand">v6.2 正名</span></td>
+            <td><strong>L4.2</strong> <span class="tag tag-expand">v6.1 扩充</span></td>
 
-            <td>资产类型</td>
+            <td>财富标的（二级）</td>
 
             <td><strong>172</strong></td>
 
-            <td>真正的"财富标的"主线：11 个一级大类（股权/现金/保险/固收/房地产/收藏/奢侈/虚拟/其他金融/知识产权/经营性不动产）已构成完整树状，是链路组合的核心</td>
+            <td>资产类型的细粒度拆分，包括具体股票标的、不动产类型、基金产品等，是链路组合的核心</td>
 
             <td>港股上市公司股权、境内住宅/商业地产、私募股权基金份额、BVI公司股权</td>
 
@@ -1349,27 +1349,7 @@ tr:hover td { background: #fafafa; }
 
         <div class="tl-date">2026-06-01</div>
 
-        <div class="tl-title">v6.2 L4.1 正名修订 <span class="tag tag-new" style="font-size:12px;">当前版本</span></div>
-
-        <div class="tl-body">
-
-          <p>结构性修订（无行数变动，共修改 13 个单元格）：将 L4.1 属性名称从误标的"财富标的"正名为"<strong>所在地</strong>"，与 L4.2"资产类型"解除父子关系误判。</p>
-
-          <p style="margin-top:8px;"><strong>问题根因：</strong>L4.1 13 行实际全部为地理位置（"居住/注册于 XX 地区"），与 L4.2 资产类型属并列维度。原"分层标准不清晰（13 vs 172）"实为命名错误，非分类深度问题。</p>
-
-          <p style="margin-top:6px;"><strong>修订方式：</strong>仅改属性名称列（第3列）共13个单元格，浅蓝 BDD7EE 标注，结构与编码全部保留。</p>
-
-        </div>
-
-      </div>
-
-      <div class="tl-item">
-
-        <div class="tl-dot old"></div>
-
-        <div class="tl-date">2026-06-01</div>
-
-        <div class="tl-title">v6.1 BU反哺版</div>
+        <div class="tl-title">v6.1 BU反哺版 <span class="tag tag-new" style="font-size:12px;">当前版本</span></div>
 
         <div class="tl-body">
 
@@ -1724,13 +1704,13 @@ tr:hover td { background: #fafafa; }
 
       <li>
 
-        <span class="tag tag-mid" style="background:#dcfce7;color:#166534;">已修复</span>
+        <span class="tag tag-high">高优先</span>
 
         <div>
 
-          <div class="pl-text">L4.1 / L4.2 分层标准不清晰 <span class="tag tag-new" style="background:#dcfce7;color:#166534;">v6.2 已修复</span></div>
+          <div class="pl-text">L4.1 / L4.2 分层标准不清晰——v6.1 反哺后差距继续扩大（13 vs 172） <span class="tag tag-new" style="background:#fef2f2;color:#991b1b;">v6.1 加剧</span></div>
 
-          <div class="pl-sub">核查后定性：原"L4.1/L4.2 父子关系不清"实为命名错误——L4.1 13 行内容全部是"居住/注册于 XX 地区"，属于<strong>地理位置维度</strong>，与 L4.2 资产类型本就是并列关系，并非父子。v6.2 已将 L4.1 属性名称从"财富标的"正名为"<strong>所在地</strong>"，与 L4.2 资产类型解耦。L4.2 内部 11 个一级大类（含 v6.1 新增的知识产权资产 / 经营性不动产）本身已是清晰的资产树状结构，无需再升格</div>
+          <div class="pl-sub">v6.0 时 L4.1（13）vs L4.2（160）已差 12 倍；v6.1 在 L4.2 又新增"知识产权资产"和"经营性不动产"两个一级分支（+12），差距扩大到 13 倍。建议把 L4.1 重定义为"大类资产"（股权 / 不动产 / 金融资产 / 另类 / 知识产权 / 现金类），与 L4.2 形成正式树状关系，并把 v6.1 新增的两个一级（10/11）正式"升格"成 L4.1 的大类节点</div>
 
         </div>
 
@@ -4813,7 +4793,7 @@ tr:hover td { background: #fafafa; }
 
 const DIM_CODES   = ["L1.1A", "L1.1B", "L3.1", "L4.1", "L4.2", "L4.3", "L5.1", "L5.2", "L6.1", "L6.2", "L6.3", "L6.4", "L6.5", "L6.6", "L6.7"];
 
-const DIM_NAMES   = ["商业/职业身份", "家庭角色", "企业资本阶段", "所在地", "资产类型", "财富规模特征", "持有形式", "治理/隐性状态", "资本动作", "税务合规", "身份规划", "架构搭建", "成长动作", "健康状况", "法律风险动作"];
+const DIM_NAMES   = ["商业/职业身份", "家庭角色", "企业资本阶段", "财富标的(一级)", "财富标的(二级)", "财富规模特征", "持有形式", "治理/隐性状态", "资本动作", "税务合规", "身份规划", "架构搭建", "成长动作", "健康状况", "法律风险动作"];
 
 const DIM_COUNTS  = [161, 65, 38, 13, 172, 7, 38, 36, 118, 149, 431, 122, 12, 32, 13];
 
@@ -4839,7 +4819,7 @@ const DIM_DETAILS = {
 
   "L3.1":  { note: "", isNew: false },
 
-  "L4.1":  { note: "v6.2 正名", isNew: false },
+  "L4.1":  { note: "", isNew: false },
 
   "L4.2":  { note: "v6.1 扩充", isNew: false },
 
