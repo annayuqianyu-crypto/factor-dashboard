@@ -11638,6 +11638,9 @@ async function newsTxTest() {
 
 // ── WSA 联网搜索主函数（通过 SCF 代理） ───────────────────────
 async function newsAISearch() {
+  // Legal 模式走独立分支：每个法律源单独发 site:domain query，严格限定来源
+  if (_newsKind === 'legal') return legalNewsAISearch();
+
   const scfUrl = newsGetScfUrl();
   if (!scfUrl) {
     document.getElementById('news-ai-result').innerHTML =
@@ -11668,13 +11671,6 @@ async function newsAISearch() {
   const payload = { query };
   if (start) payload.startDate = start;
   if (end)   payload.endDate   = end;
-  // 携带当前 kind 的域名列表，便于 SCF 后端按域名切换抓取（如已升级）
-  if (_newsKind === 'legal') {
-    payload.kind    = 'legal';
-    payload.domains = LEGAL_TRUSTED_DOMAINS;
-  } else {
-    payload.kind    = 'tax';
-  }
 
   try {
     const resp = await fetch(scfUrl, {
@@ -11757,22 +11753,6 @@ async function newsAISearch() {
       return db - da;
     });
 
-    // Legal 模式：客户端兜底域名过滤（在 SCF 后端尚未升级前）
-    let domainFiltered = 0;
-    let scfMismatchWarn = false;
-    if (_newsKind === 'legal') {
-      const beforeFilter = items.length;
-      items = items.filter(it => {
-        try {
-          const host = new URL(it.url).hostname;
-          return LEGAL_TRUSTED_DOMAINS.some(d => host.includes(d));
-        } catch { return false; }
-      });
-      domainFiltered = beforeFilter - items.length;
-      // 如果过滤后剩不到 10%，说明 SCF 还是返回 Tax 源 → 显式提醒
-      if (beforeFilter > 0 && items.length / beforeFilter < 0.1) scfMismatchWarn = true;
-    }
-
     // 负向关键词过滤：标题或摘要中含任一负向词，整条剔除
     let negFiltered = 0;
     if (negKw) {
@@ -11790,7 +11770,7 @@ async function newsAISearch() {
     // 数量限制：填了就截取，留空显示全部
     if (count !== null) items = items.slice(0, count);
 
-    newsRenderCards(items, kw, start, end, negKw, negFiltered, { domainFiltered, scfMismatchWarn });
+    newsRenderCards(items, kw, start, end, negKw, negFiltered);
     if (kw) localStorage.setItem(getNewsKwCacheKey(), kw);
     if (negKw) localStorage.setItem(getNewsNegKwCacheKey(), negKw);
 
@@ -11800,25 +11780,181 @@ async function newsAISearch() {
   }
 }
 
+// ══════════════════════════════════════════════════════════════
+// Legal 时事新闻：33 个法律源并行 site:domain 搜索
+// 同一 SCF 代理 + 同一 API Key，仅 query 字段加 site: 前缀，
+// 严格保证每条结果都来自指定法律重点信息源
+// ══════════════════════════════════════════════════════════════
+async function legalNewsAISearch() {
+  const scfUrl = newsGetScfUrl();
+  if (!scfUrl) {
+    document.getElementById('news-ai-result').innerHTML =
+      `<div style="padding:20px;color:#b45309;background:#fffbeb;border-radius:8px;font-size:13px;">
+        ⚠️ 请先配置 SCF 代理 URL 并保存，再执行搜索
+       </div>`;
+    return;
+  }
+
+  const kw       = (document.getElementById('news-keyword').value || '').trim();
+  const negKw    = (document.getElementById('news-keyword-neg')?.value || '').trim();
+  const start    = document.getElementById('news-date-start').value;
+  const end      = document.getElementById('news-date-end').value;
+  const countRaw = (document.getElementById('news-count').value || '').trim();
+  const count    = countRaw ? Math.max(1, parseInt(countRaw, 10)) : null;
+  const btn   = document.getElementById('news-search-btn');
+  const spin  = document.getElementById('news-search-spin');
+  const res   = document.getElementById('news-ai-result');
+
+  btn.disabled = true; spin.textContent = '⏳';
+
+  // 把日期转为 SCF 接受的 YYYYMMDD 格式
+  const startTime = start ? start.replace(/-/g, '') : '';
+  const endTime   = end   ? end.replace(/-/g, '')   : '';
+
+  // 33 个法律源 → 33 个并行 site: 查询任务
+  const tasks = LEGAL_SOURCES.map(s => {
+    let domain = '';
+    try { domain = new URL(s.url).hostname.replace(/^www\./, ''); } catch { return null; }
+    if (!domain) return null;
+    const query = kw ? `site:${domain} ${kw}` : `site:${domain}`;
+    return { source: s, domain, query };
+  }).filter(Boolean);
+
+  let done = 0;
+  const total = tasks.length;
+  const renderProgress = () => {
+    res.innerHTML = `<div style="padding:32px;text-align:center;color:#6b7280;font-size:13px;">
+      ⏳ 正在并行抓取 <strong style="color:#0e7490;">${total} 个法律重点信息源</strong>（每源单独 site: 限定查询）…
+      <div style="margin-top:10px;font-size:11px;color:#94a3b8;">进度 ${done}/${total}</div>
+      <div style="margin-top:8px;height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;max-width:300px;margin-left:auto;margin-right:auto;">
+        <div style="height:100%;background:#0e7490;width:${(done/total*100).toFixed(0)}%;transition:width .3s;"></div>
+      </div>
+    </div>`;
+  };
+  renderProgress();
+
+  // 并发批量：每轮 8 个，控制对 SCF 的瞬时压力
+  const BATCH_SIZE = 8;
+  const errors = [];
+  const allRaw = [];
+
+  for (let i = 0; i < tasks.length; i += BATCH_SIZE) {
+    const slice = tasks.slice(i, i + BATCH_SIZE);
+    const batchResults = await Promise.all(slice.map(async (t) => {
+      try {
+        const payload = { query: t.query, count: 10 };
+        if (startTime) payload.startTime = startTime;
+        if (endTime)   payload.endTime   = endTime;
+        const resp = await fetch(scfUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await resp.json();
+        const pages = data?.Response?.Pages || [];
+        return pages.map(p => {
+          try { return typeof p === 'string' ? JSON.parse(p) : p; }
+          catch { return null; }
+        }).filter(Boolean).map(r => ({
+          ...r,
+          _trusted_name: t.source.name,
+          _src_dim:      t.source.dim,
+          _src_domain:   t.domain
+        }));
+      } catch (e) {
+        errors.push({ source: t.source.name, msg: e.message });
+        return [];
+      } finally {
+        done++;
+        renderProgress();
+      }
+    }));
+    batchResults.forEach(arr => allRaw.push(...arr));
+  }
+
+  // 标准化字段
+  let items = allRaw.map(r => {
+    const title   = r.title   || r.Title   || r.name    || r.Name    || r.headline || '(无标题)';
+    const url     = r.url     || r.Url     || r.link    || r.Link    || '';
+    const source  = r._trusted_name || r.site || r.Site || r.source || r.Source || r.domain || '';
+    const date    = r.date    || r.Date    || r.time    || r.Time    || r.pubDate  || '';
+    const summary = r.passage || r.Passage || r.content || r.Content || r.abstract || r.desc || r.snippet || '';
+    return { title, url, source, date, summary, trusted: true, tags: [r._src_dim].filter(Boolean), relevance: '', _raw: r };
+  });
+
+  // 安全网：再次按法律域名校验（防止 SCF 返回的非预期结果混入）
+  items = items.filter(it => {
+    if (!it.url) return false;
+    try {
+      const host = new URL(it.url).hostname;
+      return LEGAL_TRUSTED_DOMAINS.some(d => host.includes(d));
+    } catch { return false; }
+  });
+
+  // URL 去重
+  const seen = new Set();
+  items = items.filter(it => {
+    if (seen.has(it.url)) return false;
+    seen.add(it.url); return true;
+  });
+
+  // 日期倒序
+  items.sort((a, b) => {
+    const da = a.date ? new Date(a.date).getTime() : 0;
+    const db = b.date ? new Date(b.date).getTime() : 0;
+    return db - da;
+  });
+
+  // 负向关键词过滤
+  let negFiltered = 0;
+  if (negKw) {
+    const negList = negKw.split(/[\s,，;；]+/).map(s=>s.trim()).filter(Boolean);
+    if (negList.length) {
+      const before = items.length;
+      items = items.filter(it => {
+        const blob = ((it.title||'') + ' ' + (it.summary||'')).toLowerCase();
+        return !negList.some(n => blob.includes(n.toLowerCase()));
+      });
+      negFiltered = before - items.length;
+    }
+  }
+
+  // 数量限制
+  if (count !== null) items = items.slice(0, count);
+
+  btn.disabled = false; spin.textContent = '🔍';
+
+  // 全部失败 → 显式提示
+  if (errors.length === tasks.length) {
+    res.innerHTML = `<div style="padding:20px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;font-size:13px;color:#991b1b;">
+      ❌ 全部 ${tasks.length} 个源请求都失败了。请检查 SCF 代理是否正常工作（点上方"测试连通"）<br>
+      <span style="font-size:11px;color:#7f1d1d;">错误样本：${errors.slice(0,3).map(e=>e.source+'='+e.msg).join('；')}</span>
+    </div>`;
+    return;
+  }
+
+  // 零结果 → 友好提示
+  if (items.length === 0) {
+    res.innerHTML = `<div style="padding:20px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:13px;color:#78350f;">
+      📭 33 个法律重点源中暂未找到匹配「${kw || '近期更新'}」的内容${start && end ? `（${start} ~ ${end} 范围内）` : ''}。
+      <div style="margin-top:8px;font-size:11px;color:#92400e;">建议：① 适当放宽时间范围 ② 换个更通用的关键词 ③ 留空关键词以获取各源最新内容</div>
+      ${errors.length ? `<div style="margin-top:6px;font-size:11px;color:#92400e;">（${errors.length} 个源请求失败：${errors.slice(0,3).map(e=>e.source).join('、')}）</div>` : ''}
+    </div>`;
+    return;
+  }
+
+  newsRenderCards(items, kw, start, end, negKw, negFiltered);
+  if (kw) localStorage.setItem(getNewsKwCacheKey(), kw);
+  if (negKw) localStorage.setItem(getNewsNegKwCacheKey(), negKw);
+}
+
 // ── 渲染新闻卡片 ─────────────────────────────────────────────
-function newsRenderCards(items, kw, start, end, negKw, negFiltered, meta) {
+function newsRenderCards(items, kw, start, end, negKw, negFiltered) {
   const res = document.getElementById('news-ai-result');
   const tagColors = ['#dbeafe:#1d4ed8','#dcfce7:#15803d','#fef3c7:#92400e',
                      '#ede9fe:#6d28d9','#fee2e2:#991b1b','#fce7f3:#9d174d'];
-  const domainFiltered  = meta?.domainFiltered  || 0;
-  const scfMismatchWarn = meta?.scfMismatchWarn || false;
 
-  // SCF 后端域名未切换的明确提醒
-  const warnBanner = scfMismatchWarn ? `
-    <div style="margin-bottom:12px;padding:11px 14px;background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;font-size:12px;color:#78350f;line-height:1.65;">
-      ⚠️ <strong>注意</strong>：当前后端 SCF 代理仅配置了税务信息源，本次抓取的原始结果几乎全部来自税务域名（${domainFiltered} 条已被前端按法律重点域名过滤）。
-      要让 Legal 时事新闻真正从法律信息源抓取，需要后端将 33 个法律重点域名加入 SCF 代理配置（详见交付给技术的部署提示词）。
-    </div>` : '';
-  // Legal 模式下的过滤计数（即使未触发警告也提示一下）
-  const legalNoteHtml = (_newsKind === 'legal' && domainFiltered > 0 && !scfMismatchWarn) ?
-    `<span style="font-size:11px;color:#0e7490;">· 已过滤 ${domainFiltered} 条非法律重点源</span>` : '';
-
-  const html = warnBanner + `
+  const html = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
       <div style="font-size:12px;color:#64748b;">
         🌐 联网搜索到 <strong>${items.length}</strong> 条动态
@@ -11826,7 +11962,6 @@ function newsRenderCards(items, kw, start, end, negKw, negFiltered, meta) {
         ${negKw ? `· 负向：<em style="color:#dc2626;">${negKw}</em>${negFiltered ? `<span style="font-size:11px;color:#9ca3af;">（已剔除 ${negFiltered} 条）</span>` : ''}` : ''}
         ${start && end ? `· ${start} ~ ${end}` : ''}
         · <span style="color:#15803d;font-weight:600;">${items.filter(i=>i.trusted).length} 条来自重点信息源</span>
-        ${legalNoteHtml}
       </div>
       <button onclick="document.getElementById('news-ai-result').innerHTML='';localStorage.removeItem(getNewsResultCacheKey());"
         style="padding:3px 10px;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;border-radius:4px;font-size:11px;cursor:pointer;">清除</button>
