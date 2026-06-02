@@ -11455,8 +11455,8 @@ function switchBuRadar(bu) {
     }
   });
   if (bu === 'tax')  radarInitSources();
-  if (bu === 'news')       { _newsKind = 'tax';   newsInit(); newsInitSources(); newsApplyTheme(); }
-  if (bu === 'legal-news') { _newsKind = 'legal'; newsInit(); newsInitSources(); newsApplyTheme(); }
+  if (bu === 'news')       { _newsKind = 'tax';   newsInit(); newsInitSources(); newsApplyTheme(); newsInitScfBar(); }
+  if (bu === 'legal-news') { _newsKind = 'legal'; newsInit(); newsInitSources(); newsApplyTheme(); newsInitScfBar(); }
 }
 
 // 按 _newsKind 切换面板的主题色与计数 label
@@ -11512,23 +11512,32 @@ function newsInit() {
   } catch(er) {}
 }
 
-// ── SCF 代理 URL 管理 ────────────────────────────────────────
-const NEWS_SCF_KEY     = 'news_scf_proxy_url';
-const NEWS_SCF_DEFAULT = 'https://1433058101-f7b95iay41.ap-guangzhou.tencentscf.com';
+// ── SCF 代理 URL 管理（Tax/Legal 各自独立的函数 URL） ─────────
+const NEWS_SCF_KEY_TAX     = 'news_scf_proxy_url';
+const NEWS_SCF_DEFAULT_TAX = 'https://1433058101-f7b95iay41.ap-guangzhou.tencentscf.com';
+const NEWS_SCF_KEY_LEGAL   = 'legal_news_scf_proxy_url';   // 由用户部署 wsa-legal-proxy 后填入
+const NEWS_SCF_DEFAULT_LEGAL = '';
+
+// 兼容别名，便于阅读旧代码
+const NEWS_SCF_KEY     = NEWS_SCF_KEY_TAX;
+const NEWS_SCF_DEFAULT = NEWS_SCF_DEFAULT_TAX;
+
+function getCurrentScfKey()     { return _newsKind === 'legal' ? NEWS_SCF_KEY_LEGAL   : NEWS_SCF_KEY_TAX; }
+function getCurrentScfDefault() { return _newsKind === 'legal' ? NEWS_SCF_DEFAULT_LEGAL : NEWS_SCF_DEFAULT_TAX; }
 
 function newsGetScfUrl() {
-  return localStorage.getItem(NEWS_SCF_KEY) || NEWS_SCF_DEFAULT;
+  return localStorage.getItem(getCurrentScfKey()) || getCurrentScfDefault();
 }
 
 function newsSaveScfUrl() {
   const v = (document.getElementById('news-scf-input')?.value || '').trim();
   if (!v) return;
-  localStorage.setItem(NEWS_SCF_KEY, v);
+  localStorage.setItem(getCurrentScfKey(), v);
   newsInitScfBar();
 }
 
 function newsClearScfUrl() {
-  localStorage.removeItem(NEWS_SCF_KEY);
+  localStorage.removeItem(getCurrentScfKey());
   newsInitScfBar();
 }
 
@@ -11536,12 +11545,13 @@ function newsInitScfBar() {
   const bar = document.getElementById('news-scf-bar');
   if (!bar) return;
   const url = newsGetScfUrl();
+  const kindLabel = _newsKind === 'legal' ? 'Legal' : 'Tax';
   if (url) {
     bar.innerHTML = `
       <div style="display:flex;align-items:center;justify-content:space-between;
         background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:9px 14px;">
         <div style="font-size:12px;color:#166534;flex:1;min-width:0;">
-          ✅ 已配置腾讯云联网搜索API
+          ✅ 已配置 ${kindLabel} SCF 联网搜索 API
         </div>
         <div style="display:flex;gap:6px;margin-left:10px;flex-shrink:0;">
           <button onclick="newsTxTest()"
@@ -11555,10 +11565,13 @@ function newsInitScfBar() {
         </div>
       </div>`;
   } else {
+    const guideHint = _newsKind === 'legal'
+      ? '请部署 <code style="background:#fef3c7;padding:1px 4px;border-radius:3px;">wsa-legal-proxy</code> 云函数（参考 <code>scf_legal_news_proxy/部署说明.md</code>），并将触发器 URL 填入下方'
+      : '请先部署腾讯云 SCF 代理函数，并将触发器 URL 填入下方';
     bar.innerHTML = `
       <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 14px;">
         <div style="font-size:12px;color:#92400e;margin-bottom:8px;">
-          ⚠️ 请先部署腾讯云 SCF 代理函数，并将触发器 URL 填入下方（<a href="#" onclick="newsShowScfGuide();return false;"
+          ⚠️ ${guideHint}（<a href="#" onclick="newsShowScfGuide();return false;"
             style="color:#b45309;text-decoration:underline;">查看部署指南</a>）
         </div>
         <div style="display:flex;gap:8px;">
@@ -11781,16 +11794,17 @@ async function newsAISearch() {
 }
 
 // ══════════════════════════════════════════════════════════════
-// Legal 时事新闻：33 个法律源并行 site:domain 搜索
-// 同一 SCF 代理 + 同一 API Key，仅 query 字段加 site: 前缀，
-// 严格保证每条结果都来自指定法律重点信息源
+// Legal 时事新闻：调用独立 SCF (wsa-legal-proxy)
+// 服务端内置 33 个法律源域名 + 并行 site:DOMAIN 查询 + 聚合返回
+// 浏览器只需 1 次 HTTP，约 10-15 秒
 // ══════════════════════════════════════════════════════════════
 async function legalNewsAISearch() {
-  const scfUrl = newsGetScfUrl();
+  const scfUrl = newsGetScfUrl();   // 自动取 Legal SCF URL
   if (!scfUrl) {
     document.getElementById('news-ai-result').innerHTML =
-      `<div style="padding:20px;color:#b45309;background:#fffbeb;border-radius:8px;font-size:13px;">
-        ⚠️ 请先配置 SCF 代理 URL 并保存，再执行搜索
+      `<div style="padding:20px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:13px;line-height:1.7;">
+        ⚠️ <strong>Legal 时事新闻独立 SCF 尚未配置</strong><br>
+        请先参考 <code style="background:#fef3c7;padding:1px 5px;border-radius:3px;">scf_legal_news_proxy/部署说明.md</code> 部署 <code style="background:#fef3c7;padding:1px 5px;border-radius:3px;">wsa-legal-proxy</code> 云函数，再将触发器 URL 填入上方配置栏
        </div>`;
     return;
   }
@@ -11806,146 +11820,102 @@ async function legalNewsAISearch() {
   const res   = document.getElementById('news-ai-result');
 
   btn.disabled = true; spin.textContent = '⏳';
+  res.innerHTML = `<div style="padding:32px;text-align:center;color:#6b7280;font-size:13px;">
+    ⏳ Legal SCF 正在并行抓取 <strong style="color:#0e7490;">33 个法律重点信息源</strong>，约 10-15 秒…</div>`;
 
-  // 把日期转为 SCF 接受的 YYYYMMDD 格式
+  // 日期转 YYYYMMDD 给 SCF
   const startTime = start ? start.replace(/-/g, '') : '';
   const endTime   = end   ? end.replace(/-/g, '')   : '';
 
-  // 33 个法律源 → 33 个并行 site: 查询任务
-  const tasks = LEGAL_SOURCES.map(s => {
-    let domain = '';
-    try { domain = new URL(s.url).hostname.replace(/^www\./, ''); } catch { return null; }
-    if (!domain) return null;
-    const query = kw ? `site:${domain} ${kw}` : `site:${domain}`;
-    return { source: s, domain, query };
-  }).filter(Boolean);
+  const payload = { query: kw };
+  if (startTime) payload.startTime = startTime;
+  if (endTime)   payload.endTime   = endTime;
 
-  let done = 0;
-  const total = tasks.length;
-  const renderProgress = () => {
-    res.innerHTML = `<div style="padding:32px;text-align:center;color:#6b7280;font-size:13px;">
-      ⏳ 正在并行抓取 <strong style="color:#0e7490;">${total} 个法律重点信息源</strong>（每源单独 site: 限定查询）…
-      <div style="margin-top:10px;font-size:11px;color:#94a3b8;">进度 ${done}/${total}</div>
-      <div style="margin-top:8px;height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;max-width:300px;margin-left:auto;margin-right:auto;">
-        <div style="height:100%;background:#0e7490;width:${(done/total*100).toFixed(0)}%;transition:width .3s;"></div>
-      </div>
-    </div>`;
-  };
-  renderProgress();
+  try {
+    const resp = await fetch(scfUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    btn.disabled = false; spin.textContent = '🔍';
+    const data = await resp.json();
 
-  // 并发批量：每轮 8 个，控制对 SCF 的瞬时压力
-  const BATCH_SIZE = 8;
-  const errors = [];
-  const allRaw = [];
-
-  for (let i = 0; i < tasks.length; i += BATCH_SIZE) {
-    const slice = tasks.slice(i, i + BATCH_SIZE);
-    const batchResults = await Promise.all(slice.map(async (t) => {
-      try {
-        const payload = { query: t.query, count: 10 };
-        if (startTime) payload.startTime = startTime;
-        if (endTime)   payload.endTime   = endTime;
-        const resp = await fetch(scfUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await resp.json();
-        const pages = data?.Response?.Pages || [];
-        return pages.map(p => {
-          try { return typeof p === 'string' ? JSON.parse(p) : p; }
-          catch { return null; }
-        }).filter(Boolean).map(r => ({
-          ...r,
-          _trusted_name: t.source.name,
-          _src_dim:      t.source.dim,
-          _src_domain:   t.domain
-        }));
-      } catch (e) {
-        errors.push({ source: t.source.name, msg: e.message });
-        return [];
-      } finally {
-        done++;
-        renderProgress();
-      }
-    }));
-    batchResults.forEach(arr => allRaw.push(...arr));
-  }
-
-  // 标准化字段
-  let items = allRaw.map(r => {
-    const title   = r.title   || r.Title   || r.name    || r.Name    || r.headline || '(无标题)';
-    const url     = r.url     || r.Url     || r.link    || r.Link    || '';
-    const source  = r._trusted_name || r.site || r.Site || r.source || r.Source || r.domain || '';
-    const date    = r.date    || r.Date    || r.time    || r.Time    || r.pubDate  || '';
-    const summary = r.passage || r.Passage || r.content || r.Content || r.abstract || r.desc || r.snippet || '';
-    return { title, url, source, date, summary, trusted: true, tags: [r._src_dim].filter(Boolean), relevance: '', _raw: r };
-  });
-
-  // 安全网：再次按法律域名校验（防止 SCF 返回的非预期结果混入）
-  items = items.filter(it => {
-    if (!it.url) return false;
-    try {
-      const host = new URL(it.url).hostname;
-      return LEGAL_TRUSTED_DOMAINS.some(d => host.includes(d));
-    } catch { return false; }
-  });
-
-  // URL 去重
-  const seen = new Set();
-  items = items.filter(it => {
-    if (seen.has(it.url)) return false;
-    seen.add(it.url); return true;
-  });
-
-  // 日期倒序
-  items.sort((a, b) => {
-    const da = a.date ? new Date(a.date).getTime() : 0;
-    const db = b.date ? new Date(b.date).getTime() : 0;
-    return db - da;
-  });
-
-  // 负向关键词过滤
-  let negFiltered = 0;
-  if (negKw) {
-    const negList = negKw.split(/[\s,，;；]+/).map(s=>s.trim()).filter(Boolean);
-    if (negList.length) {
-      const before = items.length;
-      items = items.filter(it => {
-        const blob = ((it.title||'') + ' ' + (it.summary||'')).toLowerCase();
-        return !negList.some(n => blob.includes(n.toLowerCase()));
-      });
-      negFiltered = before - items.length;
+    if (data.error) {
+      res.innerHTML = `<div style="padding:20px;background:#fee2e2;border-radius:8px;font-size:13px;color:#991b1b;">
+        <strong>SCF 错误：</strong>${data.error}
+      </div>`; return;
     }
+
+    const rawList = (data.Response?.Pages || []).map(p => {
+      try { return typeof p === 'string' ? JSON.parse(p) : p; } catch { return {}; }
+    });
+
+    if (!rawList.length) {
+      const errs = data.Response?.Errors || [];
+      res.innerHTML = `<div style="padding:20px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:13px;color:#78350f;">
+        📭 33 个法律重点源中暂未找到匹配「${kw || '近期更新'}」的内容${start && end ? `（${start} ~ ${end}）` : ''}<br>
+        <span style="font-size:11px;color:#92400e;">建议：放宽时间范围 / 换关键词 / 留空 kw 取最新</span>
+        ${errs.length ? `<div style="margin-top:6px;font-size:11px;color:#92400e;">（${errs.length} 个源请求失败：${errs.slice(0,3).join('、')}）</div>` : ''}
+      </div>`; return;
+    }
+
+    // 标准化
+    let items = rawList.map(r => {
+      const title   = r.title   || r.Title   || r.name    || r.Name    || r.headline || '(无标题)';
+      const url     = r.url     || r.Url     || r.link    || r.Link    || '';
+      const source  = r._trusted_name || r.site || r.Site || r.source || r.Source || r.domain || '';
+      const date    = r.date    || r.Date    || r.time    || r.Time    || r.pubDate  || '';
+      const summary = r.passage || r.Passage || r.content || r.Content || r.abstract || r.desc || r.snippet || '';
+      return { title, url, source, date, summary, trusted: true, tags: [], relevance: '', _raw: r };
+    });
+
+    // 安全网：再次按法律域名校验
+    items = items.filter(it => {
+      if (!it.url) return false;
+      try {
+        const host = new URL(it.url).hostname;
+        return LEGAL_TRUSTED_DOMAINS.some(d => host.includes(d));
+      } catch { return false; }
+    });
+
+    // URL 去重
+    const seen = new Set();
+    items = items.filter(it => {
+      if (seen.has(it.url)) return false;
+      seen.add(it.url); return true;
+    });
+
+    // 日期倒序
+    items.sort((a, b) => {
+      const da = a.date ? new Date(a.date).getTime() : 0;
+      const db = b.date ? new Date(b.date).getTime() : 0;
+      return db - da;
+    });
+
+    // 负向关键词过滤
+    let negFiltered = 0;
+    if (negKw) {
+      const negList = negKw.split(/[\s,，;；]+/).map(s=>s.trim()).filter(Boolean);
+      if (negList.length) {
+        const before = items.length;
+        items = items.filter(it => {
+          const blob = ((it.title||'') + ' ' + (it.summary||'')).toLowerCase();
+          return !negList.some(n => blob.includes(n.toLowerCase()));
+        });
+        negFiltered = before - items.length;
+      }
+    }
+
+    if (count !== null) items = items.slice(0, count);
+
+    newsRenderCards(items, kw, start, end, negKw, negFiltered);
+    if (kw) localStorage.setItem(getNewsKwCacheKey(), kw);
+    if (negKw) localStorage.setItem(getNewsNegKwCacheKey(), negKw);
+
+  } catch (e) {
+    btn.disabled = false; spin.textContent = '🔍';
+    res.innerHTML = `<div style="padding:20px;color:#dc2626;font-size:13px;">请求失败：${e.message}</div>`;
   }
-
-  // 数量限制
-  if (count !== null) items = items.slice(0, count);
-
-  btn.disabled = false; spin.textContent = '🔍';
-
-  // 全部失败 → 显式提示
-  if (errors.length === tasks.length) {
-    res.innerHTML = `<div style="padding:20px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;font-size:13px;color:#991b1b;">
-      ❌ 全部 ${tasks.length} 个源请求都失败了。请检查 SCF 代理是否正常工作（点上方"测试连通"）<br>
-      <span style="font-size:11px;color:#7f1d1d;">错误样本：${errors.slice(0,3).map(e=>e.source+'='+e.msg).join('；')}</span>
-    </div>`;
-    return;
-  }
-
-  // 零结果 → 友好提示
-  if (items.length === 0) {
-    res.innerHTML = `<div style="padding:20px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:13px;color:#78350f;">
-      📭 33 个法律重点源中暂未找到匹配「${kw || '近期更新'}」的内容${start && end ? `（${start} ~ ${end} 范围内）` : ''}。
-      <div style="margin-top:8px;font-size:11px;color:#92400e;">建议：① 适当放宽时间范围 ② 换个更通用的关键词 ③ 留空关键词以获取各源最新内容</div>
-      ${errors.length ? `<div style="margin-top:6px;font-size:11px;color:#92400e;">（${errors.length} 个源请求失败：${errors.slice(0,3).map(e=>e.source).join('、')}）</div>` : ''}
-    </div>`;
-    return;
-  }
-
-  newsRenderCards(items, kw, start, end, negKw, negFiltered);
-  if (kw) localStorage.setItem(getNewsKwCacheKey(), kw);
-  if (negKw) localStorage.setItem(getNewsNegKwCacheKey(), negKw);
 }
 
 // ── 渲染新闻卡片 ─────────────────────────────────────────────
