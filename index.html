@@ -2691,6 +2691,10 @@ tr:hover td { background: #fafafa; }
         style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#2d6a4f;color:#fff;border-bottom:2px solid #2d6a4f;margin-bottom:-2px;">
         📰 Tax 时事新闻
       </button>
+      <button id="bu-tab-legal-news" onclick="switchBuRadar('legal-news')"
+        style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#f3f4f6;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">
+        ⚖️ Legal 时事新闻
+      </button>
       <button id="bu-tab-tax" onclick="switchBuRadar('tax')"
         style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#f3f4f6;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">
         💼 Tax 专项场景
@@ -2751,9 +2755,15 @@ tr:hover td { background: #fafafa; }
     <!-- Tax 时事新闻面板（腾讯云混元联网搜索） -->
     <div id="radar-panel-news" style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
 
+      <!-- 当前领域 badge -->
+      <div style="margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+        <span id="news-kind-badge" style="display:inline-block;padding:3px 10px;background:#dcfce7;color:#166534;border-radius:14px;font-size:11.5px;font-weight:700;letter-spacing:.5px;">税务领域</span>
+        <span style="font-size:11px;color:#9ca3af;">切换上方 tab 即可在「Tax / Legal 时事新闻」之间切换</span>
+      </div>
+
       <!-- 信息源列表（重点关注网站清单） -->
-      <details style="margin-bottom:14px;border:1px solid #d1fae5;border-radius:8px;padding:8px 12px;background:#f0fdf4;">
-        <summary style="font-size:12.5px;color:#065f46;cursor:pointer;user-select:none;font-weight:600;">
+      <details id="news-sources-details" style="margin-bottom:14px;border:1px solid #d1fae5;border-radius:8px;padding:8px 12px;background:#f0fdf4;">
+        <summary id="news-sources-summary" style="font-size:12.5px;color:#065f46;cursor:pointer;user-select:none;font-weight:600;">
           📋 当前重点关注的 <span id="news-source-count">40</span> 个信息源（点击展开/按领域分组）
         </summary>
         <div id="news-sources-grouped" style="margin-top:10px;display:flex;flex-direction:column;gap:8px;"></div>
@@ -11297,14 +11307,85 @@ const TAX_SOURCES = [
   {dim:'组织效能与ESG价值', name:'哈佛商业评论(中文版)', url:'https://www.hbrchina.org', section:'组织效能/领导力', keywords:'组织效能、战略规划、激励机制'},
 ];
 
+// ─── Legal BU 重点关注网站（33 个，源自《法律重点关注网站列表.xlsx》）───
+const LEGAL_SOURCES = [
+  {dim:'立法动态', name:'全国人大网', url:'http://www.npc.gov.cn', section:'立法动态/法律草案', keywords:'法律草案、立法计划、人大常委会会议、法律修订'},
+  {dim:'行政立法', name:'中国政府网', url:'http://www.gov.cn', section:'国务院文件/政策', keywords:'行政法规、国务院令、政策解读、征求意见'},
+  {dim:'行政立法', name:'司法部', url:'http://www.moj.gov.cn', section:'立法工作/政策法规', keywords:'立法征求意见、律师管理、公证、仲裁'},
+  {dim:'司法动态', name:'最高人民法院', url:'http://www.court.gov.cn', section:'司法解释/指导性案例/新闻', keywords:'司法解释、指导性案例、典型案例、批复'},
+  {dim:'司法动态', name:'最高人民检察院', url:'https://www.spp.gov.cn', section:'检察新闻/指导性案例', keywords:'检察指导案例、公益诉讼、典型案例'},
+  {dim:'司法动态', name:'公安部', url:'https://www.mps.gov.cn/', section:'警务事务', keywords:'政策文件、政策解读'},
+  {dim:'监察动态', name:'中央纪委国家监委', url:'https://www.ccdi.gov.cn', section:'审查调查/法规解读', keywords:'审查调查、监察法、廉政法规、典型案例'},
+  {dim:'监管执法', name:'国家市场监督管理总局', url:'https://www.samr.gov.cn', section:'政策法规/执法动态', keywords:'反垄断、经营者集中、行政处罚、广告法'},
+  {dim:'监管执法', name:'国家金融监督管理总局', url:'https://www.nfra.gov.cn', section:'政策法规/行政处罚', keywords:'金融监管、行政处罚、监管指引'},
+  {dim:'监管执法', name:'国家网信办', url:'http://www.cac.gov.cn', section:'政策法规/执法行动', keywords:'数据安全、个人信息保护、算法治理、网络安全审查'},
+  {dim:'监管执法', name:'国家知识产权局', url:'https://www.cnipa.gov.cn', section:'政策法规/典型案例', keywords:'专利、商标、知识产权保护、典型案例'},
+  {dim:'行业自律', name:'中国国际经济贸易仲裁委员会', url:'http://www.cietac.org', section:'新闻/规则更新', keywords:'仲裁规则、涉外仲裁、典型案例'},
+  {dim:'专业媒体', name:'法治日报', url:'http://www.legaldaily.com.cn', section:'法治新闻/深度报道', keywords:'法治建设、立法动态、司法改革'},
+  {dim:'专业媒体', name:'人民法院报', url:'https://rmfygg.court.gov.cn/web/rmfyportal', section:'司法实务/案例评析', keywords:'司法实务、案例评析、审判动态'},
+  {dim:'专业媒体', name:'检察日报', url:'http://www.jcrb.com', section:'检察动态/法学专刊', keywords:'检察工作、公益诉讼、刑事司法'},
+  {dim:'律所', name:'金杜律师事务所', url:'https://www.kwm.com/cn', section:'出版刊物/洞察', keywords:'资本市场、跨境并购、反垄断、数据合规、金融监管'},
+  {dim:'律所', name:'中伦律师事务所', url:'https://www.zhonglun.com', section:'中伦观点', keywords:'私募基金、资本市场、争议解决、家族财富、税务'},
+  {dim:'律所', name:'汉坤律师事务所', url:'https://www.hankunlaw.com', section:'汉坤评论', keywords:'私募基金、TMT、跨境投资、数据合规、家族财富'},
+  {dim:'律所', name:'竞天公诚律师事务所', url:'https://www.jingtian.com/', section:'竞天研究', keywords:'港股上市、跨境投资、数据隐私与网络安全、刑事与合规调查'},
+  {dim:'律所', name:'方达律师事务所', url:'https://www.fangdalaw.com/', section:'洞察/文章', keywords:'出海、跨境、破产、政府监管、基金'},
+  {dim:'律所', name:'海问律师事务所', url:'http://www.haiwen-law.com/', section:'研究文章', keywords:'新规速递、监管、投资、基金、上市'},
+  {dim:'律所', name:'君合律师事务所', url:'https://www.junhe.com/', section:'君合法评', keywords:'资本市场、破产、合规、家族财富、刑事、基金'},
+  {dim:'律所', name:'植德律师事务所', url:'https://www.meritsandtree.com/', section:'植德研究', keywords:'新出海时代、知产、基金、家事服务与财富管理'},
+  {dim:'律所', name:'安杰世泽律师事务所', url:'https://www.anjielaw.com/', section:'专业文章', keywords:'劳动、海事、争议解决、海关'},
+  {dim:'法律自媒体', name:'律新社', url:'https://www.lvxinnews.com', section:'行业研究/热点解读', keywords:'律师行业、法律科技、热点解读'},
+  {dim:'涉外动态', name:'商务部条约法律司', url:'http://tfs.mofcom.gov.cn', section:'条约/贸易救济', keywords:'双边条约、反倾销、反补贴、WTO'},
+  {dim:'香港·立法司法', name:'香港律政司', url:'https://www.doj.gov.hk', section:'新闻公报/咨询文件', keywords:'法律改革、咨询文件、国际法律合作'},
+  {dim:'香港·立法司法', name:'香港司法机构', url:'https://www.judiciary.hk', section:'判案书/法院新闻', keywords:'终审法院、判例、重要案件'},
+  {dim:'香港·立法司法', name:'香港金管局(HKMA)', url:'https://www.hkma.gov.hk', section:'新闻稿/监管政策', keywords:'银行监管、稳定币、虚拟银行、跨境金融'},
+  {dim:'香港·立法司法', name:'香港国际仲裁中心(HKIAC)', url:'https://www.hkiac.org', section:'News/Rules Updates', keywords:'国际仲裁、规则更新、跨境争议'},
+  {dim:'新加坡', name:'新加坡最高法院', url:'https://www.judiciary.gov.sg', section:'Judgments/News', keywords:'Supreme Court, Judgments, SICC'},
+  {dim:'新加坡', name:'新加坡金管局(MAS)', url:'https://www.mas.gov.sg', section:'News/Enforcement', keywords:'Financial Regulation, VCC, Family Office, Enforcement'},
+  {dim:'新加坡', name:'新加坡国际仲裁中心(SIAC)', url:'https://siac.org.sg', section:'News/Rules', keywords:'International Arbitration, SIAC Rules'},
+];
+
+// 法律重点信息源域名（用于来源标注）
+const LEGAL_TRUSTED_DOMAINS = [
+  'npc.gov.cn','gov.cn','moj.gov.cn','court.gov.cn','spp.gov.cn','mps.gov.cn',
+  'ccdi.gov.cn','samr.gov.cn','nfra.gov.cn','cac.gov.cn','cnipa.gov.cn',
+  'cietac.org','legaldaily.com.cn','jcrb.com',
+  'kwm.com','zhonglun.com','hankunlaw.com','jingtian.com','fangdalaw.com',
+  'haiwen-law.com','junhe.com','meritsandtree.com','anjielaw.com',
+  'lvxinnews.com','mofcom.gov.cn',
+  'doj.gov.hk','judiciary.hk','hkma.gov.hk','hkiac.org',
+  'judiciary.gov.sg','mas.gov.sg','siac.org.sg'
+];
+
+// ── 当前时事新闻 tab 的"领域"状态（tax/legal）─────────────────
+let _newsKind = 'tax';
+
+function getNewsSources()  { return _newsKind === 'legal' ? LEGAL_SOURCES : TAX_SOURCES; }
+function getNewsTrustedDomains() {
+  // Tax 域名列表保留在 newsAISearch 内部，此处仅用于 legal
+  return _newsKind === 'legal' ? LEGAL_TRUSTED_DOMAINS : null; // null = 让 newsAISearch 用其内置的 Tax 列表
+}
+function getNewsKwCacheKey()     { return _newsKind === 'legal' ? 'legal_news_last_kw'     : 'news_last_kw'; }
+function getNewsNegKwCacheKey()  { return _newsKind === 'legal' ? 'legal_news_last_neg_kw' : 'news_last_neg_kw'; }
+function getNewsResultCacheKey() { return _newsKind === 'legal' ? 'legal_news_ai_cache'    : 'news_ai_cache'; }
+function getNewsLabel()          { return _newsKind === 'legal' ? '法律' : '税务'; }
+function getNewsThemeColor()     { return _newsKind === 'legal' ? '#0e7490' : '#2d6a4f'; }
+
 // ── 初始化信息源标签 ─────────────────────────────────────────
 const RADAR_DIM_COLORS = {
+  // Tax
   '证券行业':'#dbeafe:#1d4ed8', '银行业':'#dcfce7:#15803d',
   '聚合财经':'#fef3c7:#92400e', '家企架构与资本市场':'#ede9fe:#6d28d9',
   '家族财富传承与全球税务规划':'#fee2e2:#991b1b',
   '保险行业':'#fce7f3:#9d174d', '信托行业':'#e0f2fe:#0369a1',
   '全球法律与新兴业务':'#f1f5f9:#475569',
   '组织效能与ESG价值':'#ecfdf5:#065f46',
+  // Legal
+  '立法动态':'#fef9c3:#854d0e', '行政立法':'#fce7f3:#9d174d',
+  '司法动态':'#dbeafe:#1e3a8a', '监察动态':'#fee2e2:#7f1d1d',
+  '监管执法':'#fef3c7:#92400e', '行业自律':'#e0e7ff:#3730a3',
+  '专业媒体':'#f3e8ff:#6b21a8', '律所':'#ccfbf1:#115e59',
+  '法律自媒体':'#fae8ff:#86198f', '涉外动态':'#ecfeff:#155e75',
+  '香港·立法司法':'#fff1f2:#9f1239', '新加坡':'#eff6ff:#1e40af',
 };
 
 function radarInitSources() {
@@ -11321,18 +11402,20 @@ function radarInitSources() {
   });
 }
 
-// 新闻面板：按领域分组展示信息源
+// 新闻面板：按领域分组展示信息源（依 _newsKind 切换 Tax/Legal 数据）
 function newsInitSources() {
   const el = document.getElementById('news-sources-grouped');
-  if (!el || el.children.length > 0) return;
+  if (!el) return;
+  el.innerHTML = '';   // 切换 kind 时强制重渲染
+  const SOURCES = getNewsSources();
   // 按 dim 分组
   const groups = {};
-  TAX_SOURCES.forEach(s => {
+  SOURCES.forEach(s => {
     if (!groups[s.dim]) groups[s.dim] = [];
     groups[s.dim].push(s);
   });
   const cntEl = document.getElementById('news-source-count');
-  if (cntEl) cntEl.textContent = TAX_SOURCES.length;
+  if (cntEl) cntEl.textContent = SOURCES.length;
 
   Object.entries(groups).forEach(([dim, list]) => {
     const [bg, color] = (RADAR_DIM_COLORS[dim]||'#f3f4f6:#374151').split(':');
@@ -11349,13 +11432,18 @@ function newsInitSources() {
 
 // ── 二级 tab 切换 ─────────────────────────────────────────────
 function switchBuRadar(bu) {
-  const tabColors = {tax:'#0369a1', legal:'#15803d', cm:'#c2410c', news:'#2d6a4f'};
+  const tabColors = {tax:'#0369a1', legal:'#15803d', cm:'#c2410c', news:'#2d6a4f', 'legal-news':'#0e7490'};
+  // tax / legal / cm / news 各自有独立面板；legal-news 复用 news 面板
+  const panelKey = (bu === 'legal-news') ? 'news' : bu;
   ['tax','legal','cm','news'].forEach(b => {
     const panel = document.getElementById('radar-panel-' + b);
-    const tab   = document.getElementById('bu-tab-' + b);
-    if (!panel || !tab) return;
+    if (panel) panel.style.display = (b === panelKey) ? 'block' : 'none';
+  });
+  // 按钮高亮（含 legal-news 第5个 tab）
+  ['tax','legal','cm','news','legal-news'].forEach(b => {
+    const tab = document.getElementById('bu-tab-' + b);
+    if (!tab) return;
     const active = b === bu;
-    panel.style.display = active ? 'block' : 'none';
     if (active) {
       tab.style.background   = tabColors[b];
       tab.style.color        = '#fff';
@@ -11367,7 +11455,31 @@ function switchBuRadar(bu) {
     }
   });
   if (bu === 'tax')  radarInitSources();
-  if (bu === 'news') { newsInit(); newsInitSources(); }
+  if (bu === 'news')       { _newsKind = 'tax';   newsInit(); newsInitSources(); newsApplyTheme(); }
+  if (bu === 'legal-news') { _newsKind = 'legal'; newsInit(); newsInitSources(); newsApplyTheme(); }
+}
+
+// 按 _newsKind 切换面板的主题色与计数 label
+function newsApplyTheme() {
+  const isLegal = _newsKind === 'legal';
+  const themeColor = isLegal ? '#0e7490' : '#006eff';
+  const themeLabel = isLegal ? '法律' : '税务';
+  const btn = document.getElementById('news-search-btn');
+  if (btn) btn.style.background = themeColor;
+  // 顶部源列表的样式（绿/青）
+  const det = document.getElementById('news-sources-details');
+  if (det) {
+    det.style.border = isLegal ? '1px solid #a5f3fc' : '1px solid #d1fae5';
+    det.style.background = isLegal ? '#ecfeff' : '#f0fdf4';
+  }
+  const sum = document.getElementById('news-sources-summary');
+  if (sum) sum.style.color = isLegal ? '#155e75' : '#065f46';
+  const kindBadge = document.getElementById('news-kind-badge');
+  if (kindBadge) {
+    kindBadge.textContent = `${themeLabel}领域`;
+    kindBadge.style.background = isLegal ? '#cffafe' : '#dcfce7';
+    kindBadge.style.color      = isLegal ? '#155e75' : '#166534';
+  }
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -11383,14 +11495,20 @@ function newsInit() {
   const e = document.getElementById('news-date-end');
   if (s && !s.value) s.value = fmt(ago30);
   if (e && !e.value) e.value = fmt(today);
-  const kw = localStorage.getItem('news_last_kw') || '';
+  // 切换 kind 时清空输入并加载该 kind 的缓存
+  const kw = localStorage.getItem(getNewsKwCacheKey()) || '';
   const ki = document.getElementById('news-keyword');
-  if (ki && kw && !ki.value) ki.value = kw;
+  if (ki) ki.value = kw;
+  const negKw = localStorage.getItem(getNewsNegKwCacheKey()) || '';
+  const ne = document.getElementById('news-keyword-neg');
+  if (ne) ne.value = negKw;
+  const resEl = document.getElementById('news-ai-result');
+  if (resEl) resEl.innerHTML = '';
   // 初始化 SCF 状态栏
   newsInitScfBar();
   try {
-    const cache = JSON.parse(localStorage.getItem('news_ai_cache') || 'null');
-    if (cache && cache.html) document.getElementById('news-ai-result').innerHTML = cache.html;
+    const cache = JSON.parse(localStorage.getItem(getNewsResultCacheKey()) || 'null');
+    if (cache && cache.html && resEl) resEl.innerHTML = cache.html;
   } catch(er) {}
 }
 
@@ -11540,8 +11658,10 @@ async function newsAISearch() {
   const res   = document.getElementById('news-ai-result');
 
   btn.disabled = true; spin.textContent = '⏳';
+  const _kindLabel = getNewsLabel();
+  const _kindCount = getNewsSources().length;
   res.innerHTML = `<div style="padding:32px;text-align:center;color:#6b7280;font-size:13px;">
-    ⏳ 正在对 <strong style="color:#0369a1;">37 个重点信息源</strong> 并行搜索，约 20 秒请稍候…</div>`;
+    ⏳ 正在对 <strong style="color:#0369a1;">${_kindCount} 个${_kindLabel}重点信息源</strong> 并行搜索，约 20 秒请稍候…</div>`;
 
   const query = kw; // 留空时 SCF 直接用域名搜索，无关键词限制
 
@@ -11594,8 +11714,8 @@ async function newsAISearch() {
       return;
     }
 
-    // 37 个税务重点信息源域名（用于来源标注）
-    const TRUSTED_DOMAINS = [
+    // 重点信息源域名（按当前 _newsKind 选用 Tax/Legal 清单）
+    const TAX_TRUSTED_DOMAINS = [
       'csrc.gov.cn','cs.com.cn','stcn.com','sac.net.cn',
       'chinabanking.com.cn','china-cba.net','chinamoney.com.cn','pcac.org.cn',
       'cls.cn','wallstreetcn.com','cn.reuters.com','bloomberg.com','eastmoney.com',
@@ -11607,6 +11727,7 @@ async function newsAISearch() {
       'coindesk.com','mohrss.gov.cn','hbrchina.org',
       'iras.gov.sg','ird.gov.hk'
     ];
+    const TRUSTED_DOMAINS = (_newsKind === 'legal') ? LEGAL_TRUSTED_DOMAINS : TAX_TRUSTED_DOMAINS;
     function isTrusted(url) {
       try { return TRUSTED_DOMAINS.some(d => new URL(url).hostname.includes(d)); }
       catch { return false; }
@@ -11647,8 +11768,8 @@ async function newsAISearch() {
     if (count !== null) items = items.slice(0, count);
 
     newsRenderCards(items, kw, start, end, negKw, negFiltered);
-    if (kw) localStorage.setItem('news_last_kw', kw);
-    if (negKw) localStorage.setItem('news_last_neg_kw', negKw);
+    if (kw) localStorage.setItem(getNewsKwCacheKey(), kw);
+    if (negKw) localStorage.setItem(getNewsNegKwCacheKey(), negKw);
 
   } catch(e) {
     btn.disabled = false; spin.textContent = '🔍';
@@ -11671,7 +11792,7 @@ function newsRenderCards(items, kw, start, end, negKw, negFiltered) {
         ${start && end ? `· ${start} ~ ${end}` : ''}
         · <span style="color:#15803d;font-weight:600;">${items.filter(i=>i.trusted).length} 条来自重点信息源</span>
       </div>
-      <button onclick="document.getElementById('news-ai-result').innerHTML='';localStorage.removeItem('news_ai_cache');"
+      <button onclick="document.getElementById('news-ai-result').innerHTML='';localStorage.removeItem(getNewsResultCacheKey());"
         style="padding:3px 10px;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;border-radius:4px;font-size:11px;cursor:pointer;">清除</button>
     </div>
     <div style="display:flex;flex-direction:column;gap:10px;">
@@ -11718,8 +11839,8 @@ function newsRenderCards(items, kw, start, end, negKw, negFiltered) {
     </div>`;
 
   res.innerHTML = html;
-  if (kw) localStorage.setItem('news_last_kw', kw);
-  try { localStorage.setItem('news_ai_cache', JSON.stringify({ html })); } catch(e) {}
+  if (kw) localStorage.setItem(getNewsKwCacheKey(), kw);
+  try { localStorage.setItem(getNewsResultCacheKey(), JSON.stringify({ html })); } catch(e) {}
 }
 
 // ── 从 AI 新闻卡片提炼场景（使用摘要，无需抓取 URL）──────────
@@ -11734,7 +11855,10 @@ async function newsAIExtract(title, source, date, summary, relevance) {
   const apiBase = localStorage.getItem('pg_api_base') || COMPANY_API_BASE;
   const apiKey  = localStorage.getItem('pg_api_key')  || COMPANY_API_KEY;
 
-  const prompt = `你是朝曦家族办公室的场景分析师。请根据以下新闻/政策动态，提炼1-3个与高净值客户（家企传承、税务合规、跨境规划、资产保护、股权架构）相关的具体业务场景。
+  const _domainHint = (_newsKind === 'legal')
+    ? '高净值客户（家事纠纷、跨境法律、合规调查、争议解决、家族治理、刑事合规、知识产权）'
+    : '高净值客户（家企传承、税务合规、跨境规划、资产保护、股权架构）';
+  const prompt = `你是朝曦家族办公室的场景分析师。请根据以下新闻/政策动态，提炼1-3个与${_domainHint}相关的具体业务场景。
 
 新闻标题：${title}
 来源：${source}  日期：${date}
@@ -12327,7 +12451,11 @@ function renderPool(bu) {
   ['tax','legal','cm'].forEach(b => renderPool(b));
   radarInitSources();
   // news 现在是默认tab，初始化时也要渲染源列表+SCF bar
-  setTimeout(() => { if (typeof newsInit === 'function') newsInit(); if (typeof newsInitSources === 'function') newsInitSources(); }, 100);
+  setTimeout(() => {
+    if (typeof newsInit === 'function') newsInit();
+    if (typeof newsInitSources === 'function') newsInitSources();
+    if (typeof newsApplyTheme === 'function') newsApplyTheme();
+  }, 100);
   // 延迟到 LEARN_HISTORY_KEY 等 const 声明执行后再渲染（避免 TDZ 导致历史读取失败）
   setTimeout(() => { try { learnRenderHistory(); } catch(e) {} }, 0);
 })();
