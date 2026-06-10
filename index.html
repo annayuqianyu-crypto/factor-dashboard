@@ -740,7 +740,7 @@ tr:hover td { background: #fafafa; }
 
   <span class="subtitle">数据驾驶舱</span>
 
-  <span class="badge">数据截至 2026-04-10 · 生成于 2026-04-17</span>
+  <span class="badge">数据截至 2026-06-07 · 因子库 v6.1</span>
 
 </div>
 
@@ -750,9 +750,19 @@ tr:hover td { background: #fafafa; }
 
 <nav class="sidebar">
 
-  <div class="nav-section-title">因子库总览</div>
+  <div class="nav-section-title">管理看板</div>
 
-  <div class="nav-item active" onclick="showPage('overview')">
+  <div class="nav-item active" onclick="showPage('mgmt')">
+
+    <span class="icon">🎯</span>管理看板
+
+  </div>
+
+
+
+  <div class="nav-section-title" style="margin-top:12px;">因子库总览</div>
+
+  <div class="nav-item" onclick="showPage('overview')">
 
     <span class="icon">📊</span>现状分析
 
@@ -843,11 +853,111 @@ tr:hover td { background: #fafafa; }
 
 <!-- ══════════════════════════════════════
 
+     PAGE 0: 管理看板（系统首页）
+
+═══════════════════════════════════════ -->
+
+<div id="page-mgmt" class="page active">
+
+  <div class="page-header">
+    <h2>管理看板</h2>
+    <p>因子 · 痛点 · 渠道场景 三大数据资产的现状总览与周度变化追踪</p>
+  </div>
+
+  <!-- ── 静态管理：三大资产现状 KPI ── -->
+  <div style="font-size:14px;font-weight:700;color:#374151;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+    <span>📌</span> 资产现状（静态管理）
+    <span id="mgmt-asof" style="font-size:11px;font-weight:400;color:#9ca3af;"></span>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:28px;">
+
+    <div style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1px solid #bfdbfe;border-radius:14px;padding:20px 22px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:13px;font-weight:700;color:#1d4ed8;">🧬 因子库</div>
+        <span id="mgmt-factor-delta" style="font-size:12px;font-weight:700;"></span>
+      </div>
+      <div id="mgmt-factor-total" style="font-size:34px;font-weight:800;color:#1e3a8a;margin:10px 0 4px;">—</div>
+      <div id="mgmt-factor-sub" style="font-size:12px;color:#3b5bdb;line-height:1.7;"></div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#fef2f2,#fee2e2);border:1px solid #fecaca;border-radius:14px;padding:20px 22px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:13px;font-weight:700;color:#dc2626;">💢 痛点库</div>
+        <span id="mgmt-pain-delta" style="font-size:12px;font-weight:700;"></span>
+      </div>
+      <div id="mgmt-pain-total" style="font-size:34px;font-weight:800;color:#7f1d1d;margin:10px 0 4px;">—</div>
+      <div id="mgmt-pain-sub" style="font-size:12px;color:#b91c1c;line-height:1.7;"></div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #bbf7d0;border-radius:14px;padding:20px 22px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:13px;font-weight:700;color:#15803d;">📡 渠道场景</div>
+        <span id="mgmt-scene-delta" style="font-size:12px;font-weight:700;"></span>
+      </div>
+      <div id="mgmt-scene-total" style="font-size:34px;font-weight:800;color:#14532d;margin:10px 0 4px;">—</div>
+      <div id="mgmt-scene-sub" style="font-size:12px;color:#166534;line-height:1.7;"></div>
+    </div>
+
+  </div>
+
+  <!-- ── 动态追踪：周度趋势 ── -->
+  <div style="font-size:14px;font-weight:700;color:#374151;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+    <span>📈</span> 周度变化（动态追踪）
+  </div>
+  <div class="card" style="margin-bottom:18px;">
+    <div class="card-title">三大资产累计规模 · 周度趋势</div>
+    <div id="chart-mgmt-trend" class="chart-box" style="height:340px;"></div>
+  </div>
+
+  <div class="card" style="margin-bottom:18px;">
+    <div class="card-title">周度变化明细</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="white-space:nowrap;">数据周</th>
+          <th>因子</th><th>周增</th>
+          <th>痛点</th><th>周增</th>
+          <th>场景</th><th>周增</th>
+          <th>关键事件</th>
+        </tr>
+      </thead>
+      <tbody id="mgmt-week-table"></tbody>
+    </table>
+  </div>
+
+  <!-- ── 数据口径与维护说明 ── -->
+  <div class="card">
+    <div class="card-title">数据口径与维护说明</div>
+    <div class="three-col">
+      <div style="background:#eff6ff;border-radius:8px;padding:13px 15px;">
+        <div style="font-size:13px;font-weight:600;color:#1d4ed8;margin-bottom:5px;">🧬 因子</div>
+        <div style="font-size:12px;color:#374151;line-height:1.65;">C端因子库主表行数（当前 v6.1，15 个属性维度）。来源：<code style="font-size:11px;">01_因子库</code> 最新版 Excel</div>
+      </div>
+      <div style="background:#fef2f2;border-radius:8px;padding:13px 15px;">
+        <div style="font-size:13px;font-weight:600;color:#dc2626;margin-bottom:5px;">💢 痛点</div>
+        <div style="font-size:12px;color:#374151;line-height:1.65;">清洗后有效痛点 = 痛点分裂主库（D/C 级已删）+ BU 确认新增批次。来源：<code style="font-size:11px;">03_痛点清洗 / 03-1 痛点新增</code></div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:13px 15px;">
+        <div style="font-size:13px;font-weight:600;color:#15803d;margin-bottom:5px;">📡 场景</div>
+        <div style="font-size:12px;color:#374151;line-height:1.65;">渠道场景来源页 AI 提取场景总数（Neil / Hans / 怀宇 / Tax-BU），实时读取页面数据</div>
+      </div>
+    </div>
+    <div style="margin-top:12px;padding:10px 14px;background:#fffbeb;border-left:3px solid #f59e0b;border-radius:4px;font-size:12px;color:#78350f;line-height:1.7;">
+      💡 <strong>每周维护</strong>：数据变化后，在 dashboard.html 的 <code>MGMT_WEEKLY</code> 数组末尾追加一条当周快照（日期 + 三个数值 + 事件备注）即可，看板自动重算环比与趋势图。该操作可由 Claude 在每次数据更新时代办。
+    </div>
+  </div>
+
+</div>
+
+
+
+<!-- ══════════════════════════════════════
+
      PAGE 1: 因子库现状
 
 ═══════════════════════════════════════ -->
 
-<div id="page-overview" class="page active">
+<div id="page-overview" class="page">
 
   <div class="page-header">
 
@@ -4016,6 +4126,8 @@ tr:hover td { background: #fafafa; }
   ];
 
   const ALL_HGJ_DATA = [...HGJ_DATA, ...HANS_DATA, ...HUAIYU_DATA, ...TAX_BU_DATA];
+  // 供管理看板（initMgmtPage）读取的全局统计
+  window._mgmtSceneStats = { scenes: ALL_HGJ_DATA.length, meetings: new Set(ALL_HGJ_DATA.map(d => d.file)).size };
 
   function noveltyLabel(n){ return n==='高'?'⭐ 高新颖度':n==='中'?'中等':' 常见'; }
   function noveltyClass(n){ return n==='高'?'hgj-novelty-high':n==='中'?'hgj-novelty-mid':'hgj-novelty-low'; }
@@ -5700,11 +5812,112 @@ function initBusinessCharts() {
 
 // ============================================================
 
+// 管理看板（首页）
+
+// ============================================================
+
+// 周度快照（手工维护：每周追加一行；scenes 为 null 时实时读 ALL_HGJ_DATA）
+const MGMT_WEEKLY = [
+  { date: '2026-03-22', factors: 1216, pains: 299,  scenes: 0,    note: '因子库 v6.0 纯主表发布（1216行）' },
+  { date: '2026-04-12', factors: 1351, pains: 360,  scenes: 0,    note: '因子库 v6.0 补充版（+135行，质检修复78处）；痛点库20260410 合并券商60条' },
+  { date: '2026-05-03', factors: 1351, pains: 488,  scenes: 106,  note: 'Legal-BU 13场景128痛点生成；渠道场景 Neil/Hans/怀宇 首批106条' },
+  { date: '2026-05-31', factors: 1351, pains: 1042, scenes: 505,  note: '痛点分裂1070清洗至1042（删D/C级）；Tax-BU 150会议399场景入库' },
+  { date: '2026-06-07', factors: 1408, pains: 1170, scenes: null, note: '因子库 v6.1 BU反哺版（+57行）；128条BU痛点确认入库' },
+];
+
+function _mgmtResolve(snap) {
+  // scenes=null 时实时读取渠道场景数据（由渠道场景模块暴露的全局统计）
+  const scenes = snap.scenes !== null ? snap.scenes
+    : (window._mgmtSceneStats ? window._mgmtSceneStats.scenes : 0);
+  return { ...snap, scenes };
+}
+
+function _mgmtDeltaBadge(delta, colorPos) {
+  if (delta > 0)  return `<span style="color:${colorPos};">▲ +${delta}</span>`;
+  if (delta < 0)  return `<span style="color:#dc2626;">▼ ${delta}</span>`;
+  return `<span style="color:#9ca3af;">— 持平</span>`;
+}
+
+function initMgmtPage() {
+  const snaps = MGMT_WEEKLY.map(_mgmtResolve);
+  if (!snaps.length) return;
+  const latest = snaps[snaps.length - 1];
+  const prev   = snaps.length > 1 ? snaps[snaps.length - 2] : latest;
+
+  // ── KPI 卡 ──
+  const asOf = document.getElementById('mgmt-asof');
+  if (asOf) asOf.textContent = `数据截至 ${latest.date}`;
+
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.innerHTML = v; };
+  set('mgmt-factor-total', latest.factors.toLocaleString());
+  set('mgmt-pain-total',   latest.pains.toLocaleString());
+  set('mgmt-scene-total',  latest.scenes.toLocaleString());
+  set('mgmt-factor-delta', _mgmtDeltaBadge(latest.factors - prev.factors, '#1d4ed8') + '<span style="font-size:10px;color:#9ca3af;font-weight:400;"> 较上期</span>');
+  set('mgmt-pain-delta',   _mgmtDeltaBadge(latest.pains   - prev.pains,   '#dc2626') + '<span style="font-size:10px;color:#9ca3af;font-weight:400;"> 较上期</span>');
+  set('mgmt-scene-delta',  _mgmtDeltaBadge(latest.scenes  - prev.scenes,  '#15803d') + '<span style="font-size:10px;color:#9ca3af;font-weight:400;"> 较上期</span>');
+
+  const sceneMeetings = window._mgmtSceneStats ? window._mgmtSceneStats.meetings : '—';
+  set('mgmt-factor-sub', `当前版本 v6.1（2026-06-01）<br>15 个属性维度 · 三维链路组合`);
+  set('mgmt-pain-sub',   `主库 1,042 条（已清 D/C 级）<br>+ BU 确认新增 128 条`);
+  set('mgmt-scene-sub',  `覆盖 ${sceneMeetings} 场会议纪要<br>来源：Neil / Hans / 怀宇 / Tax-BU`);
+
+  // ── 趋势折线图 ──
+  const el = document.getElementById('chart-mgmt-trend');
+  if (el && !chartInstances['mgmt-trend']) {
+    const chart = echarts.init(el);
+    chartInstances['mgmt-trend'] = chart;
+    chart.setOption({
+      tooltip: { trigger: 'axis' },
+      legend: { data: ['因子', '痛点', '渠道场景'], top: 0 },
+      grid: { left: 50, right: 24, top: 40, bottom: 30 },
+      xAxis: { type: 'category', data: snaps.map(s => s.date),
+               axisLabel: { fontSize: 11 } },
+      yAxis: { type: 'value', axisLabel: { fontSize: 11 } },
+      series: [
+        { name: '因子',     type: 'line', data: snaps.map(s => s.factors), smooth: true,
+          itemStyle: { color: '#4D96FF' }, lineStyle: { width: 3 }, symbolSize: 8,
+          label: { show: true, fontSize: 10, color: '#1d4ed8' } },
+        { name: '痛点',     type: 'line', data: snaps.map(s => s.pains), smooth: true,
+          itemStyle: { color: '#FF6B6B' }, lineStyle: { width: 3 }, symbolSize: 8,
+          label: { show: true, fontSize: 10, color: '#dc2626' } },
+        { name: '渠道场景', type: 'line', data: snaps.map(s => s.scenes), smooth: true,
+          itemStyle: { color: '#6BCB77' }, lineStyle: { width: 3 }, symbolSize: 8,
+          label: { show: true, fontSize: 10, color: '#15803d' } },
+      ],
+    });
+  }
+
+  // ── 周度明细表（最新在上）──
+  const tbody = document.getElementById('mgmt-week-table');
+  if (tbody && !tbody.children.length) {
+    const rows = snaps.map((s, i) => {
+      const p = i > 0 ? snaps[i - 1] : null;
+      const d = (cur, pre) => p === null ? '—' :
+        (cur - pre > 0 ? `<strong style="color:#16a34a;">+${cur - pre}</strong>` :
+         cur - pre < 0 ? `<strong style="color:#dc2626;">${cur - pre}</strong>` : '<span style="color:#9ca3af;">0</span>');
+      return `<tr${i === snaps.length - 1 ? ' style="background:#fffbeb;"' : ''}>
+        <td style="white-space:nowrap;">${s.date}${i === snaps.length - 1 ? ' <span class="tag tag-new" style="font-size:10px;">最新</span>' : ''}</td>
+        <td><strong>${s.factors.toLocaleString()}</strong></td><td>${d(s.factors, p?.factors)}</td>
+        <td><strong>${s.pains.toLocaleString()}</strong></td><td>${d(s.pains, p?.pains)}</td>
+        <td><strong>${s.scenes.toLocaleString()}</strong></td><td>${d(s.scenes, p?.scenes)}</td>
+        <td style="font-size:12px;color:#4b5563;line-height:1.6;">${s.note}</td>
+      </tr>`;
+    }).reverse();
+    tbody.innerHTML = rows.join('');
+  }
+}
+
+
+
+// ============================================================
+
 // 页面加载
 
 // ============================================================
 
 window.addEventListener('load', () => {
+
+  initMgmtPage();   // 管理看板（首页）
 
   initOverviewCharts();
 
@@ -5723,6 +5936,8 @@ window.addEventListener('load', () => {
 // 页面切换时按需初始化图表
 
 const PAGE_INIT_MAP = {
+
+  'mgmt':      initMgmtPage,
 
   // overview 页已合并 业务契合分析+维度详细说明，需同时初始化两类图表
 
