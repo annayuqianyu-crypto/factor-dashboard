@@ -878,7 +878,7 @@ tr:hover td { background: #fafafa; }
     </div>
   </div>
   <div id="mgmt-edit-hint" style="display:none;margin-bottom:14px;padding:9px 14px;background:#fefce8;border:1px dashed #facc15;border-radius:8px;font-size:12px;color:#854d0e;line-height:1.65;">
-    ✏️ <strong>编辑模式已开启</strong>：带黄色虚线框的文字均可直接点击修改，修改自动保存在本浏览器。改完点「📋 导出修改」把修改清单发给 Claude，即可固化到线上版本（否则其他人看到的仍是旧文案）。
+    ✏️ <strong>编辑模式已开启</strong>：<span style="color:#a16207;">黄色虚线框</span>=文案可改；<span style="color:#0369a1;">蓝色虚线框</span>=周度表的日期/数值/事件可改（改完自动重算 KPI、环比与趋势图），表格下方可「➕ 新增一周」、行首 ✕ 可删行。全部修改自动保存在本浏览器。改完点「📋 导出修改」发给 Claude 固化到线上版本（否则其他人看到的仍是旧数据）。
   </div>
 
   <!-- ── 静态管理：三大资产现状 KPI ── -->
@@ -940,6 +940,10 @@ tr:hover td { background: #fafafa; }
       </thead>
       <tbody id="mgmt-week-table"></tbody>
     </table>
+    <button id="mgmt-add-week-btn" onclick="mgmtAddWeek()"
+      style="display:none;margin-top:12px;padding:7px 18px;background:#eff6ff;color:#1d4ed8;border:1px dashed #93c5fd;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;">
+      ➕ 新增一周
+    </button>
   </div>
 
   <!-- ── 数据口径与维护说明 ── -->
@@ -5855,8 +5859,18 @@ function _mgmtDeltaBadge(delta, colorPos) {
   return `<span style="color:#9ca3af;">— 持平</span>`;
 }
 
+// 周度数据：优先用用户在页面上编辑过的版本（localStorage），否则用内置默认
+const MGMT_WEEKLY_USER_KEY = 'mgmt_weekly_user';
+function _mgmtGetWeekly() {
+  try {
+    const u = JSON.parse(localStorage.getItem(MGMT_WEEKLY_USER_KEY) || 'null');
+    if (Array.isArray(u) && u.length) return u;
+  } catch {}
+  return MGMT_WEEKLY;
+}
+
 function initMgmtPage() {
-  const snaps = MGMT_WEEKLY.map(_mgmtResolve);
+  const snaps = _mgmtGetWeekly().map(_mgmtResolve);
   if (!snaps.length) return;
   const latest = snaps[snaps.length - 1];
   const prev   = snaps.length > 1 ? snaps[snaps.length - 2] : latest;
@@ -5878,11 +5892,11 @@ function initMgmtPage() {
   set('mgmt-pain-sub',   `主库 1,042 条（已清 D/C 级）<br>+ BU 确认新增 128 条`);
   set('mgmt-scene-sub',  `覆盖 ${sceneMeetings} 场会议纪要<br>来源：Neil / Hans / 怀宇 / Tax-BU`);
 
-  // ── 趋势折线图 ──
+  // ── 趋势折线图（支持数据更新后重渲染）──
   const el = document.getElementById('chart-mgmt-trend');
-  if (el && !chartInstances['mgmt-trend']) {
-    const chart = echarts.init(el);
-    chartInstances['mgmt-trend'] = chart;
+  if (el) {
+    let chart = chartInstances['mgmt-trend'];
+    if (!chart) { chart = echarts.init(el); chartInstances['mgmt-trend'] = chart; }
     chart.setOption({
       tooltip: { trigger: 'axis' },
       legend: { data: ['因子', '痛点', '渠道场景'], top: 0 },
@@ -5904,20 +5918,23 @@ function initMgmtPage() {
     });
   }
 
-  // ── 周度明细表（最新在上）──
+  // ── 周度明细表（最新在上；编辑模式下所有数据格可改）──
   const tbody = document.getElementById('mgmt-week-table');
-  if (tbody && !tbody.children.length) {
+  if (tbody) {
     const rows = snaps.map((s, i) => {
       const p = i > 0 ? snaps[i - 1] : null;
       const d = (cur, pre) => p === null ? '—' :
         (cur - pre > 0 ? `<strong style="color:#16a34a;">+${cur - pre}</strong>` :
          cur - pre < 0 ? `<strong style="color:#dc2626;">${cur - pre}</strong>` : '<span style="color:#9ca3af;">0</span>');
       return `<tr${i === snaps.length - 1 ? ' style="background:#fffbeb;"' : ''}>
-        <td style="white-space:nowrap;">${s.date}${i === snaps.length - 1 ? ' <span class="tag tag-new" style="font-size:10px;">最新</span>' : ''}</td>
-        <td><strong>${s.factors.toLocaleString()}</strong></td><td>${d(s.factors, p?.factors)}</td>
-        <td><strong>${s.pains.toLocaleString()}</strong></td><td>${d(s.pains, p?.pains)}</td>
-        <td><strong>${s.scenes.toLocaleString()}</strong></td><td>${d(s.scenes, p?.scenes)}</td>
-        <td style="font-size:12px;color:#4b5563;line-height:1.6;" data-ek="week-note-${s.date}">${s.note}</td>
+        <td style="white-space:nowrap;">
+          <button class="mgmt-wk-del" onclick="mgmtDeleteWeek(${i})" title="删除这一周"
+            style="display:none;margin-right:5px;padding:1px 7px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:4px;font-size:11px;cursor:pointer;">✕</button><span class="mgmt-wk" data-idx="${i}" data-f="date">${s.date}</span>${i === snaps.length - 1 ? ' <span class="tag tag-new" style="font-size:10px;">最新</span>' : ''}
+        </td>
+        <td><strong class="mgmt-wk" data-idx="${i}" data-f="factors">${s.factors.toLocaleString()}</strong></td><td>${d(s.factors, p?.factors)}</td>
+        <td><strong class="mgmt-wk" data-idx="${i}" data-f="pains">${s.pains.toLocaleString()}</strong></td><td>${d(s.pains, p?.pains)}</td>
+        <td><strong class="mgmt-wk" data-idx="${i}" data-f="scenes">${s.scenes.toLocaleString()}</strong></td><td>${d(s.scenes, p?.scenes)}</td>
+        <td style="font-size:12px;color:#4b5563;line-height:1.6;"><span class="mgmt-wk" data-idx="${i}" data-f="note" style="display:block;">${s.note}</span></td>
       </tr>`;
     }).reverse();
     tbody.innerHTML = rows.join('');
@@ -5925,6 +5942,8 @@ function initMgmtPage() {
 
   // 应用用户的本地文案修改（须在动态内容渲染之后）
   mgmtApplyOverrides();
+  // 编辑模式开着时，重渲染后恢复可编辑状态
+  if (_mgmtEditMode) _mgmtApplyEditState();
 }
 
 // ── 管理看板 · 文案编辑模式 ──────────────────────────────────
@@ -5944,13 +5963,9 @@ function mgmtApplyOverrides() {
   });
 }
 
-function mgmtToggleEdit() {
-  _mgmtEditMode = !_mgmtEditMode;
-  const btn  = document.getElementById('mgmt-edit-btn');
-  const hint = document.getElementById('mgmt-edit-hint');
-  const exp  = document.getElementById('mgmt-export-btn');
-  const rst  = document.getElementById('mgmt-reset-btn');
-
+// 按当前 _mgmtEditMode 把"文案块 + 周表数据格"统一设为可编辑/只读
+function _mgmtApplyEditState() {
+  // 文案块
   document.querySelectorAll('#page-mgmt [data-ek]').forEach(el => {
     if (_mgmtEditMode) {
       el.contentEditable = 'true';
@@ -5967,6 +5982,39 @@ function mgmtToggleEdit() {
       el.removeEventListener('blur', _mgmtSaveEdit);
     }
   });
+  // 周表数据格（日期/因子/痛点/场景/事件）
+  document.querySelectorAll('#page-mgmt .mgmt-wk').forEach(el => {
+    if (_mgmtEditMode) {
+      el.contentEditable = 'true';
+      el.style.outline = '2px dashed #38bdf8';
+      el.style.outlineOffset = '2px';
+      el.style.borderRadius = '3px';
+      el.style.cursor = 'text';
+      el.addEventListener('blur', _mgmtSaveWeeklyFromTable);
+    } else {
+      el.contentEditable = 'false';
+      el.style.outline = '';
+      el.style.outlineOffset = '';
+      el.style.cursor = '';
+      el.removeEventListener('blur', _mgmtSaveWeeklyFromTable);
+    }
+  });
+  // 行删除按钮 / 新增一周按钮
+  document.querySelectorAll('#page-mgmt .mgmt-wk-del').forEach(b => {
+    b.style.display = _mgmtEditMode ? 'inline-block' : 'none';
+  });
+  const addBtn = document.getElementById('mgmt-add-week-btn');
+  if (addBtn) addBtn.style.display = _mgmtEditMode ? 'inline-block' : 'none';
+}
+
+function mgmtToggleEdit() {
+  _mgmtEditMode = !_mgmtEditMode;
+  const btn  = document.getElementById('mgmt-edit-btn');
+  const hint = document.getElementById('mgmt-edit-hint');
+  const exp  = document.getElementById('mgmt-export-btn');
+  const rst  = document.getElementById('mgmt-reset-btn');
+
+  _mgmtApplyEditState();
 
   if (btn) {
     btn.textContent = _mgmtEditMode ? '✅ 完成编辑' : '✏️ 编辑文案';
@@ -5977,6 +6025,46 @@ function mgmtToggleEdit() {
   if (hint) hint.style.display = _mgmtEditMode ? 'block' : 'none';
   if (exp)  exp.style.display  = _mgmtEditMode ? 'inline-block' : 'none';
   if (rst)  rst.style.display  = _mgmtEditMode ? 'inline-block' : 'none';
+}
+
+// ── 周表数据编辑：从 DOM 收集 → 保存 → 全页重算 ──────────────
+function _mgmtSaveWeeklyFromTable() {
+  const cur = _mgmtGetWeekly().map(_mgmtResolve);   // 当前生效数据
+  const next = cur.map(s => ({ ...s }));            // 深拷贝
+  document.querySelectorAll('#page-mgmt .mgmt-wk').forEach(el => {
+    const i = parseInt(el.dataset.idx, 10);
+    const f = el.dataset.f;
+    if (isNaN(i) || !next[i]) return;
+    const raw = el.textContent.trim();
+    if (f === 'date' || f === 'note') {
+      next[i][f] = raw;
+    } else {
+      const n = parseInt(raw.replace(/[,，\s]/g, ''), 10);
+      if (!isNaN(n)) next[i][f] = n;   // 非法输入忽略，保留旧值
+    }
+  });
+  // 按日期升序排（防止改日期后顺序错乱）
+  next.sort((a, b) => a.date.localeCompare(b.date));
+  try { localStorage.setItem(MGMT_WEEKLY_USER_KEY, JSON.stringify(next)); } catch {}
+  initMgmtPage();   // KPI/环比/趋势图/表格 全部重算
+}
+
+function mgmtAddWeek() {
+  const cur = _mgmtGetWeekly().map(_mgmtResolve);
+  const last = cur[cur.length - 1] || { factors: 0, pains: 0, scenes: 0 };
+  const today = new Date().toISOString().slice(0, 10);
+  cur.push({ date: today, factors: last.factors, pains: last.pains, scenes: last.scenes, note: '（点击填写本周事件）' });
+  try { localStorage.setItem(MGMT_WEEKLY_USER_KEY, JSON.stringify(cur)); } catch {}
+  initMgmtPage();
+}
+
+function mgmtDeleteWeek(idx) {
+  const cur = _mgmtGetWeekly().map(_mgmtResolve);
+  if (!cur[idx]) return;
+  if (!confirm(`确认删除 ${cur[idx].date} 这一期数据？`)) return;
+  cur.splice(idx, 1);
+  try { localStorage.setItem(MGMT_WEEKLY_USER_KEY, JSON.stringify(cur)); } catch {}
+  initMgmtPage();
 }
 
 function _mgmtSaveEdit(e) {
@@ -5990,18 +6078,23 @@ function _mgmtSaveEdit(e) {
 
 function mgmtExportEdits() {
   const ov = _mgmtGetOverrides();
-  if (!Object.keys(ov).length) { alert('暂无文案修改可导出'); return; }
-  const text = '【管理看板文案修改清单】请 Claude 把以下修改固化到 dashboard.html：\n\n' +
-    JSON.stringify(ov, null, 2);
+  let weekly = null;
+  try { weekly = JSON.parse(localStorage.getItem(MGMT_WEEKLY_USER_KEY) || 'null'); } catch {}
+  if (!Object.keys(ov).length && !weekly) { alert('暂无修改可导出'); return; }
+  const parts = ['【管理看板修改清单】请 Claude 把以下修改固化到 dashboard.html：'];
+  if (Object.keys(ov).length) parts.push('\n■ 文案修改：\n' + JSON.stringify(ov, null, 2));
+  if (weekly) parts.push('\n■ 周度数据修改（替换 MGMT_WEEKLY）：\n' + JSON.stringify(weekly, null, 2));
+  const text = parts.join('\n');
   navigator.clipboard.writeText(text).then(
-    () => alert(`已复制 ${Object.keys(ov).length} 处修改到剪贴板。\n\n直接粘贴发给 Claude，即可固化到线上版本。`),
+    () => alert(`已复制修改清单到剪贴板（文案 ${Object.keys(ov).length} 处${weekly ? ' + 周度数据' : ''}）。\n\n直接粘贴发给 Claude，即可固化到线上版本。`),
     () => { prompt('复制失败，请手动复制：', text); }
   );
 }
 
 function mgmtResetEdits() {
-  if (!confirm('确认清除你在本浏览器做的全部文案修改，恢复默认文案？')) return;
+  if (!confirm('确认清除你在本浏览器做的全部修改（文案 + 周度数据），恢复默认？')) return;
   localStorage.removeItem(MGMT_EDIT_KEY);
+  localStorage.removeItem(MGMT_WEEKLY_USER_KEY);
   location.reload();
 }
 
