@@ -884,7 +884,6 @@ tr:hover td { background: #fafafa; }
   <!-- ── 静态管理：三大资产现状 KPI ── -->
   <div style="font-size:14px;font-weight:700;color:#374151;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
     <span>📌</span> <span data-ek="sec-static">资产现状（静态管理）</span>
-    <span id="mgmt-asof" style="font-size:11px;font-weight:400;color:#9ca3af;"></span>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:28px;">
 
@@ -922,17 +921,10 @@ tr:hover td { background: #fafafa; }
     <span>📈</span> <span data-ek="sec-dynamic">周度变化（动态追踪）</span>
   </div>
   <div class="card" style="margin-bottom:18px;">
-    <div class="card-title">三大资产累计规模 · 周度趋势</div>
+    <div class="card-title">三项数据资产累计数量 · 周度趋势</div>
     <div id="chart-mgmt-trend" class="chart-box" style="height:340px;"></div>
   </div>
 
-  <div class="card" style="margin-bottom:18px;">
-    <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
-      <span>各 BU 周度新增痛点 · 人工审核入库进度</span>
-      <span id="mgmt-bu-new-hint" style="font-size:11.5px;font-weight:400;color:#9ca3af;"></span>
-    </div>
-    <div id="chart-mgmt-bu-new" class="chart-box" style="height:260px;"></div>
-  </div>
 
   <div class="card" style="margin-bottom:18px;">
     <div class="card-title">周度变化明细</div>
@@ -5897,9 +5889,6 @@ function initMgmtPage() {
   const prev   = snaps.length > 1 ? snaps[snaps.length - 2] : latest;
 
   // ── KPI 卡 ──
-  const asOf = document.getElementById('mgmt-asof');
-  if (asOf) asOf.textContent = `数据截至 ${latest.date}`;
-
   const set = (id, v) => { const el = document.getElementById(id); if (el) el.innerHTML = v; };
   set('mgmt-factor-total', latest.factors.toLocaleString());
   set('mgmt-pain-total',   latest.pains.toLocaleString());
@@ -5935,41 +5924,6 @@ function initMgmtPage() {
         { name: '渠道场景', type: 'line', data: snaps.map(s => s.scenes), smooth: true,
           itemStyle: { color: '#6BCB77' }, lineStyle: { width: 3 }, symbolSize: 8,
           label: { show: true, fontSize: 10, color: '#15803d', position: 'top', distance: 8 } },
-      ],
-    });
-  }
-
-  // ── 各BU周度新增痛点（人工审核进度，堆叠柱状图）──
-  const buEl2 = document.getElementById('chart-mgmt-bu-new');
-  if (buEl2) {
-    // 只画已开始追踪的周（任一BU字段非null）
-    const tracked = snaps.filter(s => s.newCM != null || s.newLegal != null || s.newTax != null);
-    const hintEl = document.getElementById('mgmt-bu-new-hint');
-    if (hintEl) {
-      const totalNew = tracked.reduce((t,s) => t + (s.newCM||0) + (s.newLegal||0) + (s.newTax||0), 0);
-      hintEl.textContent = tracked.length
-        ? (totalNew === 0 ? `追踪已启用（${tracked[0].date} 起）· 暂无入库数据，自下周开始录入` : `已追踪 ${tracked.length} 周 · 累计入库 ${totalNew} 条`)
-        : '尚未开始追踪';
-    }
-    let buChart2 = chartInstances['mgmt-bu-new'];
-    if (!buChart2) { buChart2 = echarts.init(buEl2); chartInstances['mgmt-bu-new'] = buChart2; }
-    buChart2.setOption({
-      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' },
-        formatter: ps => {
-          const rows = ps.map(p => `${p.marker} ${p.seriesName}：<b>${p.value ?? 0}</b> 条`).join('<br/>');
-          const sum = ps.reduce((t,p) => t + (p.value||0), 0);
-          return `<b>${ps[0].axisValue}</b><br/>${rows}<br/><span style="font-size:11px;color:#888;">本周合计 ${sum} 条</span>`;
-        } },
-      legend: { data: ['CM', 'Legal', 'Tax'], top: 0 },
-      grid: { left: 44, right: 24, top: 36, bottom: 28 },
-      xAxis: { type: 'category', data: tracked.map(s => s.date), axisLabel: { fontSize: 11 } },
-      yAxis: { type: 'value', minInterval: 1, axisLabel: { fontSize: 11 } },
-      series: [
-        { name: 'CM',    type: 'bar', stack: 'bu', barMaxWidth: 46, data: tracked.map(s => s.newCM    ?? 0), itemStyle: { color: '#60a5fa' } },
-        { name: 'Legal', type: 'bar', stack: 'bu', barMaxWidth: 46, data: tracked.map(s => s.newLegal ?? 0), itemStyle: { color: '#4ade80' } },
-        { name: 'Tax',   type: 'bar', stack: 'bu', barMaxWidth: 46, data: tracked.map(s => s.newTax   ?? 0), itemStyle: { color: '#fb923c' },
-          label: { show: true, position: 'top', fontSize: 11, color: '#6b7280',
-                   formatter: p => { const s = tracked[p.dataIndex]; const t = (s.newCM||0)+(s.newLegal||0)+(s.newTax||0); return t > 0 ? t : ''; } } },
       ],
     });
   }
