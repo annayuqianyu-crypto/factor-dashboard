@@ -939,14 +939,20 @@ tr:hover td { background: #fafafa; }
     <table>
       <thead>
         <tr>
-          <th style="white-space:nowrap;">数据周</th>
-          <th>因子</th><th>周增</th>
-          <th>痛点</th><th>周增</th>
-          <th>场景</th><th>周增</th>
-          <th style="background:#eff6ff;color:#1d4ed8;white-space:nowrap;">CM 新增</th>
-          <th style="background:#f0fdf4;color:#15803d;white-space:nowrap;">Legal 新增</th>
-          <th style="background:#fff7ed;color:#c2410c;white-space:nowrap;">Tax 新增</th>
-          <th>关键事件</th>
+          <th rowspan="2" style="white-space:nowrap;vertical-align:middle;">数据周</th>
+          <th colspan="2" style="text-align:center;background:#eff6ff;color:#1d4ed8;">🧬 因子</th>
+          <th colspan="2" style="text-align:center;background:#f0fdf4;color:#15803d;">📡 场景</th>
+          <th colspan="5" style="text-align:center;background:#fee2e2;color:#991b1b;border-left:2px solid #fca5a5;border-right:2px solid #fca5a5;">💢 痛点（仅统计人工审核入库 · 分BU追踪）</th>
+          <th rowspan="2" style="vertical-align:middle;">关键事件</th>
+        </tr>
+        <tr>
+          <th style="background:#f8fbff;">总数</th><th style="background:#f8fbff;">周增</th>
+          <th style="background:#f7fdf9;">总数</th><th style="background:#f7fdf9;">周增</th>
+          <th style="background:#fef2f2;border-left:2px solid #fca5a5;">总数</th>
+          <th style="background:#fef2f2;">周增</th>
+          <th style="background:#fef2f2;color:#1d4ed8;white-space:nowrap;">CM 新增</th>
+          <th style="background:#fef2f2;color:#15803d;white-space:nowrap;">Legal 新增</th>
+          <th style="background:#fef2f2;color:#c2410c;white-space:nowrap;border-right:2px solid #fca5a5;">Tax 新增</th>
         </tr>
       </thead>
       <tbody id="mgmt-week-table"></tbody>
@@ -5981,11 +5987,12 @@ function initMgmtPage() {
             style="display:none;margin-right:5px;padding:1px 7px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:4px;font-size:11px;cursor:pointer;">✕</button><span class="mgmt-wk" data-idx="${i}" data-f="date">${s.date}</span>${i === snaps.length - 1 ? ' <span class="tag tag-new" style="font-size:10px;">最新</span>' : ''}
         </td>
         <td><strong class="mgmt-wk" data-idx="${i}" data-f="factors">${s.factors.toLocaleString()}</strong></td><td>${d(s.factors, p?.factors)}</td>
-        <td><strong class="mgmt-wk" data-idx="${i}" data-f="pains">${s.pains.toLocaleString()}</strong></td><td>${d(s.pains, p?.pains)}</td>
         <td><strong class="mgmt-wk" data-idx="${i}" data-f="scenes">${s.scenes.toLocaleString()}</strong></td><td>${d(s.scenes, p?.scenes)}</td>
-        <td style="background:#f8fbff;"><span class="mgmt-wk" data-idx="${i}" data-f="newCM"    style="color:#1d4ed8;font-weight:600;">${s.newCM    == null ? '—' : s.newCM}</span></td>
-        <td style="background:#f7fdf9;"><span class="mgmt-wk" data-idx="${i}" data-f="newLegal" style="color:#15803d;font-weight:600;">${s.newLegal == null ? '—' : s.newLegal}</span></td>
-        <td style="background:#fffaf5;"><span class="mgmt-wk" data-idx="${i}" data-f="newTax"   style="color:#c2410c;font-weight:600;">${s.newTax   == null ? '—' : s.newTax}</span></td>
+        <td style="background:#fef7f7;border-left:2px solid #fca5a5;"><strong class="mgmt-wk" data-idx="${i}" data-f="pains" style="color:#991b1b;">${s.pains.toLocaleString()}</strong></td>
+        <td style="background:#fef7f7;">${d(s.pains, p?.pains)}</td>
+        <td style="background:#fef7f7;"><span class="mgmt-wk" data-idx="${i}" data-f="newCM"    style="color:#1d4ed8;font-weight:600;">${s.newCM    == null ? '—' : s.newCM}</span></td>
+        <td style="background:#fef7f7;"><span class="mgmt-wk" data-idx="${i}" data-f="newLegal" style="color:#15803d;font-weight:600;">${s.newLegal == null ? '—' : s.newLegal}</span></td>
+        <td style="background:#fef7f7;border-right:2px solid #fca5a5;"><span class="mgmt-wk" data-idx="${i}" data-f="newTax" style="color:#c2410c;font-weight:600;">${s.newTax == null ? '—' : s.newTax}</span></td>
         <td style="font-size:12px;color:#4b5563;line-height:1.6;"><span class="mgmt-wk" data-idx="${i}" data-f="note" style="display:block;">${s.note}</span></td>
       </tr>`;
     }).reverse();
