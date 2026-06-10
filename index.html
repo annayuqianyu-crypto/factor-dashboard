@@ -859,50 +859,67 @@ tr:hover td { background: #fafafa; }
 
 <div id="page-mgmt" class="page active">
 
-  <div class="page-header">
-    <h2>管理看板</h2>
-    <p>因子 · 痛点 · 渠道场景 三大数据资产的现状总览与周度变化追踪</p>
+  <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;">
+    <div>
+      <h2 data-ek="mgmt-title">管理看板</h2>
+      <p data-ek="mgmt-desc">因子 · 痛点 · 渠道场景 三大数据资产的现状总览与周度变化追踪</p>
+    </div>
+    <div style="display:flex;gap:8px;flex-shrink:0;align-items:center;">
+      <button id="mgmt-edit-btn" onclick="mgmtToggleEdit()"
+        style="padding:7px 16px;background:#fff;color:#6b7280;border:1px solid #d1d5db;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;">
+        ✏️ 编辑文案
+      </button>
+      <button id="mgmt-export-btn" onclick="mgmtExportEdits()" style="display:none;padding:7px 14px;background:#0369a1;color:#fff;border:none;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;">
+        📋 导出修改
+      </button>
+      <button id="mgmt-reset-btn" onclick="mgmtResetEdits()" style="display:none;padding:7px 14px;background:#fff;color:#dc2626;border:1px solid #fca5a5;border-radius:8px;font-size:12.5px;cursor:pointer;white-space:nowrap;">
+        ↩ 恢复默认
+      </button>
+    </div>
+  </div>
+  <div id="mgmt-edit-hint" style="display:none;margin-bottom:14px;padding:9px 14px;background:#fefce8;border:1px dashed #facc15;border-radius:8px;font-size:12px;color:#854d0e;line-height:1.65;">
+    ✏️ <strong>编辑模式已开启</strong>：带黄色虚线框的文字均可直接点击修改，修改自动保存在本浏览器。改完点「📋 导出修改」把修改清单发给 Claude，即可固化到线上版本（否则其他人看到的仍是旧文案）。
   </div>
 
   <!-- ── 静态管理：三大资产现状 KPI ── -->
   <div style="font-size:14px;font-weight:700;color:#374151;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-    <span>📌</span> 资产现状（静态管理）
+    <span>📌</span> <span data-ek="sec-static">资产现状（静态管理）</span>
     <span id="mgmt-asof" style="font-size:11px;font-weight:400;color:#9ca3af;"></span>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:28px;">
 
     <div style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1px solid #bfdbfe;border-radius:14px;padding:20px 22px;">
       <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div style="font-size:13px;font-weight:700;color:#1d4ed8;">🧬 因子库</div>
+        <div style="font-size:13px;font-weight:700;color:#1d4ed8;" data-ek="kpi-factor-name">🧬 因子库</div>
         <span id="mgmt-factor-delta" style="font-size:12px;font-weight:700;"></span>
       </div>
       <div id="mgmt-factor-total" style="font-size:34px;font-weight:800;color:#1e3a8a;margin:10px 0 4px;">—</div>
-      <div id="mgmt-factor-sub" style="font-size:12px;color:#3b5bdb;line-height:1.7;"></div>
+      <div id="mgmt-factor-sub" data-ek="kpi-factor-sub" style="font-size:12px;color:#3b5bdb;line-height:1.7;"></div>
     </div>
 
     <div style="background:linear-gradient(135deg,#fef2f2,#fee2e2);border:1px solid #fecaca;border-radius:14px;padding:20px 22px;">
       <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div style="font-size:13px;font-weight:700;color:#dc2626;">💢 痛点库</div>
+        <div style="font-size:13px;font-weight:700;color:#dc2626;" data-ek="kpi-pain-name">💢 痛点库</div>
         <span id="mgmt-pain-delta" style="font-size:12px;font-weight:700;"></span>
       </div>
       <div id="mgmt-pain-total" style="font-size:34px;font-weight:800;color:#7f1d1d;margin:10px 0 4px;">—</div>
-      <div id="mgmt-pain-sub" style="font-size:12px;color:#b91c1c;line-height:1.7;"></div>
+      <div id="mgmt-pain-sub" data-ek="kpi-pain-sub" style="font-size:12px;color:#b91c1c;line-height:1.7;"></div>
     </div>
 
     <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #bbf7d0;border-radius:14px;padding:20px 22px;">
       <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div style="font-size:13px;font-weight:700;color:#15803d;">📡 渠道场景</div>
+        <div style="font-size:13px;font-weight:700;color:#15803d;" data-ek="kpi-scene-name">📡 渠道场景</div>
         <span id="mgmt-scene-delta" style="font-size:12px;font-weight:700;"></span>
       </div>
       <div id="mgmt-scene-total" style="font-size:34px;font-weight:800;color:#14532d;margin:10px 0 4px;">—</div>
-      <div id="mgmt-scene-sub" style="font-size:12px;color:#166534;line-height:1.7;"></div>
+      <div id="mgmt-scene-sub" data-ek="kpi-scene-sub" style="font-size:12px;color:#166534;line-height:1.7;"></div>
     </div>
 
   </div>
 
   <!-- ── 动态追踪：周度趋势 ── -->
   <div style="font-size:14px;font-weight:700;color:#374151;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-    <span>📈</span> 周度变化（动态追踪）
+    <span>📈</span> <span data-ek="sec-dynamic">周度变化（动态追踪）</span>
   </div>
   <div class="card" style="margin-bottom:18px;">
     <div class="card-title">三大资产累计规模 · 周度趋势</div>
@@ -930,19 +947,19 @@ tr:hover td { background: #fafafa; }
     <div class="card-title">数据口径与维护说明</div>
     <div class="three-col">
       <div style="background:#eff6ff;border-radius:8px;padding:13px 15px;">
-        <div style="font-size:13px;font-weight:600;color:#1d4ed8;margin-bottom:5px;">🧬 因子</div>
-        <div style="font-size:12px;color:#374151;line-height:1.65;">C端因子库主表行数（当前 v6.1，15 个属性维度）。来源：<code style="font-size:11px;">01_因子库</code> 最新版 Excel</div>
+        <div style="font-size:13px;font-weight:600;color:#1d4ed8;margin-bottom:5px;" data-ek="cal-factor-name">🧬 因子</div>
+        <div style="font-size:12px;color:#374151;line-height:1.65;" data-ek="cal-factor-desc">C端因子库主表行数（当前 v6.1，15 个属性维度）。来源：<code style="font-size:11px;">01_因子库</code> 最新版 Excel</div>
       </div>
       <div style="background:#fef2f2;border-radius:8px;padding:13px 15px;">
-        <div style="font-size:13px;font-weight:600;color:#dc2626;margin-bottom:5px;">💢 痛点</div>
-        <div style="font-size:12px;color:#374151;line-height:1.65;">清洗后有效痛点 = 痛点分裂主库（D/C 级已删）+ BU 确认新增批次。来源：<code style="font-size:11px;">03_痛点清洗 / 03-1 痛点新增</code></div>
+        <div style="font-size:13px;font-weight:600;color:#dc2626;margin-bottom:5px;" data-ek="cal-pain-name">💢 痛点</div>
+        <div style="font-size:12px;color:#374151;line-height:1.65;" data-ek="cal-pain-desc">清洗后有效痛点 = 痛点分裂主库（D/C 级已删）+ BU 确认新增批次。来源：<code style="font-size:11px;">03_痛点清洗 / 03-1 痛点新增</code></div>
       </div>
       <div style="background:#f0fdf4;border-radius:8px;padding:13px 15px;">
-        <div style="font-size:13px;font-weight:600;color:#15803d;margin-bottom:5px;">📡 场景</div>
-        <div style="font-size:12px;color:#374151;line-height:1.65;">渠道场景来源页 AI 提取场景总数（Neil / Hans / 怀宇 / Tax-BU），实时读取页面数据</div>
+        <div style="font-size:13px;font-weight:600;color:#15803d;margin-bottom:5px;" data-ek="cal-scene-name">📡 场景</div>
+        <div style="font-size:12px;color:#374151;line-height:1.65;" data-ek="cal-scene-desc">渠道场景来源页 AI 提取场景总数（Neil / Hans / 怀宇 / Tax-BU），实时读取页面数据</div>
       </div>
     </div>
-    <div style="margin-top:12px;padding:10px 14px;background:#fffbeb;border-left:3px solid #f59e0b;border-radius:4px;font-size:12px;color:#78350f;line-height:1.7;">
+    <div style="margin-top:12px;padding:10px 14px;background:#fffbeb;border-left:3px solid #f59e0b;border-radius:4px;font-size:12px;color:#78350f;line-height:1.7;" data-ek="maint-note">
       💡 <strong>每周维护</strong>：数据变化后，在 dashboard.html 的 <code>MGMT_WEEKLY</code> 数组末尾追加一条当周快照（日期 + 三个数值 + 事件备注）即可，看板自动重算环比与趋势图。该操作可由 Claude 在每次数据更新时代办。
     </div>
   </div>
@@ -5900,11 +5917,92 @@ function initMgmtPage() {
         <td><strong>${s.factors.toLocaleString()}</strong></td><td>${d(s.factors, p?.factors)}</td>
         <td><strong>${s.pains.toLocaleString()}</strong></td><td>${d(s.pains, p?.pains)}</td>
         <td><strong>${s.scenes.toLocaleString()}</strong></td><td>${d(s.scenes, p?.scenes)}</td>
-        <td style="font-size:12px;color:#4b5563;line-height:1.6;">${s.note}</td>
+        <td style="font-size:12px;color:#4b5563;line-height:1.6;" data-ek="week-note-${s.date}">${s.note}</td>
       </tr>`;
     }).reverse();
     tbody.innerHTML = rows.join('');
   }
+
+  // 应用用户的本地文案修改（须在动态内容渲染之后）
+  mgmtApplyOverrides();
+}
+
+// ── 管理看板 · 文案编辑模式 ──────────────────────────────────
+const MGMT_EDIT_KEY = 'mgmt_copy_overrides';
+let _mgmtEditMode = false;
+
+function _mgmtGetOverrides() {
+  try { return JSON.parse(localStorage.getItem(MGMT_EDIT_KEY) || '{}'); }
+  catch { return {}; }
+}
+
+function mgmtApplyOverrides() {
+  const ov = _mgmtGetOverrides();
+  document.querySelectorAll('#page-mgmt [data-ek]').forEach(el => {
+    const k = el.dataset.ek;
+    if (ov[k] !== undefined) el.innerHTML = ov[k];
+  });
+}
+
+function mgmtToggleEdit() {
+  _mgmtEditMode = !_mgmtEditMode;
+  const btn  = document.getElementById('mgmt-edit-btn');
+  const hint = document.getElementById('mgmt-edit-hint');
+  const exp  = document.getElementById('mgmt-export-btn');
+  const rst  = document.getElementById('mgmt-reset-btn');
+
+  document.querySelectorAll('#page-mgmt [data-ek]').forEach(el => {
+    if (_mgmtEditMode) {
+      el.contentEditable = 'true';
+      el.style.outline = '2px dashed #facc15';
+      el.style.outlineOffset = '3px';
+      el.style.borderRadius = '4px';
+      el.style.cursor = 'text';
+      el.addEventListener('blur', _mgmtSaveEdit);
+    } else {
+      el.contentEditable = 'false';
+      el.style.outline = '';
+      el.style.outlineOffset = '';
+      el.style.cursor = '';
+      el.removeEventListener('blur', _mgmtSaveEdit);
+    }
+  });
+
+  if (btn) {
+    btn.textContent = _mgmtEditMode ? '✅ 完成编辑' : '✏️ 编辑文案';
+    btn.style.background = _mgmtEditMode ? '#16a34a' : '#fff';
+    btn.style.color      = _mgmtEditMode ? '#fff' : '#6b7280';
+    btn.style.border     = _mgmtEditMode ? 'none' : '1px solid #d1d5db';
+  }
+  if (hint) hint.style.display = _mgmtEditMode ? 'block' : 'none';
+  if (exp)  exp.style.display  = _mgmtEditMode ? 'inline-block' : 'none';
+  if (rst)  rst.style.display  = _mgmtEditMode ? 'inline-block' : 'none';
+}
+
+function _mgmtSaveEdit(e) {
+  const el = e.currentTarget;
+  const k  = el.dataset.ek;
+  if (!k) return;
+  const ov = _mgmtGetOverrides();
+  ov[k] = el.innerHTML;
+  try { localStorage.setItem(MGMT_EDIT_KEY, JSON.stringify(ov)); } catch {}
+}
+
+function mgmtExportEdits() {
+  const ov = _mgmtGetOverrides();
+  if (!Object.keys(ov).length) { alert('暂无文案修改可导出'); return; }
+  const text = '【管理看板文案修改清单】请 Claude 把以下修改固化到 dashboard.html：\n\n' +
+    JSON.stringify(ov, null, 2);
+  navigator.clipboard.writeText(text).then(
+    () => alert(`已复制 ${Object.keys(ov).length} 处修改到剪贴板。\n\n直接粘贴发给 Claude，即可固化到线上版本。`),
+    () => { prompt('复制失败，请手动复制：', text); }
+  );
+}
+
+function mgmtResetEdits() {
+  if (!confirm('确认清除你在本浏览器做的全部文案修改，恢复默认文案？')) return;
+  localStorage.removeItem(MGMT_EDIT_KEY);
+  location.reload();
 }
 
 
