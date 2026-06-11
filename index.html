@@ -13311,9 +13311,15 @@ async function _skuCallJson(prompt, maxTokens) {
 }
 
 // ── 从存量SKU库中检索与待论证SKU最相关的条目（客户端预筛，控制prompt体积）──
-function _skuFindSimilar(skuText, topN) {
+// 采用「相对阈值」：保留得分≥最高分40%的条目（硬下限2，最少3条最多25条），
+// 数量随主题相关密度自然浮动，不再用固定 topN。
+function _skuFindSimilar(skuText, opt) {
+  opt = opt || {};
+  const ratio = opt.ratio != null ? opt.ratio : 0.4;  // 相对最高分的保留比例
+  const floor = opt.floor != null ? opt.floor : 2;    // 绝对最低分（防单片段偶合）
+  const minN  = opt.minN  != null ? opt.minN  : 3;     // 有匹配时至少展示几条
+  const maxN  = opt.maxN  != null ? opt.maxN  : 25;    // token 安全封顶
   if (typeof EXISTING_SKUS === 'undefined' || !EXISTING_SKUS.length) return [];
-  // 提取待论证SKU的关键字符（去标点，按2-gram粗匹配）
   const norm = s => (s || '').replace(/[\s,，;；。、：:（）()【】\[\]\/]/g, '');
   const q = norm(skuText);
   if (!q) return [];
@@ -13325,7 +13331,15 @@ function _skuFindSimilar(skuText, topN) {
     grams.forEach(g => { if (blob.includes(g)) hit++; });
     return { s, score: hit };
   }).filter(x => x.score > 0).sort((a, b) => b.score - a.score);
-  return scored.slice(0, topN || 18).map(x => x.s);
+  if (!scored.length) return [];
+  const maxScore = scored[0].score;
+  const cut = Math.max(floor, maxScore * ratio);     // 动态阈值
+  let kept = scored.filter(x => x.score >= cut);
+  // 兜底：有匹配但阈值卡太狠 → 至少给最像的 minN 条
+  if (kept.length < minN) kept = scored.slice(0, Math.min(minN, scored.length));
+  // 封顶：token 安全
+  if (kept.length > maxN) kept = kept.slice(0, maxN);
+  return kept.map(x => x.s);
 }
 
 async function skuAnalyze() {
@@ -13345,7 +13359,7 @@ async function skuAnalyze() {
 
   try {
     // ── 第 1 步：研发必要性论证 ──
-    const similar = _skuFindSimilar(skuText, 18);
+    const similar = _skuFindSimilar(skuText);
     const similarText = similar.length
       ? similar.map(s => `[${s.id}] ${s.n}｜功能:${s.f}｜场景:${s.k}`).join('\n')
       : '（库内未检索到名称/关键词相近的SKU）';
