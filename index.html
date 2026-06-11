@@ -13395,19 +13395,22 @@ ${similarText}
 
     out.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ 第 2/2 步：AI 正在论证 SKU 价值（结论 / 客群画像 / 案例 / 供应商）…</div>';
 
-    // ── 第 2 步：价值论证 ──
-    const p1 = `你是朝曦家族办公室的产品研发负责人。朝曦是金融机构高净值客户的非金融增值服务平台，服务覆盖家族架构、税务规划、法律咨询、跨境身份、股权激励、财富传承。现需论证以下「建议新增 SKU」是否值得纳入公司产品库。
+    // ── 第 2 步：产品价值评估（区别于第①步"要不要做"，本步聚焦"做了价值多大、如何落地推广"）──
+    const p1 = `你是朝曦家族办公室的产品研发负责人。朝曦是金融机构高净值客户的非金融增值服务平台。
+
+【重要】第①步「研发必要性」已回答"该不该做"（与存量SKU的缺口、市场可行性）。本步**不要重复必要性判断**，而是**假设该 SKU 决定研发**，评估它的"产品价值大小、战略优先级、预期收益与推广落地策略"。
 
 【待论证 SKU】
 ${skuText}
 
-请客观论证（既要指出价值也要指出风险与局限），输出严格 JSON：
+请输出严格 JSON：
 {
   "verdict": {
-    "recommendation": "建议新增 / 谨慎评估 / 不建议新增 三选一",
-    "score": "0-100的整数，综合价值评分",
-    "rationale": "论证理由，须正反两面，120字内",
-    "prerequisites": "若要新增，须先满足的关键前提（60字内）"
+    "priority": "战略级 / 高优先 / 中优先 / 低优先 四选一（产品价值定位与研发优先级）",
+    "score": "0-100的整数，产品价值评分（综合收入潜力、战略价值、客户覆盖面）",
+    "value_highlights": "核心价值亮点：收入潜力 / 战略卡位 / 客户覆盖 / 交叉销售带动等（正面，100字内）",
+    "main_limitation": "主要局限或落地难点（风险面，80字内）",
+    "rollout": "推广落地策略建议：优先面向哪类渠道/客户先试点、如何定价沟通、如何与现有产品组合销售（100字内）"
   },
   "customer_profile": {
     "subjects":    ["适配客户主体特征，2-4条，每条15字内"],
@@ -13420,20 +13423,24 @@ ${skuText}
   },
   "market_cases": [
     {
-      "title": "案例标题（具体、可识别）",
-      "url": "真实可访问的案例网络链接；如果你无法确定真实链接，必须留空字符串\"\"，绝不允许编造URL",
-      "is_simulated": "若 url 为空（无真实来源），填 true；有真实链接填 false",
-      "background": "案例背景（120字内）：客户是谁(主体)、持有什么(资产)、做了什么动作、面临什么约束与风险",
-      "solution": "案例采用的方案与执行路径（120字内）：如何满足客户需求、化解痛点",
-      "outcome": "案例结果与可借鉴启示（80字内）",
-      "source": "来源机构/出处说明（真实案例写机构名或媒体；模拟案例写'基于行业通行实践的模拟案例'）"
+      "title": "案例标题（含真实可识别的当事人/企业名）",
+      "case_type": "案例性质三选一：真实知名案例 / 机构公开案例 / 模拟案例",
+      "background": "案例背景（150字内）：当事人是谁(主体)、持有什么(资产)、发生了什么动作/事件、面临什么约束与风险",
+      "solution": "采用的方案与执行路径（130字内）：如何化解痛点、满足需求",
+      "outcome": "结果与对本SKU的可借鉴启示（90字内）",
+      "source": "出处：真实案例写当事人+媒体/公开报道；机构案例写律所/信托公司名称；模拟案例写'基于行业通行实践的模拟案例'",
+      "url": "若确有真实可访问链接则填写，无法确定真实URL必须留空字符串\"\"，绝不允许编造URL"
     }
   ],
   "suppliers": [
     {"type": "供应商类型（如信托公司/律所/税务师事务所）", "candidates": "代表性机构举例", "confirm": "对接时需提前确认的关键事项（40字内）"}
   ]
 }
-market_cases 2-3个，每个都要详实、有教学价值，融合主体/资产/动作/约束/风险/需求/痛点等要素；宁可写成详细的模拟案例也不要简单空泛。严禁编造不存在的URL。suppliers 3-5类。严格只输出 JSON。`;
+【案例要求·重点】请优先引用**市面上真实存在的知名案例**，包括：
+- 知名企业家/上市公司创始人的公开事件（如：土豆网王微离婚导致股权冻结、真功夫蔡达标股权之争、海底捞家族信托、龙湖吴亚军family trust离婚分割、SOHO中国潘石屹夫妇架构、娃哈哈宗庆后传承等），可结合该SKU主题精准选取最贴切的真实案例并讲清其主体/资产/动作/约束/风险/方案/结果；
+- 各大律所/信托公司/家办在官网或媒体**公开发布的脱敏案例**（如金杜、中伦、汉坤的实务文章案例）。
+只有在确实找不到贴切真实案例时，才用"模拟案例"，且需写得详实。
+输出 2-3 个案例，尽量让其中**至少 1-2 个是真实知名案例**。严禁编造不存在的 URL（找不到链接就留空，但案例本身可以是真实的公开事件）。suppliers 3-5类。严格只输出 JSON。`;
 
     const d1 = await callJson(p1, 3000);
     d1._necessity = d0;   // 把研发必要性挂到 d1 上一并渲染/存储
@@ -13581,8 +13588,9 @@ function skuRenderOutput(d1, d2, skuText) {
   const out = document.getElementById('sku-analysis-output');
   const v = d1.verdict || {};
   const cp = d1.customer_profile || {};
-  const recColor = /不建议/.test(v.recommendation||'') ? '#dc2626' : (/谨慎/.test(v.recommendation||'') ? '#d97706' : '#16a34a');
-  const recBg    = /不建议/.test(v.recommendation||'') ? '#fef2f2' : (/谨慎/.test(v.recommendation||'') ? '#fffbeb' : '#f0fdf4');
+  const _prio = v.priority || v.recommendation || '';   // 兼容旧记录
+  const recColor = /低优先/.test(_prio) ? '#d97706' : (/战略级/.test(_prio) ? '#7c3aed' : '#16a34a');
+  const recBg    = /低优先/.test(_prio) ? '#fffbeb' : (/战略级/.test(_prio) ? '#f5f3ff' : '#f0fdf4');
 
   const profileBlocks = [
     ['👤 主体', cp.subjects], ['💰 资产', cp.assets], ['🎬 动作', cp.actions],
@@ -13592,11 +13600,16 @@ function skuRenderOutput(d1, d2, skuText) {
 
   const casesHtml = (d1.market_cases || []).map((c, ci) => {
     const url = (c.url || '').trim();
-    const isSim = (c.is_simulated === true || c.is_simulated === 'true' || !url);
+    // 案例性质：兼容旧字段 is_simulated；新字段 case_type
+    const ct = c.case_type || (c.is_simulated === true || c.is_simulated === 'true' ? '模拟案例' : '真实知名案例');
+    const isSim = /模拟/.test(ct);
+    const isInst = /机构/.test(ct);
     const badge = isSim
       ? '<span style="font-size:10.5px;font-weight:700;padding:2px 8px;background:#fef3c7;color:#92400e;border-radius:10px;white-space:nowrap;">⚙ 模拟案例</span>'
-      : '<span style="font-size:10.5px;font-weight:700;padding:2px 8px;background:#dcfce7;color:#166534;border-radius:10px;white-space:nowrap;">✓ 真实案例</span>';
-    const linkHtml = (!isSim && url)
+      : isInst
+        ? '<span style="font-size:10.5px;font-weight:700;padding:2px 8px;background:#e0e7ff;color:#3730a3;border-radius:10px;white-space:nowrap;">🏛 机构公开案例</span>'
+        : '<span style="font-size:10.5px;font-weight:700;padding:2px 8px;background:#dcfce7;color:#166534;border-radius:10px;white-space:nowrap;">★ 真实知名案例</span>';
+    const linkHtml = url
       ? `<a href="${url}" target="_blank" rel="noopener" style="font-size:11.5px;color:#0369a1;text-decoration:none;word-break:break-all;">🔗 ${url}</a>`
       : '';
     const seg = (label, val, color) => val ? `
@@ -13676,13 +13689,14 @@ function skuRenderOutput(d1, d2, skuText) {
     <!-- ② 论证结论 -->
     <div style="background:${recBg};border:2px solid ${recColor};border-radius:12px;padding:18px 22px;margin-bottom:14px;">
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-        <div style="font-size:13px;font-weight:700;color:${recColor};">② 价值结论</div>
-        <div style="font-size:22px;font-weight:800;color:${recColor};">${v.recommendation || '—'}</div>
-        <div style="font-size:13px;color:#6b7280;">综合价值评分：<strong style="font-size:18px;color:${recColor};">${v.score ?? '—'}</strong> / 100</div>
+        <div style="font-size:13px;font-weight:700;color:${recColor};">② 产品价值评估</div>
+        <div style="font-size:22px;font-weight:800;color:${recColor};">${_prio || '—'}</div>
+        <div style="font-size:13px;color:#6b7280;">产品价值评分：<strong style="font-size:18px;color:${recColor};">${v.score ?? '—'}</strong> / 100</div>
         <button onclick="skuExportCurrentExcel()" style="margin-left:auto;padding:7px 18px;background:#16a34a;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;">📥 导出研发模板 Excel</button>
       </div>
-      <div style="font-size:14.5px;color:#374151;line-height:1.75;margin-top:10px;">${v.rationale || ''}</div>
-      ${v.prerequisites ? `<div style="font-size:13px;color:#92400e;background:#fffbeb;border:1px dashed #fbbf24;border-radius:6px;padding:8px 12px;margin-top:10px;"><b>落地前提：</b>${v.prerequisites}</div>` : ''}
+      ${(v.value_highlights || v.rationale) ? `<div style="font-size:13.5px;color:#374151;line-height:1.75;margin-top:10px;"><b style="color:${recColor};">价值亮点：</b>${v.value_highlights || v.rationale}</div>` : ''}
+      ${v.main_limitation ? `<div style="font-size:13px;color:#991b1b;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:8px 12px;margin-top:8px;"><b>主要局限：</b>${v.main_limitation}</div>` : ''}
+      ${(v.rollout || v.prerequisites) ? `<div style="font-size:13px;color:#1e40af;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:8px 12px;margin-top:8px;"><b>推广落地策略：</b>${v.rollout || v.prerequisites}</div>` : ''}
     </div>
 
     <!-- ③ 适配客群画像 -->
@@ -13787,8 +13801,8 @@ function skuRenderHistory() {
   }
   container.innerHTML = records.map(r => {
     const isActive = r.id === window._skuCurrentId;
-    const rec = r.d1?.verdict?.recommendation || '';
-    const recColor = /不建议/.test(rec) ? '#dc2626' : (/谨慎/.test(rec) ? '#d97706' : '#16a34a');
+    const rec = r.d1?.verdict?.priority || r.d1?.verdict?.recommendation || '';
+    const recColor = /低优先/.test(rec) ? '#d97706' : (/战略级/.test(rec) ? '#7c3aed' : '#16a34a');
     return `
     <div style="padding:12px 14px;border:1px solid ${isActive ? '#fbbf24' : '#fef3c7'};border-radius:8px;margin-bottom:8px;background:${isActive ? '#fffbeb' : '#fffdf5'};">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
@@ -13816,8 +13830,20 @@ function skuLoadRecord(id) {
   const rec = skuGetHistory().find(r => r.id === id);
   if (!rec) { alert('记录不存在'); return; }
   window._skuCurrentId = id;
-  skuRenderOutput(rec.d1, rec.d2, rec.skuText);
-  window._skuCurrentRecord = { skuText: rec.skuText, d1: rec.d1, d2: rec.d2 };
+  skuRenderOutput(rec.d1, rec.d2, rec.skuText);   // 内部会重置 _skuChatHistory=[]
+  window._skuCurrentRecord = { skuText: rec.skuText, d1: rec.d1, d2: rec.d2, chat: rec.chat || [] };
+  // 恢复历史对话
+  if (rec.chat && rec.chat.length) {
+    _skuChatHistory = rec.chat.slice();
+    _skuChatContext = _skuBuildChatContext(window._skuCurrentRecord);
+    const msgBox = document.getElementById('sku-chat-messages');
+    if (msgBox) {
+      msgBox.innerHTML = rec.chat.map(m => m.role === 'user'
+        ? `<div style="margin-bottom:12px;text-align:right;"><div style="display:inline-block;max-width:82%;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;padding:11px 15px;border-radius:14px 14px 4px 14px;font-size:14px;line-height:1.7;text-align:left;">${(m.content||'').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div></div>`
+        : `<div style="margin-bottom:12px;"><div style="display:inline-block;max-width:86%;background:#fff;border:1px solid #fde68a;padding:11px 15px;border-radius:14px 14px 14px 4px;font-size:14px;line-height:1.75;color:#78350f;">${(m.content||'').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div></div>`
+      ).join('');
+    }
+  }
   skuRenderHistory();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -13870,10 +13896,11 @@ function _skuExportToExcel(rec) {
     { '项目': '市场需求信号', '内容': (mn.demand_signals||[]).join('；') },
     { '项目': '竞争格局', '内容': mn.competition || '' },
     { '项目': '商业模式论证', '内容': mn.business_rationale || '' },
-    { '项目': '价值结论', '内容': v.recommendation || '' },
-    { '项目': '综合评分', '内容': v.score ?? '' },
-    { '项目': '论证理由', '内容': v.rationale || '' },
-    { '项目': '落地前提', '内容': v.prerequisites || '' },
+    { '项目': '产品价值·优先级', '内容': v.priority || v.recommendation || '' },
+    { '项目': '产品价值评分', '内容': v.score ?? '' },
+    { '项目': '价值亮点', '内容': v.value_highlights || v.rationale || '' },
+    { '项目': '主要局限', '内容': v.main_limitation || '' },
+    { '项目': '推广落地策略', '内容': v.rollout || v.prerequisites || '' },
     { '项目': '适配主体', '内容': (cp.subjects||[]).join('；') },
     { '项目': '适配资产', '内容': (cp.assets||[]).join('；') },
     { '项目': '动作', '内容': (cp.actions||[]).join('；') },
@@ -13881,7 +13908,7 @@ function _skuExportToExcel(rec) {
     { '项目': '风险', '内容': (cp.risks||[]).join('；') },
     { '项目': '需求', '内容': (cp.needs||[]).join('；') },
     { '项目': '痛点', '内容': (cp.pains||[]).join('；') },
-    ...(d1.market_cases||[]).map((c,i) => ({ '项目': `参考案例${i+1}${(c.is_simulated===true||c.is_simulated==='true'||!(c.url||'').trim())?'(模拟)':'(真实)'}`, '内容': `${c.title}\n背景：${c.background||''}\n方案：${c.solution||''}\n结果：${c.outcome||''}\n来源：${c.source||''}${(c.url||'').trim()?'\n链接：'+c.url:''}` })),
+    ...(d1.market_cases||[]).map((c,i) => ({ '项目': `参考案例${i+1}(${c.case_type||((c.is_simulated===true||c.is_simulated==='true')?'模拟案例':'真实案例')})`, '内容': `${c.title}\n背景：${c.background||''}\n方案：${c.solution||''}\n结果：${c.outcome||''}\n来源：${c.source||''}${(c.url||'').trim()?'\n链接：'+c.url:''}` })),
     ...(d1.suppliers||[]).map((s,i) => ({ '项目': `供应商${i+1}·${s.type}`, '内容': `${s.candidates||''}｜需确认：${s.confirm||''}` })),
   ];
   // Sheet0：原始知识卡片（用户从痛点结果推送的原始信息）
@@ -13902,10 +13929,21 @@ function _skuExportToExcel(rec) {
     { '字段': '原始推送内容', '内容': rec.skuText || '' },
   ];
 
+  // Sheet：AI 互动讨论记录（用户与LLM追问交互过程）
+  const chat = rec.chat || [];
+  const chatRows = chat.length
+    ? chat.map((m, i) => ({
+        '序号': Math.floor(i/2) + 1,
+        '角色': m.role === 'user' ? '用户提问' : 'AI回答',
+        '内容': m.content || '',
+      }))
+    : [{ '序号': '', '角色': '（无互动记录）', '内容': '用户尚未在 AI 互动讨论区提问' }];
+
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cardRows), '原始知识卡片');
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), '宽表关键问题-六阶段');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sumRows), '论证摘要');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), '宽表关键问题-六阶段');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(chatRows), 'AI互动讨论记录');
   const safeName = (rec.title || 'SKU论证').replace(/[\/\\:*?"<>|]/g, '_').slice(0, 30);
   const dateStr = new Date().toLocaleDateString('zh-CN').replace(/\//g, '-');
   XLSX.writeFile(wb, `SKU研发论证_${safeName}_${dateStr}.xlsx`);
@@ -13917,7 +13955,8 @@ function skuExportCurrentExcel() {
   // 优先用历史记录中已保存的 card；否则取当前推送卡片
   const saved = skuGetHistory().find(r => r.id === window._skuCurrentId);
   const card  = (saved && saved.card) || skuGetCurrentCard() || null;
-  _skuExportToExcel({ ...rec, card, title: (rec.skuText||'').split('\n')[0].replace(/^SKU 名称：/,'') });
+  const chat  = (_skuChatHistory && _skuChatHistory.length) ? _skuChatHistory.slice() : (rec.chat || (saved && saved.chat) || []);
+  _skuExportToExcel({ ...rec, card, chat, title: (rec.skuText||'').split('\n')[0].replace(/^SKU 名称：/,'') });
 }
 
 function skuExportRecordExcel(id) {
@@ -13940,7 +13979,7 @@ function _skuBuildChatContext(rec) {
     '你是朝曦家族办公室的资深产品研发顾问，正在与同事讨论一个 SKU 是否值得纳入产品库。以下是已完成的论证内容，请基于它专业、具体地回答同事的进一步提问。',
     `\n【待论证 SKU】\n${rec.skuText || ''}`,
     nec.overall ? `\n【研发必要性】综合结论：${nec.overall}\n产品设计必要性：${dn.verdict||''}｜${dn.verdict&&/不足/.test(dn.verdict)?('可替代SKU:'+(dn.covered_by||[]).join('、')+'；改造建议:'+(dn.deform_suggestion||'')):(dn.why_existing_insufficient||'')}\n差异化：${dn.differentiation||''}\n市场必要性：收费区间 ${mn.fee_range||''}；需求 ${(mn.demand_signals||[]).join('、')}；竞争 ${mn.competition||''}；商业模式 ${mn.business_rationale||''}` : '',
-    `\n【价值结论】${v.recommendation || ''}（评分 ${v.score ?? '—'}/100）\n理由：${v.rationale || ''}\n落地前提：${v.prerequisites || ''}`,
+    `\n【产品价值评估】优先级 ${v.priority || v.recommendation || ''}（评分 ${v.score ?? '—'}/100）\n价值亮点：${v.value_highlights || v.rationale || ''}\n主要局限：${v.main_limitation || ''}\n推广策略：${v.rollout || v.prerequisites || ''}`,
     `\n【适配客群画像】\n主体：${(cp.subjects||[]).join('、')}\n资产：${(cp.assets||[]).join('、')}\n动作：${(cp.actions||[]).join('、')}\n约束：${(cp.constraints||[]).join('、')}\n风险：${(cp.risks||[]).join('、')}\n需求：${(cp.needs||[]).join('、')}\n痛点：${(cp.pains||[]).join('、')}`,
     `\n【参考案例】\n${(d1.market_cases||[]).map(c=>`${c.title}（${(c.is_simulated===true||c.is_simulated==='true'||!(c.url||'').trim())?'模拟':'真实'}）：${c.background||''}｜方案：${c.solution||''}｜结果：${c.outcome||''}`).join('\n')}`,
     `\n【供应商对接建议】\n${(d1.suppliers||[]).map(s=>`${s.type}：${s.candidates}（需确认：${s.confirm}）`).join('\n')}`,
@@ -14038,7 +14077,14 @@ async function _skuStreamChat(bubbleId) {
       } catch(_) {}
     }
   }
-  if (fullText) _skuChatHistory.push({ role: 'assistant', content: fullText });
+  if (fullText) {
+    _skuChatHistory.push({ role: 'assistant', content: fullText });
+    // 持久化对话到当前记录 + 历史，供导出使用
+    if (window._skuCurrentRecord) window._skuCurrentRecord.chat = _skuChatHistory.slice();
+    const records = skuGetHistory();
+    const hit = records.find(r => r.id === window._skuCurrentId);
+    if (hit) { hit.chat = _skuChatHistory.slice(); try { localStorage.setItem(SKU_LEARN_HISTORY_KEY, JSON.stringify(records)); } catch {} }
+  }
 }
 
 
