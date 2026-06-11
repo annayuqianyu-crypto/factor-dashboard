@@ -839,6 +839,12 @@ tr:hover td { background: #fafafa; }
 
   </div>
 
+  <div class="nav-item" onclick="showPage('sku-learn')">
+
+    <span class="icon">🧪</span>SKU学习
+
+  </div>
+
 
 
 </nav>
@@ -4932,6 +4938,75 @@ tr:hover td { background: #fafafa; }
 
 
 
+<!-- ══════════════════════════════════════
+     PAGE: SKU学习（SKU 研发论证）
+═══════════════════════════════════════ -->
+
+<div id="page-sku-learn" class="page">
+
+  <div class="page-header">
+    <h2>SKU 研发论证</h2>
+    <p>从「痛点结果」推送建议新增 SKU → AI 协助论证是否值得纳入产品库 → 生成适配客群 / 市场案例 / 供应商对接 / 六阶段关键问题</p>
+  </div>
+
+  <!-- 待论证 SKU 卡片区 -->
+  <div class="card" style="border-left:4px solid #f59e0b;">
+    <div style="font-size:14px;font-weight:700;color:#b45309;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+      <span>📦</span> 待论证 SKU 知识卡片
+      <span id="sku-card-source" style="font-size:11px;font-weight:400;color:#9ca3af;"></span>
+    </div>
+    <div id="sku-card-display" style="margin-bottom:12px;">
+      <div style="padding:18px;text-align:center;color:#9ca3af;font-size:13px;background:#fafafa;border:1px dashed #e5e7eb;border-radius:8px;">
+        暂无推送的 SKU —— 请在「痛点结果」页的建议新增 SKU 卡片上点击「🧪 推送SKU学习」，或在下方手动填写
+      </div>
+    </div>
+    <details id="sku-manual-details" style="margin-bottom:12px;">
+      <summary style="font-size:12px;color:#6b7280;cursor:pointer;user-select:none;">✍️ 手动填写 SKU（无推送时使用）</summary>
+      <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px;">
+        <input id="sku-manual-name" type="text" placeholder="SKU 名称，如：境内慈善信托+基金会双架构服务"
+          style="width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid #fde68a;border-radius:8px;font-size:13.5px;"/>
+        <textarea id="sku-manual-desc" rows="3" placeholder="SKU 描述：服务内容、目标客户、解决什么问题…"
+          style="width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid #fde68a;border-radius:8px;font-size:13.5px;line-height:1.6;resize:vertical;font-family:inherit;"></textarea>
+      </div>
+    </details>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <button onclick="skuAnalyze()" id="sku-analyze-btn"
+        style="padding:10px 28px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;border:none;border-radius:8px;font-size:13.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(245,158,11,.25);">
+        <span id="sku-analyze-spin">🔬</span> 开始论证
+      </button>
+      <span id="sku-status" style="font-size:12px;color:#6b7280;"></span>
+    </div>
+    <div style="font-size:11px;color:#9ca3af;margin-top:8px;">
+      论证流程：① AI 客观论证 SKU 价值（结论/客群画像/市场案例/供应商对接）→ ② 生成六阶段客户适配关键问题（需求初判 → 售后维护）
+    </div>
+  </div>
+
+  <!-- 论证输出区 -->
+  <div id="sku-analysis-output" style="min-height:40px;"></div>
+
+  <!-- 历史记录面板 -->
+  <div style="margin-top:24px;">
+    <div class="card" style="border-left:4px solid #fde68a;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="font-size:14px;font-weight:700;color:#b45309;display:flex;align-items:center;gap:8px;">
+          <span>📚</span> SKU 论证历史
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span id="sku-history-count" style="font-size:12px;color:#9ca3af;"></span>
+          <button onclick="skuClearAllHistory()"
+            style="padding:4px 12px;font-size:11.5px;color:#dc2626;background:#fff;border:1px solid #fca5a5;border-radius:6px;cursor:pointer;">
+            清空全部
+          </button>
+        </div>
+      </div>
+      <div id="sku-history-list">
+        <div style="text-align:center;color:#9ca3af;font-size:12px;padding:20px 0;">暂无历史记录 · 完成论证后自动保存</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
 </main>
 
 
@@ -5070,6 +5145,11 @@ function showPage(pageId) {
   // 痛点学习页：每次进入刷新历史列表（修复初次加载因 TDZ 导致历史为空）
   if (pageId === 'pain-learn' && typeof learnRenderHistory === 'function') {
     try { learnRenderHistory(); } catch(e) {}
+  }
+
+  // SKU学习页：每次进入刷新当前卡片与历史
+  if (pageId === 'sku-learn') {
+    try { skuRenderCurrentCard(); skuRenderHistory(); } catch(e) {}
   }
 
   // resize 所有此页图表
@@ -10050,6 +10130,11 @@ function pgRenderResults(results, newSkus, bu, failNote) {
 
           <span style="font-size:16px;font-weight:700;color:#111827;">${s.name||''}</span>
 
+          <button onclick="sendSkuToLearn(${i},'pg')"
+            style="margin-left:auto;flex-shrink:0;padding:5px 14px;background:#fff;color:#b45309;border:1px solid #f59e0b;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">
+            🧪 推送SKU学习
+          </button>
+
         </div>
 
         <div style="font-size:12.5px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 12px;margin-bottom:12px;">
@@ -11503,6 +11588,11 @@ function piRenderResults(results, newSkus, bu, failNote) {
           <span style="font-size:11px;font-weight:700;padding:2px 8px;background:#fef3c7;color:#92400e;border-radius:10px;">${s.id||'New-'+(i+1)}</span>
 
           <span style="font-size:16px;font-weight:700;color:#111827;">${s.name||''}</span>
+
+          <button onclick="sendSkuToLearn(${i},'pi')"
+            style="margin-left:auto;flex-shrink:0;padding:5px 14px;background:#fff;color:#b45309;border:1px solid #f59e0b;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">
+            🧪 推送SKU学习
+          </button>
 
         </div>
 
@@ -13025,7 +13115,10 @@ function renderPool(bu) {
     if (typeof newsApplyTheme === 'function') newsApplyTheme();
   }, 100);
   // 延迟到 LEARN_HISTORY_KEY 等 const 声明执行后再渲染（避免 TDZ 导致历史读取失败）
-  setTimeout(() => { try { learnRenderHistory(); } catch(e) {} }, 0);
+  setTimeout(() => {
+    try { learnRenderHistory(); } catch(e) {}
+    try { skuRenderCurrentCard(); skuRenderHistory(); } catch(e) {}
+  }, 0);
 })();
 
 
@@ -13077,6 +13170,455 @@ function sendToLearn(idx) {
   _learnState.systemContext = '';
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+
+// ══════════════════════════════════════════════════════════════
+// SKU 学习模块（SKU 研发论证：价值论证 + 客群画像 + 六阶段关键问题）
+// ══════════════════════════════════════════════════════════════
+
+const SKU_LEARN_KEY         = 'sku_learn_current';
+const SKU_LEARN_HISTORY_KEY = 'sku_learn_history';
+let _skuAnalyzing = false;
+
+// ── 从痛点结果/外部导入推送 SKU 卡片 ─────────────────────────
+function sendSkuToLearn(idx, src) {
+  const arr = src === 'pi' ? (_piLastNewSkus || []) : (_pgLastNewSkus || []);
+  const s = arr[idx];
+  if (!s) { alert('SKU 数据不存在，请重新生成结果'); return; }
+  try { localStorage.setItem(SKU_LEARN_KEY, JSON.stringify(s)); } catch {}
+
+  // 切换到 SKU 学习页并高亮导航
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-sku-learn').classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.remove('active');
+    if ((n.getAttribute('onclick') || '').includes('sku-learn')) n.classList.add('active');
+  });
+
+  skuRenderCurrentCard();
+  skuRenderHistory();
+  const out = document.getElementById('sku-analysis-output');
+  if (out) out.innerHTML = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── 渲染当前待论证卡片 ───────────────────────────────────────
+function skuGetCurrentCard() {
+  try { return JSON.parse(localStorage.getItem(SKU_LEARN_KEY) || 'null'); }
+  catch { return null; }
+}
+
+function skuRenderCurrentCard() {
+  const el = document.getElementById('sku-card-display');
+  if (!el) return;
+  const s = skuGetCurrentCard();
+  const srcEl = document.getElementById('sku-card-source');
+  if (!s) {
+    el.innerHTML = `<div style="padding:18px;text-align:center;color:#9ca3af;font-size:13px;background:#fafafa;border:1px dashed #e5e7eb;border-radius:8px;">
+      暂无推送的 SKU —— 请在「痛点结果」页的建议新增 SKU 卡片上点击「🧪 推送SKU学习」，或在下方手动填写</div>`;
+    if (srcEl) srcEl.textContent = '';
+    return;
+  }
+  if (srcEl) srcEl.textContent = '· 来自痛点结果推送';
+  const fields = [
+    ['服务类别', s.category], ['服务流程', s.summary],
+    ['核心亮点', s.highlights], ['适用渠道', s.scenarios],
+    ['适用前提', s.preconditions], ['不适用情形', s.use_case],
+  ].filter(([,v]) => v);
+  el.innerHTML = `
+    <div style="border:1px solid #fde68a;border-radius:10px;padding:14px;background:linear-gradient(180deg,#fffbeb 0%,#fff 70%);">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <span style="font-size:11px;font-weight:700;padding:2px 8px;background:#fef3c7;color:#92400e;border-radius:10px;">${s.id || 'New-SKU'}</span>
+        <span style="font-size:16px;font-weight:700;color:#111827;">${s.name || ''}</span>
+        <button onclick="localStorage.removeItem(SKU_LEARN_KEY);skuRenderCurrentCard();"
+          style="margin-left:auto;padding:3px 10px;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;border-radius:5px;font-size:11px;cursor:pointer;">清除</button>
+      </div>
+      ${s.reason ? `<div style="font-size:12.5px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:7px 11px;margin-bottom:10px;"><b>建议原因：</b>${s.reason}</div>` : ''}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;font-size:12px;">
+        ${fields.map(([l,v]) => `<div style="background:#fff;border:1px solid #f3f4f6;border-radius:6px;padding:7px 10px;">
+          <div style="font-size:10px;font-weight:700;color:#9ca3af;margin-bottom:2px;">${l}</div>
+          <div style="color:#374151;line-height:1.55;">${v}</div></div>`).join('')}
+      </div>
+    </div>`;
+}
+
+// ── 主论证入口（两步 AI 调用）──────────────────────────────
+function _skuBuildText() {
+  const s = skuGetCurrentCard();
+  if (s) {
+    return [
+      `SKU 名称：${s.name || ''}`,
+      s.reason        ? `建议新增原因：${s.reason}` : '',
+      s.category      ? `服务类别：${s.category}` : '',
+      s.summary       ? `服务流程：${s.summary}` : '',
+      s.highlights    ? `核心亮点：${s.highlights}` : '',
+      s.scenarios     ? `适用渠道：${s.scenarios}` : '',
+      s.preconditions ? `适用前提：${s.preconditions}` : '',
+      s.use_case      ? `不适用情形：${s.use_case}` : '',
+      s.keywords      ? `关键词：${s.keywords}` : '',
+    ].filter(Boolean).join('\n');
+  }
+  const name = (document.getElementById('sku-manual-name')?.value || '').trim();
+  const desc = (document.getElementById('sku-manual-desc')?.value || '').trim();
+  if (!name) return '';
+  return `SKU 名称：${name}\nSKU 描述：${desc}`;
+}
+
+async function skuAnalyze() {
+  const skuText = _skuBuildText();
+  const st = document.getElementById('sku-status');
+  if (!skuText) { if (st) st.textContent = '请先推送或手动填写 SKU'; return; }
+  if (_skuAnalyzing) return;
+  _skuAnalyzing = true;
+
+  const btn  = document.getElementById('sku-analyze-btn');
+  const spin = document.getElementById('sku-analyze-spin');
+  const out  = document.getElementById('sku-analysis-output');
+  btn.disabled = true; spin.textContent = '⏳';
+  out.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ 第 1/2 步：AI 正在客观论证 SKU 价值（结论 / 客群画像 / 市场案例 / 供应商）…</div>';
+
+  const apiBase = localStorage.getItem('pg_api_base') || COMPANY_API_BASE;
+  const apiKey  = localStorage.getItem('pg_api_key')  || COMPANY_API_KEY;
+
+  const callJson = async (prompt, maxTokens) => {
+    const resp = await fetch(`${apiBase}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: COMPANY_API_MODEL,
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.25,
+        max_tokens: maxTokens,
+      }),
+    });
+    if (!resp.ok) throw new Error(`API HTTP ${resp.status}`);
+    const data = await resp.json();
+    let raw = (data.choices?.[0]?.message?.content || '').replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+    const m = raw.match(/\{[\s\S]*\}/);
+    if (!m) throw new Error('AI 返回内容无法解析为 JSON');
+    try { return JSON.parse(m[0]); }
+    catch { return JSON.parse(m[0].replace(/,(\s*[}\]])/g, '$1')); }
+  };
+
+  try {
+    // ── 第 1 步：价值论证 ──
+    const p1 = `你是朝曦家族办公室的产品研发负责人。朝曦是金融机构高净值客户的非金融增值服务平台，服务覆盖家族架构、税务规划、法律咨询、跨境身份、股权激励、财富传承。现需论证以下「建议新增 SKU」是否值得纳入公司产品库。
+
+【待论证 SKU】
+${skuText}
+
+请客观论证（既要指出价值也要指出风险与局限），输出严格 JSON：
+{
+  "verdict": {
+    "recommendation": "建议新增 / 谨慎评估 / 不建议新增 三选一",
+    "score": "0-100的整数，综合价值评分",
+    "rationale": "论证理由，须正反两面，120字内",
+    "prerequisites": "若要新增，须先满足的关键前提（60字内）"
+  },
+  "customer_profile": {
+    "subjects":    ["适配客户主体特征，2-4条，每条15字内"],
+    "assets":      ["适配资产特征，2-4条"],
+    "constraints": ["客户面临的约束/合规要求，2-4条"],
+    "risks":       ["客户面临的风险，2-4条"],
+    "needs":       ["客户核心需求，2-4条"],
+    "pains":       ["对应痛点，2-4条"]
+  },
+  "market_cases": [
+    {"title": "市场可参考案例名", "desc": "案例要点60字内", "source": "案例来源（机构/公开报道，无则写'行业通行实践'）"}
+  ],
+  "suppliers": [
+    {"type": "供应商类型（如信托公司/律所/税务师事务所）", "candidates": "代表性机构举例", "confirm": "对接时需提前确认的关键事项（40字内）"}
+  ]
+}
+market_cases 2-4个，suppliers 3-5类。严格只输出 JSON。`;
+
+    const d1 = await callJson(p1, 3000);
+
+    out.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ 第 2/2 步：AI 正在生成六阶段客户适配关键问题（需求初判 → 售后维护）…</div>';
+
+    // ── 第 2 步：六阶段关键问题 ──
+    const p2 = `你是朝曦家族办公室的 SKU 研发专家。请为以下 SKU 设计「客户适配判断关键问题」，覆盖完整服务生命周期六个阶段。这些问题用于帮助家办顾问判断客户是否适配该 SKU，并指导服务交付。
+
+【SKU】
+${skuText}
+
+【适配客群参考】
+${JSON.stringify(d1.customer_profile || {}, null, 0)}
+
+六个阶段：1 需求初判 / 2 资产梳理 / 3 方案设计 / 4 文件制备 / 5 交付执行 / 6 售后维护。
+每阶段设计 2-4 个二级节点，每个节点包含五个维度（参考公司慈善信托 SKU 研发模板）：
+
+输出严格 JSON：
+{
+  "stages": [
+    {
+      "stage": "1 需求初判",
+      "nodes": [
+        {
+          "node": "二级节点名（10字内）",
+          "question": "从家办角度的核心确认问题（疑问句；最关键的问题请以【★关键确认项】开头并附【目标答案】xxx）",
+          "client_pain": "从客户角度：解决了什么痛点（40字内）",
+          "client_coop": "从客户角度：需要客户配合的事项（50字内）",
+          "client_faq": "客户可能提出的问题（1-3个带引号的口语化问句，用空格分隔）",
+          "supplier_check": "从供应商角度：需提前确认的问题（按'机构类型：事项'格式，50字内）"
+        }
+      ]
+    }
+  ]
+}
+严格只输出 JSON，确保六个阶段齐全。`;
+
+    const d2 = await callJson(p2, 7000);
+
+    skuRenderOutput(d1, d2, skuText);
+    skuAutoSave(skuText, d1, d2);
+  } catch(e) {
+    out.innerHTML = `<div style="padding:16px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;font-size:13px;color:#991b1b;">
+      ❌ 论证失败：${e.message}${/401/.test(e.message) ? '<br><span style="font-size:11px;">（API Key 已失效，请在「场景选择」页配置新的 DeepSeek Key 或联系管理员更换）</span>' : ''}
+    </div>`;
+  }
+
+  spin.textContent = '🔬';
+  btn.disabled = false;
+  _skuAnalyzing = false;
+  if (st) st.textContent = '';
+}
+
+// ── 渲染论证结果 ─────────────────────────────────────────────
+function skuRenderOutput(d1, d2, skuText) {
+  const out = document.getElementById('sku-analysis-output');
+  const v = d1.verdict || {};
+  const cp = d1.customer_profile || {};
+  const recColor = /不建议/.test(v.recommendation||'') ? '#dc2626' : (/谨慎/.test(v.recommendation||'') ? '#d97706' : '#16a34a');
+  const recBg    = /不建议/.test(v.recommendation||'') ? '#fef2f2' : (/谨慎/.test(v.recommendation||'') ? '#fffbeb' : '#f0fdf4');
+
+  const profileBlocks = [
+    ['👤 主体', cp.subjects], ['💰 资产', cp.assets], ['🔒 约束', cp.constraints],
+    ['⚠️ 风险', cp.risks], ['🎯 需求', cp.needs], ['💢 痛点', cp.pains],
+  ];
+
+  const casesHtml = (d1.market_cases || []).map(c => `
+    <div style="margin-bottom:10px;padding:11px 14px;background:#f9fafb;border-left:3px solid #fbbf24;border-radius:0 6px 6px 0;">
+      <div style="font-size:14px;font-weight:700;color:#374151;margin-bottom:3px;">${c.title || ''}</div>
+      <div style="font-size:13px;color:#4b5563;line-height:1.7;">${c.desc || ''}</div>
+      ${c.source ? `<div style="font-size:11px;color:#9ca3af;margin-top:4px;">来源：${c.source}</div>` : ''}
+    </div>`).join('');
+
+  const suppliersHtml = (d1.suppliers || []).map(s => `
+    <tr>
+      <td style="font-weight:600;color:#92400e;white-space:nowrap;">${s.type || ''}</td>
+      <td style="color:#374151;">${s.candidates || ''}</td>
+      <td style="color:#4b5563;font-size:12.5px;">${s.confirm || ''}</td>
+    </tr>`).join('');
+
+  const stageColors = ['#0369a1','#15803d','#b45309','#7c3aed','#dc2626','#0e7490'];
+  const stagesHtml = (d2.stages || []).map((st, si) => {
+    const color = stageColors[si % stageColors.length];
+    const nodes = (st.nodes || []).map(n => `
+      <div style="margin-bottom:10px;padding:12px 14px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;">
+        <div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:7px;">▸ ${n.node || ''}</div>
+        <div style="font-size:13.5px;color:${color};background:${color}11;border-radius:6px;padding:8px 11px;margin-bottom:8px;line-height:1.7;"><b>核心确认：</b>${(n.question || '').replace(/【★关键确认项】/g,'<span style="background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:8px;font-size:11px;font-weight:700;">★关键确认项</span> ').replace(/【目标答案】/g,'<br><b style="color:#16a34a;">目标答案：</b>')}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;font-size:12.5px;">
+          ${[['解决痛点', n.client_pain],['需客户配合', n.client_coop],['客户可能会问', n.client_faq],['供应商需确认', n.supplier_check]]
+            .filter(([,x])=>x).map(([l,x]) => `
+            <div style="background:#f9fafb;border:1px solid #f3f4f6;border-radius:6px;padding:7px 10px;">
+              <div style="font-size:10.5px;font-weight:700;color:#9ca3af;margin-bottom:3px;">${l}</div>
+              <div style="color:#374151;line-height:1.65;">${x}</div>
+            </div>`).join('')}
+        </div>
+      </div>`).join('');
+    return `
+      <details ${si === 0 ? 'open' : ''} style="margin-bottom:10px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">
+        <summary style="padding:12px 16px;background:${color}0d;cursor:pointer;user-select:none;font-size:14.5px;font-weight:700;color:${color};">
+          ${st.stage || ''} <span style="font-size:11px;font-weight:400;color:#9ca3af;">（${(st.nodes||[]).length} 个节点）</span>
+        </summary>
+        <div style="padding:12px 14px;">${nodes}</div>
+      </details>`;
+  }).join('');
+
+  out.innerHTML = `
+    <!-- ① 论证结论 -->
+    <div style="background:${recBg};border:2px solid ${recColor};border-radius:12px;padding:18px 22px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <div style="font-size:22px;font-weight:800;color:${recColor};">${v.recommendation || '—'}</div>
+        <div style="font-size:13px;color:#6b7280;">综合价值评分：<strong style="font-size:18px;color:${recColor};">${v.score ?? '—'}</strong> / 100</div>
+        <button onclick="skuExportCurrentExcel()" style="margin-left:auto;padding:7px 18px;background:#16a34a;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;">📥 导出研发模板 Excel</button>
+      </div>
+      <div style="font-size:14.5px;color:#374151;line-height:1.75;margin-top:10px;">${v.rationale || ''}</div>
+      ${v.prerequisites ? `<div style="font-size:13px;color:#92400e;background:#fffbeb;border:1px dashed #fbbf24;border-radius:6px;padding:8px 12px;margin-top:10px;"><b>落地前提：</b>${v.prerequisites}</div>` : ''}
+    </div>
+
+    <!-- ② 适配客群画像 -->
+    <div style="border:1px solid #fde68a;border-radius:10px;padding:16px 18px;margin-bottom:14px;">
+      <div style="font-size:13px;color:#b45309;font-weight:700;letter-spacing:.05em;margin-bottom:12px;">② 适配客群画像（主体 / 资产 / 约束 / 风险 / 需求 / 痛点）</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+        ${profileBlocks.map(([label, items]) => `
+          <div style="background:#fffbeb;border:1px solid #fef3c7;border-radius:8px;padding:11px 13px;">
+            <div style="font-size:12.5px;font-weight:700;color:#92400e;margin-bottom:6px;">${label}</div>
+            <div style="font-size:12.5px;color:#374151;line-height:1.8;">${(items||[]).map(x=>`· ${x}`).join('<br>')}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- ③ 市场可参考案例 -->
+    <div style="border:1px solid #fde68a;border-radius:10px;padding:16px 18px;margin-bottom:14px;">
+      <div style="font-size:13px;color:#b45309;font-weight:700;letter-spacing:.05em;margin-bottom:12px;">③ 市场可参考案例</div>
+      ${casesHtml || '<div style="color:#9ca3af;font-size:13px;">暂无</div>'}
+    </div>
+
+    <!-- ④ 供应商机构对接 -->
+    <div style="border:1px solid #fde68a;border-radius:10px;padding:16px 18px;margin-bottom:14px;">
+      <div style="font-size:13px;color:#b45309;font-weight:700;letter-spacing:.05em;margin-bottom:12px;">④ 供应商 / 机构对接</div>
+      <table style="font-size:13px;">
+        <thead><tr><th>类型</th><th>代表机构</th><th>对接需确认</th></tr></thead>
+        <tbody>${suppliersHtml || '<tr><td colspan="3" style="color:#9ca3af;">暂无</td></tr>'}</tbody>
+      </table>
+    </div>
+
+    <!-- ⑤ 六阶段客户适配关键问题 -->
+    <div style="border:1px solid #fde68a;border-radius:10px;padding:16px 18px;margin-bottom:14px;">
+      <div style="font-size:13px;color:#b45309;font-weight:700;letter-spacing:.05em;margin-bottom:4px;">⑤ 客户适配判断 · 六阶段关键问题</div>
+      <div style="font-size:11.5px;color:#9ca3af;margin-bottom:12px;">按公司 SKU 研发模板生成（需求初判 → 资产梳理 → 方案设计 → 文件制备 → 交付执行 → 售后维护），点击阶段展开</div>
+      ${stagesHtml || '<div style="color:#9ca3af;font-size:13px;">暂无</div>'}
+    </div>`;
+
+  window._skuCurrentRecord = { skuText, d1, d2 };
+}
+
+// ── 历史记录 ─────────────────────────────────────────────────
+function skuGetHistory() {
+  try { return JSON.parse(localStorage.getItem(SKU_LEARN_HISTORY_KEY) || '[]'); }
+  catch { return []; }
+}
+
+function skuAutoSave(skuText, d1, d2) {
+  const records = skuGetHistory();
+  const id = 'sk-' + Date.now();
+  const title = (skuText.split('\n')[0] || '').replace(/^SKU 名称：/, '').slice(0, 40) || '未命名SKU';
+  records.unshift({ id, title, savedAt: new Date().toISOString(), skuText, d1, d2 });
+  if (records.length > 40) records.splice(40);
+  try { localStorage.setItem(SKU_LEARN_HISTORY_KEY, JSON.stringify(records)); } catch {}
+  window._skuCurrentId = id;
+  skuRenderHistory();
+}
+
+function skuRenderHistory() {
+  const container = document.getElementById('sku-history-list');
+  const countEl   = document.getElementById('sku-history-count');
+  if (!container) return;
+  const records = skuGetHistory();
+  if (countEl) countEl.textContent = records.length ? `共 ${records.length} 条` : '';
+  if (!records.length) {
+    container.innerHTML = '<div style="text-align:center;color:#9ca3af;font-size:12px;padding:20px 0;">暂无历史记录 · 完成论证后自动保存</div>';
+    return;
+  }
+  container.innerHTML = records.map(r => {
+    const isActive = r.id === window._skuCurrentId;
+    const rec = r.d1?.verdict?.recommendation || '';
+    const recColor = /不建议/.test(rec) ? '#dc2626' : (/谨慎/.test(rec) ? '#d97706' : '#16a34a');
+    return `
+    <div style="padding:12px 14px;border:1px solid ${isActive ? '#fbbf24' : '#fef3c7'};border-radius:8px;margin-bottom:8px;background:${isActive ? '#fffbeb' : '#fffdf5'};">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13.5px;font-weight:600;color:#374151;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.title}</div>
+          <div style="font-size:11px;color:#9ca3af;">${new Date(r.savedAt).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}
+            ${rec ? `· <span style="color:${recColor};font-weight:600;">${rec}</span>` : ''}
+            ${r.d1?.verdict?.score != null ? `· ${r.d1.verdict.score}分` : ''}
+          </div>
+        </div>
+        <div style="display:flex;gap:5px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
+          <button onclick="skuLoadRecord('${r.id}')"
+            style="padding:4px 11px;font-size:11.5px;font-weight:600;color:#b45309;background:#fff;border:1px solid #fde68a;border-radius:6px;cursor:pointer;">载入</button>
+          <button onclick="skuExportRecordExcel('${r.id}')"
+            style="padding:4px 11px;font-size:11.5px;font-weight:600;color:#16a34a;background:#fff;border:1px solid #bbf7d0;border-radius:6px;cursor:pointer;">导出</button>
+          <button onclick="skuDeleteRecord('${r.id}')"
+            style="padding:4px 11px;font-size:11.5px;font-weight:600;color:#dc2626;background:#fff;border:1px solid #fca5a5;border-radius:6px;cursor:pointer;">删除</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function skuLoadRecord(id) {
+  const rec = skuGetHistory().find(r => r.id === id);
+  if (!rec) { alert('记录不存在'); return; }
+  window._skuCurrentId = id;
+  skuRenderOutput(rec.d1, rec.d2, rec.skuText);
+  window._skuCurrentRecord = { skuText: rec.skuText, d1: rec.d1, d2: rec.d2 };
+  skuRenderHistory();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function skuDeleteRecord(id) {
+  if (!confirm('确认删除这条论证记录？')) return;
+  const records = skuGetHistory().filter(r => r.id !== id);
+  localStorage.setItem(SKU_LEARN_HISTORY_KEY, JSON.stringify(records));
+  if (window._skuCurrentId === id) window._skuCurrentId = null;
+  skuRenderHistory();
+}
+
+function skuClearAllHistory() {
+  if (!confirm('确认清空全部 SKU 论证历史？此操作不可恢复。')) return;
+  localStorage.removeItem(SKU_LEARN_HISTORY_KEY);
+  window._skuCurrentId = null;
+  skuRenderHistory();
+}
+
+// ── 导出研发模板 Excel（六阶段表 + 论证摘要，对齐慈善信托模板格式）──
+function _skuExportToExcel(rec) {
+  if (typeof XLSX === 'undefined') { alert('XLSX 库未加载'); return; }
+  const d1 = rec.d1 || {}, d2 = rec.d2 || {};
+  // Sheet1：六阶段关键问题（与 07_SKU研发 模板列结构一致）
+  const rows = [];
+  (d2.stages || []).forEach(st => {
+    (st.nodes || []).forEach(n => {
+      rows.push({
+        '一级阶段': st.stage || '',
+        '二级节点': n.node || '',
+        '从家办角度（核心确认问题）': n.question || '',
+        '从客户角度（解决了什么痛点）': n.client_pain || '',
+        '从客户角度（需要客户配合的事项）': n.client_coop || '',
+        '从客户角度（客户可能提出的问题）': n.client_faq || '',
+        '从供应商角度（需提前确认的问题）': n.supplier_check || '',
+      });
+    });
+  });
+  // Sheet2：论证摘要
+  const v = d1.verdict || {}, cp = d1.customer_profile || {};
+  const sumRows = [
+    { '项目': 'SKU', '内容': rec.title || (rec.skuText||'').split('\n')[0] },
+    { '项目': '论证结论', '内容': v.recommendation || '' },
+    { '项目': '综合评分', '内容': v.score ?? '' },
+    { '项目': '论证理由', '内容': v.rationale || '' },
+    { '项目': '落地前提', '内容': v.prerequisites || '' },
+    { '项目': '适配主体', '内容': (cp.subjects||[]).join('；') },
+    { '项目': '适配资产', '内容': (cp.assets||[]).join('；') },
+    { '项目': '约束', '内容': (cp.constraints||[]).join('；') },
+    { '项目': '风险', '内容': (cp.risks||[]).join('；') },
+    { '项目': '需求', '内容': (cp.needs||[]).join('；') },
+    { '项目': '痛点', '内容': (cp.pains||[]).join('；') },
+    ...(d1.market_cases||[]).map((c,i) => ({ '项目': `参考案例${i+1}`, '内容': `${c.title}：${c.desc}（${c.source||''}）` })),
+    ...(d1.suppliers||[]).map((s,i) => ({ '项目': `供应商${i+1}·${s.type}`, '内容': `${s.candidates||''}｜需确认：${s.confirm||''}` })),
+  ];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), '六阶段关键问题');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sumRows), '论证摘要');
+  const safeName = (rec.title || 'SKU论证').replace(/[\/\\:*?"<>|]/g, '_').slice(0, 30);
+  const dateStr = new Date().toLocaleDateString('zh-CN').replace(/\//g, '-');
+  XLSX.writeFile(wb, `SKU研发论证_${safeName}_${dateStr}.xlsx`);
+}
+
+function skuExportCurrentExcel() {
+  const rec = window._skuCurrentRecord;
+  if (!rec) { alert('请先完成论证'); return; }
+  _skuExportToExcel({ ...rec, title: (rec.skuText||'').split('\n')[0].replace(/^SKU 名称：/,'') });
+}
+
+function skuExportRecordExcel(id) {
+  const rec = skuGetHistory().find(r => r.id === id);
+  if (!rec) { alert('记录不存在'); return; }
+  _skuExportToExcel(rec);
 }
 
 
