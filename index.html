@@ -13399,7 +13399,7 @@ ${rec.skuText}
 ${JSON.stringify(rec.d1.customer_profile || {}, null, 0)}
 
 本次只生成以下阶段：${stageList.join(' / ')}。
-每阶段设计 2-4 个二级节点，每个节点包含五个维度（参考公司慈善信托 SKU 研发模板）。
+每阶段设计 2-3 个二级节点，每个节点包含五个维度（参考公司慈善信托 SKU 研发模板）。
 
 输出严格 JSON：
 {
@@ -13421,32 +13421,86 @@ ${JSON.stringify(rec.d1.customer_profile || {}, null, 0)}
 }
 重要：所有字符串内部禁止出现英文双引号(\")，引用问句一律用中文引号“”。严格只输出 JSON，确保 ${stageList.length} 个阶段齐全。`;
 
+  // 拆 3 批 × 2 阶段，逐批增量渲染（更不易截断，且边生成边可见）
+  const batches = [
+    ['1 需求初判', '2 资产梳理'],
+    ['3 方案设计', '4 文件制备'],
+    ['5 交付执行', '6 售后维护'],
+  ];
+  const collected = (rec.d2 && Array.isArray(rec.d2.stages)) ? [...rec.d2.stages] : [];
+  // 已存在的阶段名（重试时跳过已完成批次）
+  const haveStage = new Set(collected.map(s => (s.stage || '').trim()));
+
   try {
-    setLoading('⏳ 1/2：生成前三阶段（需求初判 / 资产梳理 / 方案设计）…约 30 秒');
-    const d2a = await _skuCallJson(buildStagePrompt(['1 需求初判','2 资产梳理','3 方案设计'], '上半程'), 4000);
+    for (let bi = 0; bi < batches.length; bi++) {
+      const batch = batches[bi];
+      // 整批都已生成则跳过（重试续跑）
+      if (batch.every(name => haveStage.has(name))) continue;
 
-    setLoading('⏳ 2/2：生成后三阶段（文件制备 / 交付执行 / 售后维护）…约 30 秒');
-    const d2b = await _skuCallJson(buildStagePrompt(['4 文件制备','5 交付执行','6 售后维护'], '下半程'), 4000);
+      const tip = `<div style="padding:18px;text-align:center;color:#6b7280;font-size:13px;">
+        ⏳ 正在生成 ${batch.join(' / ')}（第 ${bi+1}/${batches.length} 批）…</div>`;
+      // 已生成的阶段保持可见，加载提示追加在末尾
+      if (body) body.innerHTML = _skuStagesHtml(collected) + tip;
 
-    const d2 = { stages: [ ...(d2a.stages || []), ...(d2b.stages || []) ] };
-    rec.d2 = d2;
+      const dpart = await _skuCallJson(buildStagePrompt(batch, `第${bi+1}批`), 3500);
+      (dpart.stages || []).forEach(s => {
+        const nm = (s.stage || '').trim();
+        if (!haveStage.has(nm)) { collected.push(s); haveStage.add(nm); }
+      });
 
-    // 回写历史记录
-    const records = skuGetHistory();
-    const hit = records.find(r => r.id === window._skuCurrentId);
-    if (hit) {
-      hit.d2 = d2;
-      try { localStorage.setItem(SKU_LEARN_HISTORY_KEY, JSON.stringify(records)); } catch {}
+      // 增量更新到 record + 历史 + 视图
+      rec.d2 = { stages: collected };
+      const records = skuGetHistory();
+      const hit = records.find(r => r.id === window._skuCurrentId);
+      if (hit) { hit.d2 = rec.d2; try { localStorage.setItem(SKU_LEARN_HISTORY_KEY, JSON.stringify(records)); } catch {} }
+      if (body) body.innerHTML = _skuStagesHtml(collected);
     }
 
-    skuRenderOutput(rec.d1, d2, rec.skuText);
+    // 缺漏阶段提示 + 补全按钮
+    const missing = batches.flat().filter(name => !haveStage.has(name));
+    if (missing.length && body) {
+      body.innerHTML = _skuStagesHtml(collected) + `
+        <div style="margin-top:10px;padding:12px 14px;background:#fffbeb;border:1px dashed #fbbf24;border-radius:8px;font-size:12.5px;color:#92400e;">
+          ⚠️ 仍缺：${missing.join(' / ')}
+          <button onclick="skuGenerateStages()" style="margin-left:10px;padding:4px 14px;background:#fff;color:#b45309;border:1px solid #fde68a;border-radius:6px;font-size:12px;cursor:pointer;">🔄 补全</button>
+        </div>`;
+    }
   } catch(e) {
-    if (body) body.innerHTML = `<div style="padding:14px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;font-size:13px;color:#991b1b;">
-      ❌ 生成失败：${e.message}
-      <button onclick="skuGenerateStages()" style="margin-left:10px;padding:4px 14px;background:#fff;color:#b45309;border:1px solid #fde68a;border-radius:6px;font-size:12px;cursor:pointer;">🔄 重试</button>
-    </div>`;
+    if (body) body.innerHTML = _skuStagesHtml(collected) + `
+      <div style="margin-top:10px;padding:14px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;font-size:13px;color:#991b1b;">
+        ❌ 生成中断：${e.message}（已完成 ${collected.length}/6 阶段）
+        <button onclick="skuGenerateStages()" style="margin-left:10px;padding:4px 14px;background:#fff;color:#b45309;border:1px solid #fde68a;border-radius:6px;font-size:12px;cursor:pointer;">🔄 继续生成</button>
+      </div>`;
   }
   _skuAnalyzing = false;
+}
+
+// 六阶段渲染（抽为独立函数，供增量更新 + 默认全展开）
+function _skuStagesHtml(stages) {
+  const stageColors = ['#0369a1','#15803d','#b45309','#7c3aed','#dc2626','#0e7490'];
+  return (stages || []).map((st, si) => {
+    const color = stageColors[si % stageColors.length];
+    const nodes = (st.nodes || []).map(n => `
+      <div style="margin-bottom:10px;padding:12px 14px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;">
+        <div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:7px;">▸ ${n.node || ''}</div>
+        <div style="font-size:13.5px;color:${color};background:${color}11;border-radius:6px;padding:8px 11px;margin-bottom:8px;line-height:1.7;"><b>核心确认：</b>${(n.question || '').replace(/【★关键确认项】/g,'<span style="background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:8px;font-size:11px;font-weight:700;">★关键确认项</span> ').replace(/【目标答案】/g,'<br><b style="color:#16a34a;">目标答案：</b>')}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;font-size:12.5px;">
+          ${[['解决痛点', n.client_pain],['需客户配合', n.client_coop],['客户可能会问', n.client_faq],['供应商需确认', n.supplier_check]]
+            .filter(([,x])=>x).map(([l,x]) => `
+            <div style="background:#f9fafb;border:1px solid #f3f4f6;border-radius:6px;padding:7px 10px;">
+              <div style="font-size:10.5px;font-weight:700;color:#9ca3af;margin-bottom:3px;">${l}</div>
+              <div style="color:#374151;line-height:1.65;">${x}</div>
+            </div>`).join('')}
+        </div>
+      </div>`).join('');
+    return `
+      <div style="margin-bottom:12px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">
+        <div style="padding:10px 16px;background:${color}0d;font-size:14.5px;font-weight:700;color:${color};">
+          ${st.stage || ''} <span style="font-size:11px;font-weight:400;color:#9ca3af;">（${(st.nodes||[]).length} 个节点）</span>
+        </div>
+        <div style="padding:12px 14px;">${nodes}</div>
+      </div>`;
+  }).join('');
 }
 
 // ── 渲染论证结果 ─────────────────────────────────────────────
@@ -13501,30 +13555,7 @@ function skuRenderOutput(d1, d2, skuText) {
       <td style="color:#4b5563;font-size:12.5px;">${s.confirm || ''}</td>
     </tr>`).join('');
 
-  const stageColors = ['#0369a1','#15803d','#b45309','#7c3aed','#dc2626','#0e7490'];
-  const stagesHtml = ((d2 && d2.stages) || []).map((st, si) => {
-    const color = stageColors[si % stageColors.length];
-    const nodes = (st.nodes || []).map(n => `
-      <div style="margin-bottom:10px;padding:12px 14px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;">
-        <div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:7px;">▸ ${n.node || ''}</div>
-        <div style="font-size:13.5px;color:${color};background:${color}11;border-radius:6px;padding:8px 11px;margin-bottom:8px;line-height:1.7;"><b>核心确认：</b>${(n.question || '').replace(/【★关键确认项】/g,'<span style="background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:8px;font-size:11px;font-weight:700;">★关键确认项</span> ').replace(/【目标答案】/g,'<br><b style="color:#16a34a;">目标答案：</b>')}</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;font-size:12.5px;">
-          ${[['解决痛点', n.client_pain],['需客户配合', n.client_coop],['客户可能会问', n.client_faq],['供应商需确认', n.supplier_check]]
-            .filter(([,x])=>x).map(([l,x]) => `
-            <div style="background:#f9fafb;border:1px solid #f3f4f6;border-radius:6px;padding:7px 10px;">
-              <div style="font-size:10.5px;font-weight:700;color:#9ca3af;margin-bottom:3px;">${l}</div>
-              <div style="color:#374151;line-height:1.65;">${x}</div>
-            </div>`).join('')}
-        </div>
-      </div>`).join('');
-    return `
-      <details ${si === 0 ? 'open' : ''} style="margin-bottom:10px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">
-        <summary style="padding:12px 16px;background:${color}0d;cursor:pointer;user-select:none;font-size:14.5px;font-weight:700;color:${color};">
-          ${st.stage || ''} <span style="font-size:11px;font-weight:400;color:#9ca3af;">（${(st.nodes||[]).length} 个节点）</span>
-        </summary>
-        <div style="padding:12px 14px;">${nodes}</div>
-      </details>`;
-  }).join('');
+  const stagesHtml = _skuStagesHtml((d2 && d2.stages) || []);
 
   out.innerHTML = `
     <!-- ① 论证结论 -->
