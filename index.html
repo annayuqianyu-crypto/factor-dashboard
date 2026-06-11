@@ -13276,7 +13276,7 @@ async function skuAnalyze() {
   const spin = document.getElementById('sku-analyze-spin');
   const out  = document.getElementById('sku-analysis-output');
   btn.disabled = true; spin.textContent = '⏳';
-  out.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ 第 1/2 步：AI 正在客观论证 SKU 价值（结论 / 客群画像 / 市场案例 / 供应商）…</div>';
+  out.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ 第 1/3 步：AI 正在客观论证 SKU 价值（结论 / 客群画像 / 市场案例 / 供应商）…</div>';
 
   const apiBase = localStorage.getItem('pg_api_base') || COMPANY_API_BASE;
   const apiKey  = localStorage.getItem('pg_api_key')  || COMPANY_API_KEY;
@@ -13297,8 +13297,28 @@ async function skuAnalyze() {
     let raw = (data.choices?.[0]?.message?.content || '').replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
     const m = raw.match(/\{[\s\S]*\}/);
     if (!m) throw new Error('AI 返回内容无法解析为 JSON');
-    try { return JSON.parse(m[0]); }
-    catch { return JSON.parse(m[0].replace(/,(\s*[}\]])/g, '$1')); }
+    let txt = m[0];
+    // 第一层：直接解析 / 去尾逗号
+    try { return JSON.parse(txt); } catch {}
+    try { return JSON.parse(txt.replace(/,(\s*[}\]])/g, '$1')); } catch {}
+    // 第二层：截断修复——回退到最后一个完整对象边界，再补齐未闭合的括号
+    for (let cut = txt.lastIndexOf('}'); cut > 100; cut = txt.lastIndexOf('}', cut - 1)) {
+      let frag = txt.slice(0, cut + 1);
+      // 统计未闭合括号并补齐
+      let depthC = 0, depthS = 0, inStr = false, esc = false;
+      for (const ch of frag) {
+        if (esc) { esc = false; continue; }
+        if (ch === '\\') { esc = true; continue; }
+        if (ch === '"') { inStr = !inStr; continue; }
+        if (inStr) continue;
+        if (ch === '{') depthC++; else if (ch === '}') depthC--;
+        else if (ch === '[') depthS++; else if (ch === ']') depthS--;
+      }
+      if (inStr || depthC < 0 || depthS < 0) continue;
+      frag = frag.replace(/,\s*$/, '') + ']'.repeat(depthS) + '}'.repeat(depthC);
+      try { return JSON.parse(frag.replace(/,(\s*[}\]])/g, '$1')); } catch {}
+    }
+    throw new Error('AI 返回 JSON 无法修复（可能被截断），请重试');
   };
 
   try {
@@ -13335,10 +13355,8 @@ market_cases 2-4个，suppliers 3-5类。严格只输出 JSON。`;
 
     const d1 = await callJson(p1, 3000);
 
-    out.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ 第 2/2 步：AI 正在生成六阶段客户适配关键问题（需求初判 → 售后维护）…</div>';
-
-    // ── 第 2 步：六阶段关键问题 ──
-    const p2 = `你是朝曦家族办公室的 SKU 研发专家。请为以下 SKU 设计「客户适配判断关键问题」，覆盖完整服务生命周期六个阶段。这些问题用于帮助家办顾问判断客户是否适配该 SKU，并指导服务交付。
+    // ── 第 2 步：六阶段关键问题（拆两次调用，避免长输出截断）──
+    const buildStagePrompt = (stageList, partLabel) => `你是朝曦家族办公室的 SKU 研发专家。请为以下 SKU 设计「客户适配判断关键问题」（${partLabel}）。这些问题用于帮助家办顾问判断客户是否适配该 SKU，并指导服务交付。
 
 【SKU】
 ${skuText}
@@ -13346,30 +13364,36 @@ ${skuText}
 【适配客群参考】
 ${JSON.stringify(d1.customer_profile || {}, null, 0)}
 
-六个阶段：1 需求初判 / 2 资产梳理 / 3 方案设计 / 4 文件制备 / 5 交付执行 / 6 售后维护。
-每阶段设计 2-4 个二级节点，每个节点包含五个维度（参考公司慈善信托 SKU 研发模板）：
+本次只生成以下阶段：${stageList.join(' / ')}。
+每阶段设计 2-4 个二级节点，每个节点包含五个维度（参考公司慈善信托 SKU 研发模板）。
 
 输出严格 JSON：
 {
   "stages": [
     {
-      "stage": "1 需求初判",
+      "stage": "${stageList[0]}",
       "nodes": [
         {
           "node": "二级节点名（10字内）",
           "question": "从家办角度的核心确认问题（疑问句；最关键的问题请以【★关键确认项】开头并附【目标答案】xxx）",
           "client_pain": "从客户角度：解决了什么痛点（40字内）",
           "client_coop": "从客户角度：需要客户配合的事项（50字内）",
-          "client_faq": "客户可能提出的问题（1-3个带引号的口语化问句，用空格分隔）",
+          "client_faq": "客户可能提出的口语化问句1-3个，用中文引号“”包裹，空格分隔",
           "supplier_check": "从供应商角度：需提前确认的问题（按'机构类型：事项'格式，50字内）"
         }
       ]
     }
   ]
 }
-严格只输出 JSON，确保六个阶段齐全。`;
+重要：所有字符串内部禁止出现英文双引号(\")，引用问句一律用中文引号“”。严格只输出 JSON，确保 ${stageList.length} 个阶段齐全。`;
 
-    const d2 = await callJson(p2, 7000);
+    out.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ 第 2/3 步：AI 正在生成前三阶段关键问题（需求初判 / 资产梳理 / 方案设计）…</div>';
+    const d2a = await callJson(buildStagePrompt(['1 需求初判','2 资产梳理','3 方案设计'], '上半程'), 4000);
+
+    out.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ 第 3/3 步：AI 正在生成后三阶段关键问题（文件制备 / 交付执行 / 售后维护）…</div>';
+    const d2b = await callJson(buildStagePrompt(['4 文件制备','5 交付执行','6 售后维护'], '下半程'), 4000);
+
+    const d2 = { stages: [ ...(d2a.stages || []), ...(d2b.stages || []) ] };
 
     skuRenderOutput(d1, d2, skuText);
     skuAutoSave(skuText, d1, d2);
