@@ -13265,6 +13265,48 @@ function _skuBuildText() {
   return `SKU 名称：${name}\nSKU 描述：${desc}`;
 }
 
+// 模块级 API 调用（含截断修复兜底）
+async function _skuCallJson(prompt, maxTokens) {
+  const apiBase = localStorage.getItem('pg_api_base') || COMPANY_API_BASE;
+  const apiKey  = localStorage.getItem('pg_api_key')  || COMPANY_API_KEY;
+  const resp = await fetch(`${apiBase}/v1/chat/completions`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: localStorage.getItem('pg_api_model') || COMPANY_API_MODEL,
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.25,
+      max_tokens: maxTokens,
+    }),
+  });
+  if (!resp.ok) throw new Error(`API HTTP ${resp.status}`);
+  const data = await resp.json();
+  let raw = (data.choices?.[0]?.message?.content || '').replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+  const m = raw.match(/\{[\s\S]*\}/);
+  if (!m) throw new Error('AI 返回内容无法解析为 JSON');
+  let txt = m[0];
+  // 第一层：直接解析 / 去尾逗号
+  try { return JSON.parse(txt); } catch {}
+  try { return JSON.parse(txt.replace(/,(\s*[}\]])/g, '$1')); } catch {}
+  // 第二层：截断修复——回退到最后一个完整对象边界，再补齐未闭合的括号
+  for (let cut = txt.lastIndexOf('}'); cut > 100; cut = txt.lastIndexOf('}', cut - 1)) {
+    let frag = txt.slice(0, cut + 1);
+    let depthC = 0, depthS = 0, inStr = false, esc = false;
+    for (const ch of frag) {
+      if (esc) { esc = false; continue; }
+      if (ch === '\\') { esc = true; continue; }
+      if (ch === '"') { inStr = !inStr; continue; }
+      if (inStr) continue;
+      if (ch === '{') depthC++; else if (ch === '}') depthC--;
+      else if (ch === '[') depthS++; else if (ch === ']') depthS--;
+    }
+    if (inStr || depthC < 0 || depthS < 0) continue;
+    frag = frag.replace(/,\s*$/, '') + ']'.repeat(depthS) + '}'.repeat(depthC);
+    try { return JSON.parse(frag.replace(/,(\s*[}\]])/g, '$1')); } catch {}
+  }
+  throw new Error('AI 返回 JSON 无法修复（可能被截断），请重试');
+}
+
 async function skuAnalyze() {
   const skuText = _skuBuildText();
   const st = document.getElementById('sku-status');
@@ -13276,50 +13318,9 @@ async function skuAnalyze() {
   const spin = document.getElementById('sku-analyze-spin');
   const out  = document.getElementById('sku-analysis-output');
   btn.disabled = true; spin.textContent = '⏳';
-  out.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ 第 1/3 步：AI 正在客观论证 SKU 价值（结论 / 客群画像 / 市场案例 / 供应商）…</div>';
+  out.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ AI 正在客观论证 SKU 价值（结论 / 客群画像 / 市场案例 / 供应商）…</div>';
 
-  const apiBase = localStorage.getItem('pg_api_base') || COMPANY_API_BASE;
-  const apiKey  = localStorage.getItem('pg_api_key')  || COMPANY_API_KEY;
-
-  const callJson = async (prompt, maxTokens) => {
-    const resp = await fetch(`${apiBase}/v1/chat/completions`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: localStorage.getItem('pg_api_model') || COMPANY_API_MODEL,
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.25,
-        max_tokens: maxTokens,
-      }),
-    });
-    if (!resp.ok) throw new Error(`API HTTP ${resp.status}`);
-    const data = await resp.json();
-    let raw = (data.choices?.[0]?.message?.content || '').replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
-    const m = raw.match(/\{[\s\S]*\}/);
-    if (!m) throw new Error('AI 返回内容无法解析为 JSON');
-    let txt = m[0];
-    // 第一层：直接解析 / 去尾逗号
-    try { return JSON.parse(txt); } catch {}
-    try { return JSON.parse(txt.replace(/,(\s*[}\]])/g, '$1')); } catch {}
-    // 第二层：截断修复——回退到最后一个完整对象边界，再补齐未闭合的括号
-    for (let cut = txt.lastIndexOf('}'); cut > 100; cut = txt.lastIndexOf('}', cut - 1)) {
-      let frag = txt.slice(0, cut + 1);
-      // 统计未闭合括号并补齐
-      let depthC = 0, depthS = 0, inStr = false, esc = false;
-      for (const ch of frag) {
-        if (esc) { esc = false; continue; }
-        if (ch === '\\') { esc = true; continue; }
-        if (ch === '"') { inStr = !inStr; continue; }
-        if (inStr) continue;
-        if (ch === '{') depthC++; else if (ch === '}') depthC--;
-        else if (ch === '[') depthS++; else if (ch === ']') depthS--;
-      }
-      if (inStr || depthC < 0 || depthS < 0) continue;
-      frag = frag.replace(/,\s*$/, '') + ']'.repeat(depthS) + '}'.repeat(depthC);
-      try { return JSON.parse(frag.replace(/,(\s*[}\]])/g, '$1')); } catch {}
-    }
-    throw new Error('AI 返回 JSON 无法修复（可能被截断），请重试');
-  };
+  const callJson = _skuCallJson;
 
   try {
     // ── 第 1 步：价值论证 ──
@@ -13355,14 +13356,38 @@ market_cases 2-4个，suppliers 3-5类。严格只输出 JSON。`;
 
     const d1 = await callJson(p1, 3000);
 
-    // ── 第 2 步：六阶段关键问题（拆两次调用，避免长输出截断）──
-    const buildStagePrompt = (stageList, partLabel) => `你是朝曦家族办公室的 SKU 研发专家。请为以下 SKU 设计「客户适配判断关键问题」（${partLabel}）。这些问题用于帮助家办顾问判断客户是否适配该 SKU，并指导服务交付。
+    // 第一步完成即渲染（六阶段问题由用户点击第二个按钮单独生成，避免单次输出过长被截断）
+    skuRenderOutput(d1, null, skuText);
+    skuAutoSave(skuText, d1, null);
+  } catch(e) {
+    out.innerHTML = `<div style="padding:16px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;font-size:13px;color:#991b1b;">
+      ❌ 论证失败：${e.message}${/401/.test(e.message) ? '<br><span style="font-size:11px;">（API Key 已失效，请在「场景选择」页配置新的 DeepSeek Key 或联系管理员更换）</span>' : ''}
+    </div>`;
+  }
+
+  spin.textContent = '🔬';
+  btn.disabled = false;
+  _skuAnalyzing = false;
+  if (st) st.textContent = '';
+}
+
+// ── 第二步：六阶段关键问题（独立按钮触发，分两次调用防截断）──
+async function skuGenerateStages() {
+  const rec = window._skuCurrentRecord;
+  if (!rec || !rec.d1) { alert('请先完成「开始论证」第一步'); return; }
+  if (_skuAnalyzing) return;
+  _skuAnalyzing = true;
+
+  const body = document.getElementById('sku-stages-body');
+  const setLoading = msg => { if (body) body.innerHTML = `<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">${msg}</div>`; };
+
+  const buildStagePrompt = (stageList, partLabel) => `你是朝曦家族办公室的 SKU 研发专家。请为以下 SKU 设计「客户适配判断关键问题」（${partLabel}）。这些问题用于帮助家办顾问判断客户是否适配该 SKU，并指导服务交付。
 
 【SKU】
-${skuText}
+${rec.skuText}
 
 【适配客群参考】
-${JSON.stringify(d1.customer_profile || {}, null, 0)}
+${JSON.stringify(rec.d1.customer_profile || {}, null, 0)}
 
 本次只生成以下阶段：${stageList.join(' / ')}。
 每阶段设计 2-4 个二级节点，每个节点包含五个维度（参考公司慈善信托 SKU 研发模板）。
@@ -13387,26 +13412,32 @@ ${JSON.stringify(d1.customer_profile || {}, null, 0)}
 }
 重要：所有字符串内部禁止出现英文双引号(\")，引用问句一律用中文引号“”。严格只输出 JSON，确保 ${stageList.length} 个阶段齐全。`;
 
-    out.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ 第 2/3 步：AI 正在生成前三阶段关键问题（需求初判 / 资产梳理 / 方案设计）…</div>';
-    const d2a = await callJson(buildStagePrompt(['1 需求初判','2 资产梳理','3 方案设计'], '上半程'), 4000);
+  try {
+    setLoading('⏳ 1/2：生成前三阶段（需求初判 / 资产梳理 / 方案设计）…约 30 秒');
+    const d2a = await _skuCallJson(buildStagePrompt(['1 需求初判','2 资产梳理','3 方案设计'], '上半程'), 4000);
 
-    out.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ 第 3/3 步：AI 正在生成后三阶段关键问题（文件制备 / 交付执行 / 售后维护）…</div>';
-    const d2b = await callJson(buildStagePrompt(['4 文件制备','5 交付执行','6 售后维护'], '下半程'), 4000);
+    setLoading('⏳ 2/2：生成后三阶段（文件制备 / 交付执行 / 售后维护）…约 30 秒');
+    const d2b = await _skuCallJson(buildStagePrompt(['4 文件制备','5 交付执行','6 售后维护'], '下半程'), 4000);
 
     const d2 = { stages: [ ...(d2a.stages || []), ...(d2b.stages || []) ] };
+    rec.d2 = d2;
 
-    skuRenderOutput(d1, d2, skuText);
-    skuAutoSave(skuText, d1, d2);
+    // 回写历史记录
+    const records = skuGetHistory();
+    const hit = records.find(r => r.id === window._skuCurrentId);
+    if (hit) {
+      hit.d2 = d2;
+      try { localStorage.setItem(SKU_LEARN_HISTORY_KEY, JSON.stringify(records)); } catch {}
+    }
+
+    skuRenderOutput(rec.d1, d2, rec.skuText);
   } catch(e) {
-    out.innerHTML = `<div style="padding:16px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;font-size:13px;color:#991b1b;">
-      ❌ 论证失败：${e.message}${/401/.test(e.message) ? '<br><span style="font-size:11px;">（API Key 已失效，请在「场景选择」页配置新的 DeepSeek Key 或联系管理员更换）</span>' : ''}
+    if (body) body.innerHTML = `<div style="padding:14px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;font-size:13px;color:#991b1b;">
+      ❌ 生成失败：${e.message}
+      <button onclick="skuGenerateStages()" style="margin-left:10px;padding:4px 14px;background:#fff;color:#b45309;border:1px solid #fde68a;border-radius:6px;font-size:12px;cursor:pointer;">🔄 重试</button>
     </div>`;
   }
-
-  spin.textContent = '🔬';
-  btn.disabled = false;
   _skuAnalyzing = false;
-  if (st) st.textContent = '';
 }
 
 // ── 渲染论证结果 ─────────────────────────────────────────────
@@ -13437,7 +13468,7 @@ function skuRenderOutput(d1, d2, skuText) {
     </tr>`).join('');
 
   const stageColors = ['#0369a1','#15803d','#b45309','#7c3aed','#dc2626','#0e7490'];
-  const stagesHtml = (d2.stages || []).map((st, si) => {
+  const stagesHtml = ((d2 && d2.stages) || []).map((st, si) => {
     const color = stageColors[si % stageColors.length];
     const nodes = (st.nodes || []).map(n => `
       <div style="margin-bottom:10px;padding:12px 14px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;">
@@ -13503,8 +13534,17 @@ function skuRenderOutput(d1, d2, skuText) {
     <!-- ⑤ 六阶段客户适配关键问题 -->
     <div style="border:1px solid #fde68a;border-radius:10px;padding:16px 18px;margin-bottom:14px;">
       <div style="font-size:13px;color:#b45309;font-weight:700;letter-spacing:.05em;margin-bottom:4px;">⑤ 客户适配判断 · 六阶段关键问题</div>
-      <div style="font-size:11.5px;color:#9ca3af;margin-bottom:12px;">按公司 SKU 研发模板生成（需求初判 → 资产梳理 → 方案设计 → 文件制备 → 交付执行 → 售后维护），点击阶段展开</div>
-      ${stagesHtml || '<div style="color:#9ca3af;font-size:13px;">暂无</div>'}
+      <div style="font-size:11.5px;color:#9ca3af;margin-bottom:12px;">按公司 SKU 研发模板生成（需求初判 → 资产梳理 → 方案设计 → 文件制备 → 交付执行 → 售后维护）</div>
+      <div id="sku-stages-body">
+        ${stagesHtml || `
+        <div style="padding:22px;text-align:center;background:#fffbeb;border:1px dashed #fbbf24;border-radius:10px;">
+          <div style="font-size:13px;color:#92400e;margin-bottom:12px;">第一步论证已完成。点击下方按钮生成六阶段关键问题（分两次生成，约 1 分钟）</div>
+          <button onclick="skuGenerateStages()"
+            style="padding:10px 26px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;border:none;border-radius:8px;font-size:13.5px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(245,158,11,.25);">
+            📋 生成六阶段关键问题
+          </button>
+        </div>`}
+      </div>
     </div>`;
 
   window._skuCurrentRecord = { skuText, d1, d2 };
