@@ -13340,19 +13340,28 @@ ${skuText}
   "customer_profile": {
     "subjects":    ["适配客户主体特征，2-4条，每条15字内"],
     "assets":      ["适配资产特征，2-4条"],
+    "actions":     ["客户做了/正面临/计划做的事件或动作，2-4条（如：拟减持限售股、计划移民美国、正搭建红筹架构）"],
     "constraints": ["客户面临的约束/合规要求，2-4条"],
     "risks":       ["客户面临的风险，2-4条"],
     "needs":       ["客户核心需求，2-4条"],
     "pains":       ["对应痛点，2-4条"]
   },
   "market_cases": [
-    {"title": "市场可参考案例名", "desc": "案例要点60字内", "source": "案例来源（机构/公开报道，无则写'行业通行实践'）"}
+    {
+      "title": "案例标题（具体、可识别）",
+      "url": "真实可访问的案例网络链接；如果你无法确定真实链接，必须留空字符串\"\"，绝不允许编造URL",
+      "is_simulated": "若 url 为空（无真实来源），填 true；有真实链接填 false",
+      "background": "案例背景（120字内）：客户是谁(主体)、持有什么(资产)、做了什么动作、面临什么约束与风险",
+      "solution": "案例采用的方案与执行路径（120字内）：如何满足客户需求、化解痛点",
+      "outcome": "案例结果与可借鉴启示（80字内）",
+      "source": "来源机构/出处说明（真实案例写机构名或媒体；模拟案例写'基于行业通行实践的模拟案例'）"
+    }
   ],
   "suppliers": [
     {"type": "供应商类型（如信托公司/律所/税务师事务所）", "candidates": "代表性机构举例", "confirm": "对接时需提前确认的关键事项（40字内）"}
   ]
 }
-market_cases 2-4个，suppliers 3-5类。严格只输出 JSON。`;
+market_cases 2-3个，每个都要详实、有教学价值，融合主体/资产/动作/约束/风险/需求/痛点等要素；宁可写成详细的模拟案例也不要简单空泛。严禁编造不存在的URL。suppliers 3-5类。严格只输出 JSON。`;
 
     const d1 = await callJson(p1, 3000);
 
@@ -13449,16 +13458,41 @@ function skuRenderOutput(d1, d2, skuText) {
   const recBg    = /不建议/.test(v.recommendation||'') ? '#fef2f2' : (/谨慎/.test(v.recommendation||'') ? '#fffbeb' : '#f0fdf4');
 
   const profileBlocks = [
-    ['👤 主体', cp.subjects], ['💰 资产', cp.assets], ['🔒 约束', cp.constraints],
-    ['⚠️ 风险', cp.risks], ['🎯 需求', cp.needs], ['💢 痛点', cp.pains],
+    ['👤 主体', cp.subjects], ['💰 资产', cp.assets], ['🎬 动作', cp.actions],
+    ['🔒 约束', cp.constraints], ['⚠️ 风险', cp.risks], ['🎯 需求', cp.needs],
+    ['💢 痛点', cp.pains],
   ];
 
-  const casesHtml = (d1.market_cases || []).map(c => `
-    <div style="margin-bottom:10px;padding:11px 14px;background:#f9fafb;border-left:3px solid #fbbf24;border-radius:0 6px 6px 0;">
-      <div style="font-size:14px;font-weight:700;color:#374151;margin-bottom:3px;">${c.title || ''}</div>
-      <div style="font-size:13px;color:#4b5563;line-height:1.7;">${c.desc || ''}</div>
-      ${c.source ? `<div style="font-size:11px;color:#9ca3af;margin-top:4px;">来源：${c.source}</div>` : ''}
-    </div>`).join('');
+  const casesHtml = (d1.market_cases || []).map((c, ci) => {
+    const url = (c.url || '').trim();
+    const isSim = (c.is_simulated === true || c.is_simulated === 'true' || !url);
+    const badge = isSim
+      ? '<span style="font-size:10.5px;font-weight:700;padding:2px 8px;background:#fef3c7;color:#92400e;border-radius:10px;white-space:nowrap;">⚙ 模拟案例</span>'
+      : '<span style="font-size:10.5px;font-weight:700;padding:2px 8px;background:#dcfce7;color:#166534;border-radius:10px;white-space:nowrap;">✓ 真实案例</span>';
+    const linkHtml = (!isSim && url)
+      ? `<a href="${url}" target="_blank" rel="noopener" style="font-size:11.5px;color:#0369a1;text-decoration:none;word-break:break-all;">🔗 ${url}</a>`
+      : '';
+    const seg = (label, val, color) => val ? `
+      <div style="margin-top:7px;">
+        <span style="font-size:11px;font-weight:700;color:${color};">${label}</span>
+        <span style="font-size:13px;color:#374151;line-height:1.75;"> ${val}</span>
+      </div>` : '';
+    return `
+    <div style="margin-bottom:12px;padding:14px 16px;background:#fff;border:1px solid #fde68a;border-left:3px solid #fbbf24;border-radius:8px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;">
+        <span style="font-size:11px;font-weight:700;color:#9ca3af;">案例 ${ci+1}</span>
+        <span style="font-size:15px;font-weight:700;color:#1e293b;">${c.title || ''}</span>
+        ${badge}
+      </div>
+      ${seg('【背景】', c.background, '#b45309')}
+      ${seg('【方案】', c.solution, '#0369a1')}
+      ${seg('【结果与启示】', c.outcome, '#15803d')}
+      <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        ${c.source ? `<span style="font-size:11px;color:#9ca3af;">来源：${c.source}</span>` : '<span></span>'}
+        ${linkHtml}
+      </div>
+    </div>`;
+  }).join('');
 
   const suppliersHtml = (d1.suppliers || []).map(s => `
     <tr>
@@ -13506,7 +13540,7 @@ function skuRenderOutput(d1, d2, skuText) {
 
     <!-- ② 适配客群画像 -->
     <div style="border:1px solid #fde68a;border-radius:10px;padding:16px 18px;margin-bottom:14px;">
-      <div style="font-size:13px;color:#b45309;font-weight:700;letter-spacing:.05em;margin-bottom:12px;">② 适配客群画像（主体 / 资产 / 约束 / 风险 / 需求 / 痛点）</div>
+      <div style="font-size:13px;color:#b45309;font-weight:700;letter-spacing:.05em;margin-bottom:12px;">② 适配客群画像（主体 / 资产 / 动作 / 约束 / 风险 / 需求 / 痛点）</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
         ${profileBlocks.map(([label, items]) => `
           <div style="background:#fffbeb;border:1px solid #fef3c7;border-radius:8px;padding:11px 13px;">
@@ -13658,11 +13692,12 @@ function _skuExportToExcel(rec) {
     { '项目': '落地前提', '内容': v.prerequisites || '' },
     { '项目': '适配主体', '内容': (cp.subjects||[]).join('；') },
     { '项目': '适配资产', '内容': (cp.assets||[]).join('；') },
+    { '项目': '动作', '内容': (cp.actions||[]).join('；') },
     { '项目': '约束', '内容': (cp.constraints||[]).join('；') },
     { '项目': '风险', '内容': (cp.risks||[]).join('；') },
     { '项目': '需求', '内容': (cp.needs||[]).join('；') },
     { '项目': '痛点', '内容': (cp.pains||[]).join('；') },
-    ...(d1.market_cases||[]).map((c,i) => ({ '项目': `参考案例${i+1}`, '内容': `${c.title}：${c.desc}（${c.source||''}）` })),
+    ...(d1.market_cases||[]).map((c,i) => ({ '项目': `参考案例${i+1}${(c.is_simulated===true||c.is_simulated==='true'||!(c.url||'').trim())?'(模拟)':'(真实)'}`, '内容': `${c.title}\n背景：${c.background||''}\n方案：${c.solution||''}\n结果：${c.outcome||''}\n来源：${c.source||''}${(c.url||'').trim()?'\n链接：'+c.url:''}` })),
     ...(d1.suppliers||[]).map((s,i) => ({ '项目': `供应商${i+1}·${s.type}`, '内容': `${s.candidates||''}｜需确认：${s.confirm||''}` })),
   ];
   const wb = XLSX.utils.book_new();
