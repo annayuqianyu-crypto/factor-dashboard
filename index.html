@@ -10908,7 +10908,7 @@ function pgLoadKey() {
 // API 代理配置（密钥存于 Cloudflare Worker，不在此处）
 const COMPANY_API_KEY   = '';   // 不再使用，由 Worker 持有
 const COMPANY_API_BASE  = 'https://zx-factordashboard-deepseek-proxy.annayuqianyu.workers.dev';
-const COMPANY_API_MODEL = 'deepseek-chat';
+const COMPANY_API_MODEL = 'deepseek-v4-pro';
 const COMPANY_PROXY_TOKEN = (() => {
   // 首次使用时用户填写，存入 localStorage
   return localStorage.getItem('zx_proxy_token') || '';
@@ -13162,7 +13162,7 @@ ${relevance ? `家办关联：${relevance}` : ''}
   try {
     const resp = await fetch(`${apiBase}/v1/chat/completions`, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      headers: { 'X-Access-Token': apiKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: COMPANY_API_MODEL,
         messages: [{ role: 'user', content: prompt }],
@@ -13237,7 +13237,7 @@ JSON 数组格式输出（与家办无关则返回 []）：
   try {
     const resp = await fetch(`${apiBase}/v1/chat/completions`, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      headers: { 'X-Access-Token': apiKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: COMPANY_API_MODEL,
         messages: [{ role:'user', content: prompt }],
         temperature: 0.3, max_tokens: 800 })
@@ -13900,7 +13900,7 @@ async function _skuCallJson(prompt, maxTokens) {
   const apiKey  = localStorage.getItem('pg_api_key')  || COMPANY_API_KEY;
   const resp = await fetch(`${apiBase}/v1/chat/completions`, {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    headers: { 'X-Access-Token': apiKey, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: localStorage.getItem('pg_api_model') || COMPANY_API_MODEL,
       messages: [{ role: 'user', content: prompt }],
@@ -14665,7 +14665,7 @@ async function _skuStreamChat(bubbleId) {
 
   const resp = await fetch(`${apiBase}/v1/chat/completions`, {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    headers: { 'X-Access-Token': apiKey, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: localStorage.getItem('pg_api_model') || COMPANY_API_MODEL,
       messages, temperature: 0.35, max_tokens: 2000, stream: true,
@@ -14888,7 +14888,7 @@ ${wsaCtx || '（无联网数据）'}
 
   const resp = await fetch(`${apiBase}/v1/chat/completions`, {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    headers: { 'X-Access-Token': apiKey, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: COMPANY_API_MODEL,
       messages: [{ role: 'user', content: prompt }],
@@ -15108,7 +15108,7 @@ async function learnStreamChat(bubbleId) {
 
   const resp = await fetch(`${apiBase}/v1/chat/completions`, {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    headers: { 'X-Access-Token': apiKey, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: COMPANY_API_MODEL,
       messages,
@@ -15205,7 +15205,7 @@ async function learnExpandReg(regId, btn) {
   try {
     const resp = await fetch(`${apiBase}/v1/chat/completions`, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      headers: { 'X-Access-Token': apiKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: COMPANY_API_MODEL,
         messages: [{ role: 'user', content: prompt }],
