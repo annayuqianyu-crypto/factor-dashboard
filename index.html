@@ -1391,13 +1391,13 @@ body {
   <div class="card" style="margin-bottom:18px;">
     <div class="card-title">周度变化明细</div>
     <div style="overflow-x:auto;">
-    <table style="width:1180px;table-layout:fixed;">
+    <table style="width:100%;table-layout:fixed;">
       <colgroup>
-        <col style="width:110px">
-        <col style="width:65px"><col style="width:65px">
-        <col style="width:65px"><col style="width:65px">
-        <col style="width:81px"><col style="width:81px"><col style="width:81px"><col style="width:81px"><col style="width:81px">
-        <col style="width:81px"><col style="width:81px"><col style="width:81px"><col style="width:81px"><col style="width:81px">
+        <col style="width:10%">
+        <col style="width:6%"><col style="width:5%">
+        <col style="width:6%"><col style="width:5%">
+        <col style="width:7%"><col style="width:5%"><col style="width:7%"><col style="width:8%"><col style="width:7%">
+        <col style="width:7%"><col style="width:5%"><col style="width:7%"><col style="width:8%"><col style="width:7%">
       </colgroup>
       <thead>
         <tr>
@@ -6613,8 +6613,8 @@ function renderMgmtEvents(snaps) {
   const wrap = document.createElement('div');
   wrap.style.cssText = 'overflow-x:auto;';
   el.appendChild(wrap);
-  wrap.innerHTML = '<table style="width:1180px;table-layout:fixed;border-collapse:collapse;">' +
-    '<colgroup><col style="width:110px"><col style="width:130px"><col style="width:130px"><col style="width:405px"><col style="width:405px"></colgroup>' +
+  wrap.innerHTML = '<table style="width:100%;table-layout:fixed;border-collapse:collapse;">' +
+    '<colgroup><col style="width:10%"><col style="width:11%"><col style="width:11%"><col style="width:34%"><col style="width:34%"></colgroup>' +
     '<thead><tr style="background:#f9fafb;">' +
     '<th style="text-align:left;padding:9px 12px;font-size:12.5px;font-weight:600;color:#374151;white-space:nowrap;border-bottom:2px solid #e5e7eb;">数据周</th>' +
     assets.map(a => '<th style="text-align:left;padding:9px 12px;font-size:12.5px;font-weight:600;color:' + a.color + ';border-bottom:2px solid #e5e7eb;">' + a.lbl + '</th>').join('') +
