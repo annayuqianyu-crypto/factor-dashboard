@@ -4867,7 +4867,7 @@ body {
 
           <div style="font-size:14px;font-weight:700;color:#166534;">API 已配置</div>
 
-          <div style="font-size:12px;color:#15803d;margin-top:2px;">DeepSeek &nbsp;·&nbsp; deepseek-v4-pro &nbsp;·&nbsp; api.deepseek.com</div>
+          <div style="font-size:12px;color:#15803d;margin-top:2px;">DeepSeek &nbsp;·&nbsp; deepseek-chat &nbsp;·&nbsp; Cloudflare Worker 代理</div>
 
         </div>
 
@@ -4907,11 +4907,11 @@ body {
 
         <div>
 
-          <div style="font-size:11px;color:#374151;font-weight:600;margin-bottom:4px;">API Key（留空使用公司 Key）</div>
+          <div style="font-size:11px;color:#374151;font-weight:600;margin-bottom:4px;">访问密码 Access Token（团队统一密码，输入后自动保存）</div>
 
           <input id="apiKeyInput" type="password"
 
-            placeholder="留空 = 使用公司统一 Key"
+            placeholder="填写团队访问密码"
 
             style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;"
 
@@ -4937,13 +4937,13 @@ body {
 
       <div>
 
-        <div style="font-size:11px;color:#374151;font-weight:600;margin-bottom:4px;">API 服务地址（留空使用 api.deepseek.com）</div>
+        <div style="font-size:11px;color:#374151;font-weight:600;margin-bottom:4px;">API 服务地址（已自动使用公司代理，无需填写）</div>
 
         <div style="display:flex;gap:8px;align-items:center;">
 
           <input id="apiBaseInput"
 
-            placeholder="留空 = https://api.deepseek.com"
+            placeholder="已使用公司代理，无需填写"
 
             list="base-suggestions"
 
@@ -10143,7 +10143,7 @@ async function pgStartGenerate() {
 
   const { key, model, base } = pgGetConfig();
 
-  if (!key) { alert('请先填写 API Key，并点击「测试连接」确认可用'); return; }
+  if (!key) { alert('请先在上方「访问密码」框填写团队 Access Token，然后点击「测试连接」'); return; }
 
   const bu = document.getElementById('pgBuSelect')?.value || 'All Department';
 
@@ -10824,7 +10824,7 @@ function pgSaveKey() {
 
   const bu    = document.getElementById('pgBuSelect')?.value    || '';
 
-  if (key)   localStorage.setItem('pg_api_key',   key);
+  if (key)   { localStorage.setItem('pg_api_key', key); localStorage.setItem('zx_proxy_token', key); }
 
   if (base)  localStorage.setItem('pg_api_base',  base);
 
@@ -10903,10 +10903,14 @@ const COMPANY_TX_KEY    = '76tVwDIA'+'sa8UfhYGn'+'ANOFwUq0u'+'eEbmlY';
 const COMPANY_TX_ID     = 'AKID'+'LbeYGpESW'+'ZTCj3CoER'+'UP9g197vl'+'YJvLa';
 
 function pgGetConfig() {
-  const token = localStorage.getItem('zx_proxy_token') || '';
+  // Access Token：输入框 → localStorage pg_api_key → localStorage zx_proxy_token
+  const key = (document.getElementById('apiKeyInput')?.value || '').trim()
+    || localStorage.getItem('pg_api_key')
+    || localStorage.getItem('zx_proxy_token')
+    || '';
   const model = (document.getElementById('apiModelInput')?.value || '').trim() || COMPANY_API_MODEL;
-  const base  = COMPANY_API_BASE;   // 始终指向 Worker
-  return { key: token, model, base };
+  const base  = COMPANY_API_BASE;   // 始终指向 Worker，忽略 apiBaseInput
+  return { key, model, base };
 }
 // ── 代理 Token 首次设置 ───────────────────────────────────────
 function pgEnsureToken() {
