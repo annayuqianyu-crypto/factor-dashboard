@@ -6612,6 +6612,7 @@ function renderMgmtEvents(snaps) {
   }).join('');
   const wrap = document.createElement('div');
   wrap.style.cssText = 'overflow-x:auto;';
+  el.innerHTML = "";  // 每次重渲染先清空，避免重复追加
   el.appendChild(wrap);
   wrap.innerHTML = '<table style="width:100%;table-layout:fixed;border-collapse:collapse;">' +
     '<colgroup><col style="width:10%"><col style="width:14%"><col style="width:14%"><col style="width:31%"><col style="width:31%"></colgroup>' +
