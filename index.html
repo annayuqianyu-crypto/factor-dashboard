@@ -1390,14 +1390,16 @@ body {
 
   <div class="card" style="margin-bottom:18px;">
     <div class="card-title">周度变化明细</div>
-    <table>
+    <div style="overflow-x:auto;">
+    <table style="min-width:1180px;">
       <thead>
         <tr>
           <th rowspan="2" style="white-space:nowrap;vertical-align:middle;">数据周</th>
           <th colspan="2" style="text-align:center;background:#eff6ff;color:#1d4ed8;">🧬 因子</th>
           <th colspan="2" style="text-align:center;background:#f0fdf4;color:#15803d;">📡 场景</th>
           <th colspan="5" style="text-align:center;background:#fee2e2;color:#991b1b;border-left:2px solid #fca5a5;border-right:2px solid #fca5a5;">💢 痛点</th>
-          <th rowspan="2" style="vertical-align:middle;">关键事件</th>
+          <th colspan="5" style="text-align:center;background:#f3e8ff;color:#6b21a8;border-right:2px solid #c4b5fd;">🧪 SKU</th>
+          <th rowspan="2" style="vertical-align:middle;min-width:240px;">关键事件（按资产分类）</th>
         </tr>
         <tr>
           <th style="background:#f8fbff;">总数</th><th style="background:#f8fbff;">周增</th>
@@ -1407,11 +1409,17 @@ body {
           <th style="background:#fef2f2;color:#1d4ed8;white-space:nowrap;">CM 新增</th>
           <th style="background:#fef2f2;color:#15803d;white-space:nowrap;">Legal 新增</th>
           <th style="background:#fef2f2;color:#c2410c;white-space:nowrap;border-right:2px solid #fca5a5;">Tax 新增</th>
+          <th style="background:#faf5ff;">总数</th>
+          <th style="background:#faf5ff;">周增</th>
+          <th style="background:#faf5ff;color:#1d4ed8;white-space:nowrap;">CM 新增</th>
+          <th style="background:#faf5ff;color:#15803d;white-space:nowrap;">Legal 新增</th>
+          <th style="background:#faf5ff;color:#c2410c;white-space:nowrap;border-right:2px solid #c4b5fd;">Tax 新增</th>
         </tr>
       </thead>
       <tbody id="mgmt-week-table"></tbody>
     </table>
-    <div style="margin-top:8px;font-size:11.5px;color:#9ca3af;" data-ek="week-table-footnote">注：自 2026-06-10 开始统计各 BU 上线痛点新增数量</div>
+    </div>
+    <div style="margin-top:8px;font-size:11.5px;color:#9ca3af;" data-ek="week-table-footnote">注：自 2026-06-10 开始统计各 BU 上线痛点 / SKU 新增数量；关键事件按因子 / 痛点 / 场景 / SKU 四项资产分类填写</div>
     <button id="mgmt-add-week-btn" onclick="mgmtAddWeek()"
       style="display:none;margin-top:12px;padding:7px 18px;background:#eff6ff;color:#1d4ed8;border:1px dashed #93c5fd;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;">
       ➕ 新增一周
@@ -6391,16 +6399,27 @@ function initBusinessCharts() {
 const SKU_BU = { Tax: 203, Legal: 62, CM: 53, total: 318 };
 
 // 周度快照（手工维护：每周追加一行；scenes 为 null 时实时读 ALL_HGJ_DATA）
-// 痛点口径：2026-05-03 起仅统计"人工审核入库"数（过程稿如痛点分裂1042/1070不计入，只写备注）
-// newCM/newLegal/newTax = 各BU当周人工审核入库新增数（null=该周未开始追踪）
-// sku = SKU库总数（月增维度，null=该期未追踪；2026-06 起以知识卡片318支为起点）
+// 痛点/SKU口径：仅统计人工审核入库数；newXxxCM/Legal/Tax = 各BU当周新增（null=未追踪）
+// 关键事件按四项数据资产分类：noteFactor 因子 / notePain 痛点 / noteScene 场景 / noteSku SKU
 const MGMT_WEEKLY = [
-  { date: '2026-03-22', factors: 1216, pains: 299, scenes: 0,   sku: null, newCM: null, newLegal: null, newTax: null, note: '痛点库1.0版本共299条人工搓制上线；因子库 v6.0 发布（1216行）' },
-  { date: '2026-04-12', factors: 1351, pains: 360, scenes: 0,   sku: null, newCM: null, newLegal: null, newTax: null, note: '新增60条上市公司相关痛点，总痛点数359条，痛点自动化步骤和相关skill蒸馏成型；因子库 v6.0 补充版发布（+135行，质检修复78处）' },
-  { date: '2026-05-03', factors: 1351, pains: 488, scenes: 106, sku: null, newCM: null, newLegal: null, newTax: null, note: '数据驾驶舱系统上线，痛点生成实现自动化；法律BU新增128条新痛点，总痛点数达488条；' },
-  { date: '2026-05-31', factors: 1351, pains: 488, scenes: 505, sku: null, newCM: null, newLegal: null, newTax: null, note: '手搓版299条母痛点通过因子COT 分裂子痛点1049条；实现HGJ场景自动化生成 209条' },
-  { date: '2026-06-07', factors: 1408, pains: 488, scenes: 505, sku: null, newCM: null, newLegal: null, newTax: null, note: '因子库 v6.1 版本发布，根据法律新增的128条痛点反哺+57行' },
-  { date: '2026-06-10', factors: 1408, pains: 488, scenes: 505, sku: 318, newCM: 0, newLegal: 0, newTax: 0, note: '1049条子痛点完成相似性、合规性、专业性审查，1002条落库PLM待BU人工审核后上线小程序；SKU库以知识卡片318支为统计起点（Tax 203/Legal 62/CM 53）' },
+  { date: '2026-03-22', factors: 1216, pains: 299, scenes: 0,   sku: null,
+    newCM: null, newLegal: null, newTax: null, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
+    noteFactor: '因子库 v6.0 发布（1216行）', notePain: '痛点库1.0版本共299条人工搓制上线', noteScene: '', noteSku: '' },
+  { date: '2026-04-12', factors: 1351, pains: 360, scenes: 0,   sku: null,
+    newCM: null, newLegal: null, newTax: null, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
+    noteFactor: 'v6.0 补充版发布（+135行，质检修复78处）', notePain: '新增60条上市公司相关痛点，总359条；痛点自动化步骤与skill蒸馏成型', noteScene: '', noteSku: '' },
+  { date: '2026-05-03', factors: 1351, pains: 488, scenes: 106, sku: null,
+    newCM: null, newLegal: null, newTax: null, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
+    noteFactor: '', notePain: '法律BU新增128条，总488条；痛点生成实现自动化', noteScene: '数据驾驶舱系统上线，渠道场景首批106条', noteSku: '' },
+  { date: '2026-05-31', factors: 1351, pains: 488, scenes: 505, sku: null,
+    newCM: null, newLegal: null, newTax: null, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
+    noteFactor: '', notePain: '299条母痛点经因子COT分裂子痛点1049条（过程稿）', noteScene: 'HGJ场景自动化生成，累计505条', noteSku: '' },
+  { date: '2026-06-07', factors: 1408, pains: 488, scenes: 505, sku: null,
+    newCM: null, newLegal: null, newTax: null, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
+    noteFactor: 'v6.1 发布，法律128条痛点反哺+57行', notePain: '', noteScene: '', noteSku: '' },
+  { date: '2026-06-10', factors: 1408, pains: 488, scenes: 505, sku: 318,
+    newCM: 0, newLegal: 0, newTax: 0, newSkuCM: 0, newSkuLegal: 0, newSkuTax: 0,
+    noteFactor: '', notePain: '1049条子痛点完成三性审查，1002条落库PLM待BU人工审核', noteScene: '', noteSku: 'SKU库以知识卡片318支为统计起点（Tax 203/Legal 62/CM 53）' },
 ];
 
 function _mgmtResolve(snap) {
@@ -6505,7 +6524,17 @@ function initMgmtPage() {
         <td style="background:#fef7f7;"><span class="mgmt-wk" data-idx="${i}" data-f="newCM"    style="color:#1d4ed8;font-weight:600;">${s.newCM    == null ? '—' : s.newCM}</span></td>
         <td style="background:#fef7f7;"><span class="mgmt-wk" data-idx="${i}" data-f="newLegal" style="color:#15803d;font-weight:600;">${s.newLegal == null ? '—' : s.newLegal}</span></td>
         <td style="background:#fef7f7;border-right:2px solid #fca5a5;"><span class="mgmt-wk" data-idx="${i}" data-f="newTax" style="color:#c2410c;font-weight:600;">${s.newTax == null ? '—' : s.newTax}</span></td>
-        <td style="font-size:12px;color:#4b5563;line-height:1.6;"><span class="mgmt-wk" data-idx="${i}" data-f="note" style="display:block;">${s.note}</span></td>
+        <td style="background:#faf5ff;"><strong class="mgmt-wk" data-idx="${i}" data-f="sku" style="color:#6b21a8;">${s.sku == null ? '—' : s.sku.toLocaleString()}</strong></td>
+        <td style="background:#faf5ff;">${s.sku == null ? '—' : d(s.sku, (p && p.sku != null) ? p.sku : s.sku)}</td>
+        <td style="background:#faf5ff;"><span class="mgmt-wk" data-idx="${i}" data-f="newSkuCM"    style="color:#1d4ed8;font-weight:600;">${s.newSkuCM    == null ? '—' : s.newSkuCM}</span></td>
+        <td style="background:#faf5ff;"><span class="mgmt-wk" data-idx="${i}" data-f="newSkuLegal" style="color:#15803d;font-weight:600;">${s.newSkuLegal == null ? '—' : s.newSkuLegal}</span></td>
+        <td style="background:#faf5ff;border-right:2px solid #c4b5fd;"><span class="mgmt-wk" data-idx="${i}" data-f="newSkuTax" style="color:#c2410c;font-weight:600;">${s.newSkuTax == null ? '—' : s.newSkuTax}</span></td>
+        <td style="font-size:11.5px;color:#4b5563;line-height:1.55;min-width:240px;">
+          ${[['🧬因子','noteFactor','#1d4ed8'],['💢痛点','notePain','#dc2626'],['📡场景','noteScene','#15803d'],['🧪SKU','noteSku','#7c3aed']].map(([lbl,f,c]) => {
+            const val = s[f] != null ? s[f] : (f==='noteFactor' && s.note ? s.note : '');
+            return `<div style="margin-bottom:3px;"><span style="color:${c};font-weight:700;">${lbl}：</span><span class="mgmt-wk" data-idx="${i}" data-f="${f}" style="color:#4b5563;">${val || '<span style=color:#cbd5e1>—</span>'}</span></div>`;
+          }).join('')}
+        </td>
       </tr>`;
     }).reverse();
     tbody.innerHTML = rows.join('');
@@ -6607,10 +6636,12 @@ function _mgmtSaveWeeklyFromTable() {
     const f = el.dataset.f;
     if (isNaN(i) || !next[i]) return;
     const raw = el.textContent.trim();
-    if (f === 'date' || f === 'note') {
-      next[i][f] = raw;
-    } else if (f === 'newCM' || f === 'newLegal' || f === 'newTax') {
-      // BU 周度新增：'—' 或空 = 未追踪(null)，数字 = 当周新增
+    const NULLABLE_BU = ['newCM','newLegal','newTax','newSkuCM','newSkuLegal','newSkuTax','sku'];
+    const NOTE_FIELDS = ['note','noteFactor','notePain','noteScene','noteSku'];
+    if (f === 'date' || NOTE_FIELDS.includes(f)) {
+      next[i][f] = (raw === '—' || raw === '-') ? '' : raw;
+    } else if (NULLABLE_BU.includes(f)) {
+      // 周度新增 / SKU总数：'—' 或空 = 未追踪(null)，数字 = 实际值
       if (raw === '' || raw === '—' || raw === '-') next[i][f] = null;
       else {
         const n = parseInt(raw.replace(/[,，\s]/g, ''), 10);
@@ -6631,7 +6662,10 @@ function mgmtAddWeek() {
   const cur = _mgmtGetWeekly().map(_mgmtResolve);
   const last = cur[cur.length - 1] || { factors: 0, pains: 0, scenes: 0 };
   const today = new Date().toISOString().slice(0, 10);
-  cur.push({ date: today, factors: last.factors, pains: last.pains, scenes: last.scenes, sku: (last.sku != null ? last.sku : null), newCM: 0, newLegal: 0, newTax: 0, note: '（点击填写本周事件）' });
+  cur.push({ date: today, factors: last.factors, pains: last.pains, scenes: last.scenes,
+    sku: (last.sku != null ? last.sku : null),
+    newCM: 0, newLegal: 0, newTax: 0, newSkuCM: 0, newSkuLegal: 0, newSkuTax: 0,
+    noteFactor: '', notePain: '', noteScene: '', noteSku: '' });
   try { localStorage.setItem(MGMT_WEEKLY_USER_KEY, JSON.stringify(cur)); } catch {}
   initMgmtPage();
 }
