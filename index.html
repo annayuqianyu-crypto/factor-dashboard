@@ -10319,7 +10319,7 @@ ${factorPathsText}
 
       method: 'POST',
 
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      headers: { 'Content-Type': 'application/json', 'X-Access-Token': key },
 
       body: JSON.stringify({
 
@@ -10889,29 +10889,38 @@ function pgLoadKey() {
 // ── 从输入框读取配置（含默认值）────────────────────────────────
 
 // ── 公司统一 API 配置（管理员内置，无需用户填写）────────────────
-const COMPANY_API_KEY   = 'sk-603a729e51d54a82bf8b8de3e06530b4';
-const COMPANY_API_BASE  = 'https://api.deepseek.com';
-const COMPANY_API_MODEL = 'deepseek-v4-pro';
+// API 代理配置（密钥存于 Cloudflare Worker，不在此处）
+const COMPANY_API_KEY   = '';   // 不再使用，由 Worker 持有
+const COMPANY_API_BASE  = 'https://zx-factordashboard-deepseek-proxy.annayuqianyu.workers.dev';
+const COMPANY_API_MODEL = 'deepseek-chat';
+const COMPANY_PROXY_TOKEN = (() => {
+  // 首次使用时用户填写，存入 localStorage
+  return localStorage.getItem('zx_proxy_token') || '';
+})();
 const COMPANY_JINA_KEY  = 'jina_bb7fd8384f8740009e33867a7ecfa3d5C6ANntz0CxjUtSumMPbphypLkS5V';
 // 腾讯云混元联网搜索
 const COMPANY_TX_KEY    = '76tVwDIA'+'sa8UfhYGn'+'ANOFwUq0u'+'eEbmlY';
 const COMPANY_TX_ID     = 'AKID'+'LbeYGpESW'+'ZTCj3CoER'+'UP9g197vl'+'YJvLa';
 
 function pgGetConfig() {
-
-  const key   = (document.getElementById('apiKeyInput')?.value   || '').trim() || COMPANY_API_KEY;
-
+  const token = localStorage.getItem('zx_proxy_token') || '';
   const model = (document.getElementById('apiModelInput')?.value || '').trim() || COMPANY_API_MODEL;
-
-  let base    = (document.getElementById('apiBaseInput')?.value  || '').trim() || COMPANY_API_BASE;
-
-  base = base.replace(/\/+$/, '');                    // 去掉末尾斜杠
-
-  if (!base.endsWith('/v1')) base = base + '/v1';     // 自动补 /v1
-
-  return { key, model, base };
-
+  const base  = COMPANY_API_BASE;   // 始终指向 Worker
+  return { key: token, model, base };
 }
+// ── 代理 Token 首次设置 ───────────────────────────────────────
+function pgEnsureToken() {
+  if (!localStorage.getItem('zx_proxy_token')) {
+    const t = prompt('请输入团队访问密码（Access Token），填写一次永久保存：');
+    if (t && t.trim()) {
+      localStorage.setItem('zx_proxy_token', t.trim());
+      return t.trim();
+    }
+    return '';
+  }
+  return localStorage.getItem('zx_proxy_token');
+}
+
 
 
 
@@ -10935,7 +10944,7 @@ async function pgTestConnection() {
 
       method: 'POST',
 
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      headers: { 'Content-Type': 'application/json', 'X-Access-Token': key },
 
       body: JSON.stringify({
 
@@ -11788,7 +11797,7 @@ ${factorPathsText}
 
       const resp = await fetch(base + '/chat/completions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+        headers: { 'Content-Type': 'application/json', 'X-Access-Token': key },
         body: JSON.stringify({
           model,
           messages: [{ role: 'user', content: buildPrompt(batch, i) }],
@@ -13332,7 +13341,7 @@ ${sourceList}
   try {
     const resp = await fetch(base + '/chat/completions', {
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      headers:{'Content-Type':'application/json','X-Access-Token':key},
       body: JSON.stringify({
         model: localStorage.getItem('pg_api_model') || COMPANY_API_MODEL,
         messages:[{role:'user',content:prompt}],
