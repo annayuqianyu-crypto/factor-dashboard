@@ -25,12 +25,30 @@ body {
 
   font-family: 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
 
-  background: #f9fafb;
+  background: #f5f7fb;
 
   color: #1f2937;
 
   min-width: 1200px;
 
+}
+
+:root {
+  --zx-bg: #f5f7fb;
+  --zx-surface: #ffffff;
+  --zx-surface-soft: #f8fafc;
+  --zx-line: #e2e8f0;
+  --zx-text: #142033;
+  --zx-muted: #64748b;
+  --zx-ink: #0f172a;
+  --zx-primary: #2563eb;
+  --zx-factor: #2563eb;
+  --zx-pain: #e11d48;
+  --zx-scene: #16a34a;
+  --zx-sku: #7c3aed;
+  --zx-news: #0891b2;
+  --zx-shadow: 0 14px 34px rgba(15, 23, 42, .07);
+  --zx-shadow-soft: 0 8px 22px rgba(15, 23, 42, .05);
 }
 
 
@@ -41,11 +59,12 @@ body {
 
   position: fixed; top: 0; left: 0; right: 0; height: 56px; z-index: 100;
 
-  background: #1a56db;
+  background: #0f172a;
 
   display: flex; align-items: center; padding: 0 24px;
 
-  box-shadow: 0 2px 8px rgba(26,86,219,.25);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, .16);
+  border-bottom: 1px solid rgba(255,255,255,.08);
 
 }
 
@@ -57,15 +76,16 @@ body {
 
 .topbar .subtitle {
 
-  margin-left: 16px; font-size: 13px; color: rgba(255,255,255,.7);
+  margin-left: 16px; font-size: 13px; color: rgba(255,255,255,.68);
 
 }
 
 .topbar .badge {
 
-  margin-left: auto; font-size: 12px; color: rgba(255,255,255,.8);
+  margin-left: auto; font-size: 12px; color: rgba(255,255,255,.86);
 
-  background: rgba(255,255,255,.15); padding: 3px 10px; border-radius: 20px;
+  background: rgba(255,255,255,.12); padding: 5px 12px; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
 
 }
 
@@ -77,17 +97,17 @@ body {
 
   position: fixed; top: 56px; left: 0; width: 200px; bottom: 0;
 
-  background: #fff; border-right: 1px solid #e5e7eb;
+  background: #ffffff; border-right: 1px solid var(--zx-line);
 
-  overflow-y: auto; padding: 16px 0;
+  overflow-y: auto; padding: 18px 10px;
 
 }
 
 .nav-section-title {
 
-  font-size: 11px; color: #9ca3af; font-weight: 600; letter-spacing: .8px;
+  font-size: 10.5px; color: #94a3b8; font-weight: 700; letter-spacing: .9px;
 
-  padding: 8px 16px 4px; text-transform: uppercase;
+  padding: 9px 10px 6px; text-transform: uppercase;
 
 }
 
@@ -95,19 +115,19 @@ body {
 
   display: flex; align-items: center; gap: 8px;
 
-  padding: 9px 16px; cursor: pointer; font-size: 13.5px; color: #374151;
+  padding: 9px 10px; cursor: pointer; font-size: 13.5px; color: #475569;
 
   font-family: 'Microsoft YaHei', '微软雅黑', sans-serif; font-weight: 700;
 
-  border-radius: 6px; margin: 1px 8px; transition: all .15s;
+  border-radius: 8px; margin: 2px 0; transition: all .15s;
 
 }
 
-.nav-item:hover { background: #f0f7f4; color: #2d6a4f; }
+.nav-item:hover { background: #f1f5f9; color: var(--zx-ink); }
 
-.nav-item.active { background: #e8f5ee; color: #2d6a4f; font-weight: 700; border-left: 3px solid #2d6a4f; padding-left: 13px; }
+.nav-item.active { background: #eef4ff; color: #1d4ed8; font-weight: 800; border-left: 3px solid #2563eb; padding-left: 10px; }
 
-.nav-item .icon { display: none; }
+.nav-item .icon { display: inline-block; width: 18px; text-align: center; font-size: 13px; }
 
 
 
@@ -115,7 +135,7 @@ body {
 
 .content {
 
-  margin-left: 200px; margin-top: 56px; padding: 28px 32px;
+  margin-left: 200px; margin-top: 56px; padding: 30px 34px;
 
   min-height: calc(100vh - 56px);
 
@@ -131,15 +151,16 @@ body {
 
 .card {
 
-  background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;
+  background: #fff; border: 1px solid var(--zx-line); border-radius: 8px;
 
   padding: 20px 24px; margin-bottom: 20px;
+  box-shadow: var(--zx-shadow-soft);
 
 }
 
 .card-title {
 
-  font-size: 15px; font-weight: 600; color: #111827; margin-bottom: 16px;
+  font-size: 15px; font-weight: 800; color: var(--zx-text); margin-bottom: 16px;
 
   display: flex; align-items: center; gap: 8px;
 
@@ -149,7 +170,7 @@ body {
 
   content: ''; display: block; width: 4px; height: 16px;
 
-  background: #1a56db; border-radius: 2px;
+  background: var(--zx-primary); border-radius: 2px;
 
 }
 
@@ -633,6 +654,433 @@ tr:hover td { background: #fafafa; }
 
 .gen-empty { text-align: center; padding: 60px 0; color: #9ca3af; font-size: 14px; }
 
+/* ── 管理看板视觉升级：克制彩色系统 ── */
+#page-mgmt {
+  max-width: 1480px;
+}
+
+#page-mgmt .page-header {
+  position: relative;
+  padding: 22px 24px !important;
+  margin-bottom: 22px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 58%, #f7fdf9 100%);
+  border: 1px solid var(--zx-line);
+  border-radius: 8px;
+  box-shadow: var(--zx-shadow-soft);
+  overflow: hidden;
+}
+
+#page-mgmt .page-header::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  background: linear-gradient(180deg, var(--zx-factor), var(--zx-pain) 52%, var(--zx-scene));
+}
+
+#page-mgmt .page-header h2 {
+  font-size: 24px;
+  color: var(--zx-ink);
+  letter-spacing: 0;
+}
+
+#page-mgmt .page-header p {
+  color: var(--zx-muted);
+  margin-top: 6px;
+}
+
+#page-mgmt button {
+  box-shadow: none !important;
+}
+
+#mgmt-edit-btn {
+  background: #ffffff !important;
+  color: #334155 !important;
+  border: 1px solid var(--zx-line) !important;
+  border-radius: 8px !important;
+}
+
+#mgmt-export-btn {
+  background: var(--zx-primary) !important;
+  border-radius: 8px !important;
+}
+
+#mgmt-reset-btn {
+  border-radius: 8px !important;
+}
+
+#mgmt-edit-hint {
+  background: #fff7ed !important;
+  border: 1px dashed #fdba74 !important;
+  border-radius: 8px !important;
+  color: #9a3412 !important;
+}
+
+#page-mgmt > div[style*="font-size:14px"][style*="font-weight:700"] {
+  margin-top: 6px !important;
+  margin-bottom: 12px !important;
+  color: #334155 !important;
+  letter-spacing: 0;
+}
+
+#page-mgmt > .mgmt-kpi-grid {
+  gap: 18px !important;
+  margin-bottom: 30px !important;
+}
+
+#page-mgmt > .mgmt-kpi-grid > div {
+  position: relative;
+  min-height: 154px;
+  background: #ffffff !important;
+  border: 1px solid var(--zx-line) !important;
+  border-radius: 8px !important;
+  padding: 20px 22px 18px !important;
+  box-shadow: var(--zx-shadow);
+  overflow: hidden;
+}
+
+#page-mgmt > .mgmt-kpi-grid > div::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 4px;
+}
+
+#page-mgmt > .mgmt-kpi-grid > div:nth-child(1)::before { background: var(--zx-factor); }
+#page-mgmt > .mgmt-kpi-grid > div:nth-child(2)::before { background: var(--zx-pain); }
+#page-mgmt > .mgmt-kpi-grid > div:nth-child(3)::before { background: var(--zx-scene); }
+#page-mgmt > .mgmt-kpi-grid > div:nth-child(4)::before { background: var(--zx-sku); }
+
+#page-mgmt [data-ek="kpi-factor-name"],
+#page-mgmt [data-ek="kpi-pain-name"],
+#page-mgmt [data-ek="kpi-scene-name"],
+#page-mgmt [data-ek="kpi-sku-name"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px !important;
+  background: #f8fafc;
+}
+
+#page-mgmt [data-ek="kpi-factor-name"] { color: var(--zx-factor) !important; background: #eff6ff; }
+#page-mgmt [data-ek="kpi-pain-name"] { color: var(--zx-pain) !important; background: #fff1f2; }
+#page-mgmt [data-ek="kpi-scene-name"] { color: var(--zx-scene) !important; background: #f0fdf4; }
+#page-mgmt [data-ek="kpi-sku-name"] { color: var(--zx-sku) !important; background: #f5f3ff; }
+
+#mgmt-factor-total,
+#mgmt-pain-total,
+#mgmt-scene-total,
+#mgmt-sku-total {
+  font-size: 38px !important;
+  letter-spacing: 0;
+  color: var(--zx-ink) !important;
+}
+
+#mgmt-factor-sub,
+#mgmt-pain-sub,
+#mgmt-scene-sub,
+#mgmt-sku-sub {
+  color: var(--zx-muted) !important;
+}
+
+#page-mgmt table {
+  border: 1px solid var(--zx-line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+#page-mgmt thead tr {
+  background: #f8fafc;
+}
+
+#page-mgmt th {
+  font-size: 12px;
+  color: #475569;
+  border-bottom: 1px solid var(--zx-line);
+}
+
+#page-mgmt td {
+  color: #334155;
+}
+
+#page-mgmt tr:hover td {
+  background: #f8fafc;
+}
+
+#page-mgmt .three-col > div {
+  border: 1px solid var(--zx-line);
+  border-radius: 8px !important;
+}
+
+#page-mgmt .three-col > div:nth-child(1) { background: #f8fbff !important; }
+#page-mgmt .three-col > div:nth-child(2) { background: #fff8fa !important; }
+#page-mgmt .three-col > div:nth-child(3) { background: #f7fdf9 !important; }
+
+/* ── 管理看板视觉二版：产品中心工作台 ── */
+body {
+  background: #f3f6fb;
+  color: #162033;
+}
+
+.topbar {
+  height: 58px;
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, .08), 0 10px 28px rgba(15, 23, 42, .06);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.topbar .logo {
+  color: #0f172a;
+  font-size: 17px;
+  letter-spacing: 0;
+}
+
+.topbar .logo::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 10px;
+  border-radius: 3px;
+  background: #16a34a;
+  box-shadow: 14px 0 0 #2563eb, 28px 0 0 #e11d48;
+  vertical-align: 1px;
+}
+
+.topbar .subtitle {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.topbar .badge {
+  color: #334155;
+  background: #f8fafc;
+  border: 1px solid #dbe4ee;
+  font-weight: 700;
+}
+
+.sidebar {
+  top: 58px;
+  width: 216px;
+  background: #101827;
+  border-right: none;
+  padding: 18px 12px;
+}
+
+.nav-section-title {
+  color: #718096;
+  padding: 12px 10px 7px;
+}
+
+.nav-item {
+  color: #cbd5e1;
+  padding: 10px 11px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.nav-item:hover {
+  background: rgba(255,255,255,.08);
+  color: #ffffff;
+}
+
+.nav-item.active {
+  background: #ffffff;
+  color: #0f172a;
+  border-left: none;
+  padding-left: 11px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.18);
+}
+
+.content {
+  margin-left: 216px;
+  margin-top: 58px;
+  padding: 34px 38px;
+}
+
+#page-mgmt {
+  max-width: none;
+}
+
+#page-mgmt .page-header {
+  min-height: 146px;
+  padding: 26px 28px !important;
+  background: #101827 !important;
+  border: 1px solid #1e293b !important;
+  border-radius: 10px !important;
+  box-shadow: 0 18px 44px rgba(15, 23, 42, .18) !important;
+}
+
+#page-mgmt .page-header::before {
+  width: 6px;
+  background: linear-gradient(180deg, #22c55e 0%, #2563eb 48%, #f43f5e 100%);
+}
+
+#page-mgmt .page-header h2 {
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+#page-mgmt .page-header p {
+  max-width: 560px;
+  color: #a8b4c7;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+#mgmt-edit-btn {
+  background: rgba(255,255,255,.08) !important;
+  color: #e2e8f0 !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+}
+
+#mgmt-export-btn {
+  background: #22c55e !important;
+  color: #062813 !important;
+  font-weight: 800 !important;
+}
+
+#mgmt-reset-btn {
+  background: rgba(255,255,255,.08) !important;
+  color: #fecaca !important;
+  border: 1px solid rgba(248,113,113,.34) !important;
+}
+
+#page-mgmt > div[style*="font-size:14px"][style*="font-weight:700"] {
+  margin-top: 24px !important;
+  margin-bottom: 14px !important;
+  color: #0f172a !important;
+  font-size: 13px !important;
+  letter-spacing: .02em;
+}
+
+#page-mgmt > .mgmt-kpi-grid {
+  gap: 20px !important;
+  margin-bottom: 32px !important;
+}
+
+#page-mgmt > .mgmt-kpi-grid > div {
+  min-height: 168px;
+  border-radius: 10px !important;
+  padding: 23px 24px 20px !important;
+  box-shadow: 0 16px 34px rgba(15, 23, 42, .10) !important;
+}
+
+#page-mgmt > .mgmt-kpi-grid > div:nth-child(1) {
+  background: #eaf3ff !important;
+  border-color: #b7d6ff !important;
+}
+
+#page-mgmt > .mgmt-kpi-grid > div:nth-child(2) {
+  background: #fff0f4 !important;
+  border-color: #ffc2d0 !important;
+}
+
+#page-mgmt > .mgmt-kpi-grid > div:nth-child(3) {
+  background: #e9fbf1 !important;
+  border-color: #aeecc7 !important;
+}
+
+#page-mgmt > .mgmt-kpi-grid > div:nth-child(4) {
+  background: #f3f0ff !important;
+  border-color: #d2c5fb !important;
+}
+
+#page-mgmt > .mgmt-kpi-grid > div::before {
+  height: 6px;
+}
+
+#page-mgmt [data-ek="kpi-factor-name"],
+#page-mgmt [data-ek="kpi-pain-name"],
+#page-mgmt [data-ek="kpi-scene-name"],
+#page-mgmt [data-ek="kpi-sku-name"] {
+  background: rgba(255,255,255,.68) !important;
+  border: 1px solid rgba(255,255,255,.76);
+  color: #0f172a !important;
+  font-weight: 900 !important;
+  letter-spacing: 0;
+}
+
+#mgmt-factor-total,
+#mgmt-pain-total,
+#mgmt-scene-total,
+#mgmt-sku-total {
+  margin-top: 14px !important;
+  margin-bottom: 6px !important;
+  font-size: 42px !important;
+  font-weight: 900 !important;
+  color: #0f172a !important;
+}
+
+#mgmt-factor-sub,
+#mgmt-pain-sub,
+#mgmt-scene-sub,
+#mgmt-sku-sub {
+  max-width: 90%;
+  font-size: 12.5px !important;
+  color: #334155 !important;
+  line-height: 1.75 !important;
+}
+
+.card {
+  border-radius: 10px;
+  border-color: #dbe4ee;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, .07);
+}
+
+.card-title {
+  color: #101827;
+  font-size: 15px;
+}
+
+#page-mgmt .card-title::before {
+  width: 8px;
+  height: 8px;
+  border-radius: 3px;
+  background: #2563eb;
+}
+
+#page-mgmt table {
+  border-radius: 10px;
+  border-color: #dbe4ee;
+}
+
+#page-mgmt th {
+  padding: 11px 12px;
+  color: #334155;
+  background-color: #f8fafc;
+}
+
+#page-mgmt td {
+  padding: 11px 12px;
+  color: #1f2937;
+}
+
+#page-mgmt .three-col {
+  gap: 14px;
+}
+
+#page-mgmt .three-col > div {
+  padding: 15px 16px !important;
+  border-radius: 10px !important;
+}
+
+#page-mgmt [data-ek="maint-note"] {
+  margin-top: 14px !important;
+  background: #fff7ed !important;
+  border-left-color: #f97316 !important;
+  border-radius: 8px !important;
+}
+
 </style>
 
 </head>
@@ -868,7 +1316,7 @@ tr:hover td { background: #fafafa; }
   <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;">
     <div>
       <h2 data-ek="mgmt-title">管理看板</h2>
-      <p data-ek="mgmt-desc">因子 · 痛点 · 渠道场景 三大数据资产的现状总览与周度变化追踪</p>
+      <p data-ek="mgmt-desc">因子 · 痛点 · 渠道场景 · SKU 四大数据资产的现状总览与周度变化追踪</p>
     </div>
     <div style="display:flex;gap:8px;flex-shrink:0;align-items:center;">
       <button id="mgmt-edit-btn" onclick="mgmtToggleEdit()"
@@ -887,11 +1335,11 @@ tr:hover td { background: #fafafa; }
     ✏️ <strong>编辑模式已开启</strong>：<span style="color:#a16207;">黄色虚线框</span>=文案可改；<span style="color:#0369a1;">蓝色虚线框</span>=周度表的日期/数值/事件可改（改完自动重算 KPI、环比与趋势图），表格下方可「➕ 新增一周」、行首 ✕ 可删行。全部修改自动保存在本浏览器。改完点「📋 导出修改」发给 Claude 固化到线上版本（否则其他人看到的仍是旧数据）。
   </div>
 
-  <!-- ── 静态管理：三大资产现状 KPI ── -->
+  <!-- ── 静态管理：四大资产现状 KPI ── -->
   <div style="font-size:14px;font-weight:700;color:#374151;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
     <span>📌</span> <span data-ek="sec-static">资产现状（静态管理）</span>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:28px;">
+  <div class="mgmt-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;margin-bottom:28px;">
 
     <div style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1px solid #bfdbfe;border-radius:14px;padding:20px 22px;">
       <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -920,6 +1368,15 @@ tr:hover td { background: #fafafa; }
       <div id="mgmt-scene-sub" data-ek="kpi-scene-sub" style="font-size:12px;color:#166534;line-height:1.7;"></div>
     </div>
 
+    <div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1px solid #ddd6fe;border-radius:14px;padding:20px 22px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:13px;font-weight:700;color:#7c3aed;" data-ek="kpi-sku-name">🧪 SKU库</div>
+        <span id="mgmt-sku-delta" style="font-size:12px;font-weight:700;"></span>
+      </div>
+      <div id="mgmt-sku-total" style="font-size:34px;font-weight:800;color:#4c1d95;margin:10px 0 4px;">—</div>
+      <div id="mgmt-sku-sub" data-ek="kpi-sku-sub" style="font-size:12px;color:#6d28d9;line-height:1.7;"></div>
+    </div>
+
   </div>
 
   <!-- ── 动态追踪：周度趋势 ── -->
@@ -927,7 +1384,7 @@ tr:hover td { background: #fafafa; }
     <span>📈</span> <span data-ek="sec-dynamic">周度变化（动态追踪）</span>
   </div>
   <div class="card" style="margin-bottom:18px;">
-    <div class="card-title">三项数据资产累计数量 · 周度趋势</div>
+    <div class="card-title">四项数据资产累计数量 · 周度趋势</div>
     <div id="chart-mgmt-trend" class="chart-box" style="height:340px;"></div>
   </div>
 
@@ -5931,16 +6388,20 @@ function initBusinessCharts() {
 
 // ============================================================
 
+// SKU库各BU分布（起点：全量SKU知识卡片-BU确认版本-20260603，共318支）
+const SKU_BU = { Tax: 203, Legal: 62, CM: 53, total: 318 };
+
 // 周度快照（手工维护：每周追加一行；scenes 为 null 时实时读 ALL_HGJ_DATA）
 // 痛点口径：2026-05-03 起仅统计"人工审核入库"数（过程稿如痛点分裂1042/1070不计入，只写备注）
 // newCM/newLegal/newTax = 各BU当周人工审核入库新增数（null=该周未开始追踪）
+// sku = SKU库总数（月增维度，null=该期未追踪；2026-06 起以知识卡片318支为起点）
 const MGMT_WEEKLY = [
-  { date: '2026-03-22', factors: 1216, pains: 299, scenes: 0,   newCM: null, newLegal: null, newTax: null, note: '痛点库1.0版本共299条人工搓制上线；因子库 v6.0 发布（1216行）' },
-  { date: '2026-04-12', factors: 1351, pains: 360, scenes: 0,   newCM: null, newLegal: null, newTax: null, note: '新增60条上市公司相关痛点，总痛点数359条，痛点自动化步骤和相关skill蒸馏成型；因子库 v6.0 补充版发布（+135行，质检修复78处）' },
-  { date: '2026-05-03', factors: 1351, pains: 488, scenes: 106, newCM: null, newLegal: null, newTax: null, note: '数据驾驶舱系统上线，痛点生成实现自动化；法律BU新增128条新痛点，总痛点数达488条；' },
-  { date: '2026-05-31', factors: 1351, pains: 488, scenes: 505, newCM: null, newLegal: null, newTax: null, note: '手搓版299条母痛点通过因子COT 分裂子痛点1049条；实现HGJ场景自动化生成 209条' },
-  { date: '2026-06-07', factors: 1408, pains: 488, scenes: 505, newCM: null, newLegal: null, newTax: null, note: '因子库 v6.1 版本发布，根据法律新增的128条痛点反哺+57行' },
-  { date: '2026-06-10', factors: 1408, pains: 488, scenes: 505, newCM: 0, newLegal: 0, newTax: 0, note: '1049条子痛点完成相似性、合规性、专业性审查，1002条落库PLM待BU人工审核后上线小程序' },
+  { date: '2026-03-22', factors: 1216, pains: 299, scenes: 0,   sku: null, newCM: null, newLegal: null, newTax: null, note: '痛点库1.0版本共299条人工搓制上线；因子库 v6.0 发布（1216行）' },
+  { date: '2026-04-12', factors: 1351, pains: 360, scenes: 0,   sku: null, newCM: null, newLegal: null, newTax: null, note: '新增60条上市公司相关痛点，总痛点数359条，痛点自动化步骤和相关skill蒸馏成型；因子库 v6.0 补充版发布（+135行，质检修复78处）' },
+  { date: '2026-05-03', factors: 1351, pains: 488, scenes: 106, sku: null, newCM: null, newLegal: null, newTax: null, note: '数据驾驶舱系统上线，痛点生成实现自动化；法律BU新增128条新痛点，总痛点数达488条；' },
+  { date: '2026-05-31', factors: 1351, pains: 488, scenes: 505, sku: null, newCM: null, newLegal: null, newTax: null, note: '手搓版299条母痛点通过因子COT 分裂子痛点1049条；实现HGJ场景自动化生成 209条' },
+  { date: '2026-06-07', factors: 1408, pains: 488, scenes: 505, sku: null, newCM: null, newLegal: null, newTax: null, note: '因子库 v6.1 版本发布，根据法律新增的128条痛点反哺+57行' },
+  { date: '2026-06-10', factors: 1408, pains: 488, scenes: 505, sku: 318, newCM: 0, newLegal: 0, newTax: 0, note: '1049条子痛点完成相似性、合规性、专业性审查，1002条落库PLM待BU人工审核后上线小程序；SKU库以知识卡片318支为统计起点（Tax 203/Legal 62/CM 53）' },
 ];
 
 function _mgmtResolve(snap) {
@@ -5981,10 +6442,20 @@ function initMgmtPage() {
   set('mgmt-pain-delta',   _mgmtDeltaBadge(latest.pains   - prev.pains,   '#dc2626') + '<span style="font-size:10px;color:#9ca3af;font-weight:400;"> 较上期</span>');
   set('mgmt-scene-delta',  _mgmtDeltaBadge(latest.scenes  - prev.scenes,  '#15803d') + '<span style="font-size:10px;color:#9ca3af;font-weight:400;"> 较上期</span>');
 
+  // SKU库：总数 + 月增（找最近两个有 sku 值的快照算增量）
+  const skuSnaps = snaps.filter(s => s.sku != null);
+  const skuLatest = skuSnaps.length ? skuSnaps[skuSnaps.length - 1].sku : SKU_BU.total;
+  const skuPrev   = skuSnaps.length > 1 ? skuSnaps[skuSnaps.length - 2].sku : null;
+  set('mgmt-sku-total', skuLatest.toLocaleString());
+  set('mgmt-sku-delta', (skuPrev == null
+      ? '<span style="color:#9ca3af;">起点基线</span>'
+      : _mgmtDeltaBadge(skuLatest - skuPrev, '#7c3aed')) + '<span style="font-size:10px;color:#9ca3af;font-weight:400;"> 月增</span>');
+
   const sceneMeetings = window._mgmtSceneStats ? window._mgmtSceneStats.meetings : '—';
   set('mgmt-factor-sub', `覆盖C端高净值客户 15 个分析维度<br>场景触发后，组装 主体/资产/动作/约束 四维链路形成痛点`);
   set('mgmt-pain-sub',   `小程序已上线 488 条<br>PLM痛点协作平台新增1002条待BU人工审核`);
   set('mgmt-scene-sub',  `渠道场景覆盖 2025-2026年 ${sceneMeetings} 场HGJ会议纪要<br>税务新闻实时搜索+场景生成`);
+  set('mgmt-sku-sub',    `Tax ${SKU_BU.Tax} / Legal ${SKU_BU.Legal} / CM ${SKU_BU.CM}<br>知识卡片存量，BU研发后月度更新`);
 
   // ── 趋势折线图（支持数据更新后重渲染）──
   const el = document.getElementById('chart-mgmt-trend');
@@ -5993,7 +6464,7 @@ function initMgmtPage() {
     if (!chart) { chart = echarts.init(el); chartInstances['mgmt-trend'] = chart; }
     chart.setOption({
       tooltip: { trigger: 'axis' },
-      legend: { data: ['因子', '痛点', '渠道场景'], top: 0 },
+      legend: { data: ['因子', '痛点', '渠道场景', 'SKU'], top: 0 },
       grid: { left: 50, right: 24, top: 40, bottom: 30 },
       xAxis: { type: 'category', data: snaps.map(s => s.date),
                axisLabel: { fontSize: 11 } },
@@ -6008,6 +6479,9 @@ function initMgmtPage() {
         { name: '渠道场景', type: 'line', data: snaps.map(s => s.scenes), smooth: true,
           itemStyle: { color: '#6BCB77' }, lineStyle: { width: 3 }, symbolSize: 8,
           label: { show: true, fontSize: 10, color: '#15803d', position: 'top', distance: 8 } },
+        { name: 'SKU',      type: 'line', data: snaps.map(s => s.sku), smooth: true, connectNulls: true,
+          itemStyle: { color: '#A855F7' }, lineStyle: { width: 3 }, symbolSize: 8,
+          label: { show: true, fontSize: 10, color: '#7c3aed', position: 'bottom', distance: 8 } },
       ],
     });
   }
@@ -6158,7 +6632,7 @@ function mgmtAddWeek() {
   const cur = _mgmtGetWeekly().map(_mgmtResolve);
   const last = cur[cur.length - 1] || { factors: 0, pains: 0, scenes: 0 };
   const today = new Date().toISOString().slice(0, 10);
-  cur.push({ date: today, factors: last.factors, pains: last.pains, scenes: last.scenes, newCM: 0, newLegal: 0, newTax: 0, note: '（点击填写本周事件）' });
+  cur.push({ date: today, factors: last.factors, pains: last.pains, scenes: last.scenes, sku: (last.sku != null ? last.sku : null), newCM: 0, newLegal: 0, newTax: 0, note: '（点击填写本周事件）' });
   try { localStorage.setItem(MGMT_WEEKLY_USER_KEY, JSON.stringify(cur)); } catch {}
   initMgmtPage();
 }
