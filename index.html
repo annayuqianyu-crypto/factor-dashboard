@@ -1442,7 +1442,7 @@ body {
   <!-- ── 数据口径与维护说明 ── -->
   <div class="card">
     <div class="card-title">数据口径与维护说明</div>
-    <div class="three-col">
+    <div class="three-col" style="grid-template-columns:1fr 1fr 1fr 1fr;">
       <div style="background:#eff6ff;border-radius:8px;padding:13px 15px;">
         <div style="font-size:13px;font-weight:600;color:#1d4ed8;margin-bottom:5px;" data-ek="cal-factor-name">🧬 因子</div>
         <div style="font-size:12px;color:#374151;line-height:1.65;" data-ek="cal-factor-desc">C端因子库主表行数（当前 v6.1，15 个属性维度）。来源：<code style="font-size:11px;">01_因子库</code> 最新版 Excel</div>
@@ -1454,6 +1454,10 @@ body {
       <div style="background:#f0fdf4;border-radius:8px;padding:13px 15px;">
         <div style="font-size:13px;font-weight:600;color:#15803d;margin-bottom:5px;" data-ek="cal-scene-name">📡 场景</div>
         <div style="font-size:12px;color:#374151;line-height:1.65;" data-ek="cal-scene-desc">渠道场景来源页 AI 提取场景总数（Neil / Hans / 怀宇 / Tax-BU），实时读取页面数据</div>
+      </div>
+      <div style="background:#f5f3ff;border-radius:8px;padding:13px 15px;">
+        <div style="font-size:13px;font-weight:600;color:#7c3aed;margin-bottom:5px;" data-ek="cal-sku-name">🧪 SKU库</div>
+        <div style="font-size:12px;color:#374151;line-height:1.65;" data-ek="cal-sku-desc">已上架知识卡片 SKU 数量，来源：SKU 宽表精简定稿版（当前 318 支，含 Tax / Legal / CM 三类）。BU 研发新增后实时更新。</div>
       </div>
     </div>
     <div style="margin-top:12px;padding:10px 14px;background:#fffbeb;border-left:3px solid #f59e0b;border-radius:4px;font-size:12px;color:#78350f;line-height:1.7;" data-ek="maint-note">
@@ -6621,7 +6625,7 @@ function renderMgmtEvents(snaps) {
     '<colgroup><col style="width:10%"><col style="width:14%"><col style="width:14%"><col style="width:31%"><col style="width:31%"></colgroup>' +
     '<thead><tr style="background:#f9fafb;">' +
     '<th style="text-align:left;padding:9px 12px;font-size:12.5px;font-weight:600;color:#374151;white-space:nowrap;border-bottom:2px solid #e5e7eb;">数据周</th>' +
-    assets.map(a => '<th style="text-align:left;padding:9px 12px;font-size:12.5px;font-weight:600;color:' + a.color + ';border-bottom:2px solid #e5e7eb;">' + a.lbl + '</th>').join('') +
+    assets.map(a => '<th style="text-align:center;padding:9px 12px;font-size:12.5px;font-weight:600;color:' + a.color + ';border-bottom:2px solid #e5e7eb;">' + a.lbl + '</th>').join('') +
     '</tr></thead><tbody>' + rows + '</tbody></table>';
 }
 
