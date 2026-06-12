@@ -6408,24 +6408,45 @@ const SKU_BU = { Tax: 203, Legal: 62, CM: 53, total: 318 };
 // 痛点/SKU口径：仅统计人工审核入库数；newXxxCM/Legal/Tax = 各BU当周新增（null=未追踪）
 // 关键事件按四项数据资产分类：noteFactor 因子 / notePain 痛点 / noteScene 场景 / noteSku SKU
 const MGMT_WEEKLY = [
-  { date: '2026-03-22', factors: 1216, pains: 299, scenes: 0,   sku: null,
+  { date: '2026-03-22', factors: 1216, pains: 299, scenes: 0, sku: null,
     newCM: null, newLegal: null, newTax: null, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
-    noteFactor: '因子库 v6.0 发布（1216行）', notePain: '痛点库1.0版本共299条人工搓制上线', noteScene: '', noteSku: '' },
-  { date: '2026-04-12', factors: 1351, pains: 360, scenes: 0,   sku: null,
+    note: '痛点库1.0版本共299条人工搓制上线；因子库 v6.0 发布（1216行）',
+    noteFactor: '因子库 v6.0 发布（1216行）',
+    notePain: '痛点库1.0版本共299条人工搓制上线；',
+    noteScene: '', noteSku: '' },
+  { date: '2026-04-12', factors: 1351, pains: 360, scenes: 0, sku: null,
     newCM: null, newLegal: null, newTax: null, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
-    noteFactor: 'v6.0 补充版发布（+135行，质检修复78处）', notePain: '新增60条上市公司相关痛点，总359条；痛点自动化步骤与skill蒸馏成型', noteScene: '', noteSku: '' },
+    note: '新增60条上市公司相关痛点，总痛点数359条，痛点自动化步骤和相关skill蒸馏成型；因子库 v6.0 补充版发布（+135行，质检修复78处）',
+    noteFactor: '因子库 v6.0 补充版发布（+135行，质检修复78处）',
+    notePain: '新增60条上市公司相关痛点，总痛点数359条，痛点自动化步骤和相关skill蒸馏成型；',
+    noteScene: '', noteSku: '' },
   { date: '2026-05-03', factors: 1351, pains: 488, scenes: 106, sku: null,
     newCM: null, newLegal: null, newTax: null, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
-    noteFactor: '', notePain: '法律BU新增128条，总488条；痛点生成实现自动化', noteScene: '数据驾驶舱系统上线，渠道场景首批106条', noteSku: '' },
+    note: '数据驾驶舱系统上线，痛点生成实现全流程自动化；法律BU测试完成新增128条新痛点，总痛点数达488条；',
+    noteFactor: '数据驾驶舱系统上线，痛点生成实现全流程自动化；',
+    notePain: '数据驾驶舱新增痛点学习版块，实现新增痛点自动化论证；法律BU测试完成新增128条新痛点，总痛点数达488条；',
+    noteScene: '', noteSku: '' },
   { date: '2026-05-31', factors: 1351, pains: 488, scenes: 505, sku: null,
     newCM: null, newLegal: null, newTax: null, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
-    noteFactor: '', notePain: '299条母痛点经因子COT分裂子痛点1049条（过程稿）', noteScene: 'HGJ场景自动化生成，累计505条', noteSku: '' },
+    note: '手搓版299条母痛点通过因子COT 分裂子痛点1049条；实现HGJ场景自动化生成 209条；',
+    noteFactor: '',
+    notePain: '手搓版299条母痛点通过因子COT 分裂子痛点1049条；',
+    noteScene: '实现HGJ场景自动化生成 209条；',
+    noteSku: '' },
   { date: '2026-06-07', factors: 1408, pains: 488, scenes: 505, sku: 318,
     newCM: null, newLegal: null, newTax: null, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
-    noteFactor: 'v6.1 发布，法律128条痛点反哺+57行', notePain: '', noteScene: '', noteSku: '' },
+    note: '因子库扩充，根据法律新增的128条痛点反哺+57行；SKU宽表修订完毕，SKU精简至318支。',
+    noteFactor: '因子库扩充，根据法律新增的128条痛点反哺+57行；',
+    notePain: '1049条子痛点完成相似性、合规性、专业性审查',
+    noteScene: 'HGJ会议纪要数增加至234场，场景数增加至505个',
+    noteSku: 'SKU宽表修订完毕，SKU精简至318支。' },
   { date: '2026-06-10', factors: 1408, pains: 488, scenes: 505, sku: 318,
-    newCM: 0, newLegal: 0, newTax: 0, newSkuCM: 0, newSkuLegal: 0, newSkuTax: 0,
-    noteFactor: '', notePain: '1049条子痛点完成三性审查，1002条落库PLM待BU人工审核', noteScene: '', noteSku: 'SKU库以知识卡片318支为统计起点（Tax 203/Legal 62/CM 53）' },
+    newCM: 0, newLegal: 0, newTax: 0, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
+    note: '1049条子痛点完成三性审查，最终1002条落库PLM待BU人工审核后推送小程序；数据驾驶舱新增SKU研究版块，实现新增SKU自动化论证',
+    noteFactor: '',
+    notePain: '1002条落库PLM待BU人工审核后推送小程序；',
+    noteScene: '',
+    noteSku: '数据驾驶舱新增SKU研究版块，实现新增SKU自动化论证' },
 ];
 
 function _mgmtResolve(snap) {
@@ -6509,6 +6530,10 @@ function initMgmtPage() {
       ],
     });
   }
+
+  // ── KPI sub 文案默认值（固化用户编辑内容）──
+  set('mgmt-scene-sub', '渠道场景覆盖 2025-2026年 234 场HGJ会议纪要<br>热点新闻实时搜索+场景生成');
+  set('mgmt-sku-sub',   'Tax 203 / Legal 62 / CM 53<br>知识卡片存量数据，BU研发后实时更新');
 
   // ── 周度明细表（最新在上；编辑模式下所有数据格可改）──
   const tbody = document.getElementById('mgmt-week-table');
