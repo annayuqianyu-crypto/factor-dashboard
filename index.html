@@ -9992,6 +9992,22 @@ const pgState = { selected: new Set(), counts: {} };
 
 function initPainGeneratePage() {
 
+  // 清除旧版 pg_api_base，让 Base 输入框显示正确的 Worker 地址
+  localStorage.removeItem('pg_api_base');
+  const baseEl = document.getElementById('apiBaseInput');
+  if (baseEl) baseEl.value = COMPANY_API_BASE;
+
+  // 如果 localStorage 有旧的 pg_api_key，同步写入 zx_proxy_token
+  const oldKey = localStorage.getItem('pg_api_key');
+  if (oldKey && !localStorage.getItem('zx_proxy_token')) {
+    localStorage.setItem('zx_proxy_token', oldKey);
+  }
+  // 预填 access token 到输入框
+  const keyEl = document.getElementById('apiKeyInput');
+  if (keyEl && !keyEl.value) {
+    keyEl.value = localStorage.getItem('zx_proxy_token') || localStorage.getItem('pg_api_key') || '';
+  }
+
   const el = document.getElementById('forecastChips');
 
   if (!el || el.children.length > 0) return;
