@@ -4867,7 +4867,7 @@ body {
 
           <div style="font-size:14px;font-weight:700;color:#166534;">API 已配置</div>
 
-          <div style="font-size:12px;color:#15803d;margin-top:2px;">DeepSeek &nbsp;·&nbsp; deepseek-v4-pro &nbsp;·&nbsp; Cloudflare Worker 代理</div>
+          <div style="font-size:12px;color:#15803d;margin-top:2px;">DeepSeek &nbsp;·&nbsp; deepseek-v4-pro</div>
 
         </div>
 
@@ -4901,7 +4901,6 @@ body {
 
     <div id="pgApiAdvanced" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid #bbf7d0;">
 
-      <div style="font-size:11.5px;color:#6b7280;margin-bottom:10px;">如需覆盖公司默认配置，在此填写后保存即可。留空则使用公司统一配置。</div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
 
@@ -4921,11 +4920,11 @@ body {
 
         <div>
 
-          <div style="font-size:11px;color:#374151;font-weight:600;margin-bottom:4px;">模型名称（留空使用 deepseek-v4-pro）</div>
+          <div style="font-size:11px;color:#374151;font-weight:600;margin-bottom:4px;">模型名称（已自动配置，无需填写）</div>
 
           <input id="apiModelInput"
 
-            placeholder="留空 = deepseek-v4-pro"
+            placeholder=""
 
             style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;"
 
@@ -9996,6 +9995,12 @@ function initPainGeneratePage() {
   localStorage.removeItem('pg_api_base');
   const baseEl = document.getElementById('apiBaseInput');
   if (baseEl) baseEl.value = COMPANY_API_BASE;
+
+  // 自动填入默认模型名
+  const modelEl = document.getElementById('apiModelInput');
+  if (modelEl && !modelEl.value) {
+    modelEl.value = localStorage.getItem('pg_api_model') || COMPANY_API_MODEL;
+  }
 
   // 如果 localStorage 有旧的 pg_api_key，同步写入 zx_proxy_token
   const oldKey = localStorage.getItem('pg_api_key');
