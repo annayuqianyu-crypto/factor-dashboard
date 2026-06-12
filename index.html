@@ -1391,7 +1391,14 @@ body {
   <div class="card" style="margin-bottom:18px;">
     <div class="card-title">周度变化明细</div>
     <div style="overflow-x:auto;">
-    <table style="min-width:1180px;">
+    <table style="width:1180px;table-layout:fixed;">
+      <colgroup>
+        <col style="width:110px">
+        <col style="width:65px"><col style="width:65px">
+        <col style="width:65px"><col style="width:65px">
+        <col style="width:81px"><col style="width:81px"><col style="width:81px"><col style="width:81px"><col style="width:81px">
+        <col style="width:81px"><col style="width:81px"><col style="width:81px"><col style="width:81px"><col style="width:81px">
+      </colgroup>
       <thead>
         <tr>
           <th rowspan="2" style="white-space:nowrap;vertical-align:middle;">数据周</th>
@@ -6593,7 +6600,7 @@ function renderMgmtEvents(snaps) {
       const val = (s[a.f] != null ? s[a.f] : (a.f === 'noteFactor' && s.note ? s.note : '')).trim();
       return '<td style="padding:9px 12px;vertical-align:top;border-bottom:1px solid #f3f4f6;">' +
         (val
-          ? '<div style="padding:6px 10px;background:' + a.bg + ';border:1px solid ' + a.border + ';border-radius:6px;font-size:12.5px;color:' + a.color + ';line-height:1.65;"><span class="mgmt-wk" data-idx="' + origIdx + '" data-f="' + a.f + '">' + val + '</span></div>'
+          ? '<div style="padding:6px 10px;background:' + a.bg + ';border:1px solid ' + a.border + ';border-radius:6px;font-size:12.5px;color:#374151;line-height:1.65;"><span class="mgmt-wk" data-idx="' + origIdx + '" data-f="' + a.f + '">' + val + '</span></div>'
           : '<span class="mgmt-wk" data-idx="' + origIdx + '" data-f="' + a.f + '" style="color:#e5e7eb;">—</span>') +
         '</td>';
     }).join('');
@@ -6603,7 +6610,12 @@ function renderMgmtEvents(snaps) {
         (isLatest ? ' <span class="tag tag-new" style="font-size:10px;">最新</span>' : '') +
       '</td>' + cells + '</tr>';
   }).join('');
-  el.innerHTML = '<table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#f9fafb;">' +
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'overflow-x:auto;';
+  el.appendChild(wrap);
+  wrap.innerHTML = '<table style="width:1180px;table-layout:fixed;border-collapse:collapse;">' +
+    '<colgroup><col style="width:110px"><col style="width:130px"><col style="width:130px"><col style="width:405px"><col style="width:405px"></colgroup>' +
+    '<thead><tr style="background:#f9fafb;">' +
     '<th style="text-align:left;padding:9px 12px;font-size:12.5px;font-weight:600;color:#374151;white-space:nowrap;border-bottom:2px solid #e5e7eb;">数据周</th>' +
     assets.map(a => '<th style="text-align:left;padding:9px 12px;font-size:12.5px;font-weight:600;color:' + a.color + ';border-bottom:2px solid #e5e7eb;">' + a.lbl + '</th>').join('') +
     '</tr></thead><tbody>' + rows + '</tbody></table>';
