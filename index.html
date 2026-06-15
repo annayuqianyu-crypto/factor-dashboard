@@ -12909,9 +12909,17 @@ async function newsAISearch() {
         const data = await resp.json();
         return (data.Response?.Pages || []).map(p => {
           try { const r = typeof p === 'string' ? JSON.parse(p) : p;
+            const url = r.url || r.Url || r.link || r.Link || '';
+            // 校验 URL 确实属于目标域名，过滤 WSA site: 漏网的杂源
+            if (url) {
+              try {
+                const host = new URL(url).hostname.replace(/^www\./, '');
+                if (!host.includes(src.domain) && !src.domain.includes(host)) return null;
+              } catch { return null; }
+            }
             return {
               title:   r.title   || r.Title   || r.name    || r.Name    || r.headline || '(无标题)',
-              url:     r.url     || r.Url     || r.link    || r.Link    || '',
+              url,
               source:  src.name,
               date:    r.date    || r.Date    || r.time    || r.Time    || r.pubDate  || '',
               summary: r.passage || r.Passage || r.content || r.Content || r.abstract || r.desc || r.snippet || '',
