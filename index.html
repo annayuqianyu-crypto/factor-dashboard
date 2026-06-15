@@ -12890,6 +12890,20 @@ async function newsTxTest() {
   }
 }
 
+// ── 解析多种日期格式 → Date（无法解析返回 null）──────────────
+function _newsParseDate(s) {
+  if (!s) return null;
+  s = String(s).trim();
+  // 兼容 2023-11-09 / 2023/11/09 / 2023年11月09日 / 2023-11-09 16:35:26 / 20231109
+  const m = s.match(/(\d{4})\D{0,3}(\d{1,2})\D{0,3}(\d{1,2})/);
+  if (m) {
+    const d = new Date(+m[1], +m[2] - 1, +m[3]);
+    if (!isNaN(d.getTime())) return d;
+  }
+  const d2 = new Date(s);
+  return isNaN(d2.getTime()) ? null : d2;
+}
+
 // ── WSA 联网搜索主函数：并行 site:domain 搜索已勾选信息源 ──────
 async function newsAISearch() {
   const scfUrl = localStorage.getItem(NEWS_SCF_KEY_TAX) || NEWS_SCF_DEFAULT_TAX;
@@ -12929,7 +12943,7 @@ async function newsAISearch() {
     const allResults = await Promise.all(selected.map(async src => {
       const effectiveKw = kw || src.kwFallback || '最新';
       const query = `${effectiveKw} site:${src.domain}`;
-      const payload = { query };
+      const payload = { query, count: 20 };   // 每源取满 20 条候选，日期过滤在客户端权威执行
       if (startTime) payload.startTime = startTime;
       if (endTime)   payload.endTime   = endTime;
       try {
@@ -12974,6 +12988,21 @@ async function newsAISearch() {
     // 日期倒序
     items.sort((a, b) => (new Date(b.date||0).getTime()) - (new Date(a.date||0).getTime()));
 
+    // ── 日期范围过滤（客户端权威执行：WSA 服务端 StartTime/EndTime 不可靠，会漏放范围外文章）──
+    let dateFiltered = 0;
+    if (start || end) {
+      const startMs = start ? new Date(start + 'T00:00:00').getTime() : -Infinity;
+      const endMs   = end   ? new Date(end   + 'T23:59:59').getTime() :  Infinity;
+      const before  = items.length;
+      items = items.filter(it => {
+        const d = _newsParseDate(it.date);
+        if (!d) return false;               // 无法确认发布日期 → 给定范围时一律排除
+        const t = d.getTime();
+        return t >= startMs && t <= endMs;
+      });
+      dateFiltered = before - items.length;
+    }
+
     // 负向词过滤
     let negFiltered = 0;
     if (negKw) {
@@ -12991,8 +13020,9 @@ async function newsAISearch() {
     if (count !== null) items = items.slice(0, count);
 
     if (!items.length) {
+      const dateNote = dateFiltered > 0 ? `（已剔除 ${dateFiltered} 条不在所选日期范围内的文章）` : '';
       res.innerHTML = `<div style="padding:20px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:13px;color:#78350f;">
-        📭 所选 ${selected.length} 个信息源中未找到匹配「${kw || '近期内容'}」的结果<br>
+        📭 所选 ${selected.length} 个信息源中未找到匹配「${kw || '近期内容'}」的结果${dateNote}<br>
         <span style="font-size:11px;color:#92400e;">建议：放宽时间范围 / 换关键词 / 增加勾选信息源</span></div>`;
       return;
     }
