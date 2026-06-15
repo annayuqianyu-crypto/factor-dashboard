@@ -12554,28 +12554,152 @@ function radarInitSources() {
 function newsInitSources() {
   const el = document.getElementById('news-sources-grouped');
   if (!el) return;
-  el.innerHTML = '';   // 切换 kind 时强制重渲染
-  const SOURCES = getNewsSources();
-  // 按 dim 分组
-  const groups = {};
-  SOURCES.forEach(s => {
-    if (!groups[s.dim]) groups[s.dim] = [];
-    groups[s.dim].push(s);
-  });
-  const cntEl = document.getElementById('news-source-count');
-  if (cntEl) cntEl.textContent = SOURCES.length;
+  el.innerHTML = '';
 
+  const total = TAX_SOURCES.length + LEGAL_SOURCES.length;
+  const cntEl = document.getElementById('news-source-count');
+  if (cntEl) cntEl.textContent = total;
+
+  const defaultKind = _newsKind; // 当前 tab 的 kind 决定默认勾选哪组
+
+  // ── 顶部全选控制行 ─────────────────────────────────────
+  const ctrl = document.createElement('div');
+  ctrl.style.cssText = 'display:flex;align-items:center;gap:14px;padding:4px 0 8px;border-bottom:1px solid #e5e7eb;margin-bottom:8px;flex-wrap:wrap;';
+  ctrl.innerHTML = `
+    <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#065f46;cursor:pointer;user-select:none;">
+      <input type="checkbox" id="chk-group-tax" onchange="newsToggleGroup('tax',this.checked)" style="width:14px;height:14px;accent-color:#065f46;">
+      全选 Tax (${TAX_SOURCES.length})
+    </label>
+    <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#0e7490;cursor:pointer;user-select:none;">
+      <input type="checkbox" id="chk-group-legal" onchange="newsToggleGroup('legal',this.checked)" style="width:14px;height:14px;accent-color:#0e7490;">
+      全选 Legal (${LEGAL_SOURCES.length})
+    </label>
+    <span id="news-selected-count" style="margin-left:auto;font-size:11px;color:#9ca3af;"></span>`;
+  el.appendChild(ctrl);
+
+  // ── Tax 信息源 ─────────────────────────────────────────
+  const taxHdr = document.createElement('div');
+  taxHdr.style.cssText = 'font-size:11px;font-weight:700;color:#065f46;padding:2px 0 4px;letter-spacing:.3px;';
+  taxHdr.textContent = '💼 Tax 信息源';
+  el.appendChild(taxHdr);
+  _newsRenderSourceSection(el, TAX_SOURCES, 'tax', defaultKind === 'tax');
+
+  // ── Legal 信息源 ───────────────────────────────────────
+  const legalHdr = document.createElement('div');
+  legalHdr.style.cssText = 'font-size:11px;font-weight:700;color:#0e7490;padding:10px 0 4px;letter-spacing:.3px;border-top:1px solid #e5e7eb;margin-top:6px;';
+  legalHdr.textContent = '⚖️ Legal 信息源';
+  el.appendChild(legalHdr);
+  _newsRenderSourceSection(el, LEGAL_SOURCES, 'legal', defaultKind === 'legal');
+
+  // ── 自定义信息源 ───────────────────────────────────────
+  const customDiv = document.createElement('div');
+  customDiv.style.cssText = 'margin-top:10px;padding-top:8px;border-top:1px dashed #e5e7eb;';
+  customDiv.innerHTML = `
+    <div style="font-size:11px;color:#374151;font-weight:600;margin-bottom:5px;">➕ 添加自定义信息源</div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <input id="news-custom-url-input" type="text" placeholder="输入网站 URL，如 https://www.example.com"
+        style="flex:1;padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;"
+        onkeydown="if(event.key==='Enter') newsAddCustomSource()">
+      <button onclick="newsAddCustomSource()"
+        style="padding:6px 14px;background:#374151;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">添加</button>
+    </div>
+    <div id="news-custom-sources-list" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:5px;"></div>`;
+  el.appendChild(customDiv);
+
+  // 设置主 checkbox 初始状态
+  const cTax = document.getElementById('chk-group-tax');
+  const cLegal = document.getElementById('chk-group-legal');
+  if (cTax) cTax.checked = defaultKind === 'tax';
+  if (cLegal) cLegal.checked = defaultKind === 'legal';
+
+  _newsRenderCustomSources();
+  newsUpdateSelectedCount();
+}
+
+function _newsRenderSourceSection(el, sources, kind, defaultChecked) {
+  const accentColor = kind === 'tax' ? '#065f46' : '#0e7490';
+  const groups = {};
+  sources.forEach(s => { if (!groups[s.dim]) groups[s.dim] = []; groups[s.dim].push(s); });
   Object.entries(groups).forEach(([dim, list]) => {
     const [bg, color] = (RADAR_DIM_COLORS[dim]||'#f3f4f6:#374151').split(':');
     const row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.7;';
-    row.innerHTML = `<span style="flex-shrink:0;display:inline-block;padding:2px 9px;background:${bg};color:${color};border-radius:12px;font-size:11px;font-weight:600;min-width:auto;">${dim} · ${list.length}</span>
-      <div style="flex:1;display:flex;flex-wrap:wrap;gap:5px;">
-        ${list.map(s => `<a href="${s.url}" target="_blank" title="${s.section}｜${s.keywords}"
-          style="display:inline-block;padding:2px 8px;background:#fff;color:#374151;border:1px solid #e5e7eb;border-radius:4px;font-size:11.5px;text-decoration:none;">${s.name}</a>`).join('')}
+    row.style.cssText = 'display:flex;align-items:flex-start;gap:8px;font-size:12px;margin-bottom:4px;';
+    row.innerHTML = `
+      <span style="flex-shrink:0;padding:2px 8px;background:${bg};color:${color};border-radius:12px;font-size:10.5px;font-weight:600;margin-top:3px;">${dim}</span>
+      <div style="flex:1;display:flex;flex-wrap:wrap;gap:4px;">
+        ${list.map(s => {
+          const domain = (() => { try { return new URL(s.url).hostname.replace(/^www\./,''); } catch { return s.url; } })();
+          return `<label style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;background:#fff;border:1px solid #e5e7eb;border-radius:4px;font-size:11.5px;cursor:pointer;">
+            <input type="checkbox" data-domain="${domain}" data-name="${s.name.replace(/"/g,'&quot;')}" data-kind="${kind}" data-url="${s.url}"
+              ${defaultChecked ? 'checked' : ''} onchange="newsUpdateSelectedCount()"
+              style="width:12px;height:12px;accent-color:${accentColor};">
+            <a href="${s.url}" target="_blank" title="${(s.section||'')+'｜'+(s.keywords||'')}"
+              style="color:#374151;text-decoration:none;"
+              onmouseover="this.style.color='${accentColor}'" onmouseout="this.style.color='#374151'">${s.name}</a>
+          </label>`;
+        }).join('')}
       </div>`;
     el.appendChild(row);
   });
+}
+
+function newsToggleGroup(group, checked) {
+  const sel = group === 'all' ? 'input[type=checkbox][data-domain]' : `input[type=checkbox][data-kind="${group}"]`;
+  document.querySelectorAll(`#news-sources-grouped ${sel}`).forEach(cb => { cb.checked = checked; });
+  newsUpdateSelectedCount();
+}
+
+function newsUpdateSelectedCount() {
+  const count = document.querySelectorAll('#news-sources-grouped input[type=checkbox][data-domain]:checked').length;
+  const el = document.getElementById('news-selected-count');
+  if (el) el.textContent = `已选 ${count} 个信息源`;
+}
+
+function newsGetSelectedSources() {
+  const out = [];
+  document.querySelectorAll('#news-sources-grouped input[type=checkbox][data-domain]:checked').forEach(cb => {
+    out.push({ name: cb.dataset.name, domain: cb.dataset.domain, kind: cb.dataset.kind, url: cb.dataset.url });
+  });
+  return out;
+}
+
+function newsAddCustomSource() {
+  const inp = document.getElementById('news-custom-url-input');
+  if (!inp) return;
+  let raw = inp.value.trim();
+  if (!raw) return;
+  if (!/^https?:\/\//i.test(raw)) raw = 'https://' + raw;
+  let domain = '';
+  try { domain = new URL(raw).hostname.replace(/^www\./, ''); } catch { return; }
+  if (!domain) return;
+  const saved = JSON.parse(localStorage.getItem('news_custom_sources') || '[]');
+  if (!saved.some(s => s.domain === domain)) {
+    saved.push({ name: domain, url: raw, domain });
+    localStorage.setItem('news_custom_sources', JSON.stringify(saved));
+  }
+  inp.value = '';
+  _newsRenderCustomSources();
+  newsUpdateSelectedCount();
+}
+
+function _newsRenderCustomSources() {
+  const el = document.getElementById('news-custom-sources-list');
+  if (!el) return;
+  const saved = JSON.parse(localStorage.getItem('news_custom_sources') || '[]');
+  el.innerHTML = saved.map((s, i) => `
+    <label style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;font-size:11.5px;cursor:pointer;">
+      <input type="checkbox" data-domain="${s.domain}" data-name="${s.name}" data-kind="custom" data-url="${s.url}" checked
+        onchange="newsUpdateSelectedCount()" style="width:12px;height:12px;">
+      <a href="${s.url}" target="_blank" style="color:#374151;text-decoration:none;">${s.name}</a>
+      <span onclick="newsRemoveCustomSource(${i})" style="color:#9ca3af;cursor:pointer;margin-left:2px;font-size:11px;">✕</span>
+    </label>`).join('');
+}
+
+function newsRemoveCustomSource(idx) {
+  const saved = JSON.parse(localStorage.getItem('news_custom_sources') || '[]');
+  saved.splice(idx, 1);
+  localStorage.setItem('news_custom_sources', JSON.stringify(saved));
+  _newsRenderCustomSources();
 }
 
 // ── 二级 tab 切换 ─────────────────────────────────────────────
@@ -12660,21 +12784,17 @@ function newsInit() {
   } catch(er) {}
 }
 
-// ── SCF 代理 URL 管理（Tax/Legal 各自独立的函数 URL） ─────────
+// ── SCF 代理 URL 管理（Tax/Legal 共用同一个 SCF） ─────────────
 const NEWS_SCF_KEY_TAX     = 'news_scf_proxy_url';
 const NEWS_SCF_DEFAULT_TAX = 'https://1433058101-f7b95iay41.ap-guangzhou.tencentscf.com';
-const NEWS_SCF_KEY_LEGAL   = 'legal_news_scf_proxy_url';   // 由用户部署 wsa-legal-proxy 后填入
-const NEWS_SCF_DEFAULT_LEGAL = '';
-
-// 兼容别名，便于阅读旧代码
-const NEWS_SCF_KEY     = NEWS_SCF_KEY_TAX;
+const NEWS_SCF_KEY   = NEWS_SCF_KEY_TAX;
 const NEWS_SCF_DEFAULT = NEWS_SCF_DEFAULT_TAX;
 
-function getCurrentScfKey()     { return _newsKind === 'legal' ? NEWS_SCF_KEY_LEGAL   : NEWS_SCF_KEY_TAX; }
-function getCurrentScfDefault() { return _newsKind === 'legal' ? NEWS_SCF_DEFAULT_LEGAL : NEWS_SCF_DEFAULT_TAX; }
+function getCurrentScfKey()     { return NEWS_SCF_KEY_TAX; }
+function getCurrentScfDefault() { return NEWS_SCF_DEFAULT_TAX; }
 
 function newsGetScfUrl() {
-  return localStorage.getItem(getCurrentScfKey()) || getCurrentScfDefault();
+  return localStorage.getItem(NEWS_SCF_KEY_TAX) || NEWS_SCF_DEFAULT_TAX;
 }
 
 function newsSaveScfUrl() {
@@ -12693,13 +12813,12 @@ function newsInitScfBar() {
   const bar = document.getElementById('news-scf-bar');
   if (!bar) return;
   const url = newsGetScfUrl();
-  const kindLabel = _newsKind === 'legal' ? 'Legal' : 'Tax';
   if (url) {
     bar.innerHTML = `
       <div style="display:flex;align-items:center;justify-content:space-between;
         background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:9px 14px;">
         <div style="font-size:12px;color:#166534;flex:1;min-width:0;">
-          ✅ 已配置 ${kindLabel} SCF 联网搜索 API
+          ✅ 已配置联网搜索 SCF（Tax & Legal 共用）
         </div>
         <div style="display:flex;gap:6px;margin-left:10px;flex-shrink:0;">
           <button onclick="newsTxTest()"
@@ -12713,17 +12832,15 @@ function newsInitScfBar() {
         </div>
       </div>`;
   } else {
-    const guideHint = _newsKind === 'legal'
-      ? '请部署 <code style="background:#fef3c7;padding:1px 4px;border-radius:3px;">wsa-legal-proxy</code> 云函数（参考 <code>scf_legal_news_proxy/部署说明.md</code>），并将触发器 URL 填入下方'
-      : '请先部署腾讯云 SCF 代理函数，并将触发器 URL 填入下方';
     bar.innerHTML = `
       <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 14px;">
         <div style="font-size:12px;color:#92400e;margin-bottom:8px;">
-          ⚠️ ${guideHint}（<a href="#" onclick="newsShowScfGuide();return false;"
+          ⚠️ 请先部署腾讯云 SCF 代理函数，并将触发器 URL 填入下方
+          （<a href="#" onclick="newsShowScfGuide();return false;"
             style="color:#b45309;text-decoration:underline;">查看部署指南</a>）
         </div>
         <div style="display:flex;gap:8px;">
-          <input id="news-scf-input" type="text" placeholder="https://service-xxx.gz.apigw.tencentcs.com/release/news-proxy"
+          <input id="news-scf-input" type="text" placeholder="https://1433058101-xxx.ap-guangzhou.tencentscf.com"
             style="flex:1;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;"/>
           <button onclick="newsSaveScfUrl()"
             style="padding:7px 16px;background:#d97706;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">
@@ -12797,17 +12914,21 @@ async function newsTxTest() {
   }
 }
 
-// ── WSA 联网搜索主函数（通过 SCF 代理） ───────────────────────
+// ── WSA 联网搜索主函数：并行 site:domain 搜索已勾选信息源 ──────
 async function newsAISearch() {
-  // Legal 模式走独立分支：每个法律源单独发 site:domain query，严格限定来源
-  if (_newsKind === 'legal') return legalNewsAISearch();
-
-  const scfUrl = newsGetScfUrl();
+  const scfUrl = localStorage.getItem(NEWS_SCF_KEY_TAX) || NEWS_SCF_DEFAULT_TAX;
   if (!scfUrl) {
     document.getElementById('news-ai-result').innerHTML =
       `<div style="padding:20px;color:#b45309;background:#fffbeb;border-radius:8px;font-size:13px;">
-        ⚠️ 请先配置 SCF 代理 URL 并保存，再执行搜索
-       </div>`;
+        ⚠️ 请先配置 SCF 代理 URL 并保存，再执行搜索</div>`;
+    return;
+  }
+
+  const selected = newsGetSelectedSources();
+  if (!selected.length) {
+    document.getElementById('news-ai-result').innerHTML =
+      `<div style="padding:16px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:13px;color:#92400e;">
+        请先在上方「信息源」列表中勾选至少一个来源</div>`;
     return;
   }
 
@@ -12816,105 +12937,59 @@ async function newsAISearch() {
   const start    = document.getElementById('news-date-start').value;
   const end      = document.getElementById('news-date-end').value;
   const countRaw = (document.getElementById('news-count').value || '').trim();
-  const count    = countRaw ? Math.max(1, parseInt(countRaw, 10)) : null; // null = 不限
-  const btn   = document.getElementById('news-search-btn');
-  const spin  = document.getElementById('news-search-spin');
-  const res   = document.getElementById('news-ai-result');
+  const count    = countRaw ? Math.max(1, parseInt(countRaw, 10)) : null;
+  const btn  = document.getElementById('news-search-btn');
+  const spin = document.getElementById('news-search-spin');
+  const res  = document.getElementById('news-ai-result');
 
   btn.disabled = true; spin.textContent = '⏳';
-  const _kindLabel = getNewsLabel();
-  const _kindCount = getNewsSources().length;
   res.innerHTML = `<div style="padding:32px;text-align:center;color:#6b7280;font-size:13px;">
-    ⏳ 正在对 <strong style="color:#0369a1;">${_kindCount} 个${_kindLabel}重点信息源</strong> 并行搜索，约 20 秒请稍候…</div>`;
+    ⏳ 并行搜索 <strong>${selected.length}</strong> 个信息源，请稍候…</div>`;
 
-  const query = kw; // 留空时 SCF 直接用域名搜索，无关键词限制
-
-  const payload = { query };
-  if (start) payload.startDate = start;
-  if (end)   payload.endDate   = end;
+  const startTime = start ? start.replace(/-/g, '') : '';
+  const endTime   = end   ? end.replace(/-/g, '')   : '';
 
   try {
-    const resp = await fetch(scfUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    const allResults = await Promise.all(selected.map(async src => {
+      const query = kw ? `${kw} site:${src.domain}` : `site:${src.domain}`;
+      const payload = { query };
+      if (startTime) payload.startTime = startTime;
+      if (endTime)   payload.endTime   = endTime;
+      try {
+        const resp = await fetch(scfUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await resp.json();
+        return (data.Response?.Pages || []).map(p => {
+          try { const r = typeof p === 'string' ? JSON.parse(p) : p;
+            return {
+              title:   r.title   || r.Title   || r.name    || r.Name    || r.headline || '(无标题)',
+              url:     r.url     || r.Url     || r.link    || r.Link    || '',
+              source:  src.name,
+              date:    r.date    || r.Date    || r.time    || r.Time    || r.pubDate  || '',
+              summary: r.passage || r.Passage || r.content || r.Content || r.abstract || r.desc || r.snippet || '',
+              trusted: true, tags: [], relevance: ''
+            };
+          } catch { return null; }
+        }).filter(Boolean);
+      } catch { return []; }
+    }));
 
     btn.disabled = false; spin.textContent = '🔍';
 
-    const data = await resp.json();
-
-    if (data.error) {
-      res.innerHTML = `<div style="padding:20px;background:#fee2e2;border-radius:8px;font-size:13px;color:#991b1b;">
-        <strong>SCF 错误：</strong>${data.error}<br>
-        ${data.detail ? `<pre style="margin-top:8px;font-size:11px;white-space:pre-wrap;">${data.detail.slice(0,400)}</pre>` : ''}
-      </div>`;
-      return;
-    }
-
-    if (data.Response?.Error) {
-      res.innerHTML = `<div style="padding:20px;background:#fef9c3;border-radius:8px;font-size:13px;color:#713f12;">
-        <strong>WSA API 错误：</strong>${data.Response.Error.Code} — ${data.Response.Error.Message}<br>
-        <span style="font-size:11px;color:#92400e;margin-top:4px;display:block;">RequestId：${data.Response.RequestId || '—'}</span>
-      </div>`;
-      return;
-    }
-
-    // WSA SearchPro 返回 Response.Pages 数组（每项是 JSON 字符串，需先 parse）
-    const rawList = (data.Response?.Pages || []).map(p => {
-      try { return typeof p === 'string' ? JSON.parse(p) : p; } catch { return {}; }
+    // 展平 + URL 去重
+    const seen = new Set();
+    let items = allResults.flat().filter(it => {
+      if (!it.url || seen.has(it.url)) return false;
+      seen.add(it.url); return true;
     });
 
-    if (!rawList.length) {
-      const errs = data.Response?.Errors || [];
-      const sampleErr = errs.length ? errs.slice(0, 5).join('\n') : '（无错误信息）';
-      res.innerHTML = `<div style="padding:16px;font-size:12px;color:#6b7280;background:#fffbeb;border-radius:8px;border:1px solid #fde68a;">
-        <div style="font-weight:600;color:#92400e;margin-bottom:8px;">⚠️ 未获取到结果（${errs.length} 个站点报错）</div>
-        <div style="font-size:11px;color:#78350f;margin-bottom:4px;">🔍 诊断错误样本（前5条）：</div>
-        <pre style="background:#fff;padding:8px;border-radius:5px;font-size:11px;max-height:160px;overflow:auto;color:#1f2937;">${sampleErr}</pre>
-        <div style="font-size:11px;color:#78350f;margin-top:8px;margin-bottom:4px;">原始响应：</div>
-        <pre style="background:#f8fafc;padding:8px;border-radius:5px;overflow:auto;font-size:11px;max-height:120px;">${JSON.stringify(data.Response ?? data, null, 2).slice(0,400)}</pre>
-      </div>`;
-      return;
-    }
+    // 日期倒序
+    items.sort((a, b) => (new Date(b.date||0).getTime()) - (new Date(a.date||0).getTime()));
 
-    // 重点信息源域名（按当前 _newsKind 选用 Tax/Legal 清单）
-    const TAX_TRUSTED_DOMAINS = [
-      'csrc.gov.cn','cs.com.cn','stcn.com','sac.net.cn',
-      'chinabanking.com.cn','china-cba.net','chinamoney.com.cn','pcac.org.cn',
-      'cls.cn','wallstreetcn.com','cn.reuters.com','bloomberg.com','eastmoney.com',
-      'hexun.com','01caijing.com',
-      'cninfo.com.cn','chinaventure.com.cn','sse.com.cn','research.pedaily.cn',
-      'chinatax.gov.cn','irs.gov','sfc.hk','mas.gov.sg','step.org',
-      'cbimc.cn','huibaoxiang.com','jinribao.cn','iamac.org.cn',
-      'xtxh.net','yanglee.com','xinruizhoukan.com',
-      'coindesk.com','mohrss.gov.cn','hbrchina.org',
-      'iras.gov.sg','ird.gov.hk'
-    ];
-    const TRUSTED_DOMAINS = (_newsKind === 'legal') ? LEGAL_TRUSTED_DOMAINS : TAX_TRUSTED_DOMAINS;
-    function isTrusted(url) {
-      try { return TRUSTED_DOMAINS.some(d => new URL(url).hostname.includes(d)); }
-      catch { return false; }
-    }
-
-    // 标准化字段（兼容 WSA 各种大小写和字段别名）
-    let items = rawList.map(r => {
-      const title   = r.title   || r.Title   || r.name    || r.Name    || r.headline || '(无标题)';
-      const url     = r.url     || r.Url     || r.link    || r.Link    || '';
-      const source  = r._trusted_name || r.site || r.Site || r.source || r.Source || r.domain || '';
-      const date    = r.date    || r.Date    || r.time    || r.Time    || r.pubDate  || '';
-      const summary = r.passage || r.Passage || r.content || r.Content || r.abstract || r.desc || r.snippet || '';
-      return { title, url, source, date, summary, trusted: !!(r._trusted_name) || isTrusted(url), tags: [], relevance: '', _raw: r };
-    });
-
-    // 按日期倒序排列（最新在前）
-    items.sort((a, b) => {
-      const da = a.date ? new Date(a.date).getTime() : 0;
-      const db = b.date ? new Date(b.date).getTime() : 0;
-      return db - da;
-    });
-
-    // 负向关键词过滤：标题或摘要中含任一负向词，整条剔除
+    // 负向词过滤
     let negFiltered = 0;
     if (negKw) {
       const negList = negKw.split(/[\s,，;；]+/).map(s=>s.trim()).filter(Boolean);
@@ -12928,11 +13003,17 @@ async function newsAISearch() {
       }
     }
 
-    // 数量限制：填了就截取，留空显示全部
     if (count !== null) items = items.slice(0, count);
 
+    if (!items.length) {
+      res.innerHTML = `<div style="padding:20px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:13px;color:#78350f;">
+        📭 所选 ${selected.length} 个信息源中未找到匹配「${kw || '近期内容'}」的结果<br>
+        <span style="font-size:11px;color:#92400e;">建议：放宽时间范围 / 换关键词 / 增加勾选信息源</span></div>`;
+      return;
+    }
+
     newsRenderCards(items, kw, start, end, negKw, negFiltered);
-    if (kw) localStorage.setItem(getNewsKwCacheKey(), kw);
+    if (kw)    localStorage.setItem(getNewsKwCacheKey(), kw);
     if (negKw) localStorage.setItem(getNewsNegKwCacheKey(), negKw);
 
   } catch(e) {
@@ -12942,9 +13023,7 @@ async function newsAISearch() {
 }
 
 // ══════════════════════════════════════════════════════════════
-// Legal 时事新闻：调用独立 SCF (wsa-legal-proxy)
-// 服务端内置 33 个法律源域名 + 并行 site:DOMAIN 查询 + 聚合返回
-// 浏览器只需 1 次 HTTP，约 10-15 秒
+// [已废弃] legalNewsAISearch 已合并入 newsAISearch（checkbox 并行模式）
 // ══════════════════════════════════════════════════════════════
 async function legalNewsAISearch() {
   const scfUrl = newsGetScfUrl();   // 自动取 Legal SCF URL
