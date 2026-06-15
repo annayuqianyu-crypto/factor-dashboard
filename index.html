@@ -12419,7 +12419,7 @@ const LEGAL_SOURCES = [
   {dim:'监管执法', name:'国家知识产权局', url:'https://www.cnipa.gov.cn', section:'政策法规/典型案例', keywords:'专利、商标、知识产权保护、典型案例'},
   {dim:'行业自律', name:'中国国际经济贸易仲裁委员会', url:'http://www.cietac.org', section:'新闻/规则更新', keywords:'仲裁规则、涉外仲裁、典型案例'},
   {dim:'专业媒体', name:'法治日报', url:'http://www.legaldaily.com.cn', section:'法治新闻/深度报道', keywords:'法治建设、立法动态、司法改革'},
-  {dim:'专业媒体', name:'人民法院报', url:'https://rmfygg.court.gov.cn/web/rmfyportal', section:'司法实务/案例评析', keywords:'司法实务、案例评析、审判动态'},
+  {dim:'专业媒体', name:'人民法院报', url:'https://www.rmfyb.com', section:'司法实务/案例评析', keywords:'司法实务、案例评析、审判动态'},
   {dim:'专业媒体', name:'检察日报', url:'http://www.jcrb.com', section:'检察动态/法学专刊', keywords:'检察工作、公益诉讼、刑事司法'},
   {dim:'律所', name:'金杜律师事务所', url:'https://www.kwm.com/cn', section:'出版刊物/洞察', keywords:'资本市场、跨境并购、反垄断、数据合规、金融监管'},
   {dim:'律所', name:'中伦律师事务所', url:'https://www.zhonglun.com', section:'中伦观点', keywords:'私募基金、资本市场、争议解决、家族财富、税务'},
@@ -12578,8 +12578,9 @@ function _newsRenderSourceSection(el, sources, kind, defaultChecked) {
       <div style="flex:1;display:flex;flex-wrap:wrap;gap:4px;">
         ${list.map(s => {
           const domain = (() => { try { return new URL(s.url).hostname.replace(/^www\./,''); } catch { return s.url; } })();
+          const kwFallback = (s.keywords || '').split(/[、,，]/)[0].trim();
           return `<label style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;background:#fff;border:1px solid #e5e7eb;border-radius:4px;font-size:11.5px;cursor:pointer;">
-            <input type="checkbox" data-domain="${domain}" data-name="${s.name.replace(/"/g,'&quot;')}" data-kind="${kind}" data-url="${s.url}"
+            <input type="checkbox" data-domain="${domain}" data-name="${s.name.replace(/"/g,'&quot;')}" data-kind="${kind}" data-url="${s.url}" data-kwfallback="${kwFallback.replace(/"/g,'&quot;')}"
               ${defaultChecked ? 'checked' : ''} onchange="newsUpdateSelectedCount()"
               style="width:12px;height:12px;accent-color:${accentColor};">
             <a href="${s.url}" target="_blank" title="${(s.section||'')+'｜'+(s.keywords||'')}"
@@ -12607,7 +12608,7 @@ function newsUpdateSelectedCount() {
 function newsGetSelectedSources() {
   const out = [];
   document.querySelectorAll('#news-sources-grouped input[type=checkbox][data-domain]:checked').forEach(cb => {
-    out.push({ name: cb.dataset.name, domain: cb.dataset.domain, kind: cb.dataset.kind, url: cb.dataset.url });
+    out.push({ name: cb.dataset.name, domain: cb.dataset.domain, kind: cb.dataset.kind, url: cb.dataset.url, kwFallback: cb.dataset.kwfallback || '' });
   });
   return out;
 }
@@ -12926,7 +12927,8 @@ async function newsAISearch() {
 
   try {
     const allResults = await Promise.all(selected.map(async src => {
-      const query = kw ? `${kw} site:${src.domain}` : `site:${src.domain}`;
+      const effectiveKw = kw || src.kwFallback || '最新';
+      const query = `${effectiveKw} site:${src.domain}`;
       const payload = { query };
       if (startTime) payload.startTime = startTime;
       if (endTime)   payload.endTime   = endTime;
