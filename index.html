@@ -12499,48 +12499,41 @@ function radarInitSources() {
   });
 }
 
-// 新闻面板：按领域分组展示信息源（依 _newsKind 切换 Tax/Legal 数据）
+// 新闻面板：只展示「当前 tab 领域」的信息源（Tax / Legal 已彻底分开）
 function newsInitSources() {
   const el = document.getElementById('news-sources-grouped');
   if (!el) return;
   el.innerHTML = '';
 
-  const total = TAX_SOURCES.length + LEGAL_SOURCES.length;
+  const isLegal = _newsKind === 'legal';
+  const sources = isLegal ? LEGAL_SOURCES : TAX_SOURCES;
+  const kind    = isLegal ? 'legal' : 'tax';
+  const accent  = isLegal ? '#0e7490' : '#065f46';
+  const label   = isLegal ? 'Legal' : 'Tax';
+  const icon    = isLegal ? '⚖️' : '💼';
+
   const cntEl = document.getElementById('news-source-count');
-  if (cntEl) cntEl.textContent = total;
+  if (cntEl) cntEl.textContent = sources.length;
 
-  const defaultKind = _newsKind; // 当前 tab 的 kind 决定默认勾选哪组
-
-  // ── 顶部全选控制行 ─────────────────────────────────────
+  // ── 顶部全选控制行（仅当前领域）──────────────────────────
   const ctrl = document.createElement('div');
   ctrl.style.cssText = 'display:flex;align-items:center;gap:14px;padding:4px 0 8px;border-bottom:1px solid #e5e7eb;margin-bottom:8px;flex-wrap:wrap;';
   ctrl.innerHTML = `
-    <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#065f46;cursor:pointer;user-select:none;">
-      <input type="checkbox" id="chk-group-tax" onchange="newsToggleGroup('tax',this.checked)" style="width:14px;height:14px;accent-color:#065f46;">
-      全选 Tax (${TAX_SOURCES.length})
-    </label>
-    <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#0e7490;cursor:pointer;user-select:none;">
-      <input type="checkbox" id="chk-group-legal" onchange="newsToggleGroup('legal',this.checked)" style="width:14px;height:14px;accent-color:#0e7490;">
-      全选 Legal (${LEGAL_SOURCES.length})
+    <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:${accent};cursor:pointer;user-select:none;">
+      <input type="checkbox" id="chk-group-${kind}" onchange="newsToggleGroup('${kind}',this.checked)" checked style="width:14px;height:14px;accent-color:${accent};">
+      全选 ${label} (${sources.length})
     </label>
     <span id="news-selected-count" style="margin-left:auto;font-size:11px;color:#9ca3af;"></span>`;
   el.appendChild(ctrl);
 
-  // ── Tax 信息源 ─────────────────────────────────────────
-  const taxHdr = document.createElement('div');
-  taxHdr.style.cssText = 'font-size:11px;font-weight:700;color:#065f46;padding:2px 0 4px;letter-spacing:.3px;';
-  taxHdr.textContent = '💼 Tax 信息源';
-  el.appendChild(taxHdr);
-  _newsRenderSourceSection(el, TAX_SOURCES, 'tax', defaultKind === 'tax');
+  // ── 当前领域信息源 ─────────────────────────────────────
+  const hdr = document.createElement('div');
+  hdr.style.cssText = `font-size:11px;font-weight:700;color:${accent};padding:2px 0 4px;letter-spacing:.3px;`;
+  hdr.textContent = `${icon} ${label} 信息源`;
+  el.appendChild(hdr);
+  _newsRenderSourceSection(el, sources, kind, true);
 
-  // ── Legal 信息源 ───────────────────────────────────────
-  const legalHdr = document.createElement('div');
-  legalHdr.style.cssText = 'font-size:11px;font-weight:700;color:#0e7490;padding:10px 0 4px;letter-spacing:.3px;border-top:1px solid #e5e7eb;margin-top:6px;';
-  legalHdr.textContent = '⚖️ Legal 信息源';
-  el.appendChild(legalHdr);
-  _newsRenderSourceSection(el, LEGAL_SOURCES, 'legal', defaultKind === 'legal');
-
-  // ── 自定义信息源 ───────────────────────────────────────
+  // ── 自定义信息源（共用）─────────────────────────────────
   const customDiv = document.createElement('div');
   customDiv.style.cssText = 'margin-top:10px;padding-top:8px;border-top:1px dashed #e5e7eb;';
   customDiv.innerHTML = `
@@ -12554,12 +12547,6 @@ function newsInitSources() {
     </div>
     <div id="news-custom-sources-list" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:5px;"></div>`;
   el.appendChild(customDiv);
-
-  // 设置主 checkbox 初始状态
-  const cTax = document.getElementById('chk-group-tax');
-  const cLegal = document.getElementById('chk-group-legal');
-  if (cTax) cTax.checked = defaultKind === 'tax';
-  if (cLegal) cLegal.checked = defaultKind === 'legal';
 
   _newsRenderCustomSources();
   newsUpdateSelectedCount();
@@ -12788,13 +12775,22 @@ function newsClearScfUrl() {
 function newsInitScfBar() {
   const bar = document.getElementById('news-scf-bar');
   if (!bar) return;
+  // Legal 已独立，不走 WSA SCF —— 显示 Google 法律源接入提示，隐藏 WSA 配置
+  if (_newsKind === 'legal') {
+    bar.innerHTML = `
+      <div style="background:#ecfeff;border:1px solid #a5f3fc;border-radius:8px;padding:9px 14px;font-size:12px;color:#155e75;">
+        ⚖️ Legal 使用 <strong>Google 法律源引擎</strong>（与 Tax 的 WSA 完全独立）·
+        <span style="color:#0891b2;">接口激活中，预计明日恢复</span>
+      </div>`;
+    return;
+  }
   const url = newsGetScfUrl();
   if (url) {
     bar.innerHTML = `
       <div style="display:flex;align-items:center;justify-content:space-between;
         background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:9px 14px;">
         <div style="font-size:12px;color:#166534;flex:1;min-width:0;">
-          ✅ 已配置联网搜索 SCF（Tax & Legal 共用）
+          ✅ 已配置联网搜索 SCF（Tax 专用）
         </div>
         <div style="display:flex;gap:6px;margin-left:10px;flex-shrink:0;">
           <button onclick="newsTxTest()"
@@ -12906,6 +12902,16 @@ function _newsParseDate(s) {
 
 // ── WSA 联网搜索主函数：并行 site:domain 搜索已勾选信息源 ──────
 async function newsAISearch() {
+  // Legal 已与 Tax 彻底分开：Legal 不走 WSA（WSA 不收录法律源），等 Google 法律源引擎接通
+  if (_newsKind === 'legal') {
+    const r = document.getElementById('news-ai-result');
+    if (r) r.innerHTML =
+      `<div style="padding:18px;background:#ecfeff;border:1px solid #a5f3fc;border-radius:8px;font-size:13px;color:#155e75;line-height:1.8;">
+        ⏳ <strong>Legal 时事新闻正在切换到 Google 法律源引擎</strong>（WSA 不收录法律/政府/律所网站，无法用于 Legal）。<br>
+        目前正在等待 Google 接口激活，预计明日恢复。<br>
+        <span style="font-size:12px;color:#0891b2;">✅ Tax 时事新闻不受影响，可正常使用。</span></div>`;
+    return;
+  }
   const scfUrl = localStorage.getItem(NEWS_SCF_KEY_TAX) || NEWS_SCF_DEFAULT_TAX;
   if (!scfUrl) {
     document.getElementById('news-ai-result').innerHTML =
