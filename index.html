@@ -3325,64 +3325,9 @@ body {
         style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#f3f4f6;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">
         ⚖️ Legal 时事新闻
       </button>
-      <button id="bu-tab-tax" onclick="switchBuRadar('tax')"
-        style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#f3f4f6;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">
-        💼 Tax 专项场景
-      </button>
-      <button id="bu-tab-legal" onclick="switchBuRadar('legal')"
-        style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#f3f4f6;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">
-        ⚖️ Legal 专项场景
-      </button>
-      <button id="bu-tab-cm" onclick="switchBuRadar('cm')"
-        style="padding:9px 22px;font-size:13px;font-weight:600;border:none;border-radius:8px 8px 0 0;cursor:pointer;background:#f3f4f6;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">
-        📈 CM 专项场景
-      </button>
     </div>
 
-    <!-- Tax 雷达面板 -->
-    <div id="radar-panel-tax" style="display:none;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-        <div>
-          <div style="font-size:13.5px;font-weight:700;color:#0369a1;">税务专项场景雷达</div>
-          <div style="font-size:12px;color:#6b7280;margin-top:3px;">基于 40 个税务重点信息源，AI 合成当前值得关注的场景建议</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <span id="radar-tax-lastupd" style="font-size:11px;color:#9ca3af;"></span>
-          <button onclick="radarRefresh('tax')"
-            style="padding:8px 18px;background:#0369a1;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
-            <span id="radar-tax-spin">⟳</span> 更新信息
-          </button>
-        </div>
-      </div>
-      <details style="margin-bottom:14px;">
-        <summary style="font-size:12px;color:#6b7280;cursor:pointer;user-select:none;">📋 查看全部 40 个信息源</summary>
-        <div id="radar-tax-sources" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;"></div>
-      </details>
-      <div style="margin:10px 0;padding:8px 12px;background:#fffbeb;border-left:3px solid #f59e0b;border-radius:4px;font-size:11px;color:#78350f;line-height:1.6;">
-        💡 <strong>佐证链接说明</strong>：AI 不再直接给出文章 URL（避免 404 / 编造），改为给出<strong>信息源 + 关键词组合</strong>，链接点击后进入该信息源的 <strong>Bing 站内搜索结果</strong>，由你直接看到该网站内符合关键词的真实文章列表。如果搜索结果为空，可能是该信息源近期没有相关文章——可换信息源或调整关键词重新生成。
-      </div>
-      <div id="radar-tax-result" style="min-height:80px;"></div>
-    </div>
-
-    <!-- Legal 雷达面板（占位） -->
-    <div id="radar-panel-legal" style="display:none;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
-      <div style="text-align:center;padding:40px 0;color:#9ca3af;">
-        <div style="font-size:28px;margin-bottom:10px;">⚖️</div>
-        <div style="font-size:14px;font-weight:600;">Legal 专项场景雷达</div>
-        <div style="font-size:12px;margin-top:6px;">法律 BU 信息源配置完成后上线，敬请期待</div>
-      </div>
-    </div>
-
-    <!-- CM 雷达面板（占位） -->
-    <div id="radar-panel-cm" style="display:none;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
-      <div style="text-align:center;padding:40px 0;color:#9ca3af;">
-        <div style="font-size:28px;margin-bottom:10px;">📈</div>
-        <div style="font-size:14px;font-weight:600;">CM 专项场景雷达</div>
-        <div style="font-size:12px;margin-top:6px;">资本市场 BU 信息源配置完成后上线，敬请期待</div>
-      </div>
-    </div>
-
-    <!-- Tax 时事新闻面板（腾讯云混元联网搜索） -->
+    <!-- Tax/Legal 时事新闻面板（腾讯云混元联网搜索） -->
     <div id="radar-panel-news" style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px;background:#fff;">
 
       <!-- 当前领域 badge -->
