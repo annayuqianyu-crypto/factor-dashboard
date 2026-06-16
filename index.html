@@ -12453,9 +12453,10 @@ const LEGAL_TRUSTED_DOMAINS = [
   'judiciary.gov.sg','mas.gov.sg','siac.org.sg'
 ];
 
-// ── Legal 时事新闻：Tavily 搜索（直连，include_domains 法律源白名单）──
-// 注：免费 key（1000次/月，无计费），暴露在前端风险可控；如需更安全可在 tavily.com 后台限流/重置
+// ── 时事新闻：Tavily 搜索（直连，include_domains 信息源白名单）──
+// 注：免费 key（各 1000次/月，无计费）；Tax 与 Legal 各用一把，额度互不挤占。暴露前端风险可控，可在 tavily.com 后台限流/重置
 const LEGAL_TAVILY_KEY = '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';
+const TAX_TAVILY_KEY   = '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';
 
 // ── 当前时事新闻 tab 的"领域"状态（tax/legal）─────────────────
 let _newsKind = 'tax';
@@ -12785,52 +12786,15 @@ function newsClearScfUrl() {
 function newsInitScfBar() {
   const bar = document.getElementById('news-scf-bar');
   if (!bar) return;
-  // Legal 已独立，不走 WSA SCF —— 显示 Google 法律源接入提示，隐藏 WSA 配置
-  if (_newsKind === 'legal') {
-    bar.innerHTML = `
-      <div style="background:#ecfeff;border:1px solid #a5f3fc;border-radius:8px;padding:9px 14px;font-size:12px;color:#155e75;">
-        ⚖️ Legal 使用 <strong>Tavily 法律源引擎</strong>（33 法律源白名单，与 Tax 的 WSA 完全独立）·
-        <span style="color:#0891b2;">已就绪</span>
-      </div>`;
-    return;
-  }
-  const url = newsGetScfUrl();
-  if (url) {
-    bar.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:space-between;
-        background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:9px 14px;">
-        <div style="font-size:12px;color:#166534;flex:1;min-width:0;">
-          ✅ 已配置联网搜索 SCF（Tax 专用）
-        </div>
-        <div style="display:flex;gap:6px;margin-left:10px;flex-shrink:0;">
-          <button onclick="newsTxTest()"
-            style="padding:5px 12px;background:#16a34a;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">
-            测试连通
-          </button>
-          <button onclick="newsClearScfUrl()"
-            style="padding:5px 10px;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;cursor:pointer;">
-            修改
-          </button>
-        </div>
-      </div>`;
-  } else {
-    bar.innerHTML = `
-      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 14px;">
-        <div style="font-size:12px;color:#92400e;margin-bottom:8px;">
-          ⚠️ 请先部署腾讯云 SCF 代理函数，并将触发器 URL 填入下方
-          （<a href="#" onclick="newsShowScfGuide();return false;"
-            style="color:#b45309;text-decoration:underline;">查看部署指南</a>）
-        </div>
-        <div style="display:flex;gap:8px;">
-          <input id="news-scf-input" type="text" placeholder="https://1433058101-xxx.ap-guangzhou.tencentscf.com"
-            style="flex:1;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;"/>
-          <button onclick="newsSaveScfUrl()"
-            style="padding:7px 16px;background:#d97706;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">
-            保存并启用
-          </button>
-        </div>
-      </div>`;
-  }
+  // Tax / Legal 均走 Tavily（各自白名单 + 各自 key），WSA 已弃用
+  const isLegal = _newsKind === 'legal';
+  const label = isLegal ? '⚖️ Legal 法律源引擎' : '💼 Tax 财经/监管源引擎';
+  const n = isLegal ? LEGAL_SOURCES.length : TAX_SOURCES.length;
+  bar.innerHTML = `
+    <div style="background:#ecfeff;border:1px solid #a5f3fc;border-radius:8px;padding:9px 14px;font-size:12px;color:#155e75;">
+      ${label}：<strong>Tavily</strong>（${n} 信息源白名单，逐源带日期，结果浏览器缓存不耗额度）·
+      <span style="color:#0891b2;">已就绪</span>
+    </div>`;
 }
 
 function newsShowScfGuide() {
@@ -12912,8 +12876,12 @@ function _newsParseDate(s) {
 
 // ── WSA 联网搜索主函数：并行 site:domain 搜索已勾选信息源 ──────
 async function newsAISearch() {
-  // Legal 与 Tax 彻底分开：Legal 走 Tavily（法律源白名单），Tax 走 WSA
-  if (_newsKind === 'legal') { return legalTavilySearch(); }
+  // Tax 与 Legal 均走 Tavily（各自白名单 + 各自 key）；WSA 已弃用（贵+欠费）
+  return tavilyNewsSearch();
+}
+
+// [已弃用] WSA 联网搜索（腾讯云混元）—— Tax 已迁移至 Tavily，保留以备查
+async function newsAISearch_WSA_deprecated() {
   const scfUrl = localStorage.getItem(NEWS_SCF_KEY_TAX) || NEWS_SCF_DEFAULT_TAX;
   if (!scfUrl) {
     document.getElementById('news-ai-result').innerHTML =
@@ -13046,13 +13014,15 @@ async function newsAISearch() {
   }
 }
 
-// ── Legal 联网搜索：Tavily 逐源 news 查询（每源带日期 → 前端按日期排序/过滤 → 全覆盖）──
-async function legalTavilySearch() {
+// ── 时事新闻：Tavily 逐源 news 查询（每源带日期 → 前端按日期排序/过滤 → 全覆盖）──
+//    Tax / Legal 通用：按 _newsKind 选 key、信息源、默认词
+async function tavilyNewsSearch() {
+  const isLegal = _newsKind === 'legal';
   const res  = document.getElementById('news-ai-result');
   const selected = newsGetSelectedSources();
   if (!selected.length) {
     res.innerHTML = `<div style="padding:16px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:13px;color:#92400e;">
-      请先在上方「信息源」列表中勾选至少一个法律源</div>`;
+      请先在上方「信息源」列表中勾选至少一个信息源</div>`;
     return;
   }
 
@@ -13067,12 +13037,14 @@ async function legalTavilySearch() {
 
   // 选中域名（gov.cn → www.gov.cn 收窄）
   const domains = [...new Set(selected.map(s => s.domain === 'gov.cn' ? 'www.gov.cn' : s.domain))];
-  const apiKey  = localStorage.getItem('legal_tavily_key') || LEGAL_TAVILY_KEY;
-  const query   = kw || '最新 法律 监管 政策 动态';
+  const apiKey  = isLegal ? (localStorage.getItem('legal_tavily_key') || LEGAL_TAVILY_KEY)
+                          : (localStorage.getItem('tax_tavily_key')   || TAX_TAVILY_KEY);
+  const SRC     = isLegal ? LEGAL_SOURCES : TAX_SOURCES;
+  const query   = kw || (isLegal ? '最新 法律 监管 政策 动态' : '最新 政策 监管 市场 动态');
 
   btn.disabled = true; spin.textContent = '⏳';
   res.innerHTML = `<div style="padding:32px;text-align:center;color:#6b7280;font-size:13px;">
-    ⏳ 正在逐个检索 <strong>${domains.length}</strong> 个法律源（每源单独查询以获取发布日期）…</div>`;
+    ⏳ 正在逐个检索 <strong>${domains.length}</strong> 个信息源（每源单独查询以获取发布日期）…</div>`;
 
   // 单源 news 查询（news 模式单域名才会返回 published_date）
   async function searchOne(domain) {
@@ -13113,7 +13085,7 @@ async function legalTavilySearch() {
     try { host = new URL(r.url).hostname.replace(/^www\./, ''); } catch { return null; }
     if (!hostOk(host)) return null;
     let srcObj = null, bestLen = -1;
-    for (const s of LEGAL_SOURCES) {
+    for (const s of SRC) {
       let h; try { h = new URL(s.url).hostname.replace(/^www\./, ''); } catch { continue; }
       if (matchDomain(host, h) && h.length > bestLen) { srcObj = s; bestLen = h.length; }
     }
@@ -13127,15 +13099,16 @@ async function legalTavilySearch() {
   const seen = new Set();
   items = items.filter(it => { if (!it.url || seen.has(it.url)) return false; seen.add(it.url); return true; });
 
-  // 日期范围过滤（news 单源返回了日期 → 可真过滤；设了范围则剔除无日期项）
-  let dateFiltered = 0;
+  // 日期范围过滤：有日期的按范围严格过滤；无日期的保留（很多中文财经源 Tavily 不返回发布日期，若一刀切会全军覆没）
+  let dateFiltered = 0, undated = 0;
   if (start || end) {
     const startMs = start ? new Date(start + 'T00:00:00').getTime() : -Infinity;
     const endMs   = end   ? new Date(end   + 'T23:59:59').getTime() :  Infinity;
     const before = items.length;
-    items = items.filter(it => it._ts && it._ts >= startMs && it._ts <= endMs);
+    items = items.filter(it => !it._ts || (it._ts >= startMs && it._ts <= endMs));
     dateFiltered = before - items.length;
   }
+  undated = items.filter(it => !it._ts).length;
 
   // 负向词过滤
   let negFiltered = 0;
@@ -13151,20 +13124,34 @@ async function legalTavilySearch() {
     }
   }
 
-  // 按发布日期倒序（最新在前）
+  // 按发布日期倒序（有日期的最新在前，无日期的排最后）
   items.sort((a, b) => b._ts - a._ts);
 
+  // 每源最多 4 条，保证覆盖广度（避免少数高产/带日期源占满列表，把其它源挤掉）
+  const _perSrc = {};
+  items = items.filter(it => { _perSrc[it.source] = (_perSrc[it.source] || 0) + 1; return _perSrc[it.source] <= 4; });
+
   if (count !== null) items = items.slice(0, count);
+  else if (items.length > 80) items = items.slice(0, 80);   // 默认最多展示 80 条，可用「数量」自定义
 
   if (!items.length) {
-    const dnote = dateFiltered > 0 ? `（已剔除 ${dateFiltered} 条不在所选日期范围/无日期的文章）` : '';
+    const dnote = dateFiltered > 0 ? `（已剔除 ${dateFiltered} 条不在所选日期范围内的文章）` : '';
     res.innerHTML = `<div style="padding:20px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:13px;color:#78350f;">
-      📭 所选法律源中未找到匹配「${kw || '近期内容'}」的结果${dnote}<br>
+      📭 所选信息源中未找到匹配「${kw || '近期内容'}」的结果${dnote}<br>
       <span style="font-size:11px;color:#92400e;">建议：放宽时间范围 / 换关键词 / 增加勾选信息源</span></div>`;
     return;
   }
 
   newsRenderCards(items, kw, start, end, negKw, negFiltered);
+  // 无日期项提示（中文财经/部分站点 Tavily 不返回发布日期）
+  const undatedShown = items.filter(it => !it._ts).length;
+  if (undatedShown > 0) {
+    const note = `<div style="margin-bottom:8px;padding:6px 12px;background:#fffbeb;border:1px dashed #fde68a;border-radius:6px;font-size:11px;color:#92400e;">
+      ℹ️ 其中 <strong>${undatedShown}</strong> 条来源未提供发布日期（部分站点 Tavily 不返回日期，无法按日期过滤），已一并展示并排在带日期结果之后。</div>`;
+    const r2 = document.getElementById('news-ai-result');
+    r2.innerHTML = note + r2.innerHTML;
+    try { localStorage.setItem(getNewsResultCacheKey(), JSON.stringify({ html: r2.innerHTML })); } catch(e) {}
+  }
   newsSaveKwHistory(kw, negKw);
   if (kw)    localStorage.setItem(getNewsKwCacheKey(), kw);
   if (negKw) localStorage.setItem(getNewsNegKwCacheKey(), negKw);
