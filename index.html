@@ -13052,7 +13052,7 @@ async function tavilyNewsSearch() {
       const resp = await fetch('https://api.tavily.com/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-        body: JSON.stringify({ query, include_domains: [domain], topic: 'news', max_results: 15, search_depth: 'basic' })
+        body: JSON.stringify({ query, include_domains: [domain], topic: 'news', max_results: 10, search_depth: 'basic', include_raw_content: true })
       });
       const d = await resp.json();
       return Array.isArray(d.results) ? d.results : [];
@@ -13100,24 +13100,30 @@ async function tavilyNewsSearch() {
       if (m2) dsrc = `${m2[1]}-${m2[2]}-${m2[3]}`;
     }
     if (dsrc) { const d = new Date(dsrc); if (!isNaN(d)) { ts = d.getTime(); dateStr = d.toISOString().slice(0,10); } }
+    const blob = ((r.title||'') + ' ' + (r.content||'') + ' ' + (r.raw_content||'')).toLowerCase();
     return { title: r.title || '(无标题)', url: r.url, source: srcObj ? srcObj.name : host,
-             date: dateStr, _ts: ts, summary: r.content || '', trusted: true, tags: [], relevance: '' };
+             date: dateStr, _ts: ts, _blob: blob, summary: r.content || '', trusted: true, tags: [], relevance: '' };
   }).filter(Boolean);
 
   // URL 去重
   const seen = new Set();
   items = items.filter(it => { if (!it.url || seen.has(it.url)) return false; seen.add(it.url); return true; });
 
-  // 日期范围过滤：有日期的按范围严格过滤；无日期的保留（很多中文财经源 Tavily 不返回发布日期，若一刀切会全军覆没）
-  let dateFiltered = 0, undated = 0;
+  // 正向关键词强制命中（标题/正文/全文 任一包含 任一关键词）—— 严格筛选
+  if (kw) {
+    const posList = kw.split(/[\s,，;；]+/).map(s => s.trim().toLowerCase()).filter(Boolean);
+    if (posList.length) items = items.filter(it => posList.some(p => it._blob.includes(p)));
+  }
+
+  // 日期范围过滤（严格）：无发布日期 或 不在区间内 一律剔除，杜绝旧文混入
+  let dateFiltered = 0;
   if (start || end) {
     const startMs = start ? new Date(start + 'T00:00:00').getTime() : -Infinity;
     const endMs   = end   ? new Date(end   + 'T23:59:59').getTime() :  Infinity;
     const before = items.length;
-    items = items.filter(it => !it._ts || (it._ts >= startMs && it._ts <= endMs));
+    items = items.filter(it => it._ts && it._ts >= startMs && it._ts <= endMs);
     dateFiltered = before - items.length;
   }
-  undated = items.filter(it => !it._ts).length;
 
   // 负向词过滤
   let negFiltered = 0;
