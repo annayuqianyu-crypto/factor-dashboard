@@ -11765,25 +11765,12 @@ ${factorPathsText}
     let _rawSample = '';
     try {
 
-      const resp = await fetch(base + '/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Access-Token': key },
-        body: JSON.stringify({
-          model,
-          messages: [{ role: 'user', content: buildPrompt(batch, i) }],
-          max_tokens: 6000,
-          temperature: 0.3,
-        })
+      const raw = await pgChatStream(base, key, {
+        model,
+        messages: [{ role: 'user', content: buildPrompt(batch, i) }],
+        max_tokens: 6000,
+        temperature: 0.3,
       });
-
-      if (!resp.ok) {
-        const txt = await resp.text();
-        _rawSample = txt.slice(0, 300);
-        throw new Error(`API ${resp.status}: ${txt.slice(0, 200)}`);
-      }
-
-      const data = await resp.json();
-      const raw  = data.choices?.[0]?.message?.content || '';
       _rawSample = raw.slice(0, 300);
 
       const m = raw.match(/\{[\s\S]*\}/);
@@ -13589,17 +13576,11 @@ ${sourceList}
 ]}`;
 
   try {
-    const resp = await fetch(base + '/chat/completions', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','X-Access-Token':key},
-      body: JSON.stringify({
-        model: localStorage.getItem('pg_api_model') || COMPANY_API_MODEL,
-        messages:[{role:'user',content:prompt}],
-        max_tokens:8000, temperature:0.7
-      })
+    const raw = await pgChatStream(base, key, {
+      model: localStorage.getItem('pg_api_model') || COMPANY_API_MODEL,
+      messages:[{role:'user',content:prompt}],
+      max_tokens:8000, temperature:0.7
     });
-    const data = await resp.json();
-    const raw  = data.choices?.[0]?.message?.content || '';
     const m    = raw.match(/\{[\s\S]*\}/);
     if (!m) throw new Error('未返回JSON');
     const cleaned = cleanLLMJson(m[0]);
