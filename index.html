@@ -13052,7 +13052,7 @@ async function tavilyNewsSearch() {
       const resp = await fetch('https://api.tavily.com/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-        body: JSON.stringify({ query, include_domains: [domain], topic: 'news', max_results: 15, search_depth: 'basic' })
+        body: JSON.stringify({ query, include_domains: [domain], topic: 'news', max_results: 10, search_depth: 'basic', include_raw_content: true })
       });
       const d = await resp.json();
       return Array.isArray(d.results) ? d.results : [];
@@ -13089,8 +13089,17 @@ async function tavilyNewsSearch() {
       let h; try { h = new URL(s.url).hostname.replace(/^www\./, ''); } catch { continue; }
       if (matchDomain(host, h) && h.length > bestLen) { srcObj = s; bestLen = h.length; }
     }
-    let ts = 0, dateStr = '';
-    if (r.published_date) { const d = new Date(r.published_date); if (!isNaN(d)) { ts = d.getTime(); dateStr = d.toISOString().slice(0,10); } }
+    // 日期：优先 published_date；缺失则从 URL（如 t20260614 / 2026-06-14 / 2026/06/14）兜底，再从正文片段兜底
+    let ts = 0, dateStr = '', dsrc = r.published_date || '';
+    if (!dsrc) {
+      const m = (r.url || '').match(/(20\d{2})[-_/]?(0[1-9]|1[0-2])[-_/]?(0[1-9]|[12]\d|3[01])/);
+      if (m) dsrc = `${m[1]}-${m[2]}-${m[3]}`;
+    }
+    if (!dsrc) {
+      const m2 = (r.content || '').match(/(20\d{2})[-年.\/](1[0-2]|0?[1-9])[-月.\/](3[01]|[12]\d|0?[1-9])/);
+      if (m2) dsrc = `${m2[1]}-${m2[2]}-${m2[3]}`;
+    }
+    if (dsrc) { const d = new Date(dsrc); if (!isNaN(d)) { ts = d.getTime(); dateStr = d.toISOString().slice(0,10); } }
     return { title: r.title || '(无标题)', url: r.url, source: srcObj ? srcObj.name : host,
              date: dateStr, _ts: ts, summary: r.content || '', trusted: true, tags: [], relevance: '' };
   }).filter(Boolean);
