@@ -12733,11 +12733,12 @@ function newsInit() {
   const e = document.getElementById('news-date-end');
   if (s && !s.value) s.value = fmt(ago30);
   if (e && !e.value) e.value = fmt(today);
-  // 切换 kind 时清空输入并加载该 kind 的缓存
-  const kw = localStorage.getItem(getNewsKwCacheKey()) || '';
+  // Legal 刷新后正/负关键词留空（仅靠历史下拉提示）；Tax 仍回填上次缓存
+  const isLegal = _newsKind === 'legal';
+  const kw = isLegal ? '' : (localStorage.getItem(getNewsKwCacheKey()) || '');
   const ki = document.getElementById('news-keyword');
   if (ki) ki.value = kw;
-  const negKw = localStorage.getItem(getNewsNegKwCacheKey()) || '';
+  const negKw = isLegal ? '' : (localStorage.getItem(getNewsNegKwCacheKey()) || '');
   const ne = document.getElementById('news-keyword-neg');
   if (ne) ne.value = negKw;
   _newsRefreshKwDatalist();
