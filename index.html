@@ -14109,19 +14109,13 @@ function _skuBuildText() {
 async function _skuCallJson(prompt, maxTokens) {
   const apiBase = localStorage.getItem('pg_api_base') || COMPANY_API_BASE;
   const apiKey  = localStorage.getItem('pg_api_key')  || COMPANY_API_KEY;
-  const resp = await fetch(`${apiBase}/v1/chat/completions`, {
-    method: 'POST',
-    headers: { 'X-Access-Token': apiKey, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  const _r = await pgChatStream(apiBase, apiKey, {
       model: localStorage.getItem('pg_api_model') || COMPANY_API_MODEL,
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.25,
       max_tokens: maxTokens,
-    }),
-  });
-  if (!resp.ok) throw new Error(`API HTTP ${resp.status}`);
-  const data = await resp.json();
-  let raw = (data.choices?.[0]?.message?.content || '').replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+    });
+  let raw = (_r || '').replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
   const m = raw.match(/\{[\s\S]*\}/);
   if (!m) throw new Error('AI 返回内容无法解析为 JSON');
   let txt = m[0];
@@ -15097,19 +15091,13 @@ ${wsaCtx || '（无联网数据）'}
   }
 }`;
 
-  const resp = await fetch(`${apiBase}/v1/chat/completions`, {
-    method: 'POST',
-    headers: { 'X-Access-Token': apiKey, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  const _r = await pgChatStream(apiBase, apiKey, {
       model: COMPANY_API_MODEL,
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.25,
       max_tokens: 3000,
-    }),
-  });
-  if (!resp.ok) throw new Error(`API HTTP ${resp.status}`);
-  const data = await resp.json();
-  let raw = (data.choices?.[0]?.message?.content || '').replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+    });
+  let raw = (_r || '').replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
 
   // 兜底：提取第一个 {}
   const m = raw.match(/\{[\s\S]*\}/);
