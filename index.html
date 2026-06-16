@@ -12748,7 +12748,12 @@ function newsInit() {
   newsInitScfBar();
   try {
     const cache = JSON.parse(localStorage.getItem(getNewsResultCacheKey()) || 'null');
-    if (cache && cache.html && resEl) resEl.innerHTML = cache.html;
+    if (cache && cache.html && resEl) {
+      resEl.innerHTML =
+        `<div style="margin-bottom:10px;padding:6px 12px;background:#f1f5f9;border:1px dashed #cbd5e1;border-radius:6px;font-size:11.5px;color:#64748b;">
+          📦 以下为<strong>上次搜索的缓存结果</strong>，刷新 / 切换不消耗额度 · 重新点「联网搜索」才会更新
+        </div>` + cache.html;
+    }
   } catch(er) {}
 }
 
