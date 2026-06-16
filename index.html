@@ -13052,7 +13052,7 @@ async function tavilyNewsSearch() {
       const resp = await fetch('https://api.tavily.com/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-        body: JSON.stringify({ query, include_domains: [domain], topic: 'news', max_results: 10, search_depth: 'basic', include_raw_content: true })
+        body: JSON.stringify({ query, include_domains: [domain], topic: 'news', max_results: 15, search_depth: 'basic' })
       });
       const d = await resp.json();
       return Array.isArray(d.results) ? d.results : [];
