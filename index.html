@@ -12453,6 +12453,10 @@ const LEGAL_TRUSTED_DOMAINS = [
   'judiciary.gov.sg','mas.gov.sg','siac.org.sg'
 ];
 
+// ── Legal 时事新闻：Tavily 搜索（直连，include_domains 法律源白名单）──
+// 注：免费 key（1000次/月，无计费），暴露在前端风险可控；如需更安全可在 tavily.com 后台限流/重置
+const LEGAL_TAVILY_KEY = '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';
+
 // ── 当前时事新闻 tab 的"领域"状态（tax/legal）─────────────────
 let _newsKind = 'tax';
 
@@ -12779,8 +12783,8 @@ function newsInitScfBar() {
   if (_newsKind === 'legal') {
     bar.innerHTML = `
       <div style="background:#ecfeff;border:1px solid #a5f3fc;border-radius:8px;padding:9px 14px;font-size:12px;color:#155e75;">
-        ⚖️ Legal 使用 <strong>Google 法律源引擎</strong>（与 Tax 的 WSA 完全独立）·
-        <span style="color:#0891b2;">接口激活中，预计明日恢复</span>
+        ⚖️ Legal 使用 <strong>Tavily 法律源引擎</strong>（33 法律源白名单，与 Tax 的 WSA 完全独立）·
+        <span style="color:#0891b2;">已就绪</span>
       </div>`;
     return;
   }
@@ -12902,16 +12906,8 @@ function _newsParseDate(s) {
 
 // ── WSA 联网搜索主函数：并行 site:domain 搜索已勾选信息源 ──────
 async function newsAISearch() {
-  // Legal 已与 Tax 彻底分开：Legal 不走 WSA（WSA 不收录法律源），等 Google 法律源引擎接通
-  if (_newsKind === 'legal') {
-    const r = document.getElementById('news-ai-result');
-    if (r) r.innerHTML =
-      `<div style="padding:18px;background:#ecfeff;border:1px solid #a5f3fc;border-radius:8px;font-size:13px;color:#155e75;line-height:1.8;">
-        ⏳ <strong>Legal 时事新闻正在切换到 Google 法律源引擎</strong>（WSA 不收录法律/政府/律所网站，无法用于 Legal）。<br>
-        目前正在等待 Google 接口激活，预计明日恢复。<br>
-        <span style="font-size:12px;color:#0891b2;">✅ Tax 时事新闻不受影响，可正常使用。</span></div>`;
-    return;
-  }
+  // Legal 与 Tax 彻底分开：Legal 走 Tavily（法律源白名单），Tax 走 WSA
+  if (_newsKind === 'legal') { return legalTavilySearch(); }
   const scfUrl = localStorage.getItem(NEWS_SCF_KEY_TAX) || NEWS_SCF_DEFAULT_TAX;
   if (!scfUrl) {
     document.getElementById('news-ai-result').innerHTML =
@@ -13030,6 +13026,122 @@ async function newsAISearch() {
       res.innerHTML = `<div style="padding:20px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:13px;color:#78350f;">
         📭 所选 ${selected.length} 个信息源中未找到匹配「${kw || '近期内容'}」的结果${dateNote}<br>
         <span style="font-size:11px;color:#92400e;">建议：放宽时间范围 / 换关键词 / 增加勾选信息源</span></div>`;
+      return;
+    }
+
+    newsRenderCards(items, kw, start, end, negKw, negFiltered);
+    newsSaveKwHistory(kw, negKw);
+    if (kw)    localStorage.setItem(getNewsKwCacheKey(), kw);
+    if (negKw) localStorage.setItem(getNewsNegKwCacheKey(), negKw);
+
+  } catch(e) {
+    btn.disabled = false; spin.textContent = '🔍';
+    res.innerHTML = `<div style="padding:20px;color:#dc2626;font-size:13px;">请求失败：${e.message}</div>`;
+  }
+}
+
+// ── Legal 联网搜索：Tavily（include_domains 法律源白名单 + 前端严格域名复核）──
+async function legalTavilySearch() {
+  const res  = document.getElementById('news-ai-result');
+  const selected = newsGetSelectedSources();
+  if (!selected.length) {
+    res.innerHTML = `<div style="padding:16px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:13px;color:#92400e;">
+      请先在上方「信息源」列表中勾选至少一个法律源</div>`;
+    return;
+  }
+
+  const kw    = (document.getElementById('news-keyword').value || '').trim();
+  const negKw = (document.getElementById('news-keyword-neg')?.value || '').trim();
+  const start = document.getElementById('news-date-start').value;
+  const end   = document.getElementById('news-date-end').value;
+  const countRaw = (document.getElementById('news-count').value || '').trim();
+  const count = countRaw ? Math.max(1, parseInt(countRaw, 10)) : null;
+  const btn  = document.getElementById('news-search-btn');
+  const spin = document.getElementById('news-search-spin');
+
+  // 选中域名（gov.cn → www.gov.cn 收窄，避免放进其它政府站）
+  const domains = [...new Set(selected.map(s => s.domain === 'gov.cn' ? 'www.gov.cn' : s.domain))];
+
+  btn.disabled = true; spin.textContent = '⏳';
+  res.innerHTML = `<div style="padding:32px;text-align:center;color:#6b7280;font-size:13px;">
+    ⏳ 正在从 <strong>${domains.length}</strong> 个法律源检索（Tavily 法律源引擎）…</div>`;
+
+  const apiKey = localStorage.getItem('legal_tavily_key') || LEGAL_TAVILY_KEY;
+  const payload = {
+    query:        kw || '最新 法律 监管 动态',
+    include_domains: domains,
+    topic:        'general',         // 严格白名单模式
+    search_depth: 'advanced',
+    max_results:  20
+  };
+  if (start) payload.start_date = start;   // 尽力而为（general 模式日期非强制）
+  if (end)   payload.end_date   = end;
+
+  try {
+    const resp = await fetch('https://api.tavily.com/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+      body: JSON.stringify(payload)
+    });
+    const data = await resp.json();
+    btn.disabled = false; spin.textContent = '🔍';
+
+    if (!resp.ok || data.error || !Array.isArray(data.results)) {
+      res.innerHTML = `<div style="padding:20px;color:#dc2626;font-size:13px;">
+        搜索失败：${data.error || data.detail || ('HTTP ' + resp.status)}</div>`;
+      return;
+    }
+
+    // 前端严格域名复核（去掉 Tavily 漏网的近似域名，如 csrc / 地方法院）
+    // gov.cn 仅精确匹配（避免把所有 .gov.cn 政府站放进来），其余允许子域
+    const matchDomain = (host, d) => {
+      const dd = d.replace(/^www\./, '');
+      if (dd === 'gov.cn') return host === 'gov.cn';
+      return host === dd || host.endsWith('.' + dd);
+    };
+    const hostOk = (host) => domains.some(d => matchDomain(host, d));
+    let items = data.results.map(r => {
+      let host = '';
+      try { host = new URL(r.url).hostname.replace(/^www\./, ''); } catch { return null; }
+      if (!hostOk(host)) return null;
+      // 来源名：取「最具体（域名最长）」的匹配，避免被 gov.cn 抢走
+      let srcObj = null, bestLen = -1;
+      for (const s of LEGAL_SOURCES) {
+        let h; try { h = new URL(s.url).hostname.replace(/^www\./, ''); } catch { continue; }
+        if (matchDomain(host, h) && h.length > bestLen) { srcObj = s; bestLen = h.length; }
+      }
+      let dateStr = '';
+      if (r.published_date) { const d = new Date(r.published_date); if (!isNaN(d)) dateStr = d.toISOString().slice(0, 10); }
+      return {
+        title: r.title || '(无标题)',
+        url: r.url,
+        source: srcObj ? srcObj.name : host,
+        date: dateStr,
+        summary: r.content || '',
+        trusted: true, tags: [], relevance: ''
+      };
+    }).filter(Boolean);
+
+    // 负向词过滤
+    let negFiltered = 0;
+    if (negKw) {
+      const negList = negKw.split(/[\s,，;；]+/).map(s => s.trim()).filter(Boolean);
+      if (negList.length) {
+        const before = items.length;
+        items = items.filter(it => {
+          const blob = ((it.title||'') + ' ' + (it.summary||'')).toLowerCase();
+          return !negList.some(n => blob.includes(n.toLowerCase()));
+        });
+        negFiltered = before - items.length;
+      }
+    }
+
+    if (count !== null) items = items.slice(0, count);
+
+    if (!items.length) {
+      res.innerHTML = `<div style="padding:20px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:13px;color:#78350f;">
+        📭 所选法律源中未找到匹配「${kw || '近期内容'}」的结果<br>
+        <span style="font-size:11px;color:#92400e;">建议：换关键词 / 增加勾选信息源</span></div>`;
       return;
     }
 
