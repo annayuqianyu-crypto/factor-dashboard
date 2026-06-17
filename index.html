@@ -4814,9 +4814,9 @@ body {
 
         <div>
 
-          <div style="font-size:14px;font-weight:700;color:#166534;">API 已配置</div>
+          <div style="font-size:14px;font-weight:700;color:#166534;">API 配置 · 直连 DeepSeek</div>
 
-          <div style="font-size:12px;color:#15803d;margin-top:2px;">DeepSeek &nbsp;·&nbsp; deepseek-v4-pro</div>
+          <div style="font-size:12px;color:#15803d;margin-top:2px;">请在「⚙️ 自定义」中填入你的 DeepSeek API Key（sk-...）后点「测试连接」</div>
 
         </div>
 
@@ -4855,11 +4855,11 @@ body {
 
         <div>
 
-          <div style="font-size:11px;color:#374151;font-weight:600;margin-bottom:4px;">访问密码 Access Token（团队统一密码，输入后自动保存）</div>
+          <div style="font-size:11px;color:#374151;font-weight:600;margin-bottom:4px;">DeepSeek API Key（sk-... ，输入后自动保存）</div>
 
           <input id="apiKeyInput" type="password"
 
-            placeholder="填写团队访问密码"
+            placeholder="填写 DeepSeek API Key（sk-...）"
 
             style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;"
 
@@ -4869,7 +4869,7 @@ body {
 
         <div>
 
-          <div style="font-size:11px;color:#374151;font-weight:600;margin-bottom:4px;">模型名称（已自动配置，无需填写）</div>
+          <div style="font-size:11px;color:#374151;font-weight:600;margin-bottom:4px;">模型名称（如 deepseek-chat / deepseek-reasoner）</div>
 
           <input id="apiModelInput"
 
@@ -4885,13 +4885,13 @@ body {
 
       <div>
 
-        <div style="font-size:11px;color:#374151;font-weight:600;margin-bottom:4px;">API 服务地址（已自动使用公司代理，无需填写）</div>
+        <div style="font-size:11px;color:#374151;font-weight:600;margin-bottom:4px;">API 服务地址 Base URL（直连 DeepSeek，默认 api.deepseek.com）</div>
 
         <div style="display:flex;gap:8px;align-items:center;">
 
           <input id="apiBaseInput"
 
-            placeholder="已使用公司代理，无需填写"
+            placeholder="https://api.deepseek.com"
 
             list="base-suggestions"
 
@@ -4915,7 +4915,7 @@ body {
 
             style="padding:8px 12px;border:1px solid #fca5a5;border-radius:6px;font-size:12px;color:#dc2626;background:#fff;cursor:pointer;white-space:nowrap;">
 
-            重置为公司默认
+            重置默认
 
           </button>
 
@@ -9940,10 +9940,9 @@ const pgState = { selected: new Set(), counts: {} };
 
 function initPainGeneratePage() {
 
-  // 清除旧版 pg_api_base，让 Base 输入框显示正确的 Worker 地址
-  localStorage.removeItem('pg_api_base');
+  // 直连 DeepSeek：Base 默认 api.deepseek.com（可自定义），不再强制公司代理
   const baseEl = document.getElementById('apiBaseInput');
-  if (baseEl) baseEl.value = COMPANY_API_BASE;
+  if (baseEl && !baseEl.value) baseEl.value = localStorage.getItem('pg_api_base') || COMPANY_API_BASE;
 
   // 自动填入默认模型名
   const modelEl = document.getElementById('apiModelInput');
@@ -9951,15 +9950,10 @@ function initPainGeneratePage() {
     modelEl.value = localStorage.getItem('pg_api_model') || COMPANY_API_MODEL;
   }
 
-  // 如果 localStorage 有旧的 pg_api_key，同步写入 zx_proxy_token
-  const oldKey = localStorage.getItem('pg_api_key');
-  if (oldKey && !localStorage.getItem('zx_proxy_token')) {
-    localStorage.setItem('zx_proxy_token', oldKey);
-  }
-  // 预填 access token 到输入框
+  // 预填 DeepSeek API Key 到输入框
   const keyEl = document.getElementById('apiKeyInput');
   if (keyEl && !keyEl.value) {
-    keyEl.value = localStorage.getItem('zx_proxy_token') || localStorage.getItem('pg_api_key') || '';
+    keyEl.value = localStorage.getItem('pg_api_key') || '';
   }
 
   const el = document.getElementById('forecastChips');
@@ -10825,9 +10819,9 @@ function pgLoadKey() {
 
 // ── 公司统一 API 配置（管理员内置，无需用户填写）────────────────
 // API 代理配置（密钥存于 Cloudflare Worker，不在此处）
-const COMPANY_API_KEY   = '';   // 不再使用，由 Worker 持有
-const COMPANY_API_BASE  = 'https://zx-factordashboard-deepseek-proxy.annayuqianyu.workers.dev';
-const COMPANY_API_MODEL = 'deepseek-v4-pro';
+const COMPANY_API_KEY   = '';   // 由用户在面板填写真实 DeepSeek Key（sk-...）
+const COMPANY_API_BASE  = 'https://api.deepseek.com';   // 直连 DeepSeek（Cloudflare workers.dev 被公司安全拦截，改回直连）
+const COMPANY_API_MODEL = 'deepseek-chat';
 const COMPANY_PROXY_TOKEN = (() => {
   // 首次使用时用户填写，存入 localStorage
   return localStorage.getItem('zx_proxy_token') || '';
@@ -10844,7 +10838,7 @@ function pgGetConfig() {
     || localStorage.getItem('zx_proxy_token')
     || '';
   const model = (document.getElementById('apiModelInput')?.value || '').trim() || COMPANY_API_MODEL;
-  const base  = COMPANY_API_BASE;   // 始终指向 Worker，忽略 apiBaseInput
+  const base  = (document.getElementById('apiBaseInput')?.value || '').trim() || localStorage.getItem('pg_api_base') || COMPANY_API_BASE;
   return { key, model, base };
 }
 // ── 代理 Token 首次设置 ───────────────────────────────────────
@@ -10880,7 +10874,7 @@ async function pgChatStream(base, key, bodyObj, opts) {
     try {
       const resp = await fetch(base + '/chat/completions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Access-Token': key },
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
         body: JSON.stringify(Object.assign({}, bodyObj, { stream: true }))
       });
       if (!resp.ok) {
@@ -10935,7 +10929,7 @@ async function pgTestConnection() {
 
       method: 'POST',
 
-      headers: { 'Content-Type': 'application/json', 'X-Access-Token': key },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
 
       body: JSON.stringify({
 
@@ -13400,7 +13394,7 @@ ${relevance ? `家办关联：${relevance}` : ''}
   try {
     const resp = await fetch(`${apiBase}/v1/chat/completions`, {
       method: 'POST',
-      headers: { 'X-Access-Token': apiKey, 'Content-Type': 'application/json' },
+      headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: COMPANY_API_MODEL,
         messages: [{ role: 'user', content: prompt }],
@@ -13475,7 +13469,7 @@ JSON 数组格式输出（与家办无关则返回 []）：
   try {
     const resp = await fetch(`${apiBase}/v1/chat/completions`, {
       method: 'POST',
-      headers: { 'X-Access-Token': apiKey, 'Content-Type': 'application/json' },
+      headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: COMPANY_API_MODEL,
         messages: [{ role:'user', content: prompt }],
         temperature: 0.3, max_tokens: 800 })
@@ -14915,7 +14909,7 @@ async function _skuStreamChat(bubbleId) {
 
   const resp = await fetch(`${apiBase}/v1/chat/completions`, {
     method: 'POST',
-    headers: { 'X-Access-Token': apiKey, 'Content-Type': 'application/json' },
+    headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: localStorage.getItem('pg_api_model') || COMPANY_API_MODEL,
       messages, temperature: 0.35, max_tokens: 2000, stream: true,
@@ -15355,7 +15349,7 @@ async function learnStreamChat(bubbleId) {
 
   const resp = await fetch(`${apiBase}/v1/chat/completions`, {
     method: 'POST',
-    headers: { 'X-Access-Token': apiKey, 'Content-Type': 'application/json' },
+    headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: COMPANY_API_MODEL,
       messages,
@@ -15452,7 +15446,7 @@ async function learnExpandReg(regId, btn) {
   try {
     const resp = await fetch(`${apiBase}/v1/chat/completions`, {
       method: 'POST',
-      headers: { 'X-Access-Token': apiKey, 'Content-Type': 'application/json' },
+      headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: COMPANY_API_MODEL,
         messages: [{ role: 'user', content: prompt }],
