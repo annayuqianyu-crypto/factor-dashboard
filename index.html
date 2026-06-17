@@ -14290,15 +14290,18 @@ ${skuText}
   ],
   "suppliers": [
     {"type": "供应商类型（如信托公司/律所/税务师事务所）", "candidates": "代表性机构举例", "confirm": "对接时需提前确认的关键事项（40字内）"}
+  ],
+  "regulations": [
+    {"name": "法规/政策全称（如《中华人民共和国个人所得税法》《金融机构客户尽职调查管理办法》）", "article": "具体条款（如 第8条 / 第45条第2款）；确实无法精确到条则填章节名或'（待核实具体条款）'", "relation": "该条款与本SKU的关联：是法律依据 / 合规约束 / 业务触发点（60字内）", "iteration_trigger": "该法规若发生何种变化（修订 / 新规 / 执法口径调整）将触发本SKU迭代升级（50字内）"}
   ]
 }
 【案例要求·重点】请优先引用**市面上真实存在的知名案例**，包括：
 - 知名企业家/上市公司创始人的公开事件（如：土豆网王微离婚导致股权冻结、真功夫蔡达标股权之争、海底捞家族信托、龙湖吴亚军family trust离婚分割、SOHO中国潘石屹夫妇架构、娃哈哈宗庆后传承等），可结合该SKU主题精准选取最贴切的真实案例并讲清其主体/资产/动作/约束/风险/方案/结果；
 - 各大律所/信托公司/家办在官网或媒体**公开发布的脱敏案例**（如金杜、中伦、汉坤的实务文章案例）。
 只有在确实找不到贴切真实案例时，才用"模拟案例"，且需写得详实。
-输出 2-3 个案例，尽量让其中**至少 1-2 个是真实知名案例**。严禁编造不存在的 URL（找不到链接就留空，但案例本身可以是真实的公开事件）。suppliers 3-5类。严格只输出 JSON。`;
+输出 2-3 个案例，尽量让其中**至少 1-2 个是真实知名案例**。严禁编造不存在的 URL（找不到链接就留空，但案例本身可以是真实的公开事件）。suppliers 3-5类。regulations 列 2-4 条与本SKU最相关的政策法规及**具体条款**，作为该SKU的法律基础与未来迭代触发器；条款尽量精确到"第X条"，不确定就标注"（待核实）"，**严禁编造不存在的法规或条款**。严格只输出 JSON。`;
 
-    const d1 = await callJson(p1, 3000, skuStatus);
+    const d1 = await callJson(p1, 3500, skuStatus);
     d1._necessity = d0;   // 把研发必要性挂到 d1 上一并渲染/存储
 
     // 论证完成即渲染（六阶段问题由用户点击第二个按钮单独生成，避免单次输出过长被截断）
@@ -14497,6 +14500,16 @@ function skuRenderOutput(d1, d2, skuText) {
       <td style="color:#4b5563;font-size:12.5px;">${s.confirm || ''}</td>
     </tr>`).join('');
 
+  const regulationsHtml = (d1.regulations || []).map(r => `
+    <div style="margin-bottom:10px;padding:12px 14px;background:#fff;border:1px solid #bfdbfe;border-left:3px solid #3b82f6;border-radius:8px;">
+      <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:5px;">
+        <span style="font-size:13.5px;font-weight:700;color:#1d4ed8;">${r.name || ''}</span>
+        ${r.article ? `<span style="font-size:11.5px;font-weight:700;color:#fff;background:#3b82f6;padding:1px 9px;border-radius:10px;white-space:nowrap;">${r.article}</span>` : ''}
+      </div>
+      ${r.relation ? `<div style="font-size:12.5px;color:#374151;line-height:1.7;"><span style="font-weight:700;color:#1e40af;">关联：</span>${r.relation}</div>` : ''}
+      ${r.iteration_trigger ? `<div style="font-size:12px;color:#92400e;line-height:1.7;margin-top:4px;"><span style="font-weight:700;">🔄 迭代触发：</span>${r.iteration_trigger}</div>` : ''}
+    </div>`).join('');
+
   const stagesHtml = _skuStagesHtml((d2 && d2.stages) || []);
 
   // ── 研发必要性论证 ──
@@ -14564,6 +14577,13 @@ function skuRenderOutput(d1, d2, skuText) {
             <div style="font-size:12.5px;color:#374151;line-height:1.8;">${(items||[]).map(x=>`· ${x}`).join('<br>')}</div>
           </div>`).join('')}
       </div>
+    </div>
+
+    <!-- 相关政策法规（法律基础·迭代触发器）-->
+    <div style="border:1px solid #bfdbfe;border-radius:10px;padding:16px 18px;margin-bottom:14px;background:#f8fafc;">
+      <div style="font-size:13px;color:#1d4ed8;font-weight:700;letter-spacing:.05em;margin-bottom:4px;">📜 相关政策法规（SKU 法律基础 · 迭代触发器）</div>
+      <div style="font-size:11.5px;color:#9ca3af;margin-bottom:12px;">本 SKU 所依据/受约束的具体法规条款；这些法规一旦修订或出台新规，即为本 SKU 迭代升级的信号</div>
+      ${regulationsHtml || '<div style="color:#9ca3af;font-size:13px;">暂无</div>'}
     </div>
 
     <!-- ③ 市场可参考案例 -->
