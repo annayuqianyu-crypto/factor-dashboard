@@ -10866,34 +10866,55 @@ function pgEnsureToken() {
 // ── 测试连接 ─────────────────────────────────────────────────
 
 // 流式调用 chat/completions：累积并返回完整 content，规避非流式长请求被 Cloudflare ~60s 掐断
-async function pgChatStream(base, key, bodyObj) {
-  const resp = await fetch(base + '/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Access-Token': key },
-    body: JSON.stringify(Object.assign({}, bodyObj, { stream: true }))
-  });
-  if (!resp.ok) {
-    let txt=''; try { txt = await resp.text(); } catch(e){}
-    const hint = resp.status===401 ? ' → API Key 无效或已过期' : resp.status===404 ? ' → URL 或模型名称有误' : resp.status===403 ? ' → Key 无权限访问该模型' : '';
-    throw new Error('API 返回 ' + resp.status + hint + '  详情：' + txt.slice(0,300));
-  }
-  const reader = resp.body.getReader();
-  const dec = new TextDecoder('utf-8');
-  let buf='', content='';
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buf += dec.decode(value, { stream: true });
-    const lines = buf.split('\n'); buf = lines.pop();
-    for (const ln of lines) {
-      const t = ln.trim();
-      if (!t.startsWith('data:')) continue;
-      const pl = t.slice(5).trim();
-      if (!pl || pl === '[DONE]') continue;
-      try { const j = JSON.parse(pl); const d = j.choices && j.choices[0] && j.choices[0].delta && j.choices[0].delta.content; if (d) content += d; } catch(e){}
+// opts.retries 自动重试次数(默认2)；opts.onStatus(msg) 重试时回调，供 UI 显示"正在重试…"
+async function pgChatStream(base, key, bodyObj, opts) {
+  opts = opts || {};
+  const maxRetries = (opts.retries != null) ? opts.retries : 2;
+  const onStatus   = (typeof opts.onStatus === 'function') ? opts.onStatus : function(){};
+  let lastErr;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    if (attempt > 0) {
+      onStatus('服务繁忙，正在自动重试（第 ' + attempt + '/' + maxRetries + ' 次）…');
+      await new Promise(function(r){ setTimeout(r, 1500 * attempt); });   // 递增退避
+    }
+    try {
+      const resp = await fetch(base + '/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Access-Token': key },
+        body: JSON.stringify(Object.assign({}, bodyObj, { stream: true }))
+      });
+      if (!resp.ok) {
+        let txt=''; try { txt = await resp.text(); } catch(e){}
+        const hint = resp.status===401 ? ' → API Key 无效或已过期' : resp.status===404 ? ' → URL 或模型名称有误' : resp.status===403 ? ' → Key 无权限访问该模型' : '';
+        const err = new Error('API 返回 ' + resp.status + hint + '  详情：' + txt.slice(0,300));
+        err.httpStatus = resp.status;
+        throw err;
+      }
+      const reader = resp.body.getReader();
+      const dec = new TextDecoder('utf-8');
+      let buf='', content='';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        const lines = buf.split('\n'); buf = lines.pop();
+        for (const ln of lines) {
+          const t = ln.trim();
+          if (!t.startsWith('data:')) continue;
+          const pl = t.slice(5).trim();
+          if (!pl || pl === '[DONE]') continue;
+          try { const j = JSON.parse(pl); const d = j.choices && j.choices[0] && j.choices[0].delta && j.choices[0].delta.content; if (d) content += d; } catch(e){}
+        }
+      }
+      return content;   // 成功
+    } catch(e) {
+      lastErr = e;
+      // 鉴权/权限类错误重试也没用，直接抛出
+      if (e.httpStatus === 401 || e.httpStatus === 403) throw e;
+      // 其余(网络/超时/Failed to fetch/5xx/429)：继续下一次重试
     }
   }
-  return content;
+  throw lastErr;
 }
 
 async function pgTestConnection() {
@@ -14106,7 +14127,7 @@ function _skuBuildText() {
 }
 
 // 模块级 API 调用（含截断修复兜底）
-async function _skuCallJson(prompt, maxTokens) {
+async function _skuCallJson(prompt, maxTokens, onStatus) {
   const apiBase = localStorage.getItem('pg_api_base') || COMPANY_API_BASE;
   const apiKey  = localStorage.getItem('pg_api_key')  || COMPANY_API_KEY;
   const _r = await pgChatStream(apiBase, apiKey, {
@@ -14114,7 +14135,7 @@ async function _skuCallJson(prompt, maxTokens) {
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.25,
       max_tokens: maxTokens,
-    });
+    }, { onStatus });
   let raw = (_r || '').replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
   const m = raw.match(/\{[\s\S]*\}/);
   if (!m) throw new Error('AI 返回内容无法解析为 JSON');
@@ -14187,6 +14208,10 @@ async function skuAnalyze() {
   out.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ 第 1/2 步：AI 正在论证研发必要性（产品设计必要性 / 市场必要性）…</div>';
 
   const callJson = _skuCallJson;
+  const skuStatus = function(msg){
+    if (st) st.textContent = '⏳ ' + msg;
+    out.innerHTML = '<div style="padding:24px;text-align:center;color:#b45309;font-size:13px;">⏳ ' + msg + '<br><span style="font-size:11px;color:#92400e;">（服务繁忙属正常，正在自动重试，请稍候）</span></div>';
+  };
 
   try {
     // ── 第 1 步：研发必要性论证 ──
@@ -14222,7 +14247,7 @@ ${similarText}
 }
 收费区间与需求数据如无确切公开数据，请基于行业常识给出合理估计并标注'（估算）'。严格只输出 JSON。`;
 
-    const d0 = await callJson(p0, 2500);
+    const d0 = await callJson(p0, 2500, skuStatus);
 
     out.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ 第 2/2 步：AI 正在论证 SKU 价值（结论 / 客群画像 / 案例 / 供应商）…</div>';
 
@@ -14273,7 +14298,7 @@ ${skuText}
 只有在确实找不到贴切真实案例时，才用"模拟案例"，且需写得详实。
 输出 2-3 个案例，尽量让其中**至少 1-2 个是真实知名案例**。严禁编造不存在的 URL（找不到链接就留空，但案例本身可以是真实的公开事件）。suppliers 3-5类。严格只输出 JSON。`;
 
-    const d1 = await callJson(p1, 3000);
+    const d1 = await callJson(p1, 3000, skuStatus);
     d1._necessity = d0;   // 把研发必要性挂到 d1 上一并渲染/存储
 
     // 论证完成即渲染（六阶段问题由用户点击第二个按钮单独生成，避免单次输出过长被截断）
@@ -14995,7 +15020,10 @@ async function learnAnalyze() {
   out.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ DeepSeek 正在深度分析痛点，生成六维论证报告…</div>';
 
   try {
-    const result = await learnBuildAnalysis(pain, wsaContext);
+    const result = await learnBuildAnalysis(pain, wsaContext, function(msg){
+      st.textContent = '⏳ ' + msg;
+      out.innerHTML = '<div style="padding:24px;text-align:center;color:#b45309;font-size:13px;">⏳ ' + msg + '<br><span style="font-size:11px;color:#92400e;">（首次请求偶遇服务繁忙属正常，正在自动重试，请稍候）</span></div>';
+    });
     learnRenderOutput(result, pain, wsaContext);
   } catch(e) {
     out.innerHTML = `<div style="padding:16px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;font-size:13px;color:#991b1b;">
@@ -15042,7 +15070,7 @@ async function learnSearchRegs(pain) {
 }
 
 // ── DeepSeek 六层分析 ─────────────────────────────────────────
-async function learnBuildAnalysis(pain, wsaCtx) {
+async function learnBuildAnalysis(pain, wsaCtx, onStatus) {
   const apiBase = localStorage.getItem('pg_api_base') || COMPANY_API_BASE;
   const apiKey  = localStorage.getItem('pg_api_key')  || COMPANY_API_KEY;
 
@@ -15096,7 +15124,7 @@ ${wsaCtx || '（无联网数据）'}
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.25,
       max_tokens: 3000,
-    });
+    }, { onStatus });
   let raw = (_r || '').replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
 
   // 兜底：提取第一个 {}
