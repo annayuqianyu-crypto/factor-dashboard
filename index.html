@@ -1187,7 +1187,7 @@ body {
 
   <span class="subtitle">数据驾驶舱</span>
 
-  <span class="badge">数据截至 2026-06-10</span>
+  <span class="badge">数据截至 2026-06-22</span>
 
 </div>
 
@@ -1453,7 +1453,7 @@ body {
       </div>
       <div style="background:#fef2f2;border-radius:8px;padding:13px 15px;">
         <div style="font-size:13px;font-weight:600;color:#dc2626;margin-bottom:5px;" data-ek="cal-pain-name">💢 痛点</div>
-        <div style="font-size:12px;color:#374151;line-height:1.65;" data-ek="cal-pain-desc">自 2026-05-03 起<strong>仅统计人工审核入库数</strong>，当前为《痛点数据-20260610》定稿 488 条（P-001~P-500）。过程稿（如痛点分裂 1042/1070）未经人工审核不计入，只在周度事件中文字记录。分 BU 周度新增见上方进度图。来源：<code style="font-size:11px;">08 痛点数据</code></div>
+        <div style="font-size:12px;color:#374151;line-height:1.65;" data-ek="cal-pain-desc">自 2026-05-03 起<strong>仅统计人工审核入库数</strong>，当前累计 <strong>518 条</strong>（《痛点数据-20260610》定稿 488 条 P-001~P-500 ＋ 6.15-6.22 各 BU 新增审核入库 30 条：法律22/税务6/资本2）。过程稿（如痛点分裂 1042/1070）未经人工审核不计入，只在周度事件中文字记录。分 BU 周度新增见上方进度图。来源：<code style="font-size:11px;">08 痛点数据</code></div>
       </div>
       <div style="background:#f5f3ff;border-radius:8px;padding:13px 15px;">
         <div style="font-size:13px;font-weight:600;color:#7c3aed;margin-bottom:5px;" data-ek="cal-sku-name">🧪 SKU库</div>
@@ -1523,7 +1523,7 @@ body {
 
     <div class="kpi-card">
 
-      <div class="kpi-value">488</div>
+      <div class="kpi-value">518</div>
 
       <div class="kpi-label">覆盖痛点条数</div>
 
@@ -2768,7 +2768,7 @@ body {
 
       <div style="background:#f9fafb;border-radius:8px;padding:14px 16px;text-align:center;">
 
-        <div style="font-size:26px;font-weight:700;color:#1a56db;">488</div>
+        <div style="font-size:26px;font-weight:700;color:#1a56db;">518</div>
 
         <div style="font-size:12.5px;color:#6b7280;margin-top:4px;">已梳理痛点场景</div>
 
@@ -2834,7 +2834,7 @@ body {
 
     <div class="card-title">各 BU 痛点分布</div>
 
-    <div style="font-size:12.5px;color:#374151;margin-bottom:8px;">已上线痛点达 <strong>488</strong> 条</div>
+    <div style="font-size:12.5px;color:#374151;margin-bottom:8px;">已上线痛点达 <strong>518</strong> 条</div>
 
     <div id="chart-bu-bar" class="chart-box" style="height:180px;"></div>
 
@@ -6007,11 +6007,11 @@ function initScenesCharts() {
 
     const buData = [
 
-      { name: 'CM 资本市场', value: 88,  detail: '资本市场场景 + 股权激励 + 境外架构 + 综合（P-001~P-231 区段）' },
+      { name: 'CM 资本市场', value: 90,  detail: '资本市场场景 + 股权激励 + 境外架构 + 综合（P-001~P-231 区段）· 6.15-6.22 新增 2' },
 
-      { name: 'Tax 税务',    value: 175, detail: '税务合规 + 身份/海外税务 + 跨境税务 + 转让定价 + CRS/FATCA 等' },
+      { name: 'Tax 税务',    value: 181, detail: '税务合规 + 身份/海外税务 + 跨境税务 + 转让定价 + CRS/FATCA 等 · 6.15-6.22 新增 6' },
 
-      { name: 'Legal 法律',  value: 225, detail: '法律架构 + 资产保护 + 财富传承 + 慈善公益（存量 Law 97 + 2026.05 新增批次 128）' },
+      { name: 'Legal 法律',  value: 247, detail: '法律架构 + 资产保护 + 财富传承 + 慈善公益（存量 Law 97 + 2026.05 新增批次 128）· 6.15-6.22 新增 22' },
 
     ];
 
@@ -6409,6 +6409,13 @@ const MGMT_WEEKLY = [
     notePain: '1002条子痛点落库PLM待BU人工审核后推送小程序；',
     noteScene: '',
     noteSku: '数据驾驶舱新增SKU研究版块，实现新增SKU自动化研发论证' },
+  { date: '2026-06-22', factors: 1408, pains: 518, scenes: 505, sku: 318,
+    newCM: 2, newLegal: 22, newTax: 6, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
+    note: '各 BU 完成新一批痛点人工审核入库（法律 +22 / 税务 +6 / 资本 +2），总痛点数 488 → 518 条',
+    noteFactor: '',
+    notePain: '各 BU 人工审核入库新痛点：法律 +22、税务 +6、资本 +2，总痛点数达 518 条；',
+    noteScene: '',
+    noteSku: '' },
 ];
 
 function _mgmtResolve(snap) {
@@ -6463,7 +6470,7 @@ function initMgmtPage() {
 
   const sceneMeetings = window._mgmtSceneStats ? window._mgmtSceneStats.meetings : '—';
   set('mgmt-factor-sub', `覆盖C端高净值客户 15 个分析维度<br>场景触发后，组装 主体/资产/动作/约束 四维链路形成痛点`);
-  set('mgmt-pain-sub',   `小程序已上线 488 条<br>PLM痛点协作平台新增1002条待BU人工审核`);
+  set('mgmt-pain-sub',   `小程序已上线 518 条<br>PLM痛点协作平台新增1002条待BU人工审核`);
   set('mgmt-scene-sub',  '渠道场景覆盖 2025-2026年 234 场HGJ会议纪要<br>热点新闻实时搜索+场景生成');
   set('mgmt-sku-sub',    'Tax 203 / Legal 62 / CM 53<br>知识卡片存量数据，BU研发后实时更新');
 
