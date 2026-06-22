@@ -14284,6 +14284,9 @@ ${skuText}
     "needs":       ["客户核心需求，2-4条"],
     "pains":       ["对应痛点，2-4条"]
   },
+  "regulations": [
+    {"name": "法规/政策全称（如《中华人民共和国个人所得税法》《金融机构客户尽职调查管理办法》）", "article": "具体条款（如 第8条 / 第45条第2款）；无法精确到条则填章节名或'（待核实具体条款）'", "relation": "该条款与本SKU的关联：法律依据 / 合规约束 / 业务触发点（60字内）", "iteration_trigger": "该法规若发生何种变化（修订/新规/执法口径调整）将触发本SKU迭代升级（50字内）"}
+  ],
   "market_cases": [
     {
       "title": "案例标题（含真实可识别的当事人/企业名）",
@@ -14297,18 +14300,15 @@ ${skuText}
   ],
   "suppliers": [
     {"type": "供应商类型（如信托公司/律所/税务师事务所）", "candidates": "代表性机构举例", "confirm": "对接时需提前确认的关键事项（40字内）"}
-  ],
-  "regulations": [
-    {"name": "法规/政策全称（如《中华人民共和国个人所得税法》《金融机构客户尽职调查管理办法》）", "article": "具体条款（如 第8条 / 第45条第2款）；确实无法精确到条则填章节名或'（待核实具体条款）'", "relation": "该条款与本SKU的关联：是法律依据 / 合规约束 / 业务触发点（60字内）", "iteration_trigger": "该法规若发生何种变化（修订 / 新规 / 执法口径调整）将触发本SKU迭代升级（50字内）"}
   ]
 }
 【案例要求·重点】请优先引用**市面上真实存在的知名案例**，包括：
 - 知名企业家/上市公司创始人的公开事件（如：土豆网王微离婚导致股权冻结、真功夫蔡达标股权之争、海底捞家族信托、龙湖吴亚军family trust离婚分割、SOHO中国潘石屹夫妇架构、娃哈哈宗庆后传承等），可结合该SKU主题精准选取最贴切的真实案例并讲清其主体/资产/动作/约束/风险/方案/结果；
 - 各大律所/信托公司/家办在官网或媒体**公开发布的脱敏案例**（如金杜、中伦、汉坤的实务文章案例）。
 只有在确实找不到贴切真实案例时，才用"模拟案例"，且需写得详实。
-输出 2-3 个案例，尽量让其中**至少 1-2 个是真实知名案例**。严禁编造不存在的 URL（找不到链接就留空，但案例本身可以是真实的公开事件）。suppliers 3-5类。regulations 列 2-4 条与本SKU最相关的政策法规及**具体条款**，作为该SKU的法律基础与未来迭代触发器；条款尽量精确到"第X条"，不确定就标注"（待核实）"，**严禁编造不存在的法规或条款**。严格只输出 JSON。`;
+输出 2-3 个案例，尽量让其中**至少 1-2 个是真实知名案例**。严禁编造不存在的 URL（找不到链接就留空，但案例本身可以是真实的公开事件）。suppliers 3-5类。regulations 列 2-4 条与本SKU最相关的政策法规及**具体条款**，作为该SKU的法律基础与未来迭代触发器；条款尽量精确到"第X条"，不确定就标注"（待核实）"，**严禁编造不存在的法规或条款**；**若本SKU确实无任何强相关法规，必须返回空数组 regulations:[]，绝不可省略该字段**。严格只输出 JSON。`;
 
-    const d1 = await callJson(p1, 3500, skuStatus);
+    const d1 = await callJson(p1, 4000, skuStatus);
     d1._necessity = d0;   // 把研发必要性挂到 d1 上一并渲染/存储
 
     // 论证完成即渲染（六阶段问题由用户点击第二个按钮单独生成，避免单次输出过长被截断）
@@ -14517,6 +14517,16 @@ function skuRenderOutput(d1, d2, skuText) {
       ${r.iteration_trigger ? `<div style="font-size:12px;color:#92400e;line-height:1.7;margin-top:4px;"><span style="font-weight:700;">🔄 迭代触发：</span>${r.iteration_trigger}</div>` : ''}
     </div>`).join('');
 
+  // 区分「AI 判定确无(返回空数组)」vs「未返回/被截断(字段缺失)」，避免用户误以为是渲染 bug
+  let regSection;
+  if (Array.isArray(d1.regulations) && d1.regulations.length) {
+    regSection = regulationsHtml;
+  } else if (Array.isArray(d1.regulations)) {
+    regSection = '<div style="font-size:12.5px;color:#92400e;background:#fffbeb;border:1px dashed #fde68a;border-radius:6px;padding:10px 12px;line-height:1.7;">✅ AI 判断本 SKU <strong>无强相关的具体法规条款</strong>（可能为纯流程 / 商务 / 服务类）。如有遗漏可手动补充。</div>';
+  } else {
+    regSection = '<div style="font-size:12.5px;color:#b91c1c;background:#fef2f2;border:1px dashed #fca5a5;border-radius:6px;padding:10px 12px;line-height:1.7;">⚠️ 本次论证<strong>未返回法规字段</strong>（可能因输出过长被截断或模型遗漏，<strong>并非"确实没有"</strong>）。建议重新点「开始论证」重试；跨境 / 税务 / 合规类 SKU 通常应有相关法规。</div>';
+  }
+
   const stagesHtml = _skuStagesHtml((d2 && d2.stages) || []);
 
   // ── 研发必要性论证 ──
@@ -14590,7 +14600,7 @@ function skuRenderOutput(d1, d2, skuText) {
     <div style="border:1px solid #bfdbfe;border-radius:10px;padding:16px 18px;margin-bottom:14px;background:#f8fafc;">
       <div style="font-size:13px;color:#1d4ed8;font-weight:700;letter-spacing:.05em;margin-bottom:4px;">📜 相关政策法规（SKU 法律基础 · 迭代触发器）</div>
       <div style="font-size:11.5px;color:#9ca3af;margin-bottom:12px;">本 SKU 所依据/受约束的具体法规条款；这些法规一旦修订或出台新规，即为本 SKU 迭代升级的信号</div>
-      ${regulationsHtml || '<div style="color:#9ca3af;font-size:13px;">暂无</div>'}
+      ${regSection}
     </div>
 
     <!-- ③ 市场可参考案例 -->
