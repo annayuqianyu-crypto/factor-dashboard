@@ -6434,14 +6434,20 @@ function _mgmtDeltaBadge(delta, colorPos) {
   return `<span style="color:#9ca3af;">— 持平</span>`;
 }
 
-// 周度数据：优先用用户在页面上编辑过的版本（localStorage），否则用内置默认
+// 周度数据：合并「内置默认」与「用户页面编辑版(localStorage)」
+// 规则：以 date 为键，用户编辑版优先（保留其改动）；代码新增的日期(用户版没有的，如新周快照)自动补入。按日期排序。
 const MGMT_WEEKLY_USER_KEY = 'mgmt_weekly_user';
 function _mgmtGetWeekly() {
+  let user = null;
   try {
     const u = JSON.parse(localStorage.getItem(MGMT_WEEKLY_USER_KEY) || 'null');
-    if (Array.isArray(u) && u.length) return u;
+    if (Array.isArray(u) && u.length) user = u;
   } catch {}
-  return MGMT_WEEKLY;
+  if (!user) return MGMT_WEEKLY;
+  const byDate = {};
+  MGMT_WEEKLY.forEach(w => { if (w && w.date) byDate[w.date] = w; });   // 内置为底
+  user.forEach(w => { if (w && w.date) byDate[w.date] = w; });          // 用户版覆盖同日期
+  return Object.values(byDate).sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
 }
 
 function initMgmtPage() {
