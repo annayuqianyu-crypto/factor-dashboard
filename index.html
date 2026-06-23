@@ -14450,6 +14450,23 @@ function _skuStagesHtml(stages) {
 }
 
 // ── 渲染论证结果 ─────────────────────────────────────────────
+// SKU 编号 → 名称（取自本地 318 主表 EXISTING_SKUS），便于人工识别编号指向哪个产品
+function _skuNameById(id) {
+  try {
+    if (typeof EXISTING_SKUS === 'undefined') return '';
+    const hit = EXISTING_SKUS.find(s => (s.id || '').toLowerCase() === String(id || '').toLowerCase());
+    return hit ? (hit.n || '') : '';
+  } catch(e) { return ''; }
+}
+// 把自由文本里出现的 SKU 编号就地标注成「编号（名称）」
+function _skuAnnotateIds(text) {
+  if (!text) return text;
+  return String(text).replace(/(Tax|Legal|CM)-\d+/gi, function(m){
+    const nm = _skuNameById(m);
+    return nm ? (m + '（' + nm + '）') : m;
+  });
+}
+
 function skuRenderOutput(d1, d2, skuText) {
   const out = document.getElementById('sku-analysis-output');
   const v = d1.verdict || {};
@@ -14551,12 +14568,12 @@ function skuRenderOutput(d1, d2, skuText) {
             <span style="font-size:11px;font-weight:700;padding:1px 9px;border-radius:10px;background:${dnNeeded?'#dcfce7':'#fef3c7'};color:${dnNeeded?'#166534':'#92400e'};">${dn.verdict || '—'}</span>
           </div>
           ${dnNeeded ? `
-            <div style="font-size:13px;color:#374151;line-height:1.75;margin-bottom:8px;"><b style="color:#6d28d9;">现有SKU为何不足：</b>${dn.why_existing_insufficient || '—'}</div>
+            <div style="font-size:13px;color:#374151;line-height:1.75;margin-bottom:8px;"><b style="color:#6d28d9;">现有SKU为何不足：</b>${_skuAnnotateIds(dn.why_existing_insufficient) || '—'}</div>
             ${dn.differentiation ? `<div style="font-size:12.5px;color:#374151;background:#fff;border:1px solid #e9d5ff;border-radius:6px;padding:7px 10px;"><b>差异化内核：</b>${dn.differentiation}</div>` : ''}
           ` : `
             <div style="font-size:13px;color:#92400e;background:#fffbeb;border:1px dashed #fbbf24;border-radius:6px;padding:8px 11px;margin-bottom:8px;"><b>⚠ 必要性不足</b>，可由现有SKU替代或改造</div>
-            ${(dn.covered_by&&dn.covered_by.length)?`<div style="font-size:12.5px;color:#374151;line-height:1.7;margin-bottom:8px;"><b style="color:#6d28d9;">可替代的现有SKU：</b>${dn.covered_by.join('；')}</div>`:''}
-            ${dn.deform_suggestion ? `<div style="font-size:12.5px;color:#374151;background:#fff;border:1px solid #e9d5ff;border-radius:6px;padding:7px 10px;"><b>变形/补足建议：</b>${dn.deform_suggestion}</div>` : ''}
+            ${(dn.covered_by&&dn.covered_by.length)?`<div style="font-size:12.5px;color:#374151;line-height:1.7;margin-bottom:8px;"><b style="color:#6d28d9;">可替代的现有SKU：</b>${dn.covered_by.map(function(id){var nm=_skuNameById(id);return nm?(id+'（'+nm+'）'):id;}).join('；')}</div>`:''}
+            ${dn.deform_suggestion ? `<div style="font-size:12.5px;color:#374151;background:#fff;border:1px solid #e9d5ff;border-radius:6px;padding:7px 10px;"><b>变形/补足建议：</b>${_skuAnnotateIds(dn.deform_suggestion)}</div>` : ''}
           `}
         </div>
         <!-- 市场必要性 -->
