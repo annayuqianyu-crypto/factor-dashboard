@@ -10295,7 +10295,7 @@ ${factorPathsText}
     const raw = await pgChatStream(base, key, {
         model,
         messages: [{ role: 'user', content: userPrompt }],
-        max_tokens: 14000,
+        max_tokens: 64000,
         temperature: 0.35
       });
 
@@ -11796,7 +11796,7 @@ ${factorPathsText}
       const raw = await pgChatStream(base, key, {
         model,
         messages: [{ role: 'user', content: buildPrompt(batch, i) }],
-        max_tokens: 8000,
+        max_tokens: 64000,
         temperature: 0.3,
       });
       _rawSample = raw.slice(0, 300);
@@ -13412,7 +13412,7 @@ ${relevance ? `家办关联：${relevance}` : ''}
         model: COMPANY_API_MODEL,
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.3,
-        max_tokens: 800
+        max_tokens: 64000
       })
     });
     const data = await resp.json();
@@ -13485,7 +13485,7 @@ JSON 数组格式输出（与家办无关则返回 []）：
       headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: COMPANY_API_MODEL,
         messages: [{ role:'user', content: prompt }],
-        temperature: 0.3, max_tokens: 800 })
+        temperature: 0.3, max_tokens: 64000 })
     });
     const data = await resp.json();
     let raw = (data.choices?.[0]?.message?.content || '[]')
@@ -13607,7 +13607,7 @@ ${sourceList}
     const raw = await pgChatStream(base, key, {
       model: localStorage.getItem('pg_api_model') || COMPANY_API_MODEL,
       messages:[{role:'user',content:prompt}],
-      max_tokens:8000, temperature:0.7
+      max_tokens:64000, temperature:0.7
     });
     const m    = raw.match(/\{[\s\S]*\}/);
     if (!m) throw new Error('未返回JSON');
@@ -14254,7 +14254,7 @@ ${similarText}
 }
 收费区间与需求数据如无确切公开数据，请基于行业常识给出合理估计并标注'（估算）'。严格只输出 JSON。`;
 
-    const d0 = await callJson(p0, 8000, skuStatus);
+    const d0 = await callJson(p0, 64000, skuStatus);
 
     out.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ 第 2/2 步：AI 正在论证 SKU 价值（结论 / 客群画像 / 案例 / 供应商）…</div>';
 
@@ -14308,7 +14308,7 @@ ${skuText}
 只有在确实找不到贴切真实案例时，才用"模拟案例"，且需写得详实。
 输出 2-3 个案例，尽量让其中**至少 1-2 个是真实知名案例**。严禁编造不存在的 URL（找不到链接就留空，但案例本身可以是真实的公开事件）。suppliers 3-5类。regulations 列 2-4 条与本SKU最相关的政策法规及**具体条款**，作为该SKU的法律基础与未来迭代触发器；条款尽量精确到"第X条"，不确定就标注"（待核实）"，**严禁编造不存在的法规或条款**；**若本SKU确实无任何强相关法规，必须返回空数组 regulations:[]，绝不可省略该字段**。严格只输出 JSON。`;
 
-    const d1 = await callJson(p1, 8000, skuStatus);
+    const d1 = await callJson(p1, 64000, skuStatus);
     d1._necessity = d0;   // 把研发必要性挂到 d1 上一并渲染/存储
 
     // 论证完成即渲染（六阶段问题由用户点击第二个按钮单独生成，避免单次输出过长被截断）
@@ -14388,7 +14388,7 @@ ${JSON.stringify(rec.d1.customer_profile || {}, null, 0)}
       // 已生成的阶段保持可见，加载提示追加在末尾
       if (body) body.innerHTML = _skuStagesHtml(collected) + tip;
 
-      const dpart = await _skuCallJson(buildStagePrompt(batch, `第${bi+1}批`), 8000);
+      const dpart = await _skuCallJson(buildStagePrompt(batch, `第${bi+1}批`), 64000);
       (dpart.stages || []).forEach(s => {
         const nm = (s.stage || '').trim();
         if (!haveStage.has(nm)) { collected.push(s); haveStage.add(nm); }
@@ -14935,7 +14935,7 @@ async function _skuStreamChat(bubbleId) {
     headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: localStorage.getItem('pg_api_model') || COMPANY_API_MODEL,
-      messages, temperature: 0.35, max_tokens: 2000, stream: true,
+      messages, temperature: 0.35, max_tokens: 64000, stream: true,
     }),
     signal: AbortSignal.timeout(120000),
   });
@@ -15160,7 +15160,7 @@ ${wsaCtx || '（无联网数据）'}
       model: COMPANY_API_MODEL,
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.25,
-      max_tokens: 8000,
+      max_tokens: 64000,
     }, { onStatus });
   let raw = (_r || '').replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
 
@@ -15377,7 +15377,7 @@ async function learnStreamChat(bubbleId) {
       model: COMPANY_API_MODEL,
       messages,
       temperature: 0.3,
-      max_tokens: 2000,
+      max_tokens: 64000,
       stream: true,
     }),
     signal: AbortSignal.timeout(120000),
@@ -15474,7 +15474,7 @@ async function learnExpandReg(regId, btn) {
         model: COMPANY_API_MODEL,
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.1,
-        max_tokens: 3000,
+        max_tokens: 64000,
         stream: true,
       }),
       signal: AbortSignal.timeout(120000),   // 法规原文较长，给 120s
