@@ -14799,8 +14799,8 @@ function _skuExportToExcel(rec) {
     { '项目': 'SKU', '内容': rec.title || (rec.skuText||'').split('\n')[0] },
     { '项目': '研发必要性·综合结论', '内容': nec.overall || '' },
     { '项目': '产品设计必要性', '内容': dn.verdict || '' },
-    { '项目': '现有SKU为何不足/可替代', '内容': (dn.why_existing_insufficient || '') + ((dn.covered_by&&dn.covered_by.length)?('｜可替代:'+dn.covered_by.join('；')):'') + (dn.deform_suggestion?('｜改造建议:'+dn.deform_suggestion):'') },
-    { '项目': '差异化内核', '内容': dn.differentiation || '' },
+    { '项目': '现有SKU为何不足/可替代', '内容': (_skuAnnotateIds(dn.why_existing_insufficient) || '') + ((dn.covered_by&&dn.covered_by.length)?('｜可替代:'+dn.covered_by.map(function(id){var nm=_skuNameById(id);return nm?(id+'（'+nm+'）'):id;}).join('；')):'') + (dn.deform_suggestion?('｜改造建议:'+_skuAnnotateIds(dn.deform_suggestion)):'') },
+    { '项目': '差异化内核', '内容': _skuAnnotateIds(dn.differentiation) || '' },
     { '项目': '市场收费区间', '内容': mn.fee_range || '' },
     { '项目': '市场需求信号', '内容': (mn.demand_signals||[]).join('；') },
     { '项目': '竞争格局', '内容': mn.competition || '' },
@@ -14819,6 +14819,9 @@ function _skuExportToExcel(rec) {
     { '项目': '痛点', '内容': (cp.pains||[]).join('；') },
     ...(d1.market_cases||[]).map((c,i) => ({ '项目': `参考案例${i+1}(${c.case_type||((c.is_simulated===true||c.is_simulated==='true')?'模拟案例':'真实案例')})`, '内容': `${c.title}\n背景：${c.background||''}\n方案：${c.solution||''}\n结果：${c.outcome||''}\n来源：${c.source||''}${(c.url||'').trim()?'\n链接：'+c.url:''}` })),
     ...(d1.suppliers||[]).map((s,i) => ({ '项目': `供应商${i+1}·${s.type}`, '内容': `${s.candidates||''}｜需确认：${s.confirm||''}` })),
+    ...((Array.isArray(d1.regulations) && d1.regulations.length)
+        ? d1.regulations.map((r,i) => ({ '项目': `相关政策法规${i+1}`, '内容': `${r.name||''}${r.article?(' '+r.article):''}${r.relation?('｜关联:'+r.relation):''}${r.iteration_trigger?('｜迭代触发:'+r.iteration_trigger):''}` }))
+        : [{ '项目': '相关政策法规', '内容': Array.isArray(d1.regulations) ? '（AI 判定本 SKU 无强相关法规）' : '（本次未返回法规字段，可能被截断，建议重新论证）' }]),
   ];
   // Sheet0：原始知识卡片（用户从痛点结果推送的原始信息）
   const card = rec.card || null;
