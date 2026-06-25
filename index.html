@@ -14088,7 +14088,7 @@ function skuRenderCurrentCard() {
     if (srcEl) srcEl.textContent = '';
     return;
   }
-  if (srcEl) srcEl.textContent = '· 来自痛点结果推送';
+  if (srcEl) srcEl.textContent = s._manual ? '· AI 自动生成（手动填写）' : '· 来自痛点结果推送';
   const fields = [
     ['服务类别', s.category], ['服务流程', s.summary],
     ['核心亮点', s.highlights], ['适用渠道', s.scenarios],
@@ -14131,6 +14131,42 @@ function _skuBuildText() {
   const desc = (document.getElementById('sku-manual-desc')?.value || '').trim();
   if (!name) return '';
   return `SKU 名称：${name}\nSKU 描述：${desc}`;
+}
+
+// ── 手动填写时：AI 自动补全为结构化知识卡片（字段与推送卡片一致）──
+// 让手动 SKU 也拥有"原始知识卡片"，使后续渲染与导出与推送场景完全一致。
+async function _skuGenerateCard(name, desc, callJson, onStatus) {
+  const prompt = `你是朝曦家族办公室的产品知识卡片编辑。下面是用户手动填写的一个待研发 SKU 的名称与简述，请把它补全为一张结构化的「SKU 知识卡片」，字段含义与现有产品库知识卡片保持一致，内容要符合家办高净值客户业务实际。
+
+【SKU 名称】${name}
+【用户简述】${desc || '（用户未填写描述，请基于名称合理推断）'}
+
+请严格输出 JSON：
+{
+  "reason": "建议新增/研发该SKU的原因（结合家办高净值客户需求与市场缺口，60字内）",
+  "category": "服务类别（如 税务筹划 / 家族信托 / 跨境架构 / 股权传承 / 合规风控 等，简短）",
+  "summary": "服务流程：该SKU的服务内容与交付流程（100字内）",
+  "highlights": "核心亮点：差异化价值与卖点（60字内）",
+  "scenarios": "适用渠道/适用场景：哪类客户、什么情况下使用（60字内）",
+  "preconditions": "适用前提：客户需满足的条件（50字内）",
+  "use_case": "不适用情形：什么情况下不适用或需谨慎（50字内）",
+  "keywords": "关键词，3-6个，用中文逗号分隔"
+}
+基于家办行业常识合理补全，不要编造具体数字或法规条款。严格只输出 JSON。`;
+  const d = await callJson(prompt, 64000, onStatus);
+  return {
+    id:            'New-SKU',
+    name:          name,
+    _manual:       true,
+    reason:        d.reason || '',
+    category:      d.category || '',
+    summary:       d.summary || desc || '',
+    highlights:    d.highlights || '',
+    scenarios:     d.scenarios || '',
+    preconditions: d.preconditions || '',
+    use_case:      d.use_case || '',
+    keywords:      d.keywords || '',
+  };
 }
 
 // 模块级 API 调用（含截断修复兜底）
@@ -14202,7 +14238,7 @@ function _skuFindSimilar(skuText, opt) {
 }
 
 async function skuAnalyze() {
-  const skuText = _skuBuildText();
+  let skuText = _skuBuildText();
   const st = document.getElementById('sku-status');
   if (!skuText) { if (st) st.textContent = '请先推送或手动填写 SKU'; return; }
   if (_skuAnalyzing) return;
@@ -14221,6 +14257,20 @@ async function skuAnalyze() {
   };
 
   try {
+    // ── 第 0 步：手动填写场景，先 AI 自动生成结构化知识卡片 ──
+    // 推送场景已有完整卡片；手动场景只有名称+描述，需补全后才能让"原始知识卡片"完整。
+    if (!skuGetCurrentCard()) {
+      const mName = (document.getElementById('sku-manual-name')?.value || '').trim();
+      const mDesc = (document.getElementById('sku-manual-desc')?.value || '').trim();
+      if (mName) {
+        out.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ 第 0 步：AI 正在为手动填写的 SKU 自动生成知识卡片…</div>';
+        const card = await _skuGenerateCard(mName, mDesc, callJson, skuStatus);
+        try { localStorage.setItem(SKU_LEARN_KEY, JSON.stringify(card)); } catch {}
+        skuRenderCurrentCard();
+        skuText = _skuBuildText();   // 重新构建：纳入刚生成的卡片字段，论证基于完整信息
+      }
+    }
+
     // ── 第 1 步：研发必要性论证 ──
     const similar = _skuFindSimilar(skuText);
     const similarText = similar.length
