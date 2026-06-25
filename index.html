@@ -14158,6 +14158,8 @@ async function _skuGenerateCard(name, desc, callJson, onStatus) {
     id:            'New-SKU',
     name:          name,
     _manual:       true,
+    _seedName:     name,   // 记录生成时的原始输入，供"重填覆盖"判断
+    _seedDesc:     desc,
     reason:        d.reason || '',
     category:      d.category || '',
     summary:       d.summary || desc || '',
@@ -14258,12 +14260,15 @@ async function skuAnalyze() {
 
   try {
     // ── 第 0 步：手动填写场景，先 AI 自动生成结构化知识卡片 ──
-    // 推送场景已有完整卡片；手动场景只有名称+描述，需补全后才能让"原始知识卡片"完整。
-    if (!skuGetCurrentCard()) {
+    // 推送场景已有完整卡片（优先，不被手动表单覆盖；要换请点卡片「清除」）。
+    // 手动场景：无卡片→生成；已是AI生成卡片但名称/描述改过→重新生成覆盖；未改→复用不浪费调用。
+    {
+      const cur = skuGetCurrentCard();
       const mName = (document.getElementById('sku-manual-name')?.value || '').trim();
       const mDesc = (document.getElementById('sku-manual-desc')?.value || '').trim();
-      if (mName) {
-        out.innerHTML = '<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ 第 0 步：AI 正在为手动填写的 SKU 自动生成知识卡片…</div>';
+      const needGen = mName && (!cur || (cur._manual && (cur._seedName !== mName || cur._seedDesc !== mDesc)));
+      if (needGen) {
+        out.innerHTML = `<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px;">⏳ 第 0 步：AI 正在${cur ? '根据新填写内容重新生成' : '为手动填写的 SKU 自动生成'}知识卡片…</div>`;
         const card = await _skuGenerateCard(mName, mDesc, callJson, skuStatus);
         try { localStorage.setItem(SKU_LEARN_KEY, JSON.stringify(card)); } catch {}
         skuRenderCurrentCard();
