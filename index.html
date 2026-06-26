@@ -1187,7 +1187,7 @@ body {
 
   <span class="subtitle">数据驾驶舱</span>
 
-  <span class="badge">数据截至 2026-06-22</span>
+  <span class="badge">数据截至 2026-06-26</span>
 
 </div>
 
@@ -2834,7 +2834,7 @@ body {
 
     <div class="card-title">各 BU 痛点分布</div>
 
-    <div style="font-size:12.5px;color:#374151;margin-bottom:8px;">已上线痛点达 <strong>518</strong> 条</div>
+    <div style="font-size:12.5px;color:#374151;margin-bottom:8px;">已上线痛点达 <strong>591</strong> 条</div>
 
     <div id="chart-bu-bar" class="chart-box" style="height:180px;"></div>
 
@@ -2860,7 +2860,7 @@ body {
 
         <div class="scene-item">
 
-          <div class="scene-name">税务合规 <span class="tag tag-blue" style="font-size:11px;">85条</span></div>
+          <div class="scene-name">税务合规 <span class="tag tag-blue" style="font-size:11px;">90条</span></div>
 
           <div class="scene-example">• 三流不一致在金税四期监管下极易触发税务稽查<br/>• 跨境关联交易定价缺乏依据面临稽查风险</div>
 
@@ -2868,7 +2868,7 @@ body {
 
         <div class="scene-item">
 
-          <div class="scene-name">股权激励 <span class="tag tag-blue">70条</span></div>
+          <div class="scene-name">股权激励 <span class="tag tag-blue">90条</span></div>
 
           <div class="scene-example">• 非上市公司员工行权后无流动性缴税困难<br/>• 递延备案失败触发全员行权税负</div>
 
@@ -2884,7 +2884,7 @@ body {
 
         <div class="scene-item">
 
-          <div class="scene-name">资本市场 <span class="tag tag-blue">60条</span></div>
+          <div class="scene-name">资本市场 <span class="tag tag-blue">72条</span></div>
 
           <div class="scene-example">• 股东增持意愿强但资金不足<br/>• 合伙平台减持上市公司股票面临高额税负</div>
 
@@ -2892,7 +2892,7 @@ body {
 
         <div class="scene-item">
 
-          <div class="scene-name">境外架构 <span class="tag tag-blue">56条</span></div>
+          <div class="scene-name">境外架构 <span class="tag tag-blue">63条</span></div>
 
           <div class="scene-example">• 香港公司离岸收入豁免举证困难<br/>• 红筹架构搭建37号文备案存在缺失</div>
 
@@ -2900,7 +2900,7 @@ body {
 
         <div class="scene-item">
 
-          <div class="scene-name">资产保护 <span class="tag tag-blue">51条</span></div>
+          <div class="scene-name">资产保护 <span class="tag tag-blue">79条</span></div>
 
           <div class="scene-example">• 婚前股权缺乏隔离婚后增值面临共同财产分割风险<br/>• 代持人个人债务可能导致代持资产被强制执行</div>
 
@@ -2908,7 +2908,7 @@ body {
 
         <div class="scene-item">
 
-          <div class="scene-name">身份/海外税务 <span class="tag tag-blue">43条</span></div>
+          <div class="scene-name">身份/海外税务 <span class="tag tag-blue">46条</span></div>
 
           <div class="scene-example">• 美国税务居民全球征税合规要求高税率沉重<br/>• 绿卡持有超8年放弃身份前须规划弃籍税</div>
 
@@ -2916,7 +2916,7 @@ body {
 
         <div class="scene-item">
 
-          <div class="scene-name">财富传承 <span class="tag tag-blue">40条</span></div>
+          <div class="scene-name">财富传承 <span class="tag tag-blue">65条</span></div>
 
           <div class="scene-example">• 创始人无遗嘱导致企业股权继承僵局<br/>• 多子女股权传承缺乏安排引发分配纠纷与财产外流</div>
 
@@ -2924,7 +2924,7 @@ body {
 
         <div class="scene-item">
 
-          <div class="scene-name">综合/其他 <span class="tag tag-blue">12条</span></div>
+          <div class="scene-name">综合/其他 <span class="tag tag-blue">15条</span></div>
 
           <div class="scene-example">• 利率下行养老资金难以锁定长期稳定收益<br/>• 医保覆盖不足高额医疗费用带来财务压力</div>
 
@@ -5464,7 +5464,7 @@ const DIM_GROUPS  = ["主体", "主体", "资产", "资产", "资产", "资产",
 
 const PAIN_LABELS = ["税务合规", "身份/海外税务", "境外架构", "股权激励", "综合/其他", "资产保护", "资本市场", "法律架构", "财富传承", "慈善公益"];
 
-const PAIN_VALUES = [85, 43, 56, 70, 12, 51, 60, 63, 40, 8];
+const PAIN_VALUES = [90, 46, 63, 90, 15, 79, 72, 63, 65, 8];
 
 const VER_NEW     = {"L1.1A": 161, "L1.1B": 65, "L3.1": 38, "L4.1": 13, "L4.2": 172, "L4.3": 7, "L5.1": 38, "L5.2": 36, "L6.1": 118, "L6.2": 149, "L6.3": 431, "L6.4": 122, "L6.5": 12, "L6.6": 32, "L6.7": 13};
 
@@ -6007,11 +6007,11 @@ function initScenesCharts() {
 
     const buData = [
 
-      { name: 'CM 资本市场', value: 90,  detail: '资本市场场景 + 股权激励 + 境外架构 + 综合（P-001~P-231 区段）· 6.15-6.22 新增 2' },
+      { name: 'CM 资本市场', value: 100, detail: '资本市场场景 + 股权激励 + 境外架构 + 综合（P-001~P-231 区段）· 6.22-6.26 新增 10' },
 
-      { name: 'Tax 税务',    value: 181, detail: '税务合规 + 身份/海外税务 + 跨境税务 + 转让定价 + CRS/FATCA 等 · 6.15-6.22 新增 6' },
+      { name: 'Tax 税务',    value: 193, detail: '税务合规 + 身份/海外税务 + 跨境税务 + 转让定价 + CRS/FATCA 等 · 6.22-6.26 新增 12' },
 
-      { name: 'Legal 法律',  value: 247, detail: '法律架构 + 资产保护 + 财富传承 + 慈善公益（存量 Law 97 + 2026.05 新增批次 128）· 6.15-6.22 新增 22' },
+      { name: 'Legal 法律',  value: 298, detail: '法律架构 + 资产保护 + 财富传承 + 慈善公益（存量 Law 97 + 2026.05 新增批次 128）· 6.22-6.26 新增 51' },
 
     ];
 
@@ -6416,6 +6416,13 @@ const MGMT_WEEKLY = [
     notePain: '各 BU 人工审核入库新痛点：法律 +22、税务 +6、资本 +2，总痛点数达 518 条；',
     noteScene: '',
     noteSku: '' },
+  { date: '2026-06-26', factors: 1408, pains: 591, scenes: 505, sku: 318,
+    newCM: 10, newLegal: 51, newTax: 12, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
+    note: '已上线小程序痛点批量同步：法律 +51 / 税务 +12 / 资本 +10，已上线总痛点数 518 → 591 条（法律 BU 集中上线一批）',
+    noteFactor: '',
+    notePain: '本周已同步上线痛点：法律 +51、税务 +12、资本 +10，小程序已上线总数达 591 条；',
+    noteScene: '',
+    noteSku: '' },
 ];
 
 function _mgmtResolve(snap) {
@@ -6476,7 +6483,7 @@ function initMgmtPage() {
 
   const sceneMeetings = window._mgmtSceneStats ? window._mgmtSceneStats.meetings : '—';
   set('mgmt-factor-sub', `覆盖C端高净值客户 15 个分析维度<br>场景触发后，组装 主体/资产/动作/约束 四维链路形成痛点`);
-  set('mgmt-pain-sub',   `小程序已上线 518 条<br>PLM痛点协作平台新增1002条待BU人工审核`);
+  set('mgmt-pain-sub',   `小程序已上线 591 条<br>PLM痛点协作平台新增1002条待BU人工审核`);
   set('mgmt-scene-sub',  '渠道场景覆盖 2025-2026年 234 场HGJ会议纪要<br>热点新闻实时搜索+场景生成');
   set('mgmt-sku-sub',    'Tax 203 / Legal 62 / CM 53<br>知识卡片存量数据，BU研发后实时更新');
 
