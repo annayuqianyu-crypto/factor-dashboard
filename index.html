@@ -6574,9 +6574,11 @@ function renderMgmtEvents(snaps) {
     const isLatest = revIdx === 0;
     const cells = assets.map(a => {
       const val = (s[a.f] != null ? s[a.f] : (a.f === 'noteFactor' && s.note ? s.note : '')).trim();
+      // 带编号的多条事件（；2、 / ；3、 …）自动分行显示；内联顿号(如"税务+29、法律")不受影响
+      const valHtml = val.replace(/[；;]\s*(?=\d+、)/g, '；<br>');
       return '<td style="padding:9px 12px;vertical-align:top;border-bottom:1px solid #f3f4f6;">' +
         (val
-          ? '<div style="padding:6px 10px;background:' + a.bg + ';border:1px solid ' + a.border + ';border-radius:6px;font-size:12.5px;color:#374151;line-height:1.65;"><span class="mgmt-wk" data-idx="' + origIdx + '" data-f="' + a.f + '">' + val + '</span></div>'
+          ? '<div style="padding:6px 10px;background:' + a.bg + ';border:1px solid ' + a.border + ';border-radius:6px;font-size:12.5px;color:#374151;line-height:1.65;"><span class="mgmt-wk" data-idx="' + origIdx + '" data-f="' + a.f + '">' + valHtml + '</span></div>'
           : '<span class="mgmt-wk" data-idx="' + origIdx + '" data-f="' + a.f + '" style="color:#e5e7eb;">—</span>') +
         '</td>';
     }).join('');
