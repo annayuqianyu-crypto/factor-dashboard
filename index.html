@@ -6491,12 +6491,15 @@ function initMgmtPage() {
     chart.setOption({
       tooltip: { trigger: 'axis' },
       legend: { data: ['因子', '痛点', '渠道场景', 'SKU'], top: 0 },
-      grid: { left: 50, right: 24, top: 40, bottom: 30 },
+      grid: { left: 50, right: 58, top: 40, bottom: 30 },
       xAxis: { type: 'category', data: snaps.map(s => s.date),
                axisLabel: { fontSize: 11 } },
-      yAxis: { type: 'value', axisLabel: { fontSize: 11 } },
+      yAxis: [
+        { type: 'value', name: '痛点/场景/SKU', nameTextStyle: { fontSize: 10, color: '#9ca3af' }, axisLabel: { fontSize: 11 } },
+        { type: 'value', name: '因子', position: 'right', nameTextStyle: { fontSize: 10, color: '#4D96FF' }, axisLabel: { fontSize: 11, color: '#4D96FF' }, splitLine: { show: false } },
+      ],
       series: [
-        { name: '因子',     type: 'line', data: snaps.map(s => s.factors), smooth: true,
+        { name: '因子',     type: 'line', yAxisIndex: 1, data: snaps.map(s => s.factors), smooth: true,
           itemStyle: { color: '#4D96FF' }, lineStyle: { width: 3 }, symbolSize: 8,
           label: { show: true, fontSize: 10, color: '#1d4ed8', position: 'top' } },
         { name: '痛点',     type: 'line', data: snaps.map(s => s.pains), smooth: true,
