@@ -6417,10 +6417,10 @@ const MGMT_WEEKLY = [
   { date: '2026-06-29', factors: 1408, pains: 614, scenes: 505, sku: 318,
     newCM: 16, newLegal: 51, newTax: 29, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
     note: '已上线小程序痛点同步：税务 +29 / 法律 +51 / 资本 +16，已上线总痛点数 518 → 614 条（法律批次、香港离岸 FSIE、股东借款债资比等专题集中上线）',
-    noteFactor: '',
-    notePain: '本周已同步上线痛点：税务 +29、法律 +51、资本 +16，小程序已上线总数达 614 条；',
-    noteScene: '',
-    noteSku: 'SKU 创新 + 迭代系统搭建中，已完成管理面板搭建，各项功能建设中；' },
+    noteFactor: '预计本周更新6月底批次，完成新增痛点轮询反推因子库扩充',
+    notePain: '1、已上线痛点总数614条：本周新增税务+29、法律+51、资本+16；2、PLM痛点库实现痛点库导出和因子上传功能，预计本周上线字段修改和索引功能',
+    noteScene: '本周更新6月底批次，根据6月新增慧管家会议纪要进行场景迭代',
+    noteSku: '1、“SKU 创新迭代系统”搭建中，已完成管理面板搭建，各项功能正在建设；2、小程序上线：Legal & Tax 共计 49支SKU的PPT缺失，BU正在制备中' },
 ];
 
 function _mgmtResolve(snap) {
@@ -6480,9 +6480,9 @@ function initMgmtPage() {
       : _mgmtDeltaBadge(skuLatest - skuPrev, '#7c3aed')) + '<span style="font-size:10px;color:#9ca3af;font-weight:400;"> 月增</span>');
 
   const sceneMeetings = window._mgmtSceneStats ? window._mgmtSceneStats.meetings : '—';
-  set('mgmt-factor-sub', `覆盖C端高净值客户 15 个分析维度<br>场景触发后，组装 主体/资产/动作/约束 四维链路形成痛点`);
-  set('mgmt-pain-sub',   `小程序已上线 614 条<br>PLM痛点协作平台新增1002条待BU人工审核`);
-  set('mgmt-scene-sub',  '渠道场景覆盖 2025-2026年 234 场HGJ会议纪要<br>热点新闻实时搜索+场景生成');
+  set('mgmt-factor-sub', `覆盖C端高净值客户 15 个分析维度，按月更新<br>主体/资产/动作/约束 四维链路形成痛点`);
+  set('mgmt-pain-sub',   `小程序已上线 614 条，按周更新<br>PLM痛点协作平台持续迭代，痛点持续修改中`);
+  set('mgmt-scene-sub',  '覆盖 2025-2026年 234 场HGJ会议纪要，按月更新<br>热点新闻实时搜索+场景生成');
   set('mgmt-sku-sub',    'Tax 203 / Legal 62 / CM 53<br>知识卡片存量数据，BU研发后实时更新');
 
   // ── 趋势折线图（支持数据更新后重渲染）──
@@ -6515,7 +6515,7 @@ function initMgmtPage() {
   }
 
   // ── KPI sub 文案默认值（固化用户编辑内容）──
-  set('mgmt-scene-sub', '渠道场景覆盖 2025-2026年 234 场HGJ会议纪要<br>热点新闻实时搜索+场景生成');
+  set('mgmt-scene-sub', '覆盖 2025-2026年 234 场HGJ会议纪要，按月更新<br>热点新闻实时搜索+场景生成');
   set('mgmt-sku-sub',   'Tax 203 / Legal 62 / CM 53<br>知识卡片存量数据，BU研发后实时更新');
 
   // ── 周度明细表（最新在上；编辑模式下所有数据格可改）──
