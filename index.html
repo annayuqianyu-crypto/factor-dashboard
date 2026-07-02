@@ -1481,7 +1481,7 @@ body {
 
     <h2>因子库总览</h2>
 
-    <p>朝曦家办 C端因子库 v6.2（202607月更版）· 核心指标 / 维度详细说明 / 业务契合分析</p>
+    <p>朝曦家办 C端因子库 v6.2（202607月更版）· 核心指标 / 维度详细说明</p>
 
   </div>
 
@@ -1554,44 +1554,6 @@ body {
       <div class="card-title">四维结构占比</div>
 
       <div id="chart-3d-pie" class="chart-box" style="height:380px;"></div>
-
-    </div>
-
-  </div>
-
-
-
-  <!-- ─────────  业务契合分析（合并自 PAGE 9）  ───────── -->
-
-  <div style="margin-top:32px;padding-top:20px;border-top:2px solid #e5e7eb;">
-
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-
-      <span style="font-size:20px;">🏢</span>
-
-      <h3 style="font-size:18px;font-weight:700;color:#111827;margin:0;">业务契合分析</h3>
-
-      <span style="font-size:12px;color:#9ca3af;">朝曦家办业务线与因子库维度覆盖度</span>
-
-    </div>
-
-    <div class="two-col">
-
-      <div class="card">
-
-        <div class="card-title">业务线覆盖度雷达图</div>
-
-        <div id="chart-radar" class="chart-box" style="height:360px;"></div>
-
-      </div>
-
-      <div class="card">
-
-        <div class="card-title">各业务线覆盖度详情</div>
-
-        <div id="biz-detail-list"></div>
-
-      </div>
 
     </div>
 
@@ -6818,8 +6780,6 @@ window.addEventListener('load', () => {
 
   initOverviewCharts();
 
-  initBusinessCharts();   // overview 已合并业务契合分析，初始加载也要初始化
-
   window.addEventListener('resize', () => {
 
     Object.values(chartInstances).forEach(c => { try { c.resize(); } catch(e) {} });
@@ -6836,9 +6796,7 @@ const PAGE_INIT_MAP = {
 
   'mgmt':      initMgmtPage,
 
-  // overview 页已合并 业务契合分析+维度详细说明，需同时初始化两类图表
-
-  'overview':  function() { initOverviewCharts(); initBusinessCharts(); },
+  'overview':  initOverviewCharts,
 
   // history 页已合并 本次扩库详情，需初始化 chart-delta-bar
 
