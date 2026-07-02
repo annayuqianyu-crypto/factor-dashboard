@@ -322,6 +322,20 @@ tr:hover td { background: #fafafa; }
 
 .tl-body { font-size: 13.5px; color: #4b5563; line-height: 1.7; }
 
+.timeline-toggle {
+  margin: 6px 0 22px 0;
+  border: 1px solid #dbe4f0;
+  background: #f8fafc;
+  color: #334155;
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.timeline-toggle:hover { background: #eef4ff; border-color: #bfdbfe; color: #1d4ed8; }
+
 
 
 /* ── 链路示例 ── */
@@ -1942,7 +1956,7 @@ body {
 
         <div class="tl-dot"></div>
 
-        <div class="tl-date">2026-06-01</div>
+        <div class="tl-date">2026-07-02</div>
 
         <div class="tl-title">v6.2 202607月更版 <span class="tag tag-new" style="font-size:12px;">当前版本</span></div>
 
@@ -1959,6 +1973,30 @@ body {
         </div>
 
       </div>
+
+      <div class="tl-item">
+
+        <div class="tl-dot old"></div>
+
+        <div class="tl-date">2026-06-07</div>
+
+        <div class="tl-title">v6.1 法律痛点反哺版 <span class="tag tag-expand" style="font-size:12px;">上一版</span></div>
+
+        <div class="tl-body">
+
+          <p>总计 <strong>1408 行</strong>，较 v6.0 补充版新增 <strong>+57 行</strong>，来源：法律 BU 128 条新增痛点反哺。</p>
+
+          <p style="margin-top:8px;"><strong>主要变化：</strong>补足知识产权资产、经营性不动产、对外付汇、婚姻状态、上市公司减持合规动作、历史合规瑕疵等主线。</p>
+
+          <p style="margin-top:6px;"><strong>版本意义：</strong>首次形成 BU 痛点 → 因子库反推补足的闭环，使因子库从静态框架进入业务验证阶段。</p>
+
+        </div>
+
+      </div>
+
+      <button type="button" id="factor-history-toggle" class="timeline-toggle" onclick="toggleFactorHistory()">展开历史版本</button>
+
+      <div id="factor-history-extra" style="display:none;">
 
       <div class="tl-item">
 
@@ -2031,6 +2069,8 @@ body {
         </div>
 
       </div>
+
+    </div>
 
     </div>
 
@@ -6769,6 +6809,24 @@ function mgmtResetEdits() {
   localStorage.removeItem(MGMT_EDIT_KEY);
   localStorage.removeItem(MGMT_WEEKLY_USER_KEY);
   location.reload();
+}
+
+
+
+function toggleFactorHistory() {
+
+  const extra = document.getElementById('factor-history-extra');
+
+  const btn = document.getElementById('factor-history-toggle');
+
+  if (!extra || !btn) return;
+
+  const opening = extra.style.display === 'none' || !extra.style.display;
+
+  extra.style.display = opening ? 'block' : 'none';
+
+  btn.textContent = opening ? '收起历史版本' : '展开历史版本';
+
 }
 
 
