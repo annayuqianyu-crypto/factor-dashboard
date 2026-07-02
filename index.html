@@ -393,6 +393,27 @@ tr:hover td { background: #fafafa; }
   line-height: 1.45;
 }
 
+#page-history.active {
+  display: flex;
+  flex-direction: column;
+}
+
+#page-history .page-header {
+  order: 0;
+}
+
+.history-expansion-section {
+  order: 1;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  border-top: 0 !important;
+}
+
+.history-timeline-card {
+  order: 2;
+  margin-top: 24px;
+}
+
 @media (max-width: 900px) {
   .expansion-summary {
     grid-template-columns: 1fr;
@@ -2066,7 +2087,7 @@ body {
 
 
 
-  <div class="card">
+  <div class="card history-timeline-card">
 
     <div class="card-title">版本时间线</div>
 
@@ -2200,7 +2221,7 @@ body {
 
   <!-- ─────────  本次扩库详情（合并自 PAGE 4，去除 各维度增量对比图）  ───────── -->
 
-  <div style="margin-top:32px;padding-top:20px;border-top:2px solid #e5e7eb;">
+  <div class="history-expansion-section" style="margin-top:32px;padding-top:20px;border-top:2px solid #e5e7eb;">
 
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
 
