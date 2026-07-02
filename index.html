@@ -286,6 +286,126 @@ tr:hover td { background: #fafafa; }
 
 .tag-act    { background: #dbeafe; color: #1e40af; }
 
+/* ── 版本扩库分支清单 ── */
+
+.expansion-branch-card {
+  overflow: hidden;
+}
+
+.expansion-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 12px 0 16px;
+}
+
+.expansion-summary-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 12px 14px;
+}
+
+.expansion-summary-label {
+  color: #64748b;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.expansion-summary-value {
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.expansion-branch-list {
+  display: grid;
+  gap: 12px;
+}
+
+.expansion-branch-item {
+  --accent: #2563eb;
+  --tint: #eff6ff;
+  display: grid;
+  grid-template-columns: 118px minmax(0, 1fr) 176px;
+  gap: 16px;
+  align-items: stretch;
+  border: 1px solid #e5e7eb;
+  border-left: 5px solid var(--accent);
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--tint) 0%, #ffffff 44%);
+  padding: 14px 16px 14px 14px;
+}
+
+.expansion-branch-code {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.expansion-branch-code strong {
+  color: #0f172a;
+  font-size: 18px;
+}
+
+.expansion-branch-name {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.expansion-branch-main {
+  min-width: 0;
+}
+
+.expansion-branch-title {
+  color: #111827;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.expansion-branch-desc {
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.expansion-branch-meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 8px;
+  text-align: right;
+}
+
+.expansion-branch-delta {
+  color: var(--accent);
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.expansion-branch-source {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+@media (max-width: 900px) {
+  .expansion-summary {
+    grid-template-columns: 1fr;
+  }
+  .expansion-branch-item {
+    grid-template-columns: 1fr;
+  }
+  .expansion-branch-meta {
+    align-items: flex-start;
+    text-align: left;
+  }
+}
+
 
 
 /* ── 时间线 ── */
@@ -2092,103 +2212,116 @@ body {
 
     </div>
 
-    <div class="two-col">
-
-      <div class="card">
+    <div class="card expansion-branch-card">
 
         <div class="card-title">新增分支（6个维度 / +298 行）</div>
 
-        <table>
+        <div class="expansion-summary">
+          <div class="expansion-summary-item">
+            <div class="expansion-summary-label">本轮新增</div>
+            <div class="expansion-summary-value">298 行</div>
+          </div>
+          <div class="expansion-summary-item">
+            <div class="expansion-summary-label">覆盖维度</div>
+            <div class="expansion-summary-value">6 个</div>
+          </div>
+          <div class="expansion-summary-item">
+            <div class="expansion-summary-label">更新重心</div>
+            <div class="expansion-summary-value">L4-L6</div>
+          </div>
+        </div>
 
-          <thead><tr><th>维度</th><th>新增分支</th><th>行数</th><th>反哺来源</th></tr></thead>
+        <div class="expansion-branch-list">
+          <div class="expansion-branch-item" style="--accent:#2563eb;--tint:#eff6ff;">
+            <div class="expansion-branch-code">
+              <strong>L6.2</strong>
+              <span class="expansion-branch-name">税务合规</span>
+            </div>
+            <div class="expansion-branch-main">
+              <div class="expansion-branch-title">税务合规主线补强</div>
+              <div class="expansion-branch-desc">个人税务居民、企业税务、对外付汇、股权/资产交易税务处理等高频痛点链路补足。</div>
+            </div>
+            <div class="expansion-branch-meta">
+              <div class="expansion-branch-delta">+149</div>
+              <div class="expansion-branch-source">已同步税务痛点反推<br>同父叶子补齐</div>
+            </div>
+          </div>
 
-          <tbody>
+          <div class="expansion-branch-item" style="--accent:#dc2626;--tint:#fef2f2;">
+            <div class="expansion-branch-code">
+              <strong>L6.7</strong>
+              <span class="expansion-branch-name">法律风险动作</span>
+            </div>
+            <div class="expansion-branch-main">
+              <div class="expansion-branch-title">法律风险动作补强</div>
+              <div class="expansion-branch-desc">股权代持、股东争议、婚姻财产、继承争议、司法冻结/执行等风险动作进一步原子化。</div>
+            </div>
+            <div class="expansion-branch-meta">
+              <div class="expansion-branch-delta">+60</div>
+              <div class="expansion-branch-source">法律/资本痛点反推<br>风险状态穷尽</div>
+            </div>
+          </div>
 
-            <tr>
+          <div class="expansion-branch-item" style="--accent:#16a34a;--tint:#f0fdf4;">
+            <div class="expansion-branch-code">
+              <strong>L6.1</strong>
+              <span class="expansion-branch-name">资本动作</span>
+            </div>
+            <div class="expansion-branch-main">
+              <div class="expansion-branch-title">资本动作补强</div>
+              <div class="expansion-branch-desc">上市公司股份增减持、控制权提升、减持合规、资本运作触发动作按MECE原则补足。</div>
+            </div>
+            <div class="expansion-branch-meta">
+              <div class="expansion-branch-delta">+48</div>
+              <div class="expansion-branch-source">资本市场痛点反推<br>组内补足</div>
+            </div>
+          </div>
 
-              <td><strong>L6.2</strong> <span class="tag tag-new">+149</span></td>
+          <div class="expansion-branch-item" style="--accent:#7c3aed;--tint:#f5f3ff;">
+            <div class="expansion-branch-code">
+              <strong>L5.2</strong>
+              <span class="expansion-branch-name">治理/隐性状态</span>
+            </div>
+            <div class="expansion-branch-main">
+              <div class="expansion-branch-title">治理与隐性状态补强</div>
+              <div class="expansion-branch-desc">代持状态、历史合规瑕疵、资产/股权隐性约束、治理缺陷识别等状态类缺口补齐。</div>
+            </div>
+            <div class="expansion-branch-meta">
+              <div class="expansion-branch-delta">+26</div>
+              <div class="expansion-branch-source">痛点链路缺口<br>隐性风险MECE补齐</div>
+            </div>
+          </div>
 
-              <td>税务合规主线补强：个人税务居民、企业税务、对外付汇、股权/资产交易税务处理</td>
+          <div class="expansion-branch-item" style="--accent:#0891b2;--tint:#ecfeff;">
+            <div class="expansion-branch-code">
+              <strong>L1.1B</strong>
+              <span class="expansion-branch-name">家庭角色</span>
+            </div>
+            <div class="expansion-branch-main">
+              <div class="expansion-branch-title">家庭角色补强</div>
+              <div class="expansion-branch-desc">婚姻状态、家庭成员关系、跨境家庭结构与传承相关角色补充，用于更细的客户画像识别。</div>
+            </div>
+            <div class="expansion-branch-meta">
+              <div class="expansion-branch-delta">+8</div>
+              <div class="expansion-branch-source">家庭治理/传承<br>痛点反推</div>
+            </div>
+          </div>
 
-              <td><strong style="color:#16a34a">+149</strong></td>
-
-              <td>已同步税务痛点反推 + 同父叶子补齐</td>
-
-            </tr>
-
-            <tr>
-
-              <td><strong>L6.7</strong> <span class="tag tag-new">+60</span></td>
-
-              <td>法律风险动作补强：股权代持、股东争议、婚姻财产、继承争议、司法冻结/执行</td>
-
-              <td><strong style="color:#16a34a">+60</strong></td>
-
-              <td>法律/资本痛点反推 + 风险状态穷尽</td>
-
-            </tr>
-
-            <tr>
-
-              <td><strong>L6.1</strong> <span class="tag tag-new">+48</span></td>
-
-              <td>资本动作补强：上市公司股份增减持、控制权提升、减持合规、资本运作触发动作</td>
-
-              <td><strong style="color:#16a34a">+48</strong></td>
-
-              <td>资本市场痛点反推 + MECE组内补足</td>
-
-            </tr>
-
-            <tr>
-
-              <td><strong>L5.2</strong> <span class="tag tag-expand">+26</span></td>
-
-              <td>治理与隐性状态补强：代持状态、历史合规瑕疵、资产/股权隐性约束、治理缺陷识别</td>
-
-              <td><strong style="color:#16a34a">+26</strong></td>
-
-              <td>痛点链路缺口 + 隐性风险MECE补齐</td>
-
-            </tr>
-
-            <tr>
-
-              <td><strong>L1.1B</strong> <span class="tag tag-expand">+8</span></td>
-
-              <td>家庭角色补强：婚姻状态、家庭成员关系、跨境家庭结构与传承相关角色</td>
-
-              <td><strong style="color:#16a34a">+8</strong></td>
-
-              <td>家庭治理/传承痛点反推</td>
-
-            </tr>
-
-            <tr>
-
-              <td><strong>L6.4</strong> <span class="tag tag-expand">+7</span></td>
-
-              <td>架构搭建补强：信托、持股平台、离岸/境内结构搭建等场景归位</td>
-
-              <td><strong style="color:#16a34a">+7</strong></td>
-
-              <td>L6.4归位去重 + 架构场景补足</td>
-
-            </tr>
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-      <div class="card">
-
-        <div class="card-title">各维度增量分布</div>
-
-        <div id="chart-delta-bar" class="chart-box" style="height:300px;"></div>
-
-      </div>
+          <div class="expansion-branch-item" style="--accent:#ea580c;--tint:#fff7ed;">
+            <div class="expansion-branch-code">
+              <strong>L6.4</strong>
+              <span class="expansion-branch-name">架构搭建</span>
+            </div>
+            <div class="expansion-branch-main">
+              <div class="expansion-branch-title">架构搭建归位补强</div>
+              <div class="expansion-branch-desc">信托、持股平台、离岸/境内结构搭建等场景归位，修复此前 L6.4 插行和重复口径问题。</div>
+            </div>
+            <div class="expansion-branch-meta">
+              <div class="expansion-branch-delta">+7</div>
+              <div class="expansion-branch-source">L6.4归位去重<br>架构场景补足</div>
+            </div>
+          </div>
+        </div>
 
     </div>
 
