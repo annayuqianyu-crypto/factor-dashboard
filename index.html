@@ -1445,7 +1445,7 @@ body {
     <div class="three-col" style="grid-template-columns:1fr 1fr 1fr 1fr;">
       <div style="background:#eff6ff;border-radius:8px;padding:13px 15px;">
         <div style="font-size:13px;font-weight:600;color:#1d4ed8;margin-bottom:5px;" data-ek="cal-factor-name">🧬 因子</div>
-        <div style="font-size:12px;color:#374151;line-height:1.65;" data-ek="cal-factor-desc">C端因子库主表行数（当前 202607 / v6.2 月更版，15 个属性维度）。来源：<code style="font-size:11px;">01_因子库/202607版本/C端因子库-202060702-6月更新版本.xlsx</code></div>
+        <div style="font-size:12px;color:#374151;line-height:1.65;" data-ek="cal-factor-desc">C端因子库主表行数（当前 202607 / v6.2 月更版，15 个属性维度）。</div>
       </div>
       <div style="background:#f0fdf4;border-radius:8px;padding:13px 15px;">
         <div style="font-size:13px;font-weight:600;color:#15803d;margin-bottom:5px;" data-ek="cal-scene-name">📡 场景</div>
@@ -5647,6 +5647,18 @@ function initOverviewCharts() {
 
   chart1.setOption({
 
+    title: {
+
+      text: '15个维度 · 合计1706行',
+
+      right: 20,
+
+      top: 2,
+
+      textStyle: { fontSize: 12, fontWeight: 600, color: '#6b7280' }
+
+    },
+
     tooltip: {
 
       trigger: 'axis',
@@ -5701,6 +5713,8 @@ function initOverviewCharts() {
 
   const groupCounts = groups.map(g => DIM_COUNTS.reduce((s,c,i) => DIM_GROUPS[i]===g ? s+c : s, 0));
 
+  const totalFactors = groupCounts.reduce((sum, v) => sum + v, 0);
+
   // 淡雅径向渐变：从近白中心向外渐变到淡彩色边缘
 
   const groupGradients = [
@@ -5719,6 +5733,38 @@ function initOverviewCharts() {
 
   chart2.setOption({
 
+    title: [
+
+      {
+
+        text: '主体234 · 资产330 · 动作770 · 约束372',
+
+        left: 'center',
+
+        top: 4,
+
+        textStyle: { fontSize: 12, fontWeight: 600, color: '#6b7280' }
+
+      },
+
+      {
+
+        text: String(totalFactors),
+
+        subtext: '总因子',
+
+        left: 'center',
+
+        top: '38%',
+
+        textStyle: { fontSize: 24, fontWeight: 800, color: '#111827', lineHeight: 30 },
+
+        subtextStyle: { fontSize: 12, color: '#6b7280' }
+
+      }
+
+    ],
+
     tooltip: {
 
       trigger: 'item',
@@ -5735,7 +5781,7 @@ function initOverviewCharts() {
 
       radius: ['35%', '60%'],
 
-      center: ['50%', '44%'],
+      center: ['50%', '46%'],
 
       data: groups.map((g, i) => ({
 
@@ -6422,7 +6468,7 @@ const MGMT_WEEKLY = [
   { date: '2026-07-06', factors: 1706, pains: 614, scenes: 505, sku: 312,
     newCM: 0, newLegal: 0, newTax: 0, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
     note: '因子库完成202607月度更新：基于已同步痛点反哺扩库，主表1706行，本轮新增298行，并完成L6.4归位去重与MECE复检。',
-    noteFactor: '因子库完成202607月度更新：主表1706行，较上一版+298行；基于已同步痛点反哺补足因子，并完成L6.4归位去重与MECE复检。',
+    noteFactor: '6月新增298行，总计1706行，',
     notePain: '',
     noteScene: '',
     noteSku: '' },
