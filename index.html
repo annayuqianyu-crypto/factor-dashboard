@@ -2812,7 +2812,6 @@ body {
       <div class="pain-tabs" aria-label="痛点分布视图切换">
         <button class="pain-tab-btn active" type="button" data-pain-tab="structure" onclick="switchPainBuTab('structure')">BU结构</button>
         <button class="pain-tab-btn" type="button" data-pain-tab="delta" onclick="switchPainBuTab('delta')">新增贡献</button>
-        <button class="pain-tab-btn" type="button" data-pain-tab="coverage" onclick="switchPainBuTab('coverage')">覆盖说明</button>
       </div>
     </div>
 
@@ -6063,41 +6062,21 @@ function renderPainBuPanel(mode = 'structure') {
     return;
   }
 
-  if (mode === 'coverage') {
-    el.innerHTML = `
-      <div class="pain-bu-grid">
-        ${PAIN_BU_DATA.map(item => {
-          const pct = (item.value / total * 100).toFixed(1);
-          return `
-            <div class="pain-bu-mini" style="background:${item.soft};">
-              <div class="pain-bu-mini-top">
-                <div class="pain-bu-name">${item.name}</div>
-                <div class="pain-bu-pill" style="color:${item.color};background:#fff;">${pct}%</div>
-              </div>
-              <div class="pain-bu-count">${item.value}<span>条</span></div>
-              <div class="pain-bu-desc">${item.note}</div>
-            </div>
-          `;
-        }).join('')}
-      </div>
-    `;
-    return;
-  }
-
   el.innerHTML = `
     <div class="pain-bu-grid">
       ${PAIN_BU_DATA.map(item => {
         const pct = (item.value / total * 100).toFixed(1);
         return `
-          <div class="pain-bu-mini">
+          <div class="pain-bu-mini" style="background:${item.soft};">
             <div class="pain-bu-mini-top">
               <div class="pain-bu-name">${item.name}</div>
-              <div class="pain-bu-pill" style="color:${item.color};background:${item.soft};">${pct}%</div>
+              <div class="pain-bu-pill" style="color:${item.color};background:#fff;">${pct}%</div>
             </div>
+            <div class="pain-bu-count">${item.value}<span>条</span></div>
             <div class="pain-rank-track">
               <div class="pain-rank-fill" style="width:${pct}%;background:${item.fill};"></div>
             </div>
-            <div class="pain-bu-desc">${item.value} 条已上线痛点，最近一轮新增 +${item.delta} 条。</div>
+            <div class="pain-bu-desc">${item.note} 最近一轮新增 +${item.delta} 条。</div>
           </div>
         `;
       }).join('')}
