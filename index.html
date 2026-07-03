@@ -3945,6 +3945,10 @@ body {
       <div class="hgj-topic-wrap">
         <div class="hgj-toolbar-label">细分主题</div>
         <div id="hgjTopicChips" class="hgj-topic-chips"></div>
+        <div id="hgjSubtopicWrap" class="hgj-subtopic-wrap" style="display:none;">
+          <div class="hgj-toolbar-label">细分方向</div>
+          <div id="hgjSubtopicChips" class="hgj-topic-chips"></div>
+        </div>
       </div>
       <div class="hgj-search-box">
         <span>🔍</span>
@@ -4000,6 +4004,7 @@ body {
 .hgj-toolbar { display: grid; grid-template-columns: 1fr 320px; gap: 14px; align-items: start; }
 .hgj-toolbar-label { font-size: 11px; color: #94a3b8; font-weight: 800; margin-bottom: 8px; }
 .hgj-topic-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.hgj-subtopic-wrap { margin-top: 13px; padding-top: 12px; border-top: 1px dashed #e2e8f0; }
 .hgj-topic-chip {
   border: 1px solid #cbd5e1;
   background: #fff;
@@ -4818,6 +4823,7 @@ body {
     }
     if(bu === 'Cross'){
       if(/CRS|FATCA|FBAR/.test(blob)) return 'CRS/FATCA';
+      if(/香港公司|ODI|返程投资|离岸豁免|利得税|转让定价|分红|利润回流|跨境电商|境外投资|持股架构|资金回流|外汇管制|常设机构/.test(blob)) return '跨境经营架构';
       if(/香港|绿卡|身份|税务居民/.test(blob)) return '身份规划';
       if(/账户|券商|金融资产|保单|境外资产/.test(blob)) return '境外账户资产';
       if(/美国|德国|法国|新西兰|巴西|澳/.test(blob)) return '多国税务';
@@ -4827,6 +4833,75 @@ body {
     if(/继承|遗产|遗嘱/.test(blob)) return '继承安排';
     if(/婚姻|赠与|房产/.test(blob)) return '家庭资产隔离';
     return '财富传承';
+  }
+
+  function hgjSubtopicOf(d){
+    const blob = hgjBlob(d);
+    const bu = hgjBuOf(d);
+    const topic = hgjTopicOf(d);
+
+    if(bu === 'Cross' && topic === 'CRS/FATCA'){
+      if(/FBAR|FATCA|8938|1040|美国|绿卡|美国公民|新移民/.test(blob)) return '美国FATCA/FBAR';
+      if(/自查|自查表|自查申报|数据差异/.test(blob)) return 'CRS自查申报';
+      if(/补税|滞纳金|追征|罚款|补报/.test(blob)) return '补税滞纳金';
+      if(/通知|约谈/.test(blob)) return '税局通知约谈';
+      if(/核查|追税|税局|税务局|稽查|行动/.test(blob)) return '核查争议应对';
+      if(/香港保险|香港账户|港股|香港金融|香港永居/.test(blob)) return '香港账户CRS';
+      if(/香港公司|离岸|开曼|BVI|新加坡|中港|利得税/.test(blob)) return '离岸公司CRS';
+      if(/保险|理财|基金|股票|证券|券商/.test(blob)) return '境外投资保险申报';
+      if(/账户|银行|金融资产|存款|利息/.test(blob)) return '境外银行账户申报';
+      if(/租金|房产|不动产/.test(blob)) return '境外不动产申报';
+      if(/信托|架构|公司|分红|利润|转让定价|常设机构|跨境投资/.test(blob)) return '跨境架构CRS';
+      return 'CRS身份与交换';
+    }
+
+    if(bu === 'Cross' && topic === '身份规划'){
+      if(/香港|港澳/.test(blob) && /永居|投资移民|身份申请|居住要求|身份维护|临时身份/.test(blob)) return '香港身份取得维护';
+      if(/香港|港澳/.test(blob) && /税务居民|税收居民|身份声明|地址证明|居民认定/.test(blob)) return '香港税务居民认定';
+      if(/香港|港澳/.test(blob) && /账户|保险|金融|银行|证券|理财/.test(blob)) return '香港金融账户安排';
+      if(/香港|港澳/.test(blob) && /公司|企业|架构|主体/.test(blob)) return '香港公司投资结构';
+      if(/香港|港澳/.test(blob) && /投资|资金|资产|出境|配置/.test(blob)) return '香港资金资产配置';
+      if(/香港|港澳/.test(blob)) return '香港身份综合';
+      if(/美国|绿卡|加拿大|澳洲|新西兰|西班牙|英国|马来|新加坡|德国|法国|巴西/.test(blob)) return '多国税籍判断';
+      if(/税务居民|居民身份|身份声明|税号|永久性住所|重要利益中心|注销户籍/.test(blob)) return '税务居民判定';
+      if(/账户|资产|资金|出境|保险|金融/.test(blob)) return '身份与资产配置';
+      return '身份规划综合';
+    }
+
+    if(bu === 'Cross' && topic === '跨境申报'){
+      if(/境外所得|海外收入|利息|股息|红利|股票|租金|拍卖|所得|资本利得/.test(blob)) return '境外所得申报';
+      if(/资金|汇款|回流|付款|公转私|外管|出境/.test(blob)) return '跨境资金申报';
+      if(/外贸|出口|转口|跨境电商|物流|亚马逊|贸易/.test(blob)) return '跨境经营申报';
+      return '申报资料与口径';
+    }
+
+    if(bu === 'Cross' && topic === '跨境经营架构'){
+      if(/ODI|返程投资|持股架构|外汇管制|37号文|境外投资|增资/.test(blob)) return 'ODI与返程投资';
+      if(/分红|利润回流|资金回流|预提税|股息|抵免/.test(blob)) return '利润分红回流';
+      if(/亚马逊|平台数据|15号公告|赛维/.test(blob)) return '电商平台数据税务';
+      if(/买单出口|出口|报关|货物/.test(blob)) return '出口报关合规';
+      if(/跨境电商|收款/.test(blob)) return '跨境电商收款架构';
+      if(/离岸豁免|利得税|转让定价|常设机构|关联交易|代收代付/.test(blob)) return '香港公司税务';
+      return '跨境主体搭建';
+    }
+
+    if(bu === 'Tax' && topic === '经营税务合规'){
+      if(/稽查|自查|核查|税局|检查|约谈|风险复核/.test(blob)) return '稽查自查应对';
+      if(/发票|无票|专票|开票|进项|成本票|票据/.test(blob)) return '发票成本链';
+      if(/收入|成本|利润|企业所得税|增值税|留痕/.test(blob)) return '收入成本确认';
+      if(/股东|分红|借款|往来|资金|公转私|个人账户/.test(blob)) return '股东资金往来';
+      if(/医药|医疗|餐饮|零售|物流|制造|贸易|行业/.test(blob)) return '行业经营合规';
+      return '日常税务合规';
+    }
+
+    if(bu === 'Tax' && topic === '电商/平台税务'){
+      if(/亚马逊|跨境电商|海外|外贸|出口/.test(blob)) return '跨境电商';
+      if(/平台|直播|网店|线上|第三方支付/.test(blob)) return '平台收入确认';
+      if(/个体|个体工商|公转私|私账|个人账户/.test(blob)) return '个体户与私账';
+      return '电商经营合规';
+    }
+
+    return topic;
   }
 
   // 对每个场景卡片，找出全量会议中所有含相同tag的文件（去重）
@@ -4936,6 +5011,7 @@ body {
 
   window._hgjActiveBu = 'Tax';
   window._hgjActiveTopic = '全部';
+  window._hgjActiveSubtopic = '全部';
   window._hgjDisplayLimit = 40;
 
   function hgjDataByBu(buId){
@@ -4980,6 +5056,43 @@ body {
       }).join('');
   }
 
+  function renderSubtopicChips(data){
+    const wrap = document.getElementById('hgjSubtopicWrap');
+    const el = document.getElementById('hgjSubtopicChips');
+    if(!wrap || !el) return;
+
+    const topic = window._hgjActiveTopic || '全部';
+    const shouldDrill = topic !== '全部' && data.length > 30;
+    if(!shouldDrill){
+      wrap.style.display = 'none';
+      el.innerHTML = '';
+      window._hgjActiveSubtopic = '全部';
+      return;
+    }
+
+    const subCounts = new Map();
+    data.forEach(d=>{
+      const subtopic = hgjSubtopicOf(d);
+      subCounts.set(subtopic, (subCounts.get(subtopic)||0) + 1);
+    });
+    const subtopics = [...subCounts.entries()].sort((a,b)=>b[1]-a[1] || a[0].localeCompare(b[0], 'zh-Hans-CN'));
+    if(subtopics.length <= 1){
+      wrap.style.display = 'none';
+      el.innerHTML = '';
+      window._hgjActiveSubtopic = '全部';
+      return;
+    }
+
+    wrap.style.display = 'block';
+    const current = window._hgjActiveSubtopic || '全部';
+    const allActive = current === '全部' ? ' active' : '';
+    el.innerHTML = `<button class="hgj-topic-chip${allActive}" onclick="hgjSelectSubtopic('全部')">全部 ${data.length}</button>` +
+      subtopics.map(([subtopic,count])=>{
+        const active = subtopic === current ? ' active' : '';
+        return `<button class="hgj-topic-chip${active}" onclick="hgjSelectSubtopic('${subtopic.replace(/'/g,"\\'")}')">${subtopic} ${count}</button>`;
+      }).join('');
+  }
+
   function applyHgjFilters(){
     renderBuTabs();
     const buData = getActiveBuData();
@@ -4988,6 +5101,11 @@ body {
     const topic = window._hgjActiveTopic || '全部';
     if(topic !== '全部'){
       data = data.filter(d => hgjTopicOf(d) === topic);
+    }
+    renderSubtopicChips(data);
+    const subtopic = window._hgjActiveSubtopic || '全部';
+    if(subtopic !== '全部'){
+      data = data.filter(d => hgjSubtopicOf(d) === subtopic);
     }
 
     const kw = (document.getElementById('hgjSearchInput')?.value || '').trim().toLowerCase();
@@ -5019,8 +5137,9 @@ body {
     }
     if(meta){
       const topicText = topic === '全部' ? '全部细分主题' : topic;
+      const subtopicText = subtopic === '全部' ? '' : ` / ${subtopic}`;
       const moreText = data.length > (window._hgjDisplayLimit || 40) ? `，当前展示前 ${window._hgjDisplayLimit || 40} 条` : '';
-      meta.innerHTML = `<strong>${bu?.label || '场景池'}</strong> / ${topicText}：共 ${data.length} 个可推导业务场景，覆盖 ${totalMeetings} 份会议纪要${moreText}`;
+      meta.innerHTML = `<strong>${bu?.label || '场景池'}</strong> / ${topicText}${subtopicText}：共 ${data.length} 个可推导业务场景，覆盖 ${totalMeetings} 份会议纪要${moreText}`;
     }
     renderCards(data);
   }
@@ -5028,12 +5147,20 @@ body {
   function hgjSelectBu(buId){
     window._hgjActiveBu = buId;
     window._hgjActiveTopic = '全部';
+    window._hgjActiveSubtopic = '全部';
     window._hgjDisplayLimit = 40;
     applyHgjFilters();
   }
 
   function hgjSelectTopic(topic){
     window._hgjActiveTopic = topic;
+    window._hgjActiveSubtopic = '全部';
+    window._hgjDisplayLimit = 40;
+    applyHgjFilters();
+  }
+
+  function hgjSelectSubtopic(subtopic){
+    window._hgjActiveSubtopic = subtopic;
     window._hgjDisplayLimit = 40;
     applyHgjFilters();
   }
@@ -5058,6 +5185,7 @@ body {
   window.hgjSearch = hgjSearch;
   window.hgjSelectBu = hgjSelectBu;
   window.hgjSelectTopic = hgjSelectTopic;
+  window.hgjSelectSubtopic = hgjSelectSubtopic;
   window.hgjShowMore = hgjShowMore;
 
   window.hgjSendToPainGenerate = function(dir){
