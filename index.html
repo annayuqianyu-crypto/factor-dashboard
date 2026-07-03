@@ -212,6 +212,81 @@ body {
 
 }
 
+.pain-bu-card { padding: 22px 24px 24px; }
+
+.pain-bu-head {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 18px;
+  margin-bottom: 18px;
+}
+
+.pain-total-value {
+  font-size: 48px; line-height: 1; font-weight: 800; color: #1d4ed8; letter-spacing: 0;
+  margin-top: 12px;
+}
+
+.pain-total-value span { font-size: 18px; font-weight: 700; color: #64748b; margin-left: 4px; }
+
+.pain-total-sub { font-size: 12px; color: #94a3b8; margin-top: 8px; }
+
+.pain-tabs {
+  display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px;
+  background: #f1f5f9; border: 1px solid #e2e8f0;
+}
+
+.pain-tab-btn {
+  border: 0; border-radius: 999px; padding: 7px 13px; background: transparent;
+  color: #64748b; font-size: 12px; font-weight: 700; cursor: pointer;
+}
+
+.pain-tab-btn.active {
+  background: #fff; color: #1d4ed8; box-shadow: 0 6px 18px rgba(15, 23, 42, .08);
+}
+
+.pain-bu-panel { min-height: 184px; }
+
+.pain-stack {
+  display: flex; gap: 5px;
+  height: 56px; margin: 4px 0 18px;
+}
+
+.pain-stack-seg {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  min-width: 0; padding: 0 8px; border-radius: 10px; font-size: 12px; font-weight: 800;
+  color: #0f172a; box-shadow: inset 0 0 0 1px rgba(255,255,255,.72);
+}
+
+.pain-bu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
+.pain-bu-mini {
+  border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 14px 12px;
+  background: #fff; box-shadow: 0 10px 24px rgba(15, 23, 42, .04);
+}
+
+.pain-bu-mini-top { display:flex; justify-content:space-between; gap:10px; align-items:center; margin-bottom: 10px; }
+
+.pain-bu-name { font-size: 13px; font-weight: 800; color: #111827; }
+
+.pain-bu-pill { font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 999px; }
+
+.pain-bu-count { font-size: 24px; line-height: 1; font-weight: 800; color: #111827; }
+
+.pain-bu-count span { font-size: 12px; color: #64748b; margin-left: 2px; }
+
+.pain-bu-desc { font-size: 11.5px; color: #64748b; line-height: 1.55; margin-top: 8px; }
+
+.pain-rank-row {
+  display: grid; grid-template-columns: 96px 1fr 48px; gap: 10px; align-items: center;
+  margin: 12px 0;
+}
+
+.pain-rank-name { font-size: 12px; font-weight: 800; color: #334155; }
+
+.pain-rank-track { height: 12px; border-radius: 999px; background: #f1f5f9; overflow: hidden; }
+
+.pain-rank-fill { height: 100%; border-radius: 999px; }
+
+.pain-rank-value { font-size: 12px; font-weight: 800; color: #334155; text-align: right; }
+
 
 
 /* ── 图表容器 ── */
@@ -2737,13 +2812,22 @@ body {
 
   <!-- 各 BU 痛点分布（按 CM/Tax/Legal 三大业务单元统计） -->
 
-  <div class="card" style="margin-bottom:16px;">
+  <div class="card pain-bu-card" style="margin-bottom:16px;">
 
-    <div class="card-title">各 BU 痛点分布</div>
+    <div class="pain-bu-head">
+      <div>
+        <div class="card-title">各 BU 痛点分布</div>
+        <div class="pain-total-value">614<span>条</span></div>
+        <div class="pain-total-sub">已同步上线痛点主库 · 按 BU 归属观察覆盖结构</div>
+      </div>
+      <div class="pain-tabs" aria-label="痛点分布视图切换">
+        <button class="pain-tab-btn active" type="button" data-pain-tab="structure" onclick="switchPainBuTab('structure')">BU结构</button>
+        <button class="pain-tab-btn" type="button" data-pain-tab="delta" onclick="switchPainBuTab('delta')">新增贡献</button>
+        <button class="pain-tab-btn" type="button" data-pain-tab="coverage" onclick="switchPainBuTab('coverage')">覆盖说明</button>
+      </div>
+    </div>
 
-    <div style="font-size:12.5px;color:#374151;margin-bottom:8px;">已上线痛点达 <strong>614</strong> 条</div>
-
-    <div id="chart-bu-bar" class="chart-box" style="height:180px;"></div>
+    <div id="chart-bu-bar" class="pain-bu-panel"></div>
 
   </div>
 
@@ -5920,110 +6004,126 @@ function initScenesCharts() {
 
 
 
-  // ── 各 BU 痛点分布（横向 stacked bar，更紧凑）──
+  switchPainBuTab('structure');
 
-  const buEl = document.getElementById('chart-bu-bar');
+}
 
-  if (buEl && !chartInstances['scenes-bu-bar']) {
+const PAIN_BU_DATA = [
+  {
+    key: 'cm',
+    name: 'CM 资本市场',
+    value: 106,
+    delta: 16,
+    color: '#2563eb',
+    soft: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
+    fill: 'linear-gradient(90deg, #60a5fa 0%, #2563eb 100%)',
+    note: '资本市场、股权激励、境外架构与综合场景，当前占比适中，承担交易与企业资本动作类痛点覆盖。'
+  },
+  {
+    key: 'tax',
+    name: 'Tax 税务',
+    value: 210,
+    delta: 29,
+    color: '#e11d48',
+    soft: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)',
+    fill: 'linear-gradient(90deg, #fb7185 0%, #e11d48 100%)',
+    note: '税务合规、身份与海外税务、跨境税务、转让定价、CRS/FATCA 等，是高净值客户风险识别的高频区。'
+  },
+  {
+    key: 'legal',
+    name: 'Legal 法律',
+    value: 298,
+    delta: 51,
+    color: '#9333ea',
+    soft: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
+    fill: 'linear-gradient(90deg, #c084fc 0%, #9333ea 100%)',
+    note: '法律架构、资产保护、财富传承与慈善公益覆盖最深，是当前痛点主库中占比最高的 BU。'
+  }
+];
 
-    const buChart = echarts.init(buEl);
+function switchPainBuTab(mode) {
+  document.querySelectorAll('[data-pain-tab]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.painTab === mode);
+  });
+  renderPainBuPanel(mode);
+}
 
-    chartInstances['scenes-bu-bar'] = buChart;
+function renderPainBuPanel(mode = 'structure') {
+  const el = document.getElementById('chart-bu-bar');
+  if (!el) return;
 
-    // 淡雅渐变色：CM蓝色系 / Tax玫红系 / Legal薰衣草紫系
+  const total = PAIN_BU_DATA.reduce((sum, item) => sum + item.value, 0);
+  const deltaTotal = PAIN_BU_DATA.reduce((sum, item) => sum + item.delta, 0);
 
-    const buGradients = [
-
-      { x: 0, y: 0, x2: 1, y2: 0, colorStops: [ { offset: 0, color: '#f8fbff' }, { offset: 0.6, color: '#dbeafe' }, { offset: 1, color: '#93c5fd' } ] },
-
-      { x: 0, y: 0, x2: 1, y2: 0, colorStops: [ { offset: 0, color: '#fff8f8' }, { offset: 0.6, color: '#fee2e2' }, { offset: 1, color: '#fca5a5' } ] },
-
-      { x: 0, y: 0, x2: 1, y2: 0, colorStops: [ { offset: 0, color: '#fdf8ff' }, { offset: 0.6, color: '#f3e8ff' }, { offset: 1, color: '#d8b4fe' } ] },
-
-    ];
-
-    const buData = [
-
-      { name: 'CM 资本市场', value: 106, detail: '资本市场场景 + 股权激励 + 境外架构 + 综合（P-001~P-231 区段）· 6.22-6.29 新增 16' },
-
-      { name: 'Tax 税务',    value: 210, detail: '税务合规 + 身份/海外税务 + 跨境税务 + 转让定价 + CRS/FATCA 等 · 6.22-6.29 新增 29' },
-
-      { name: 'Legal 法律',  value: 298, detail: '法律架构 + 资产保护 + 财富传承 + 慈善公益（存量 Law 97 + 2026.05 新增批次 128）· 6.22-6.29 新增 51' },
-
-    ];
-
-    const total = buData.reduce((s,b)=>s+b.value,0);
-
-    buChart.setOption({
-
-      tooltip: {
-
-        trigger:'item',
-
-        formatter: p => `<b>${p.data.name}</b><br/>痛点数：<b>${p.value} 条</b>（占 ${(p.value/total*100).toFixed(1)}%）<br/><span style="font-size:11px;color:#888;">${p.data.detail}</span>`
-
-      },
-
-      grid: { left: 10, right: 80, top: 10, bottom: 10 },
-
-      xAxis: { type: 'value', max: total, axisLine:{show:false}, axisTick:{show:false}, splitLine:{show:false}, axisLabel:{show:false} },
-
-      yAxis: {
-
-        type: 'category',
-
-        data: [''],
-
-        axisLabel: { show: false },
-
-        axisLine:{show:false}, axisTick:{show:false}
-
-      },
-
-      series: buData.map((b, i) => ({
-
-        name: b.name,
-
-        type: 'bar',
-
-        stack: 'bu',
-
-        data: [{ value: b.value, name: b.name, detail: b.detail }],
-
-        itemStyle: {
-
-          color: { type: 'linear', ...buGradients[i] },
-
-          borderRadius: i===0?[6,0,0,6]:i===buData.length-1?[0,6,6,0]:[0,0,0,0],
-
-          borderColor: '#fff', borderWidth: 2
-
-        },
-
-        label: {
-
-          show: true,
-
-          formatter: p => `${p.data.name}\n${p.value} 条 · ${(p.value/total*100).toFixed(1)}%`,
-
-          color: '#1f2937',
-
-          fontWeight: 600,
-
-          fontSize: 12,
-
-          lineHeight: 18
-
-        },
-
-        barWidth: 60
-
-      }))
-
-    });
-
+  if (mode === 'delta') {
+    el.innerHTML = `
+      <div style="font-size:12px;color:#64748b;margin-bottom:10px;">最近一轮新增贡献：共 ${deltaTotal} 条，Legal 与 Tax 是主要增量来源。</div>
+      ${PAIN_BU_DATA.map(item => {
+        const pct = (item.delta / deltaTotal * 100).toFixed(1);
+        return `
+          <div class="pain-rank-row">
+            <div class="pain-rank-name">${item.name}</div>
+            <div class="pain-rank-track">
+              <div class="pain-rank-fill" style="width:${pct}%;background:${item.fill};"></div>
+            </div>
+            <div class="pain-rank-value">+${item.delta}</div>
+          </div>
+        `;
+      }).join('')}
+    `;
+    return;
   }
 
+  if (mode === 'coverage') {
+    el.innerHTML = `
+      <div class="pain-bu-grid">
+        ${PAIN_BU_DATA.map(item => {
+          const pct = (item.value / total * 100).toFixed(1);
+          return `
+            <div class="pain-bu-mini" style="background:${item.soft};">
+              <div class="pain-bu-mini-top">
+                <div class="pain-bu-name">${item.name}</div>
+                <div class="pain-bu-pill" style="color:${item.color};background:#fff;">${pct}%</div>
+              </div>
+              <div class="pain-bu-count">${item.value}<span>条</span></div>
+              <div class="pain-bu-desc">${item.note}</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="pain-stack">
+      ${PAIN_BU_DATA.map(item => {
+        const pct = (item.value / total * 100).toFixed(1);
+        return `
+          <div class="pain-stack-seg" style="flex:${item.value};background:${item.soft};">
+            <div>${item.name}<br>${item.value} 条 · ${pct}%</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+    <div class="pain-bu-grid">
+      ${PAIN_BU_DATA.map(item => {
+        const pct = (item.value / total * 100).toFixed(1);
+        return `
+          <div class="pain-bu-mini">
+            <div class="pain-bu-mini-top">
+              <div class="pain-bu-name">${item.name}</div>
+              <div class="pain-bu-pill" style="color:${item.color};background:${item.soft};">${pct}%</div>
+            </div>
+            <div class="pain-rank-track">
+              <div class="pain-rank-fill" style="width:${pct}%;background:${item.fill};"></div>
+            </div>
+            <div class="pain-bu-desc">${item.value} 条已上线痛点，最近一轮新增 +${item.delta} 条。</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
 }
 
 
