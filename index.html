@@ -3930,37 +3930,120 @@ body {
     </div>
   </div>
 
-  <!-- 搜索栏 -->
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-    <div style="position:relative;flex:1;">
-      <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:14px;pointer-events:none;">🔍</span>
-      <input type="text" id="hgjSearchInput" placeholder="搜索场景标题、tag、客户问题、文件名…"
-        style="width:100%;box-sizing:border-box;padding:10px 38px 10px 36px;border:1px solid #cbd5e1;border-radius:8px;font-size:13.5px;background:#fff;"
-        oninput="hgjSearch()" />
-      <span id="hgjSearchClear" onclick="document.getElementById('hgjSearchInput').value='';hgjSearch();"
-        style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#cbd5e1;font-size:16px;cursor:pointer;display:none;">✕</span>
+  <div class="hgj-workbench">
+    <div class="hgj-workbench-head">
+      <div>
+        <div class="hgj-eyebrow">BU 场景工作台</div>
+        <div class="hgj-workbench-title">按业务线进入场景池</div>
+      </div>
+      <div id="hgjSearchHint" class="hgj-result-count"></div>
     </div>
-    <div id="hgjSearchHint" style="font-size:12px;color:#94a3b8;white-space:nowrap;"></div>
+
+    <div id="hgjBuTabs" class="hgj-bu-tabs"></div>
+
+    <div class="hgj-toolbar">
+      <div class="hgj-topic-wrap">
+        <div class="hgj-toolbar-label">细分主题</div>
+        <div id="hgjTopicChips" class="hgj-topic-chips"></div>
+      </div>
+      <div class="hgj-search-box">
+        <span>🔍</span>
+        <input type="text" id="hgjSearchInput" placeholder="搜索标题、标签、客户问题、文件名…" oninput="hgjSearch()" />
+        <button id="hgjSearchClear" onclick="document.getElementById('hgjSearchInput').value='';hgjSearch();" title="清空搜索">×</button>
+      </div>
+    </div>
   </div>
 
-  <!-- 筛选栏 -->
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;" id="hgjFilters">
-    <button class="hgj-filter-btn active" data-filter="全部"   data-label="全部"   onclick="hgjFilter(this,'全部')">全部</button>
-    <button class="hgj-filter-btn" data-filter="税务合规" data-label="税务合规" onclick="hgjFilter(this,'税务合规')">税务合规</button>
-    <button class="hgj-filter-btn" data-filter="合规诉讼" data-label="合规诉讼" onclick="hgjFilter(this,'合规诉讼')">合规诉讼</button>
-    <button class="hgj-filter-btn" data-filter="跨境规划" data-label="跨境规划" onclick="hgjFilter(this,'跨境规划')">跨境规划</button>
-    <button class="hgj-filter-btn" data-filter="股权架构" data-label="股权架构" onclick="hgjFilter(this,'股权架构')">股权架构</button>
-    <button class="hgj-filter-btn" data-filter="财富传承" data-label="财富传承" onclick="hgjFilter(this,'财富传承')">财富传承</button>
-    <button class="hgj-filter-btn" data-filter="资产保护" data-label="资产保护" onclick="hgjFilter(this,'资产保护')">资产保护</button>
-    <button class="hgj-filter-btn" data-filter="劳动用工" data-label="劳动用工" onclick="hgjFilter(this,'劳动用工')">劳动用工</button>
-    <button class="hgj-filter-btn" data-filter="高新颖度" data-label="⭐ 高新颖度" onclick="hgjFilter(this,'高新颖度')">⭐ 高新颖度</button>
-  </div>
+  <div id="hgjResultMeta" class="hgj-result-meta"></div>
 
   <!-- 场景卡片列表 -->
-  <div id="hgjCards" style="display:flex;flex-direction:column;gap:14px;"></div>
+  <div id="hgjCards" class="hgj-card-grid"></div>
 </div>
 
 <style>
+.hgj-workbench {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, .05);
+}
+.hgj-workbench-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.hgj-eyebrow { font-size: 11px; color: #64748b; font-weight: 800; letter-spacing: .08em; }
+.hgj-workbench-title { font-size: 18px; color: #0f172a; font-weight: 850; margin-top: 4px; }
+.hgj-result-count { font-size: 12px; color: #64748b; white-space: nowrap; }
+.hgj-bu-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+.hgj-bu-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+  padding: 13px 14px;
+  cursor: pointer;
+  transition: all .16s ease;
+  min-height: 88px;
+  text-align: left;
+  font-family: inherit;
+}
+.hgj-bu-card:hover { transform: translateY(-1px); border-color: #bfdbfe; box-shadow: 0 10px 24px rgba(37, 99, 235, .08); }
+.hgj-bu-card.active { background: #eff6ff; border-color: #2563eb; box-shadow: inset 0 0 0 1px #2563eb; }
+.hgj-bu-top { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.hgj-bu-name { font-size: 14px; color: #0f172a; font-weight: 850; }
+.hgj-bu-count { font-size: 22px; color: #1d4ed8; font-weight: 850; line-height: 1; }
+.hgj-bu-desc { font-size: 11.5px; color: #64748b; line-height: 1.45; margin-top: 8px; }
+.hgj-toolbar { display: grid; grid-template-columns: 1fr 320px; gap: 14px; align-items: start; }
+.hgj-toolbar-label { font-size: 11px; color: #94a3b8; font-weight: 800; margin-bottom: 8px; }
+.hgj-topic-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.hgj-topic-chip {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #475569;
+  border-radius: 999px;
+  padding: 6px 11px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.hgj-topic-chip.active { background: #111827; color: #fff; border-color: #111827; }
+.hgj-search-box { position: relative; }
+.hgj-search-box span { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 14px; pointer-events: none; }
+.hgj-search-box input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 36px 10px 36px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 13px;
+  background: #fff;
+}
+.hgj-search-box button {
+  position: absolute;
+  right: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 18px;
+  cursor: pointer;
+  display: none;
+}
+.hgj-result-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 14px 0 10px;
+  color: #64748b;
+  font-size: 12.5px;
+}
+.hgj-card-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .hgj-filter-btn {
   padding: 5px 14px;
   border-radius: 20px;
@@ -3978,9 +4061,9 @@ body {
 }
 .hgj-card {
   background: #fff;
-  border-radius: 10px;
+  border-radius: 12px;
   border: 1px solid #e2e8f0;
-  padding: 16px 20px;
+  padding: 15px 16px;
   transition: box-shadow .15s;
 }
 .hgj-card:hover { box-shadow: 0 2px 12px rgba(26,86,219,.10); }
@@ -4024,6 +4107,11 @@ body {
   transition: background .12s;
 }
 .hgj-pain-chip:hover { background: #dbeafe; border-color: #93c5fd; }
+@media (max-width: 1100px) {
+  .hgj-bu-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hgj-toolbar { grid-template-columns: 1fr; }
+  .hgj-card-grid { grid-template-columns: 1fr; }
+}
 </style>
 
 <script>
@@ -4681,7 +4769,67 @@ body {
   function noveltyLabel(n){ return n==='高'?'⭐ 高新颖度':n==='中'?'中等':' 常见'; }
   function noveltyClass(n){ return n==='高'?'hgj-novelty-high':n==='中'?'hgj-novelty-mid':'hgj-novelty-low'; }
 
-  // 对每个场景卡片，找出67份会议中所有含相同tag的文件（去重）
+  const HGJ_BU_GROUPS = [
+    { id:'Tax', label:'Tax 税务', desc:'企业税务、CRS、跨境申报、公转私、清算注销', cats:['税务合规'] },
+    { id:'Legal', label:'Legal 法律', desc:'婚姻家事、继承纠纷、房产代持、合同诉讼', cats:['合规诉讼','资产保护'] },
+    { id:'CM', label:'CM 资本市场', desc:'股权架构、合资协议、控制权、上市/拟上市', cats:['股权架构'] },
+    { id:'Cross', label:'跨境身份', desc:'身份规划、境外账户、海外资产、CRS/FATCA', cats:['跨境规划'] },
+    { id:'Family', label:'家族资产', desc:'财富传承、保单信托、家庭资产配置', cats:['财富传承','资产保护'] },
+  ];
+
+  function hgjBlob(d){
+    return [d.title||'', d.cat||'', d.source||'', d.file||'', (d.tags||[]).join(' '), ((d.questions||d.dirs)||[]).join(' ')].join(' ');
+  }
+
+  function hgjBuOf(d){
+    const blob = hgjBlob(d);
+    if(d.cat === '股权架构' || /股权|合资|控制权|上市|并购|架构重组|估值|减持|激励/.test(blob)) return 'CM';
+    if(d.cat === '合规诉讼' || /诉讼|纠纷|违约|证据|合同|代持|名誉权|离婚|婚姻/.test(blob)) return 'Legal';
+    if(d.cat === '财富传承' || /传承|继承|遗嘱|家族信托|保单|赠与|跨代/.test(blob)) return 'Family';
+    if(d.cat === '跨境规划' || /CRS|FATCA|FBAR|香港|美国|境外|海外|跨境|身份|绿卡|离岸/.test(blob)) return 'Cross';
+    return 'Tax';
+  }
+
+  function hgjTopicOf(d){
+    const blob = hgjBlob(d);
+    const bu = hgjBuOf(d);
+    if(bu === 'Tax'){
+      if(/电商|平台|直播|网店/.test(blob)) return '电商/平台税务';
+      if(/CRS|境外收入|海外|香港|美国|跨境|外商/.test(blob)) return '跨境税务申报';
+      if(/注销|清算|未分配利润|留抵/.test(blob)) return '注销清算';
+      if(/公转私|私账|分红|股东资金/.test(blob)) return '公转私';
+      if(/社保|劳动|员工|用工/.test(blob)) return '社保用工';
+      if(/研发|高新|加计扣除|拟上市/.test(blob)) return '研发/上市财税';
+      return '经营税务合规';
+    }
+    if(bu === 'Legal'){
+      if(/婚姻|离婚|名誉权|财产分割/.test(blob)) return '婚姻家事';
+      if(/继承|遗产|遗嘱/.test(blob)) return '继承纠纷';
+      if(/房产|代持|抵押|抵债/.test(blob)) return '房产/代持';
+      if(/合同|合资|协议|谈判|违约/.test(blob)) return '合同争议';
+      return '诉讼证据链';
+    }
+    if(bu === 'CM'){
+      if(/合资|协议/.test(blob)) return '合资协议';
+      if(/控制权|股东|章程/.test(blob)) return '控制权安排';
+      if(/上市|拟上市|股权激励|减持/.test(blob)) return '上市/激励';
+      if(/跨境投资|FDI|ODI|红筹|VIE/.test(blob)) return '跨境投资架构';
+      return '股权架构';
+    }
+    if(bu === 'Cross'){
+      if(/CRS|FATCA|FBAR/.test(blob)) return 'CRS/FATCA';
+      if(/香港|绿卡|身份|税务居民/.test(blob)) return '身份规划';
+      if(/账户|券商|金融资产|保单|境外资产/.test(blob)) return '境外账户资产';
+      if(/美国|德国|法国|新西兰|巴西|澳/.test(blob)) return '多国税务';
+      return '跨境申报';
+    }
+    if(/信托|保单/.test(blob)) return '信托/保单';
+    if(/继承|遗产|遗嘱/.test(blob)) return '继承安排';
+    if(/婚姻|赠与|房产/.test(blob)) return '家庭资产隔离';
+    return '财富传承';
+  }
+
+  // 对每个场景卡片，找出全量会议中所有含相同tag的文件（去重）
   const TOTAL_FILES = new Set(ALL_HGJ_DATA.map(d=>d.file)).size;
   const HGJ_MATCH_STOP_TAGS = new Set([
     '税务合规','合规整改','业务税务处理','交易凭证管理','税负测算',
@@ -4702,29 +4850,38 @@ body {
     return fileMap;
   }
 
-  function renderCards(data){
+  function renderCards(data, opts={}){
     const container = document.getElementById('hgjCards');
     if(!container) return;
     // 按出现次数降序排列
     const sorted = [...data].sort((a,b) => sceneHits(b).size - sceneHits(a).size);
-    container.innerHTML = sorted.map((d,i) => {
+    const limit = opts.showAll ? sorted.length : Math.min(sorted.length, window._hgjDisplayLimit || 40);
+    const visible = sorted.slice(0, limit);
+    container.innerHTML = visible.map((d,i) => {
       const hits = sceneHits(d);
       const hitCount = hits.size;
       // 生成文件索引列表（每条一行）
-      const fileLines = [...hits.entries()].map(([file, title])=>{
+      const fileLines = [...hits.entries()].slice(0, 6).map(([file, title])=>{
         const shortName = file.replace(/-转写结果\.docx|\.docx/g,'');
         return `<div style="font-size:11px;color:#475569;padding:2px 0;display:flex;align-items:baseline;gap:6px;">
           <span style="color:#94a3b8;flex-shrink:0;">📁</span>
           <span>${shortName}</span>
         </div>`;
       }).join('');
+      const moreLine = hits.size > 6 ? `<div style="font-size:11px;color:#94a3b8;margin-top:3px;">另有 ${hits.size - 6} 份会议命中</div>` : '';
+      const topic = hgjTopicOf(d);
+      const bu = hgjBuOf(d);
 
       return `
       <div class="hgj-card" data-cat="${d.cat}" data-novelty="${d.novelty}">
         <div class="hgj-card-header">
-          <span style="font-size:15px;font-weight:700;color:#1e293b;flex:1;cursor:pointer;text-decoration:underline;text-decoration-color:#cbd5e1;text-underline-offset:3px;" onclick="hgjSendToPainGenerate(this.dataset.title)" data-title="${d.title.replace(/"/g,'&quot;')}" title="点击添加为场景">${d.title}</span>
+          <span style="font-size:15px;font-weight:800;color:#1e293b;flex:1;cursor:pointer;text-decoration:underline;text-decoration-color:#cbd5e1;text-underline-offset:3px;" onclick="hgjSendToPainGenerate(this.dataset.title)" data-title="${d.title.replace(/"/g,'&quot;')}" title="点击添加为场景">${d.title}</span>
           <span class="hgj-tag ${noveltyClass(d.novelty)}">${noveltyLabel(d.novelty)}</span>
-          <span class="hgj-cat-tag">${d.cat}</span>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin:-2px 0 10px;">
+          <span class="hgj-cat-tag">${bu}</span>
+          <span class="hgj-cat-tag" style="background:#f1f5f9;color:#475569;">${topic}</span>
+          <span class="hgj-cat-tag" style="background:#eff6ff;color:#1d4ed8;">${d.cat}</span>
         </div>
 
         <!-- 出现次数 + 文件索引 -->
@@ -4734,6 +4891,7 @@ body {
           </div>
           <div style="display:flex;flex-direction:column;gap:1px;">
             ${fileLines}
+            ${moreLine}
           </div>
         </div>
 
@@ -4745,7 +4903,9 @@ body {
           ${d.tags.map(t=>`<span style="font-size:11px;background:#f1f5f9;color:#64748b;padding:2px 7px;border-radius:4px;">${t}</span>`).join('')}
         </div>
       </div>`;
-    }).join('');
+    }).join('') + (!opts.showAll && sorted.length > limit ? `
+      <button class="hgj-topic-chip" style="grid-column:1/-1;justify-self:center;margin:8px 0 4px;padding:9px 18px;" onclick="hgjShowMore()">展开更多 ${sorted.length - limit} 条</button>
+    ` : '');
   }
 
   function updateHgjSummary(){
@@ -4774,34 +4934,66 @@ body {
     }
   }
 
-  function updateFilterBadges(){
-    const TOTAL_MEETINGS = new Set(ALL_HGJ_DATA.map(d=>d.file)).size;
-    document.querySelectorAll('.hgj-filter-btn').forEach(btn=>{
-      const f = btn.dataset.filter;
-      const label = btn.dataset.label || btn.textContent.replace(/\s*\d.*$/,'').trim();
-      if(!f) return;
-      if(f==='全部'){
-        btn.textContent = `${label}（${ALL_HGJ_DATA.length} 场景 / ${TOTAL_MEETINGS} 会议）`;
-      } else {
-        const subset = f==='高新颖度' ? ALL_HGJ_DATA.filter(d=>d.novelty==='高') : ALL_HGJ_DATA.filter(d=>d.cat===f);
-        const uniqFiles = new Set(subset.map(d=>d.file)).size;
-        btn.textContent = `${label} ${uniqFiles}/${TOTAL_MEETINGS}`;
-      }
-    });
+  window._hgjActiveBu = 'Tax';
+  window._hgjActiveTopic = '全部';
+  window._hgjDisplayLimit = 40;
+
+  function hgjDataByBu(buId){
+    return ALL_HGJ_DATA.filter(d => hgjBuOf(d) === buId);
   }
 
-  // 当前分类筛选（默认全部）
-  window._hgjActiveFilter = '全部';
+  function renderBuTabs(){
+    const el = document.getElementById('hgjBuTabs');
+    if(!el) return;
+    el.innerHTML = HGJ_BU_GROUPS.map(group=>{
+      const count = hgjDataByBu(group.id).length;
+      const active = group.id === window._hgjActiveBu ? ' active' : '';
+      return `<button class="hgj-bu-card${active}" onclick="hgjSelectBu('${group.id}')">
+        <div class="hgj-bu-top">
+          <span class="hgj-bu-name">${group.label}</span>
+          <span class="hgj-bu-count">${count}</span>
+        </div>
+        <div class="hgj-bu-desc">${group.desc}</div>
+      </button>`;
+    }).join('');
+  }
+
+  function getActiveBuData(){
+    return hgjDataByBu(window._hgjActiveBu || 'Tax');
+  }
+
+  function renderTopicChips(data){
+    const el = document.getElementById('hgjTopicChips');
+    if(!el) return;
+    const topicCounts = new Map();
+    data.forEach(d=>{
+      const topic = hgjTopicOf(d);
+      topicCounts.set(topic, (topicCounts.get(topic)||0) + 1);
+    });
+    const topics = [...topicCounts.entries()].sort((a,b)=>b[1]-a[1] || a[0].localeCompare(b[0], 'zh-Hans-CN'));
+    const current = window._hgjActiveTopic || '全部';
+    const allActive = current === '全部' ? ' active' : '';
+    el.innerHTML = `<button class="hgj-topic-chip${allActive}" onclick="hgjSelectTopic('全部')">全部 ${data.length}</button>` +
+      topics.map(([topic,count])=>{
+        const active = topic === current ? ' active' : '';
+        return `<button class="hgj-topic-chip${active}" onclick="hgjSelectTopic('${topic.replace(/'/g,"\\'")}')">${topic} ${count}</button>`;
+      }).join('');
+  }
 
   function applyHgjFilters(){
-    const f = window._hgjActiveFilter || '全部';
-    let data = f==='全部'    ? ALL_HGJ_DATA :
-               f==='高新颖度' ? ALL_HGJ_DATA.filter(d=>d.novelty==='高') :
-               ALL_HGJ_DATA.filter(d=>d.cat===f);
+    renderBuTabs();
+    const buData = getActiveBuData();
+    renderTopicChips(buData);
+    let data = buData;
+    const topic = window._hgjActiveTopic || '全部';
+    if(topic !== '全部'){
+      data = data.filter(d => hgjTopicOf(d) === topic);
+    }
 
     const kw = (document.getElementById('hgjSearchInput')?.value || '').trim().toLowerCase();
     const clearBtn = document.getElementById('hgjSearchClear');
     const hint = document.getElementById('hgjSearchHint');
+    const meta = document.getElementById('hgjResultMeta');
     if(clearBtn) clearBtn.style.display = kw ? 'block' : 'none';
 
     if(kw){
@@ -4820,25 +5012,53 @@ body {
       });
     }
 
+    const bu = HGJ_BU_GROUPS.find(g=>g.id === (window._hgjActiveBu || 'Tax'));
+    const totalMeetings = new Set(data.map(d=>d.file)).size;
     if(hint){
-      hint.textContent = kw ? `搜索到 ${data.length} 条` : '';
+      hint.textContent = kw ? `搜索到 ${data.length} 条` : `${bu?.label || ''} · ${data.length} 个场景`;
+    }
+    if(meta){
+      const topicText = topic === '全部' ? '全部细分主题' : topic;
+      const moreText = data.length > (window._hgjDisplayLimit || 40) ? `，当前展示前 ${window._hgjDisplayLimit || 40} 条` : '';
+      meta.innerHTML = `<strong>${bu?.label || '场景池'}</strong> / ${topicText}：共 ${data.length} 个可推导业务场景，覆盖 ${totalMeetings} 份会议纪要${moreText}`;
     }
     renderCards(data);
   }
 
-  function hgjFilter(btn, f){
-    document.querySelectorAll('.hgj-filter-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    window._hgjActiveFilter = f;
+  function hgjSelectBu(buId){
+    window._hgjActiveBu = buId;
+    window._hgjActiveTopic = '全部';
+    window._hgjDisplayLimit = 40;
     applyHgjFilters();
   }
 
+  function hgjSelectTopic(topic){
+    window._hgjActiveTopic = topic;
+    window._hgjDisplayLimit = 40;
+    applyHgjFilters();
+  }
+
+  function hgjShowMore(){
+    window._hgjDisplayLimit = (window._hgjDisplayLimit || 40) + 80;
+    applyHgjFilters();
+  }
+
+  function hgjFilter(btn, f){
+    const matched = HGJ_BU_GROUPS.find(g=>g.cats.includes(f) || g.id === f);
+    if(matched) hgjSelectBu(matched.id);
+    else applyHgjFilters();
+  }
+
   function hgjSearch(){
+    window._hgjDisplayLimit = 40;
     applyHgjFilters();
   }
 
   window.hgjFilter = hgjFilter;
   window.hgjSearch = hgjSearch;
+  window.hgjSelectBu = hgjSelectBu;
+  window.hgjSelectTopic = hgjSelectTopic;
+  window.hgjShowMore = hgjShowMore;
 
   window.hgjSendToPainGenerate = function(dir){
     showPage('pain-generate');
@@ -4852,13 +5072,12 @@ body {
   const origShowPage = window.showPage;
   window.showPage = function(pageId){
     origShowPage && origShowPage.apply(this, arguments);
-    if(pageId==='hgj'){ renderCards(ALL_HGJ_DATA); updateFilterBadges(); updateHgjSummary(); }
+    if(pageId==='hgj'){ applyHgjFilters(); updateHgjSummary(); }
   };
 
   // 页面加载后立即计算计数+渲染卡片（兜底，避免全部按钮初次无内容）
   setTimeout(()=>{
-    renderCards(ALL_HGJ_DATA);
-    updateFilterBadges();
+    applyHgjFilters();
     updateHgjSummary();
   }, 300);
 })();
