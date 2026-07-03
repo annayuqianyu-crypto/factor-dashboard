@@ -228,20 +228,6 @@ body {
 
 .pain-total-sub { font-size: 12px; color: #94a3b8; margin-top: 8px; }
 
-.pain-tabs {
-  display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px;
-  background: #f1f5f9; border: 1px solid #e2e8f0;
-}
-
-.pain-tab-btn {
-  border: 0; border-radius: 999px; padding: 7px 13px; background: transparent;
-  color: #64748b; font-size: 12px; font-weight: 700; cursor: pointer;
-}
-
-.pain-tab-btn.active {
-  background: #fff; color: #1d4ed8; box-shadow: 0 6px 18px rgba(15, 23, 42, .08);
-}
-
 .pain-bu-panel { min-height: 184px; }
 
 .pain-bu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
@@ -263,18 +249,9 @@ body {
 
 .pain-bu-desc { font-size: 11.5px; color: #64748b; line-height: 1.55; margin-top: 8px; }
 
-.pain-rank-row {
-  display: grid; grid-template-columns: 96px 1fr 48px; gap: 10px; align-items: center;
-  margin: 12px 0;
-}
-
-.pain-rank-name { font-size: 12px; font-weight: 800; color: #334155; }
-
 .pain-rank-track { height: 12px; border-radius: 999px; background: #f1f5f9; overflow: hidden; }
 
 .pain-rank-fill { height: 100%; border-radius: 999px; }
-
-.pain-rank-value { font-size: 12px; font-weight: 800; color: #334155; text-align: right; }
 
 
 
@@ -2808,10 +2785,6 @@ body {
         <div class="card-title">各 BU 痛点分布</div>
         <div class="pain-total-value">614<span>条</span></div>
         <div class="pain-total-sub">已同步上线痛点主库 · 按 BU 归属观察覆盖结构</div>
-      </div>
-      <div class="pain-tabs" aria-label="痛点分布视图切换">
-        <button class="pain-tab-btn active" type="button" data-pain-tab="structure" onclick="switchPainBuTab('structure')">BU结构</button>
-        <button class="pain-tab-btn" type="button" data-pain-tab="delta" onclick="switchPainBuTab('delta')">新增贡献</button>
       </div>
     </div>
 
@@ -5992,7 +5965,7 @@ function initScenesCharts() {
 
 
 
-  switchPainBuTab('structure');
+  renderPainBuPanel();
 
 }
 
@@ -6029,38 +6002,11 @@ const PAIN_BU_DATA = [
   }
 ];
 
-function switchPainBuTab(mode) {
-  document.querySelectorAll('[data-pain-tab]').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.painTab === mode);
-  });
-  renderPainBuPanel(mode);
-}
-
-function renderPainBuPanel(mode = 'structure') {
+function renderPainBuPanel() {
   const el = document.getElementById('chart-bu-bar');
   if (!el) return;
 
   const total = PAIN_BU_DATA.reduce((sum, item) => sum + item.value, 0);
-  const deltaTotal = PAIN_BU_DATA.reduce((sum, item) => sum + item.delta, 0);
-
-  if (mode === 'delta') {
-    el.innerHTML = `
-      <div style="font-size:12px;color:#64748b;margin-bottom:10px;">最近一轮新增贡献：共 ${deltaTotal} 条，Legal 与 Tax 是主要增量来源。</div>
-      ${PAIN_BU_DATA.map(item => {
-        const pct = (item.delta / deltaTotal * 100).toFixed(1);
-        return `
-          <div class="pain-rank-row">
-            <div class="pain-rank-name">${item.name}</div>
-            <div class="pain-rank-track">
-              <div class="pain-rank-fill" style="width:${pct}%;background:${item.fill};"></div>
-            </div>
-            <div class="pain-rank-value">+${item.delta}</div>
-          </div>
-        `;
-      }).join('')}
-    `;
-    return;
-  }
 
   el.innerHTML = `
     <div class="pain-bu-grid">
