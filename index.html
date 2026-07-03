@@ -145,8 +145,6 @@ body {
 
 .page.active { display: block; }
 
-.hidden-module { display: none !important; }
-
 
 
 /* ── 通用卡片 ── */
@@ -1460,15 +1458,7 @@ body {
     <span class="icon">📋</span>痛点结果
 
   </div>
-
-  <div class="nav-item hidden-module" onclick="showPage('pain-import')" hidden>
-
-    <span class="icon">📥</span>外部导入
-
-  </div>
-
-
-  <div class="nav-section-title" style="margin-top:12px;">深度研究</div>
+<div class="nav-section-title" style="margin-top:12px;">深度研究</div>
 
   <div class="nav-item" onclick="showPage('pain-learn')">
 
@@ -5046,204 +5036,6 @@ body {
 </div>
 
 
-
-
-
-<!-- ══════════════════════════════════════
-
-     PAGE 12: 外部痛点导入
-
-═══════════════════════════════════════ -->
-
-<div id="page-pain-import" class="page hidden-module" hidden>
-
-  <div class="page-header">
-
-    <h2>外部痛点导入</h2>
-
-    <p>上传已有痛点 Excel → AI 自动补全因子链路、标签、SKU 匹配与四步分析 → 导出完整结果</p>
-
-  </div>
-
-
-
-  <!-- ① Upload -->
-
-  <div class="card">
-
-    <div class="card-title">① 上传痛点 Excel</div>
-
-    <div style="font-size:12px;color:#9ca3af;margin-bottom:14px;margin-top:-6px;">
-
-      支持 .xlsx / .xls 格式，数量不限（自动分批处理，每批20条）。至少需包含「痛点标题」列；「场景」「说明」列可选。
-
-    </div>
-
-
-
-    <!-- Drop zone -->
-
-    <div id="piDropZone"
-
-      onclick="document.getElementById('piFileInput').click()"
-
-      ondragover="event.preventDefault();this.style.background='#eff6ff';"
-
-      ondragleave="this.style.background='';"
-
-      ondrop="event.preventDefault();this.style.background='';piHandleFile(event.dataTransfer.files[0]);"
-
-      style="border:2px dashed #d1d5db;border-radius:10px;padding:32px;text-align:center;cursor:pointer;transition:background .2s;">
-
-      <input type="file" id="piFileInput" accept=".xlsx,.xls" style="display:none;" onchange="piHandleFile(this.files[0])">
-
-      <div style="font-size:36px;margin-bottom:10px;">📂</div>
-
-      <div style="font-size:14px;font-weight:600;color:#374151;">点击选择文件，或将 Excel 文件拖放至此处</div>
-
-      <div style="font-size:12px;color:#9ca3af;margin-top:6px;">支持 .xlsx / .xls</div>
-
-    </div>
-
-
-
-    <!-- Preview -->
-
-    <div id="piPreviewWrap" style="display:none;margin-top:18px;">
-
-      <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:8px;" id="piPreviewTitle"></div>
-
-      <div style="overflow-x:auto;">
-
-        <table id="piPreviewTable" style="width:100%;border-collapse:collapse;font-size:12.5px;">
-
-          <thead id="piPreviewHead" style="background:#f3f4f6;"></thead>
-
-          <tbody id="piPreviewBody"></tbody>
-
-        </table>
-
-      </div>
-
-    </div>
-
-  </div>
-
-
-
-  <!-- ② Mapping + Config -->
-
-  <div class="card" id="piConfigCard" style="display:none;">
-
-    <div class="card-title">② 字段映射 & 生成配置</div>
-
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;">
-
-      <div>
-
-        <div style="font-size:11px;font-weight:600;color:#6b7280;margin-bottom:5px;">痛点编码列（可选，用于回索引原始数据）</div>
-
-        <select id="piColCode" style="width:100%;padding:7px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;">
-
-          <option value="">(无)</option>
-
-        </select>
-
-      </div>
-
-      <div>
-
-        <div style="font-size:11px;font-weight:600;color:#6b7280;margin-bottom:5px;">场景列（可选）</div>
-
-        <select id="piColScene" style="width:100%;padding:7px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;">
-
-          <option value="">(无/统一命名为"外部导入")</option>
-
-        </select>
-
-      </div>
-
-      <div>
-
-        <div style="font-size:11px;font-weight:600;color:#6b7280;margin-bottom:5px;">痛点标题列 <span style="color:#dc2626;">*</span></div>
-
-        <select id="piColTitle" style="width:100%;padding:7px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;"></select>
-
-      </div>
-
-      <div>
-
-        <div style="font-size:11px;font-weight:600;color:#6b7280;margin-bottom:5px;">说明/描述列（可选）</div>
-
-        <select id="piColDesc" style="width:100%;padding:7px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;">
-
-          <option value="">(无)</option>
-
-        </select>
-
-      </div>
-
-    </div>
-
-
-
-    <div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-top:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;margin-bottom:14px;">
-
-      <span style="font-size:13px;font-weight:600;color:#6b7280;">BU：</span>
-
-      <select id="piBuSelect"
-
-        style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;color:#374151;background:#fff;">
-
-        <option value="All Department">All Department</option>
-
-        <option value="CM">CM（资本市场）</option>
-
-        <option value="Tax">Tax（税务）</option>
-
-        <option value="Legal">Legal（法律）</option>
-
-      </select>
-
-      <span style="font-size:12px;color:#9ca3af;margin-left:4px;">选择 BU 后 AI 将聚焦对应领域补全分析</span>
-
-    </div>
-
-
-
-    <div style="font-size:12px;color:#6b7280;margin-bottom:14px;">
-
-      ⚙️ API 配置沿用「场景选择」页面的设置（Key / Base URL / 模型）。如尚未配置，请先前往
-
-      <span onclick="showPage('pain-generate')" style="color:#1a56db;cursor:pointer;text-decoration:underline;">场景选择</span> 页完成配置并测试连接。
-
-    </div>
-
-
-
-    <div style="display:flex;justify-content:flex-end;gap:12px;align-items:center;">
-
-      <span id="piEnrichStatus" style="font-size:12.5px;color:#6b7280;"></span>
-
-      <button id="piEnrichBtn" onclick="piStartEnrich()"
-
-        style="padding:10px 24px;background:#1a56db;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">
-
-        🤖 AI 补全分析
-
-      </button>
-
-    </div>
-
-  </div>
-
-
-
-  <!-- Results -->
-
-  <div id="piResultsContent"></div>
-
-</div>
 
 
 
@@ -10928,7 +10720,7 @@ function pgExportSkuExcel() {
 
 // ════════════════════════════════════════════════════════════
 
-// 外部痛点导入模块
+// 批量痛点补全模块
 
 // ════════════════════════════════════════════════════════════
 
@@ -11092,7 +10884,7 @@ function piRenderMapping() {
 
   selCode.innerHTML  = '<option value="">(无)</option>';
 
-  selScene.innerHTML = '<option value="">(无/统一命名为"外部导入")</option>';
+  selScene.innerHTML = '<option value="">(无/统一命名为"批量补全")</option>';
 
   selTitle.innerHTML = '';
 
@@ -11204,7 +10996,7 @@ async function piStartEnrich() {
 
     code:  idxCode  >= 0 ? String(row[idxCode]  || '').trim() : '',
 
-    scene: idxScene >= 0 ? String(row[idxScene] || '').trim() || '外部导入' : '外部导入',
+    scene: idxScene >= 0 ? String(row[idxScene] || '').trim() || '批量补全' : '批量补全',
 
     title: String(row[idxTitle] || '').trim(),
 
@@ -11912,7 +11704,7 @@ function piExportSkuExcel() {
 
 
 
-PAGE_INIT_MAP['pain-import'] = function() {};
+
 
 
 
@@ -13646,7 +13438,7 @@ const SKU_LEARN_KEY         = 'sku_learn_current';
 const SKU_LEARN_HISTORY_KEY = 'sku_learn_history';
 let _skuAnalyzing = false;
 
-// ── 从痛点结果/外部导入推送 SKU 卡片 ─────────────────────────
+// ── 从痛点结果/批量补全推送 SKU 卡片 ─────────────────────────
 function sendSkuToLearn(idx, src) {
   const arr = src === 'pi' ? (_piLastNewSkus || []) : (_pgLastNewSkus || []);
   const s = arr[idx];
