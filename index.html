@@ -244,17 +244,6 @@ body {
 
 .pain-bu-panel { min-height: 184px; }
 
-.pain-stack {
-  display: flex; gap: 5px;
-  height: 56px; margin: 4px 0 18px;
-}
-
-.pain-stack-seg {
-  display: flex; align-items: center; justify-content: center; text-align: center;
-  min-width: 0; padding: 0 8px; border-radius: 10px; font-size: 12px; font-weight: 800;
-  color: #0f172a; box-shadow: inset 0 0 0 1px rgba(255,255,255,.72);
-}
-
 .pain-bu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 
 .pain-bu-mini {
@@ -6096,16 +6085,6 @@ function renderPainBuPanel(mode = 'structure') {
   }
 
   el.innerHTML = `
-    <div class="pain-stack">
-      ${PAIN_BU_DATA.map(item => {
-        const pct = (item.value / total * 100).toFixed(1);
-        return `
-          <div class="pain-stack-seg" style="flex:${item.value};background:${item.soft};">
-            <div>${item.name}<br>${item.value} 条 · ${pct}%</div>
-          </div>
-        `;
-      }).join('')}
-    </div>
     <div class="pain-bu-grid">
       ${PAIN_BU_DATA.map(item => {
         const pct = (item.value / total * 100).toFixed(1);
