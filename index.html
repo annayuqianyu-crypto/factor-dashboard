@@ -2869,14 +2869,6 @@ body {
 
         <div class="scene-item">
 
-          <div class="scene-name">综合/其他 <span class="tag tag-blue">0条</span></div>
-
-          <div class="scene-example">• 利率下行养老资金难以锁定长期稳定收益<br/>• 医保覆盖不足高额医疗费用带来财务压力</div>
-
-        </div>
-
-        <div class="scene-item">
-
           <div class="scene-name">慈善公益 <span class="tag tag-blue">9条</span></div>
 
           <div class="scene-example">• 股权捐赠涉税问题且慈善组织缺乏专业管理能力<br/>• 慈善基金会资金闲置面临强制支出与增值难题</div>
@@ -3026,28 +3018,6 @@ body {
           <div>· 离职股权处置 <span style="color:#9ca3af;">(5)</span></div>
 
           <div>· 上市前激励安排<span style="color:#9ca3af;">(5)</span></div>
-
-        </div>
-
-      </div>
-
-
-
-      <!-- 综合/其他 -->
-
-      <div style="border:1px solid #d1d5db;border-radius:10px;padding:14px 16px;background:linear-gradient(180deg,#f9fafb 0%,#fff 60%);">
-
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-
-          <span style="font-size:14px;font-weight:700;color:#374151;">🧭 综合 / 其他</span>
-
-          <span style="font-size:11px;color:#374151;background:#fff;border:1px solid #d1d5db;padding:2px 8px;border-radius:10px;">0 条</span>
-
-        </div>
-
-        <div style="font-size:12px;color:#6b7280;line-height:1.7;">
-
-          暂无单独归入“综合 / 其他”的痛点；原有综合类表述已按业务含义拆入身份、税务、架构、资本市场等具体板块。
 
         </div>
 
@@ -6165,7 +6135,7 @@ function initScenesCharts() {
 
 
 
-  const sortedIdx = PAIN_VALUES.map((v,i)=>({v,i})).sort((a,b)=>a.v-b.v).map(x=>x.i);
+  const sortedIdx = PAIN_VALUES.map((v,i)=>({v,i})).filter(x => x.v > 0).sort((a,b)=>a.v-b.v).map(x=>x.i);
 
 
 
