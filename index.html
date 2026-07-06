@@ -738,6 +738,201 @@ tr:hover td { background: #fafafa; }
 
 .scene-example { font-size: 12.5px; color: #6b7280; line-height: 1.5; }
 
+.semantic-map {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.semantic-entry-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.semantic-entry-card {
+  position: relative;
+  min-height: 154px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 14px;
+  background: linear-gradient(180deg, var(--entry-soft), #fff 72%);
+  overflow: hidden;
+}
+
+.semantic-entry-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--entry-color);
+}
+
+.semantic-entry-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.semantic-entry-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.35;
+}
+
+.semantic-entry-count {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--entry-color);
+  background: #fff;
+  border: 1px solid color-mix(in srgb, var(--entry-color) 28%, #fff);
+  border-radius: 999px;
+  padding: 3px 8px;
+}
+
+.semantic-entry-desc {
+  font-size: 12px;
+  color: #475569;
+  line-height: 1.65;
+  margin-bottom: 10px;
+}
+
+.semantic-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.semantic-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #334155;
+  background: rgba(255,255,255,.78);
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  padding: 3px 8px;
+}
+
+.semantic-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.semantic-panel {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  padding: 14px 16px;
+}
+
+.semantic-panel-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.semantic-flow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.semantic-flow-step {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 10px;
+  min-height: 72px;
+}
+
+.semantic-flow-step strong {
+  display: block;
+  font-size: 12px;
+  color: #1d4ed8;
+  margin-bottom: 5px;
+}
+
+.semantic-flow-step span {
+  display: block;
+  font-size: 11.5px;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.semantic-cluster-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.semantic-cluster {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  padding: 12px;
+}
+
+.semantic-cluster strong {
+  display: block;
+  font-size: 12.5px;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.semantic-cluster p {
+  font-size: 11.5px;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.semantic-evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.semantic-evidence {
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 12px;
+}
+
+.semantic-evidence-name {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.semantic-evidence-text {
+  font-size: 11.5px;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+@media (max-width: 1180px) {
+  .semantic-map { grid-template-columns: 1fr; }
+  .semantic-entry-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+  .semantic-entry-grid,
+  .semantic-cluster-grid,
+  .semantic-evidence-grid,
+  .semantic-flow { grid-template-columns: 1fr; }
+}
+
 
 
 .page-header {
@@ -2787,493 +2982,153 @@ body {
 
 
 
-  <div class="two-col">
-
-    <div class="card">
-
-      <div class="card-title">各业务板块分布</div>
-
-      <div id="chart-scene-bar" class="chart-box" style="height:340px;"></div>
-
-    </div>
-
-    <div class="card">
-
-      <div class="card-title">各场景典型痛点举例</div>
-
-      <div style="max-height:380px;overflow-y:auto;">
-
-        <div class="scene-item">
-
-          <div class="scene-name">税务合规 <span class="tag tag-blue" style="font-size:11px;">52条</span></div>
-
-          <div class="scene-example">• 三流不一致在金税四期监管下极易触发税务稽查<br/>• 跨境关联交易定价缺乏依据面临稽查风险</div>
-
-        </div>
-
-        <div class="scene-item">
-
-          <div class="scene-name">股权激励 <span class="tag tag-blue">139条</span></div>
-
-          <div class="scene-example">• 非上市公司员工行权后无流动性缴税困难<br/>• 递延备案失败触发全员行权税负</div>
-
-        </div>
-
-        <div class="scene-item">
-
-          <div class="scene-name">法律架构 <span class="tag tag-blue">46条</span></div>
-
-          <div class="scene-example">• 章程反收购条款不完善致控制权风险<br/>• 关联交易动态识别与额度管控不完善</div>
-
-        </div>
-
-        <div class="scene-item">
-
-          <div class="scene-name">资本市场 <span class="tag tag-blue">225条</span></div>
-
-          <div class="scene-example">• 股东增持意愿强但资金不足<br/>• 合伙平台减持上市公司股票面临高额税负</div>
-
-        </div>
-
-        <div class="scene-item">
-
-          <div class="scene-name">境外架构 <span class="tag tag-blue">78条</span></div>
-
-          <div class="scene-example">• 香港公司离岸收入豁免举证困难<br/>• 红筹架构搭建37号文备案存在缺失</div>
-
-        </div>
-
-        <div class="scene-item">
-
-          <div class="scene-name">资产保护 <span class="tag tag-blue">42条</span></div>
-
-          <div class="scene-example">• 婚前股权缺乏隔离婚后增值面临共同财产分割风险<br/>• 代持人个人债务可能导致代持资产被强制执行</div>
-
-        </div>
-
-        <div class="scene-item">
-
-          <div class="scene-name">身份/海外税务 <span class="tag tag-blue">75条</span></div>
-
-          <div class="scene-example">• 美国税务居民全球征税合规要求高税率沉重<br/>• 绿卡持有超8年放弃身份前须规划弃籍税</div>
-
-        </div>
-
-        <div class="scene-item">
-
-          <div class="scene-name">财富传承 <span class="tag tag-blue">71条</span></div>
-
-          <div class="scene-example">• 创始人无遗嘱导致企业股权继承僵局<br/>• 多子女股权传承缺乏安排引发分配纠纷与财产外流</div>
-
-        </div>
-
-        <div class="scene-item">
-
-          <div class="scene-name">慈善公益 <span class="tag tag-blue">9条</span></div>
-
-          <div class="scene-example">• 股权捐赠涉税问题且慈善组织缺乏专业管理能力<br/>• 慈善基金会资金闲置面临强制支出与增值难题</div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-
-
-
-  <!-- ───────── 现有痛点场景分型展示 ───────── -->
-
   <div class="card">
+    <div class="card-title">场景-痛点语义入口地图</div>
+    <div class="semantic-map">
+      <div>
+        <div class="semantic-entry-grid">
+          <div class="semantic-entry-card" style="--entry-color:#92400e;--entry-soft:#fffbeb;">
+            <div class="semantic-entry-top">
+              <div class="semantic-entry-title">资本市场</div>
+              <div class="semantic-entry-count">225条</div>
+            </div>
+            <div class="semantic-entry-desc">覆盖实控人、大股东、上市公司围绕增持、减持、控制权、并购重组产生的资金、披露、税务和监管问题。</div>
+            <div class="semantic-tags"><span class="semantic-tag">上市公司资本动作</span><span class="semantic-tag">股权激励</span><span class="semantic-tag">控制权纠纷</span></div>
+          </div>
 
-    <div class="card-title">
+          <div class="semantic-entry-card" style="--entry-color:#1e40af;--entry-soft:#eff6ff;">
+            <div class="semantic-entry-top">
+              <div class="semantic-entry-title">股权激励</div>
+              <div class="semantic-entry-count">139条</div>
+            </div>
+            <div class="semantic-entry-desc">覆盖授予、行权、退出、持股平台、递延备案与员工离职争议，是资本、税务、法律高频交叉入口。</div>
+            <div class="semantic-tags"><span class="semantic-tag">员工持股</span><span class="semantic-tag">行权税负</span><span class="semantic-tag">平台退出</span></div>
+          </div>
 
-      <span>🧩 痛点链路资产地图</span>
+          <div class="semantic-entry-card" style="--entry-color:#991b1b;--entry-soft:#fef2f2;">
+            <div class="semantic-entry-top">
+              <div class="semantic-entry-title">税务合规</div>
+              <div class="semantic-entry-count">52条</div>
+            </div>
+            <div class="semantic-entry-desc">覆盖个税、企税、关联交易、转让定价、税务稽查与交易申报，是多数跨 BU 痛点的约束维度。</div>
+            <div class="semantic-tags"><span class="semantic-tag">企业税务体检</span><span class="semantic-tag">关联交易</span><span class="semantic-tag">稽查应对</span></div>
+          </div>
 
-    </div>
+          <div class="semantic-entry-card" style="--entry-color:#9a3412;--entry-soft:#fff7ed;">
+            <div class="semantic-entry-top">
+              <div class="semantic-entry-title">身份 / 海外税务</div>
+              <div class="semantic-entry-count">75条</div>
+            </div>
+            <div class="semantic-entry-desc">覆盖海外身份、税务居民、全球征税、CRS/FATCA、FBAR、弃籍税等自然人跨境合规问题。</div>
+            <div class="semantic-tags"><span class="semantic-tag">税务居民</span><span class="semantic-tag">CRS/FATCA</span><span class="semantic-tag">全球征税</span></div>
+          </div>
 
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:10px;">
+          <div class="semantic-entry-card" style="--entry-color:#5b21b6;--entry-soft:#f5f3ff;">
+            <div class="semantic-entry-top">
+              <div class="semantic-entry-title">境外架构</div>
+              <div class="semantic-entry-count">78条</div>
+            </div>
+            <div class="semantic-entry-desc">覆盖香港、BVI、开曼、新加坡等境外主体的设立、维护、重组、分红、经济实质和外汇路径。</div>
+            <div class="semantic-tags"><span class="semantic-tag">FSIE</span><span class="semantic-tag">37号文</span><span class="semantic-tag">经济实质</span></div>
+          </div>
 
+          <div class="semantic-entry-card" style="--entry-color:#166534;--entry-soft:#f0fdf4;">
+            <div class="semantic-entry-top">
+              <div class="semantic-entry-title">资产保护</div>
+              <div class="semantic-entry-count">42条</div>
+            </div>
+            <div class="semantic-entry-desc">覆盖债务隔离、代持风险、婚姻财产、资产执行、信托隔离等高净值客户资产安全问题。</div>
+            <div class="semantic-tags"><span class="semantic-tag">资产隔离</span><span class="semantic-tag">代持风险</span><span class="semantic-tag">执行风险</span></div>
+          </div>
 
+          <div class="semantic-entry-card" style="--entry-color:#9d174d;--entry-soft:#fdf2f8;">
+            <div class="semantic-entry-top">
+              <div class="semantic-entry-title">法律架构</div>
+              <div class="semantic-entry-count">46条</div>
+            </div>
+            <div class="semantic-entry-desc">覆盖股权代持、股东协议、章程治理、一致行动、控制权安排与争议预防。</div>
+            <div class="semantic-tags"><span class="semantic-tag">股权代持</span><span class="semantic-tag">公司治理</span><span class="semantic-tag">控制权</span></div>
+          </div>
 
-      <!-- 税务合规 -->
+          <div class="semantic-entry-card" style="--entry-color:#3730a3;--entry-soft:#eef2ff;">
+            <div class="semantic-entry-top">
+              <div class="semantic-entry-title">财富传承</div>
+              <div class="semantic-entry-count">71条</div>
+            </div>
+            <div class="semantic-entry-desc">覆盖创一代、配偶、子女、接班人之间围绕继承、婚姻、家族治理和跨代分配产生的问题。</div>
+            <div class="semantic-tags"><span class="semantic-tag">继承安排</span><span class="semantic-tag">家族治理</span><span class="semantic-tag">跨代分配</span></div>
+          </div>
 
-      <div style="border:1px solid #fee2e2;border-radius:10px;padding:14px 16px;background:linear-gradient(180deg,#fef2f2 0%,#fff 60%);">
-
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-
-          <span style="font-size:14px;font-weight:700;color:#991b1b;">💼 税务合规</span>
-
-          <span style="font-size:11px;color:#991b1b;background:#fff;border:1px solid #fecaca;padding:2px 8px;border-radius:10px;">52 条</span>
-
+          <div class="semantic-entry-card" style="--entry-color:#115e59;--entry-soft:#f0fdfa;">
+            <div class="semantic-entry-top">
+              <div class="semantic-entry-title">慈善公益</div>
+              <div class="semantic-entry-count">9条</div>
+            </div>
+            <div class="semantic-entry-desc">覆盖股权捐赠、慈善信托、基金会治理、公益支出与家族声誉管理相关问题。</div>
+            <div class="semantic-tags"><span class="semantic-tag">慈善信托</span><span class="semantic-tag">股权捐赠</span><span class="semantic-tag">公益治理</span></div>
+          </div>
         </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:#374151;">
-
-          <div>· 个税合规 <span style="color:#9ca3af;">(18)</span></div>
-
-          <div>· 企税合规 <span style="color:#9ca3af;">(12)</span></div>
-
-          <div>· 跨境税务 <span style="color:#9ca3af;">(11)</span></div>
-
-          <div>· CRS / FATCA <span style="color:#9ca3af;">(9)</span></div>
-
-          <div>· 转让定价 <span style="color:#9ca3af;">(8)</span></div>
-
-          <div>· 稽查应对 <span style="color:#9ca3af;">(7)</span></div>
-
-        </div>
-
       </div>
 
-
-
-      <!-- 身份/海外税务 -->
-
-      <div style="border:1px solid #fed7aa;border-radius:10px;padding:14px 16px;background:linear-gradient(180deg,#fff7ed 0%,#fff 60%);">
-
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-
-          <span style="font-size:14px;font-weight:700;color:#9a3412;">🌍 身份 / 海外税务</span>
-
-          <span style="font-size:11px;color:#9a3412;background:#fff;border:1px solid #fed7aa;padding:2px 8px;border-radius:10px;">75 条</span>
-
+      <div class="semantic-side">
+        <div class="semantic-panel">
+          <div class="semantic-panel-title">入口不是分类结果</div>
+          <div style="font-size:12.5px;color:#475569;line-height:1.75;">
+            场景入口是覆盖较多痛点向量的语义投影区域。用户先从一个业务方向进入，再通过主体、资产、动作、约束、风险收缩检索范围，定位到具体痛点簇和痛点。
+          </div>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:#374151;">
-
-          <div>· 香港优才/高才通 <span style="color:#9ca3af;">(9)</span></div>
-
-          <div>· 新加坡 PR/EP <span style="color:#9ca3af;">(8)</span></div>
-
-          <div>· 美国 EB-5/绿卡 <span style="color:#9ca3af;">(7)</span></div>
-
-          <div>· 加拿大 PR <span style="color:#9ca3af;">(5)</span></div>
-
-          <div>· 弃籍税规划 <span style="color:#9ca3af;">(6)</span></div>
-
-          <div>· 双重居民判定 <span style="color:#9ca3af;">(4)</span></div>
-
+        <div class="semantic-panel">
+          <div class="semantic-panel-title">检索收缩链路</div>
+          <div class="semantic-flow">
+            <div class="semantic-flow-step"><strong>场景入口</strong><span>股权激励、境外架构、资产保护等大投影区域</span></div>
+            <div class="semantic-flow-step"><strong>结构特征</strong><span>主体、资产、动作、约束、风险逐层补充</span></div>
+            <div class="semantic-flow-step"><strong>痛点簇</strong><span>相似向量聚集形成可解释的问题族</span></div>
+            <div class="semantic-flow-step"><strong>痛点 / SKU</strong><span>落到已同步痛点证据和服务承接</span></div>
+          </div>
         </div>
 
+        <div class="semantic-panel">
+          <div class="semantic-panel-title">高价值重叠入口</div>
+          <div class="semantic-tags">
+            <span class="semantic-tag">股权激励 ∩ 税务合规 ∩ 资本市场</span>
+            <span class="semantic-tag">境外架构 ∩ 身份/海外税务 ∩ 税务合规</span>
+            <span class="semantic-tag">资产保护 ∩ 财富传承 ∩ 法律架构</span>
+            <span class="semantic-tag">资本市场 ∩ 法律架构 ∩ 控制权风险</span>
+          </div>
+        </div>
       </div>
-
-
-
-      <!-- 境外架构 -->
-
-      <div style="border:1px solid #ddd6fe;border-radius:10px;padding:14px 16px;background:linear-gradient(180deg,#f5f3ff 0%,#fff 60%);">
-
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-
-          <span style="font-size:14px;font-weight:700;color:#5b21b6;">🏛️ 境外架构</span>
-
-          <span style="font-size:11px;color:#5b21b6;background:#fff;border:1px solid #ddd6fe;padding:2px 8px;border-radius:10px;">78 条</span>
-
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:#374151;">
-
-          <div>· BVI / 开曼控股 <span style="color:#9ca3af;">(11)</span></div>
-
-          <div>· 香港 FO <span style="color:#9ca3af;">(8)</span></div>
-
-          <div>· 新加坡 FO 13O/13U <span style="color:#9ca3af;">(7)</span></div>
-
-          <div>· 美国 LLC/Trust <span style="color:#9ca3af;">(5)</span></div>
-
-          <div>· VIE 架构 <span style="color:#9ca3af;">(4)</span></div>
-
-          <div>· FSIE / 经济实质 <span style="color:#9ca3af;">(3)</span></div>
-
-        </div>
-
-      </div>
-
-
-
-      <!-- 股权激励 -->
-
-      <div style="border:1px solid #bfdbfe;border-radius:10px;padding:14px 16px;background:linear-gradient(180deg,#eff6ff 0%,#fff 60%);">
-
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-
-          <span style="font-size:14px;font-weight:700;color:#1e40af;">📈 股权激励</span>
-
-          <span style="font-size:11px;color:#1e40af;background:#fff;border:1px solid #bfdbfe;padding:2px 8px;border-radius:10px;">139 条</span>
-
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:#374151;">
-
-          <div>· 期权 / RSU 跨境<span style="color:#9ca3af;">(15)</span></div>
-
-          <div>· 限制性股票 <span style="color:#9ca3af;">(10)</span></div>
-
-          <div>· 持股平台搭建 <span style="color:#9ca3af;">(8)</span></div>
-
-          <div>· 行权时点税务<span style="color:#9ca3af;">(7)</span></div>
-
-          <div>· 离职股权处置 <span style="color:#9ca3af;">(5)</span></div>
-
-          <div>· 上市前激励安排<span style="color:#9ca3af;">(5)</span></div>
-
-        </div>
-
-      </div>
-
-
-
-      <!-- 资产保护 -->
-
-      <div style="border:1px solid #bbf7d0;border-radius:10px;padding:14px 16px;background:linear-gradient(180deg,#f0fdf4 0%,#fff 60%);">
-
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-
-          <span style="font-size:14px;font-weight:700;color:#166534;">🛡️ 资产保护</span>
-
-          <span style="font-size:11px;color:#166534;background:#fff;border:1px solid #bbf7d0;padding:2px 8px;border-radius:10px;">42 条</span>
-
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:#374151;">
-
-          <div>· 公司面纱刺穿 <span style="color:#9ca3af;">(7)</span></div>
-
-          <div>· 一人公司风险 <span style="color:#9ca3af;">(5)</span></div>
-
-          <div>· 婚前财产约定 <span style="color:#9ca3af;">(5)</span></div>
-
-          <div>· 资产隔离信托 <span style="color:#9ca3af;">(4)</span></div>
-
-          <div>· 担保连带责任 <span style="color:#9ca3af;">(2)</span></div>
-
-          <div>· 债权人执行隔离 <span style="color:#9ca3af;">(2)</span></div>
-
-        </div>
-
-      </div>
-
-
-
-      <!-- 资本市场 -->
-
-      <div style="border:1px solid #fde68a;border-radius:10px;padding:14px 16px;background:linear-gradient(180deg,#fffbeb 0%,#fff 60%);">
-
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-
-          <span style="font-size:14px;font-weight:700;color:#92400e;">📊 资本市场</span>
-
-          <span style="font-size:11px;color:#92400e;background:#fff;border:1px solid #fde68a;padding:2px 8px;border-radius:10px;">225 条</span>
-
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:#374151;">
-
-          <div>· A股大股东减持<span style="color:#9ca3af;">(15)</span></div>
-
-          <div>· IPO 前架构清理 <span style="color:#9ca3af;">(8)</span></div>
-
-          <div>· 港股 / 美股上市<span style="color:#9ca3af;">(8)</span></div>
-
-          <div>· 实控人变更 / 要约<span style="color:#9ca3af;">(6)</span></div>
-
-          <div>· 增发 / 定增 <span style="color:#9ca3af;">(5)</span></div>
-
-          <div>· 大宗 / 协议转让<span style="color:#9ca3af;">(5)</span></div>
-
-          <div>· PE/VC 退出安排<span style="color:#9ca3af;">(5)</span></div>
-
-        </div>
-
-      </div>
-
-
-
-      <!-- 法律架构 -->
-
-      <div style="border:1px solid #fbcfe8;border-radius:10px;padding:14px 16px;background:linear-gradient(180deg,#fdf2f8 0%,#fff 60%);">
-
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-
-          <span style="font-size:14px;font-weight:700;color:#9d174d;">⚖️ 法律架构</span>
-
-          <span style="font-size:11px;color:#9d174d;background:#fff;border:1px solid #fbcfe8;padding:2px 8px;border-radius:10px;">46 条</span>
-
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:#374151;">
-
-          <div>· 股权代持还原 <span style="color:#9ca3af;">(6)</span></div>
-
-          <div>· 家族控股架构 <span style="color:#9ca3af;">(5)</span></div>
-
-          <div>· 股东协议设计 <span style="color:#9ca3af;">(4)</span></div>
-
-          <div>· 一致行动安排 <span style="color:#9ca3af;">(2)</span></div>
-
-          <div>· 公司治理章程 <span style="color:#9ca3af;">(2)</span></div>
-
-        </div>
-
-      </div>
-
-
-
-      <!-- 财富传承 -->
-
-      <div style="border:1px solid #c7d2fe;border-radius:10px;padding:14px 16px;background:linear-gradient(180deg,#eef2ff 0%,#fff 60%);">
-
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-
-          <span style="font-size:14px;font-weight:700;color:#3730a3;">🎓 财富传承</span>
-
-          <span style="font-size:11px;color:#3730a3;background:#fff;border:1px solid #c7d2fe;padding:2px 8px;border-radius:10px;">71 条</span>
-
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:#374151;">
-
-          <div>· 家族信托 <span style="color:#9ca3af;">(5)</span></div>
-
-          <div>· 遗嘱 / 遗产规划 <span style="color:#9ca3af;">(4)</span></div>
-
-          <div>· 二代接班 <span style="color:#9ca3af;">(3)</span></div>
-
-          <div>· 跨境遗产税 <span style="color:#9ca3af;">(3)</span></div>
-
-          <div>· 保险金信托 <span style="color:#9ca3af;">(2)</span></div>
-
-        </div>
-
-      </div>
-
-
-
-      <!-- 慈善公益 -->
-
-      <div style="border:1px solid #99f6e4;border-radius:10px;padding:14px 16px;background:linear-gradient(180deg,#f0fdfa 0%,#fff 60%);">
-
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-
-          <span style="font-size:14px;font-weight:700;color:#115e59;">❤️ 慈善公益</span>
-
-          <span style="font-size:11px;color:#115e59;background:#fff;border:1px solid #99f6e4;padding:2px 8px;border-radius:10px;">9 条</span>
-
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:#374151;">
-
-          <div>· 境内慈善基金会 <span style="color:#9ca3af;">(3)</span></div>
-
-          <div>· 境外 DAF / 私募基金 <span style="color:#9ca3af;">(2)</span></div>
-
-          <div>· 慈善信托 <span style="color:#9ca3af;">(2)</span></div>
-
-          <div>· 公益捐赠税收抵免 <span style="color:#9ca3af;">(1)</span></div>
-
-        </div>
-
-      </div>
-
-
-
     </div>
 
     <div style="margin-top:16px;border-top:1px solid #e5e7eb;padding-top:16px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <div style="font-size:14px;font-weight:800;color:#111827;">真实链路簇解释层</div>
-        <div style="font-size:11.5px;color:#9ca3af;">从已同步痛点反推，不再使用理论全排列</div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
-        <div style="border:1px solid #fde68a;background:#fffbeb;border-radius:10px;padding:13px 14px;">
-          <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:8px;">
-            <strong style="font-size:13px;color:#92400e;">上市公司资本动作链路</strong>
-            <span style="font-size:11px;color:#92400e;background:#fff;border:1px solid #fde68a;border-radius:10px;padding:2px 8px;">高频跨BU</span>
-          </div>
-          <div style="font-size:12px;color:#374151;line-height:1.75;">
-            <strong>主体</strong>：实控人 / 大股东 / 高管<br>
-            <strong>资产</strong>：A股股票 / 限售股 / 控制权股份<br>
-            <strong>动作</strong>：增持、减持、融资、控制权调整<br>
-            <strong>约束</strong>：信披、减持新规、融资监管、税务成本
-          </div>
-        </div>
-
-        <div style="border:1px solid #bfdbfe;background:#eff6ff;border-radius:10px;padding:13px 14px;">
-          <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:8px;">
-            <strong style="font-size:13px;color:#1e40af;">股权激励与员工持股链路</strong>
-            <span style="font-size:11px;color:#1e40af;background:#fff;border:1px solid #bfdbfe;border-radius:10px;padding:2px 8px;">资本/法律/税务</span>
-          </div>
-          <div style="font-size:12px;color:#374151;line-height:1.75;">
-            <strong>主体</strong>：拟上市企业 / 核心员工 / 持股平台<br>
-            <strong>资产</strong>：期权、RSU、合伙份额、激励股权<br>
-            <strong>动作</strong>：授予、行权、退出、上市前调整<br>
-            <strong>约束</strong>：个税递延、工商变更、外汇登记、离职争议
-          </div>
-        </div>
-
-        <div style="border:1px solid #fed7aa;background:#fff7ed;border-radius:10px;padding:13px 14px;">
-          <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:8px;">
-            <strong style="font-size:13px;color:#9a3412;">跨境身份与税务居民链路</strong>
-            <span style="font-size:11px;color:#9a3412;background:#fff;border:1px solid #fed7aa;border-radius:10px;padding:2px 8px;">Tax主导</span>
-          </div>
-          <div style="font-size:12px;color:#374151;line-height:1.75;">
-            <strong>主体</strong>：美国税居 / 香港身份 / 跨境企业主<br>
-            <strong>资产</strong>：境外账户、境外公司、全球收入<br>
-            <strong>动作</strong>：登陆、弃籍、申报、资产配置<br>
-            <strong>约束</strong>：CRS/FATCA、FBAR、双重居民、全球征税
-          </div>
-        </div>
-
-        <div style="border:1px solid #ddd6fe;background:#f5f3ff;border-radius:10px;padding:13px 14px;">
-          <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:8px;">
-            <strong style="font-size:13px;color:#5b21b6;">境外公司与经济实质链路</strong>
-            <span style="font-size:11px;color:#5b21b6;background:#fff;border:1px solid #ddd6fe;border-radius:10px;padding:2px 8px;">Tax高频</span>
-          </div>
-          <div style="font-size:12px;color:#374151;line-height:1.75;">
-            <strong>主体</strong>：香港公司 / 开曼BVI主体 / 出海企业<br>
-            <strong>资产</strong>：离岸架构、红筹/VIE、境外利润<br>
-            <strong>动作</strong>：设立、维护、重组、分红、TRC申请<br>
-            <strong>约束</strong>：经济实质、FSIE、37号文、协定优惠
-          </div>
-        </div>
-
-        <div style="border:1px solid #fbcfe8;background:#fdf2f8;border-radius:10px;padding:13px 14px;">
-          <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:8px;">
-            <strong style="font-size:13px;color:#9d174d;">股权代持与控制权纠纷链路</strong>
-            <span style="font-size:11px;color:#9d174d;background:#fff;border:1px solid #fbcfe8;border-radius:10px;padding:2px 8px;">Legal集中</span>
-          </div>
-          <div style="font-size:12px;color:#374151;line-height:1.75;">
-            <strong>主体</strong>：实际出资人 / 代持人 / 名义股东<br>
-            <strong>资产</strong>：非上市公司股权、代持资产、控制权<br>
-            <strong>动作</strong>：代持、还原、转让、争议处理<br>
-            <strong>约束</strong>：举证困难、婚变债务、优先购买权、公司僵局
-          </div>
-        </div>
-
-        <div style="border:1px solid #c7d2fe;background:#eef2ff;border-radius:10px;padding:13px 14px;">
-          <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:8px;">
-            <strong style="font-size:13px;color:#3730a3;">继承婚姻与家庭治理链路</strong>
-            <span style="font-size:11px;color:#3730a3;background:#fff;border:1px solid #c7d2fe;border-radius:10px;padding:2px 8px;">Legal主导</span>
-          </div>
-          <div style="font-size:12px;color:#374151;line-height:1.75;">
-            <strong>主体</strong>：创一代、配偶、继承人、接班人<br>
-            <strong>资产</strong>：房产、公司股权、信托受益权、合伙份额<br>
-            <strong>动作</strong>：传承、继承、离婚分割、接班安排<br>
-            <strong>约束</strong>：共同财产、遗嘱效力、财产混同、分配纠纷
-          </div>
-        </div>
+      <div class="semantic-panel-title">代表性痛点簇</div>
+      <div class="semantic-cluster-grid">
+        <div class="semantic-cluster"><strong>上市公司资本动作链路</strong><p>主体集中在实控人、大股东、高管；资产集中在股票、限售股、控制权股份；风险集中在资金、信披、减持规则与税务成本。</p></div>
+        <div class="semantic-cluster"><strong>股权激励与员工持股链路</strong><p>主体集中在拟上市企业、核心员工、持股平台；动作集中在授予、行权、退出；约束集中在递延备案、个税、工商和离职争议。</p></div>
+        <div class="semantic-cluster"><strong>跨境身份与税务居民链路</strong><p>主体集中在海外身份客户和跨境企业主；约束集中在 CRS、FATCA、全球征税、FBAR、双重居民和弃籍税。</p></div>
+        <div class="semantic-cluster"><strong>境外公司与经济实质链路</strong><p>主体集中在香港、BVI、开曼、新加坡公司；约束集中在 FSIE、经济实质、37号文、TRC 和协定优惠。</p></div>
+        <div class="semantic-cluster"><strong>股权代持与控制权纠纷链路</strong><p>主体集中在实际出资人、代持人、名义股东和配偶；风险集中在举证、婚变、债务执行、优先购买权和公司僵局。</p></div>
+        <div class="semantic-cluster"><strong>继承婚姻与家庭治理链路</strong><p>主体集中在创一代、配偶、继承人、接班人；资产集中在房产、股权、信托受益权；风险集中在共同财产、遗嘱效力和分配纠纷。</p></div>
       </div>
     </div>
 
-    <div style="margin-top:12px;padding:10px 14px;background:#f9fafb;border-radius:6px;font-size:11.5px;color:#6b7280;line-height:1.7;">
-
-      💡 本模块上半部分保留业务场景分型，方便 BU 按主题检索；下半部分用真实链路簇解释这些痛点背后的“主体-资产-动作-约束”结构，并作为后续 SKU 闭环、因子补足和场景迭代的共同口径。
-
+    <div style="margin-top:16px;border-top:1px solid #e5e7eb;padding-top:16px;">
+      <div class="semantic-panel-title">代表痛点证据</div>
+      <div class="semantic-evidence-grid">
+        <div class="semantic-evidence">
+          <div class="semantic-evidence-name">股权激励行权税负</div>
+          <div class="semantic-evidence-text">场景入口：股权激励、税务合规、资本市场。结构特征：员工 / 持股平台 / 行权退出 / 个税递延 / 现金流压力。</div>
+        </div>
+        <div class="semantic-evidence">
+          <div class="semantic-evidence-name">代持人婚变控制权风险</div>
+          <div class="semantic-evidence-text">场景入口：法律架构、资产保护、财富传承。结构特征：实际出资人 / 代持股权 / 婚姻变化 / 举证困难 / 资产被分割。</div>
+        </div>
+        <div class="semantic-evidence">
+          <div class="semantic-evidence-name">香港公司 FSIE 举证困难</div>
+          <div class="semantic-evidence-text">场景入口：境外架构、税务合规、身份/海外税务。结构特征：香港公司 / 境外收入 / 豁免申请 / 经济实质 / 补税风险。</div>
+        </div>
+      </div>
     </div>
-
   </div>
 
 </div>
