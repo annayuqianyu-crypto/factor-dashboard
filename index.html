@@ -1038,7 +1038,7 @@ tr:hover td { background: #fafafa; }
   color: #64748b;
 }
 
-.space-equation {
+.space-note {
   margin-top: 8px;
   padding: 8px 10px;
   border-radius: 8px;
@@ -3255,37 +3255,37 @@ body {
         <div class="space-method-card">
           <div class="space-method-top">
             <div class="space-method-title">1. 业务语义空间</div>
-            <div class="space-method-symbol">V = span(L, T, C, x)</div>
+            <div class="space-method-symbol">空间底座</div>
           </div>
-          <p>法、税、资是三条组织能力坐标轴，主体、资产、动作、约束、风险构成业务结构特征 x。每条痛点都是这个空间中的一个业务语义向量。</p>
-          <div class="space-equation">p_i = w_L L + w_T T + w_C C + w_x x_i</div>
+          <p>法、税、资是三条组织能力坐标轴，主体、资产、动作、约束、风险是判断痛点位置的业务结构特征。每条痛点都可以理解为落在这个空间中的一个业务问题点。</p>
+          <div class="space-note">业务口径：先判断痛点更偏法律、税务还是资本，再看它涉及什么客户、什么资产、什么动作和什么风险。</div>
         </div>
 
         <div class="space-method-card">
           <div class="space-method-top">
             <div class="space-method-title">2. 投影形成场景入口</div>
-            <div class="space-method-symbol">E_s</div>
+            <div class="space-method-symbol">入口层</div>
           </div>
-          <p>场景入口不是单个分类，而是某一业务方向向量 s 在空间中覆盖到的投影区域。面积越大，说明它能承接更多痛点和痛点簇。</p>
-          <div class="space-equation">E_s = { p_i | cos(p_i, s) >= tau }</div>
+          <p>场景入口不是最终分类，而是用户进入问题空间的第一扇门。例如“财富传承”“股权激励”“境外架构”，都代表一片较大的业务覆盖区域。</p>
+          <div class="space-note">业务口径：入口负责承接用户的初始问题，不负责直接给答案；进入入口后，还要继续缩小范围。</div>
         </div>
 
         <div class="space-method-card">
           <div class="space-method-top">
             <div class="space-method-title">3. 入口特征形成收缩切面</div>
-            <div class="space-method-symbol">q</div>
+            <div class="space-method-symbol">收缩层</div>
           </div>
-          <p>入口特征是入口内部的局部语义向量，用来把大投影区域继续压缩。例如财富传承入口下，继承安排、家族治理、跨代分配会共同调整检索方向。</p>
-          <div class="space-equation">q = s + alpha f_继承安排 + beta f_家族治理 + gamma f_跨代分配</div>
+          <p>入口特征是在大场景内部继续筛选问题的关键词。例如财富传承入口下，可以继续用继承安排、家族治理、跨代分配来缩小搜索范围。</p>
+          <div class="space-note">业务口径：入口特征不是痛点簇，只是帮助系统从“大方向”收敛到“更具体的问题类型”。</div>
         </div>
 
         <div class="space-method-card">
           <div class="space-method-top">
             <div class="space-method-title">4. 相似向量聚成痛点簇</div>
-            <div class="space-method-symbol">C_k</div>
+            <div class="space-method-symbol">聚类层</div>
           </div>
           <p>当一组痛点在主体、资产、动作、约束、风险上方向接近，就形成相似语义向量族，也就是可解释的痛点簇。</p>
-          <div class="space-equation">C_k = { p_i | sim(p_i, q_k) >= theta }</div>
+          <div class="space-note">业务口径：痛点簇不是人为硬分组，而是把结构相近的真实痛点归在一起，方便复用经验、反哺因子和承接 SKU。</div>
         </div>
       </div>
     </div>
