@@ -833,6 +833,20 @@ tr:hover td { background: #fafafa; }
   padding: 3px 8px;
 }
 
+.semantic-tag.clickable,
+.semantic-cluster.clickable {
+  cursor: pointer;
+  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease, background .16s ease;
+}
+
+.semantic-tag.clickable:hover,
+.semantic-tag.is-active {
+  color: #1d4ed8;
+  border-color: #93c5fd;
+  background: #eff6ff;
+  box-shadow: 0 8px 18px rgba(37,99,235,.10);
+}
+
 .semantic-side {
   display: flex;
   flex-direction: column;
@@ -895,6 +909,14 @@ tr:hover td { background: #fafafa; }
   padding: 12px;
 }
 
+.semantic-cluster.clickable:hover,
+.semantic-cluster.is-active {
+  transform: translateY(-1px);
+  border-color: #93c5fd;
+  background: linear-gradient(135deg, #fff 0%, #eff6ff 100%);
+  box-shadow: 0 12px 28px rgba(37,99,235,.10);
+}
+
 .semantic-cluster strong {
   display: block;
   font-size: 12.5px;
@@ -907,6 +929,124 @@ tr:hover td { background: #fafafa; }
   color: #64748b;
   line-height: 1.6;
   margin: 0;
+}
+
+.semantic-drill-panel {
+  margin-top: 14px;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+  box-shadow: 0 16px 36px rgba(30,64,175,.08);
+  padding: 14px;
+}
+
+.semantic-drill-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.semantic-drill-title {
+  font-size: 15px;
+  font-weight: 900;
+  color: #0f172a;
+  margin-bottom: 5px;
+}
+
+.semantic-drill-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.semantic-drill-badge,
+.semantic-drill-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.semantic-drill-badge {
+  flex-shrink: 0;
+  color: #1d4ed8;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.semantic-drill-pill {
+  color: #475569;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.semantic-drill-grid {
+  display: grid;
+  grid-template-columns: minmax(0, .78fr) minmax(300px, .22fr);
+  gap: 12px;
+}
+
+.semantic-drill-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.semantic-drill-pain {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  padding: 10px 11px;
+}
+
+.semantic-drill-pain strong {
+  display: block;
+  font-size: 12.5px;
+  color: #111827;
+  margin-bottom: 5px;
+}
+
+.semantic-drill-pain span {
+  display: block;
+  font-size: 11.5px;
+  color: #64748b;
+  line-height: 1.55;
+}
+
+.semantic-drill-structure {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 11px;
+}
+
+.semantic-drill-structure h4 {
+  margin: 0 0 8px;
+  font-size: 12.5px;
+  color: #0f172a;
+}
+
+.semantic-drill-structure dl {
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  gap: 6px 8px;
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+
+.semantic-drill-structure dt {
+  color: #64748b;
+  font-weight: 800;
+}
+
+.semantic-drill-structure dd {
+  margin: 0;
+  color: #334155;
 }
 
 .semantic-evidence-grid {
@@ -1059,6 +1199,8 @@ tr:hover td { background: #fafafa; }
   .semantic-entry-grid,
   .semantic-cluster-grid,
   .semantic-evidence-grid,
+  .semantic-drill-grid,
+  .semantic-drill-list,
   .semantic-flow { grid-template-columns: 1fr; }
   .semantic-space { grid-template-columns: 1fr; }
   .space-visual { min-height: 500px; }
@@ -3304,7 +3446,7 @@ body {
               <div class="semantic-entry-count">225条</div>
             </div>
             <div class="semantic-entry-desc">覆盖实控人、大股东、上市公司围绕增持、减持、控制权、并购重组产生的资金、披露、税务和监管问题。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag">上市公司资本动作</span><span class="semantic-tag">股权激励</span><span class="semantic-tag">控制权纠纷</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('listed-capital-action', this)">上市公司资本动作</span><span class="semantic-tag clickable" onclick="semanticShowDrill('equity-incentive', this)">股权激励</span><span class="semantic-tag clickable" onclick="semanticShowDrill('control-dispute', this)">控制权纠纷</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#1e40af;--entry-soft:#eff6ff;">
@@ -3313,7 +3455,7 @@ body {
               <div class="semantic-entry-count">139条</div>
             </div>
             <div class="semantic-entry-desc">覆盖授予、行权、退出、持股平台、递延备案与员工离职争议，是资本、税务、法律高频交叉入口。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag">员工持股</span><span class="semantic-tag">行权税负</span><span class="semantic-tag">平台退出</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('employee-shareholding', this)">员工持股</span><span class="semantic-tag clickable" onclick="semanticShowDrill('exercise-tax', this)">行权税负</span><span class="semantic-tag clickable" onclick="semanticShowDrill('platform-exit', this)">平台退出</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#991b1b;--entry-soft:#fef2f2;">
@@ -3322,7 +3464,7 @@ body {
               <div class="semantic-entry-count">52条</div>
             </div>
             <div class="semantic-entry-desc">覆盖个税、企税、关联交易、转让定价、税务稽查与交易申报，是多数跨 BU 痛点的约束维度。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag">企业税务体检</span><span class="semantic-tag">关联交易</span><span class="semantic-tag">稽查应对</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('tax-health-check', this)">企业税务体检</span><span class="semantic-tag clickable" onclick="semanticShowDrill('related-transaction', this)">关联交易</span><span class="semantic-tag clickable" onclick="semanticShowDrill('tax-audit-response', this)">稽查应对</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#9a3412;--entry-soft:#fff7ed;">
@@ -3331,7 +3473,7 @@ body {
               <div class="semantic-entry-count">75条</div>
             </div>
             <div class="semantic-entry-desc">覆盖海外身份、税务居民、全球征税、CRS/FATCA、FBAR、弃籍税等自然人跨境合规问题。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag">税务居民</span><span class="semantic-tag">CRS/FATCA</span><span class="semantic-tag">全球征税</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('tax-residency', this)">税务居民</span><span class="semantic-tag clickable" onclick="semanticShowDrill('crs-fatca', this)">CRS/FATCA</span><span class="semantic-tag clickable" onclick="semanticShowDrill('worldwide-tax', this)">全球征税</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#5b21b6;--entry-soft:#f5f3ff;">
@@ -3340,7 +3482,7 @@ body {
               <div class="semantic-entry-count">78条</div>
             </div>
             <div class="semantic-entry-desc">覆盖香港、BVI、开曼、新加坡等境外主体的设立、维护、重组、分红、经济实质和外汇路径。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag">FSIE</span><span class="semantic-tag">37号文</span><span class="semantic-tag">经济实质</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('fsie', this)">FSIE</span><span class="semantic-tag clickable" onclick="semanticShowDrill('circular-37', this)">37号文</span><span class="semantic-tag clickable" onclick="semanticShowDrill('economic-substance', this)">经济实质</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#166534;--entry-soft:#f0fdf4;">
@@ -3349,7 +3491,7 @@ body {
               <div class="semantic-entry-count">42条</div>
             </div>
             <div class="semantic-entry-desc">覆盖债务隔离、代持风险、婚姻财产、资产执行、信托隔离等高净值客户资产安全问题。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag">资产隔离</span><span class="semantic-tag">代持风险</span><span class="semantic-tag">执行风险</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('asset-isolation', this)">资产隔离</span><span class="semantic-tag clickable" onclick="semanticShowDrill('nominee-risk', this)">代持风险</span><span class="semantic-tag clickable" onclick="semanticShowDrill('enforcement-risk', this)">执行风险</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#9d174d;--entry-soft:#fdf2f8;">
@@ -3358,7 +3500,7 @@ body {
               <div class="semantic-entry-count">46条</div>
             </div>
             <div class="semantic-entry-desc">覆盖股权代持、股东协议、章程治理、一致行动、控制权安排与争议预防。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag">股权代持</span><span class="semantic-tag">公司治理</span><span class="semantic-tag">控制权</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('nominee-shareholding', this)">股权代持</span><span class="semantic-tag clickable" onclick="semanticShowDrill('corporate-governance', this)">公司治理</span><span class="semantic-tag clickable" onclick="semanticShowDrill('control-right', this)">控制权</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#3730a3;--entry-soft:#eef2ff;">
@@ -3367,7 +3509,7 @@ body {
               <div class="semantic-entry-count">71条</div>
             </div>
             <div class="semantic-entry-desc">覆盖创一代、配偶、子女、接班人之间围绕继承、婚姻、家族治理和跨代分配产生的问题。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag">继承安排</span><span class="semantic-tag">家族治理</span><span class="semantic-tag">跨代分配</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('inheritance-arrangement', this)">继承安排</span><span class="semantic-tag clickable" onclick="semanticShowDrill('family-governance', this)">家族治理</span><span class="semantic-tag clickable" onclick="semanticShowDrill('intergenerational-allocation', this)">跨代分配</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#115e59;--entry-soft:#f0fdfa;">
@@ -3376,7 +3518,7 @@ body {
               <div class="semantic-entry-count">9条</div>
             </div>
             <div class="semantic-entry-desc">覆盖股权捐赠、慈善信托、基金会治理、公益支出与家族声誉管理相关问题。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag">慈善信托</span><span class="semantic-tag">股权捐赠</span><span class="semantic-tag">公益治理</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('charitable-trust', this)">慈善信托</span><span class="semantic-tag clickable" onclick="semanticShowDrill('equity-donation', this)">股权捐赠</span><span class="semantic-tag clickable" onclick="semanticShowDrill('charity-governance', this)">公益治理</span></div>
           </div>
         </div>
       </div>
@@ -3414,13 +3556,14 @@ body {
     <div style="margin-top:16px;border-top:1px solid #e5e7eb;padding-top:16px;">
       <div class="semantic-panel-title">代表性痛点簇</div>
       <div class="semantic-cluster-grid">
-        <div class="semantic-cluster"><strong>上市公司资本动作链路</strong><p>主体集中在实控人、大股东、高管；资产集中在股票、限售股、控制权股份；风险集中在资金、信披、减持规则与税务成本。</p></div>
-        <div class="semantic-cluster"><strong>股权激励与员工持股链路</strong><p>主体集中在拟上市企业、核心员工、持股平台；动作集中在授予、行权、退出；约束集中在递延备案、个税、工商和离职争议。</p></div>
-        <div class="semantic-cluster"><strong>跨境身份与税务居民链路</strong><p>主体集中在海外身份客户和跨境企业主；约束集中在 CRS、FATCA、全球征税、FBAR、双重居民和弃籍税。</p></div>
-        <div class="semantic-cluster"><strong>境外公司与经济实质链路</strong><p>主体集中在香港、BVI、开曼、新加坡公司；约束集中在 FSIE、经济实质、37号文、TRC 和协定优惠。</p></div>
-        <div class="semantic-cluster"><strong>股权代持与控制权纠纷链路</strong><p>主体集中在实际出资人、代持人、名义股东和配偶；风险集中在举证、婚变、债务执行、优先购买权和公司僵局。</p></div>
-        <div class="semantic-cluster"><strong>继承婚姻与家庭治理链路</strong><p>主体集中在创一代、配偶、继承人、接班人；资产集中在房产、股权、信托受益权；风险集中在共同财产、遗嘱效力和分配纠纷。</p></div>
+        <div class="semantic-cluster clickable" onclick="semanticShowDrill('cluster-listed-action', this)"><strong>上市公司资本动作链路</strong><p>主体集中在实控人、大股东、高管；资产集中在股票、限售股、控制权股份；风险集中在资金、信披、减持规则与税务成本。</p></div>
+        <div class="semantic-cluster clickable" onclick="semanticShowDrill('cluster-equity-incentive', this)"><strong>股权激励与员工持股链路</strong><p>主体集中在拟上市企业、核心员工、持股平台；动作集中在授予、行权、退出；约束集中在递延备案、个税、工商和离职争议。</p></div>
+        <div class="semantic-cluster clickable" onclick="semanticShowDrill('cluster-cross-border-tax', this)"><strong>跨境身份与税务居民链路</strong><p>主体集中在海外身份客户和跨境企业主；约束集中在 CRS、FATCA、全球征税、FBAR、双重居民和弃籍税。</p></div>
+        <div class="semantic-cluster clickable" onclick="semanticShowDrill('cluster-offshore-substance', this)"><strong>境外公司与经济实质链路</strong><p>主体集中在香港、BVI、开曼、新加坡公司；约束集中在 FSIE、经济实质、37号文、TRC 和协定优惠。</p></div>
+        <div class="semantic-cluster clickable" onclick="semanticShowDrill('cluster-nominee-control', this)"><strong>股权代持与控制权纠纷链路</strong><p>主体集中在实际出资人、代持人、名义股东和配偶；风险集中在举证、婚变、债务执行、优先购买权和公司僵局。</p></div>
+        <div class="semantic-cluster clickable" onclick="semanticShowDrill('cluster-family-governance', this)"><strong>继承婚姻与家庭治理链路</strong><p>主体集中在创一代、配偶、继承人、接班人；资产集中在房产、股权、信托受益权；风险集中在共同财产、遗嘱效力和分配纠纷。</p></div>
       </div>
+      <div id="semantic-drill-panel" class="semantic-drill-panel" style="display:none;"></div>
     </div>
 
     <div style="margin-top:16px;border-top:1px solid #e5e7eb;padding-top:16px;">
@@ -6478,6 +6621,287 @@ const PAIN_BU_DATA = [
     note: '法律架构、资产保护、财富传承与慈善公益覆盖最深，是当前痛点主库中占比最高的 BU。'
   }
 ];
+
+const SEMANTIC_CLUSTER_LIBRARY = {
+  listed: {
+    type: '代表性痛点簇',
+    title: '上市公司资本动作链路',
+    scenes: ['资本市场', '法律架构', '税务合规'],
+    structure: {
+      subject: '实控人、大股东、高管、上市公司',
+      asset: '股票、限售股、控制权股份、持股平台份额',
+      action: '增持、减持、并购重组、控制权安排',
+      constraint: '信披窗口、减持规则、资金来源、税负测算',
+      risk: '违规披露、资金错配、控制权旁落、交易税负失控'
+    },
+    pains: [
+      ['大股东增持资金路径不清', '增持承诺已经形成，但资金来源、资金闭环和披露口径没有同步设计，容易形成执行和监管压力。', 'CM / Legal'],
+      ['实控人减持与家族资金安排冲突', '客户既有流动性需求，又受减持比例、窗口期和税务成本约束，单一动作无法解决全局问题。', 'CM / Tax'],
+      ['控制权收购后治理安排不足', '交易完成后表决权、董事席位、协议控制和章程保护没有同步落地，后续容易产生公司僵局。', 'CM / Legal'],
+      ['股权激励与资本动作时间错配', '授予、行权、上市、减持节奏没有统筹，员工税负和公司资本市场动作互相牵制。', 'CM / Tax']
+    ],
+    sku: '资本市场交易顾问、控制权方案设计、上市公司税务测算'
+  },
+  incentive: {
+    type: '代表性痛点簇',
+    title: '股权激励与员工持股链路',
+    scenes: ['股权激励', '税务合规', '资本市场'],
+    structure: {
+      subject: '拟上市企业、核心员工、创始人、持股平台',
+      asset: '期权、限制性股权、合伙份额、员工持股平台',
+      action: '授予、行权、退出、回购、递延备案',
+      constraint: '个税、递延纳税、工商登记、离职规则、上市节奏',
+      risk: '行权现金流压力、平台退出争议、员工离职纠纷、税务补缴'
+    },
+    pains: [
+      ['员工行权税负与现金流不匹配', '员工尚未获得流动性却需要承担纳税义务，容易影响激励接受度和公司稳定性。', 'Tax / CM'],
+      ['持股平台退出机制不清', '合伙平台缺少离职、回购、份额转让和税负承担规则，后续容易形成员工争议。', 'Legal / Tax'],
+      ['递延纳税备案条件不确定', '激励工具、主体资质、备案时点和材料留痕不足，导致递延政策无法稳定适用。', 'Tax'],
+      ['上市前后激励节奏断裂', '授予、行权、锁定、减持安排没有与上市窗口同步，影响资本市场合规和员工收益。', 'CM / Legal']
+    ],
+    sku: '股权激励方案、员工持股平台治理、个税递延备案辅导'
+  },
+  crossBorder: {
+    type: '代表性痛点簇',
+    title: '跨境身份与税务居民链路',
+    scenes: ['身份 / 海外税务', '税务合规', '境外架构'],
+    structure: {
+      subject: '海外身份客户、跨境企业主、家庭成员、美国税务人',
+      asset: '境外账户、海外公司、全球金融资产、移民前资产',
+      action: '身份转换、账户申报、全球收入披露、登陆前规划',
+      constraint: 'CRS、FATCA、FBAR、双重居民、全球征税规则',
+      risk: '漏报罚款、重复征税、信息交换暴露、弃籍税和补税风险'
+    },
+    pains: [
+      ['客户身份变化触发全球征税', '客户取得或变更海外身份后，原有资产和收入没有重新评估税务居民身份和申报义务。', 'Tax'],
+      ['CRS/FATCA 信息交换暴露账户', '境外账户、控股公司和受益人信息被交换后，境内外解释材料没有提前准备。', 'Tax / Legal'],
+      ['美国税务人海外申报遗漏', '客户涉及美国身份或绿卡，FBAR、FATCA 和全球收入申报口径没有形成完整闭环。', 'Tax'],
+      ['登陆前资产重组窗口错过', '移民或长期居留前未完成资产成本、赠与、信托或公司架构评估，后续税负显著上升。', 'Tax / Legal']
+    ],
+    sku: '全球税务居民体检、CRS/FATCA 申报辅导、登陆前税务规划'
+  },
+  offshore: {
+    type: '代表性痛点簇',
+    title: '境外公司与经济实质链路',
+    scenes: ['境外架构', '税务合规', '身份 / 海外税务'],
+    structure: {
+      subject: '香港公司、BVI/开曼公司、新加坡公司、境内实控人',
+      asset: '境外股权、离岸收入、分红、知识产权和投资收益',
+      action: '设立、维护、分红、重组、注销、协定优惠申请',
+      constraint: 'FSIE、经济实质、37号文、TRC、外汇登记',
+      risk: '豁免失败、补税、利润汇回受阻、架构空壳化'
+    },
+    pains: [
+      ['香港公司 FSIE 举证困难', '境外收入希望适用豁免，但人员、决策、合同、资金流和商业实质留痕不足。', 'Tax'],
+      ['37号文登记缺失影响资金闭环', '红筹或返程投资架构未及时登记，后续分红、退出和资金回流存在障碍。', 'CM / Tax'],
+      ['离岸公司经济实质不足', 'BVI、开曼等主体缺少董事会、人员、费用和业务决策证据，影响税务解释能力。', 'Tax / Legal'],
+      ['协定优惠申请材料不完整', '客户希望享受税收协定待遇，但受益所有人、TRC 和商业目的材料不足。', 'Tax']
+    ],
+    sku: '境外架构体检、FSIE/经济实质辅导、跨境资金路径设计'
+  },
+  nominee: {
+    type: '代表性痛点簇',
+    title: '股权代持与控制权纠纷链路',
+    scenes: ['法律架构', '资产保护', '财富传承'],
+    structure: {
+      subject: '实际出资人、代持人、名义股东、配偶、债权人',
+      asset: '代持股权、控制权股份、分红权、表决权',
+      action: '代持、还原、确权、转让、表决权安排',
+      constraint: '证据链、婚姻财产、债务执行、优先购买权、公司章程',
+      risk: '代持否认、股权被分割、执行冻结、控制权争议'
+    },
+    pains: [
+      ['代持人婚变引发股权分割风险', '名义股东婚姻状态变化后，代持股权可能被纳入夫妻共同财产争议范围。', 'Legal'],
+      ['代持人个人债务导致股权冻结', '代持人外部债务进入执行程序，名下股权被查封，实际出资人维权成本高。', 'Legal'],
+      ['代持协议证据链不足', '出资凭证、分红流向、表决指令和代持协议不完整，无法稳定证明实际权益。', 'Legal'],
+      ['控制权安排缺少章程承接', '协议层面有控制权设计，但章程、董事会和表决程序没有同步固化，执行力不足。', 'Legal / CM']
+    ],
+    sku: '股权代持体检、控制权保护方案、股东协议与章程治理'
+  },
+  family: {
+    type: '代表性痛点簇',
+    title: '继承婚姻与家庭治理链路',
+    scenes: ['财富传承', '资产保护', '法律架构'],
+    structure: {
+      subject: '创一代、配偶、子女、接班人、家族成员',
+      asset: '房产、股权、家族企业、信托受益权、保险金',
+      action: '继承、赠与、婚前安排、家族治理、跨代分配',
+      constraint: '遗嘱效力、夫妻共同财产、未成年人持股、继承程序',
+      risk: '分配纠纷、控制权断裂、资产被分割、接班治理失败'
+    },
+    pains: [
+      ['创始人突发风险导致股权继承僵局', '核心股权没有遗嘱、信托或章程安排，继承程序可能影响公司治理和经营连续性。', 'Legal'],
+      ['子女婚姻变化影响家族资产安全', '股权、房产或受益权没有隔离设计，婚姻风险可能传导到家族核心资产。', 'Legal'],
+      ['多子女分配缺少治理规则', '资产可以分配，但决策权、收益权和经营权没有区分，容易引发长期家族冲突。', 'Legal / Tax'],
+      ['家族信托与企业控制权衔接不足', '信托设立后，受托人、保护人、董事会和家族治理规则没有形成一致机制。', 'Legal / CM']
+    ],
+    sku: '家族传承方案、婚姻资产隔离、家族治理与信托架构'
+  }
+};
+
+const SEMANTIC_DRILL_DATA = {
+  'cluster-listed-action': SEMANTIC_CLUSTER_LIBRARY.listed,
+  'listed-capital-action': { ...SEMANTIC_CLUSTER_LIBRARY.listed, type: '入口特征', title: '上市公司资本动作' },
+  'control-dispute': { ...SEMANTIC_CLUSTER_LIBRARY.nominee, type: '入口特征', title: '控制权纠纷' },
+  'cluster-equity-incentive': SEMANTIC_CLUSTER_LIBRARY.incentive,
+  'equity-incentive': { ...SEMANTIC_CLUSTER_LIBRARY.incentive, type: '入口特征', title: '股权激励' },
+  'employee-shareholding': { ...SEMANTIC_CLUSTER_LIBRARY.incentive, type: '入口特征', title: '员工持股' },
+  'exercise-tax': { ...SEMANTIC_CLUSTER_LIBRARY.incentive, type: '入口特征', title: '行权税负' },
+  'platform-exit': { ...SEMANTIC_CLUSTER_LIBRARY.incentive, type: '入口特征', title: '平台退出' },
+  'tax-health-check': {
+    type: '入口特征',
+    title: '企业税务体检',
+    scenes: ['税务合规', '资本市场', '境外架构'],
+    structure: {
+      subject: '企业主、财务负责人、集团公司、关联企业',
+      asset: '收入、成本费用、发票、往来款、股权交易',
+      action: '税务体检、风险排查、资料补正、稽查应对',
+      constraint: '金税系统、凭证链、三流一致、纳税调整',
+      risk: '补税罚款、滞纳金、历史问题暴露、交易无法推进'
+    },
+    pains: [
+      ['成本费用凭证链不足', '企业历史费用入账缺少合同、发票、付款和业务实质材料，税务检查时解释能力不足。', 'Tax'],
+      ['三流不一致触发税务风险', '合同流、发票流、资金流和货物流不匹配，交易真实性容易被质疑。', 'Tax'],
+      ['股东借款与资金占用税务风险', '企业主长期通过往来款调配资金，可能引发利息、视同分红和债资比问题。', 'Tax'],
+      ['历史税务问题影响资本动作', '上市、并购或股权转让前未清理历史税务瑕疵，影响交易估值和进度。', 'Tax / CM']
+    ],
+    sku: '企业税务体检、交易税务尽调、稽查应对材料包'
+  },
+  'related-transaction': {
+    type: '入口特征',
+    title: '关联交易',
+    scenes: ['税务合规', '境外架构', '资本市场'],
+    structure: {
+      subject: '集团公司、关联企业、实控人、境外关联方',
+      asset: '服务费、货款、许可费、资金往来、股权交易',
+      action: '交易定价、利润分配、合同重构、资料留痕',
+      constraint: '转让定价、商业实质、同期资料、独立交易原则',
+      risk: '利润转移质疑、纳税调整、特别纳税调查、披露风险'
+    },
+    pains: [
+      ['跨境关联交易定价依据不足', '境内外公司之间长期收付服务费或许可费，但缺少可比分析和商业实质证明。', 'Tax'],
+      ['关联方资金往来长期未清理', '集团内资金拆借和代垫费用频繁发生，利息、资本弱化和视同分配风险交织。', 'Tax'],
+      ['上市公司关联交易披露遗漏', '实控人控制的多主体交易未被完整识别，可能影响上市公司信息披露合规。', 'CM / Legal'],
+      ['家族企业利润分配缺少税务路径', '家庭成员和关联公司之间通过非标准方式分配收益，后续税务解释难度高。', 'Tax / Legal']
+    ],
+    sku: '关联交易体检、转让定价文档、集团资金往来规范'
+  },
+  'tax-audit-response': {
+    type: '入口特征',
+    title: '稽查应对',
+    scenes: ['税务合规', '身份 / 海外税务'],
+    structure: {
+      subject: '企业主、财务团队、高净值自然人、境外账户持有人',
+      asset: '发票、账册、账户流水、申报表、境外收入',
+      action: '资料准备、口径解释、补税测算、整改闭环',
+      constraint: '稽查程序、举证责任、申报期限、处罚裁量',
+      risk: '补税罚款、刑事风险、跨境信息交换、历史问题扩大'
+    },
+    pains: [
+      ['稽查口径和业务事实不一致', '企业提供的合同、流水和业务说明无法形成闭环，导致风险点被持续放大。', 'Tax'],
+      ['个人境外收入被动暴露', 'CRS 交换后境外账户和收入被关注，但客户缺少历史申报和资金来源解释材料。', 'Tax'],
+      ['发票异常引发上下游穿透', '供应商或客户异常导致企业被牵连，进项抵扣、成本真实性和资金回流都需要解释。', 'Tax'],
+      ['补税方案缺少现金流安排', '客户认可风险但没有分期、资金来源和后续整改方案，影响稽查谈判空间。', 'Tax / CM']
+    ],
+    sku: '税务稽查应对、历史申报修正、跨境税务解释材料'
+  },
+  'cluster-cross-border-tax': SEMANTIC_CLUSTER_LIBRARY.crossBorder,
+  'tax-residency': { ...SEMANTIC_CLUSTER_LIBRARY.crossBorder, type: '入口特征', title: '税务居民' },
+  'crs-fatca': { ...SEMANTIC_CLUSTER_LIBRARY.crossBorder, type: '入口特征', title: 'CRS/FATCA' },
+  'worldwide-tax': { ...SEMANTIC_CLUSTER_LIBRARY.crossBorder, type: '入口特征', title: '全球征税' },
+  'cluster-offshore-substance': SEMANTIC_CLUSTER_LIBRARY.offshore,
+  'fsie': { ...SEMANTIC_CLUSTER_LIBRARY.offshore, type: '入口特征', title: 'FSIE' },
+  'circular-37': { ...SEMANTIC_CLUSTER_LIBRARY.offshore, type: '入口特征', title: '37号文' },
+  'economic-substance': { ...SEMANTIC_CLUSTER_LIBRARY.offshore, type: '入口特征', title: '经济实质' },
+  'asset-isolation': { ...SEMANTIC_CLUSTER_LIBRARY.family, type: '入口特征', title: '资产隔离' },
+  'nominee-risk': { ...SEMANTIC_CLUSTER_LIBRARY.nominee, type: '入口特征', title: '代持风险' },
+  'enforcement-risk': { ...SEMANTIC_CLUSTER_LIBRARY.nominee, type: '入口特征', title: '执行风险' },
+  'cluster-nominee-control': SEMANTIC_CLUSTER_LIBRARY.nominee,
+  'nominee-shareholding': { ...SEMANTIC_CLUSTER_LIBRARY.nominee, type: '入口特征', title: '股权代持' },
+  'corporate-governance': { ...SEMANTIC_CLUSTER_LIBRARY.nominee, type: '入口特征', title: '公司治理' },
+  'control-right': { ...SEMANTIC_CLUSTER_LIBRARY.nominee, type: '入口特征', title: '控制权' },
+  'cluster-family-governance': SEMANTIC_CLUSTER_LIBRARY.family,
+  'inheritance-arrangement': { ...SEMANTIC_CLUSTER_LIBRARY.family, type: '入口特征', title: '继承安排' },
+  'family-governance': { ...SEMANTIC_CLUSTER_LIBRARY.family, type: '入口特征', title: '家族治理' },
+  'intergenerational-allocation': { ...SEMANTIC_CLUSTER_LIBRARY.family, type: '入口特征', title: '跨代分配' },
+  'charitable-trust': {
+    type: '入口特征',
+    title: '慈善信托',
+    scenes: ['慈善公益', '财富传承', '法律架构'],
+    structure: {
+      subject: '企业家、家族成员、慈善信托、受托人、公益机构',
+      asset: '现金、股权、基金会资产、信托财产',
+      action: '设立、捐赠、治理、支出、信息披露',
+      constraint: '慈善目的、受托责任、公益支出比例、税前扣除',
+      risk: '治理失效、税务扣除失败、公益资产使用争议、声誉风险'
+    },
+    pains: [
+      ['慈善信托治理职责不清', '委托人、受托人、监察人和家族成员之间缺少清晰权限，后续公益执行容易失真。', 'Legal'],
+      ['公益支出和税务扣除口径不匹配', '客户希望取得税务扣除效果，但捐赠主体、票据和项目资质没有提前校验。', 'Tax / Legal'],
+      ['家族慈善与传承安排割裂', '慈善资产、家族资产和企业股权没有统一治理，公益目标难以长期延续。', 'Legal'],
+      ['基金会信息披露影响家族声誉', '公益项目和资金使用留痕不足，可能引发透明度、合规和声誉管理问题。', 'Legal']
+    ],
+    sku: '慈善信托架构、公益基金会治理、股权捐赠税务评估'
+  }
+};
+
+SEMANTIC_DRILL_DATA['equity-donation'] = { ...SEMANTIC_DRILL_DATA['charitable-trust'], title: '股权捐赠' };
+SEMANTIC_DRILL_DATA['charity-governance'] = { ...SEMANTIC_DRILL_DATA['charitable-trust'], title: '公益治理' };
+
+function semanticEscape(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[ch]));
+}
+
+function semanticShowDrill(key, trigger) {
+  const panel = document.getElementById('semantic-drill-panel');
+  const data = SEMANTIC_DRILL_DATA[key];
+  if (!panel || !data) return;
+
+  document.querySelectorAll('.semantic-tag.is-active,.semantic-cluster.is-active').forEach(el => el.classList.remove('is-active'));
+  if (trigger) trigger.classList.add('is-active');
+
+  const struct = data.structure || {};
+  panel.style.display = 'block';
+  panel.innerHTML = `
+    <div class="semantic-drill-head">
+      <div>
+        <div class="semantic-drill-title">${semanticEscape(data.title)}</div>
+        <div class="semantic-drill-meta">
+          ${(data.scenes || []).map(scene => `<span class="semantic-drill-pill">${semanticEscape(scene)}</span>`).join('')}
+        </div>
+      </div>
+      <span class="semantic-drill-badge">${semanticEscape(data.type)}</span>
+    </div>
+    <div class="semantic-drill-grid">
+      <div class="semantic-drill-list">
+        ${(data.pains || []).map(([name, desc, bu]) => `
+          <div class="semantic-drill-pain">
+            <strong>${semanticEscape(name)}</strong>
+            <span>${semanticEscape(desc)}</span>
+            <span style="margin-top:6px;font-weight:800;color:#2563eb;">${semanticEscape(bu)}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div class="semantic-drill-structure">
+        <h4>同族结构特征</h4>
+        <dl>
+          <dt>主体</dt><dd>${semanticEscape(struct.subject)}</dd>
+          <dt>资产</dt><dd>${semanticEscape(struct.asset)}</dd>
+          <dt>动作</dt><dd>${semanticEscape(struct.action)}</dd>
+          <dt>约束</dt><dd>${semanticEscape(struct.constraint)}</dd>
+          <dt>风险</dt><dd>${semanticEscape(struct.risk)}</dd>
+          <dt>承接</dt><dd>${semanticEscape(data.sku)}</dd>
+        </dl>
+      </div>
+    </div>
+  `;
+}
 
 function renderPainBuPanel() {
   const el = document.getElementById('chart-bu-bar');
