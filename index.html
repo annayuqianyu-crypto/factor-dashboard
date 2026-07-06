@@ -808,6 +808,21 @@ tr:hover td { background: #fafafa; }
   gap: 6px;
 }
 
+.entry-features {
+  align-items: center;
+}
+
+.entry-features::before {
+  content: "入口特征";
+  font-size: 11px;
+  font-weight: 800;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  padding: 3px 8px;
+}
+
 .semantic-tag {
   font-size: 11px;
   font-weight: 700;
@@ -921,8 +936,150 @@ tr:hover td { background: #fafafa; }
   line-height: 1.6;
 }
 
+.semantic-space {
+  display: grid;
+  grid-template-columns: minmax(420px, .95fr) minmax(0, 1.05fr);
+  gap: 16px;
+  align-items: stretch;
+  margin-bottom: 16px;
+}
+
+.space-visual {
+  position: relative;
+  min-height: 420px;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(219,234,254,.9), transparent 28%),
+    radial-gradient(circle at 80% 22%, rgba(254,226,226,.75), transparent 30%),
+    radial-gradient(circle at 48% 85%, rgba(237,233,254,.78), transparent 30%),
+    linear-gradient(145deg, #f8fafc 0%, #fff 58%, #f8fafc 100%);
+}
+
+.space-visual svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.space-formula-card {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  width: 250px;
+  padding: 12px 14px;
+  border: 1px solid rgba(37,99,235,.22);
+  border-radius: 8px;
+  background: rgba(255,255,255,.84);
+  box-shadow: 0 12px 28px rgba(15,23,42,.08);
+  backdrop-filter: blur(8px);
+}
+
+.space-formula-card strong {
+  display: block;
+  font-size: 13px;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.space-formula-card code {
+  display: block;
+  font-size: 11.5px;
+  color: #1d4ed8;
+  line-height: 1.65;
+  white-space: normal;
+}
+
+.space-legend {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  display: grid;
+  gap: 7px;
+  padding: 11px 12px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.86);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 12px 28px rgba(15,23,42,.08);
+}
+
+.space-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.space-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--dot);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--dot) 18%, transparent);
+}
+
+.space-method {
+  display: grid;
+  gap: 10px;
+}
+
+.space-method-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  padding: 13px 14px;
+}
+
+.space-method-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 7px;
+}
+
+.space-method-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.space-method-symbol {
+  font-size: 11px;
+  font-weight: 800;
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+.space-method-card p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #64748b;
+}
+
+.space-equation {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  font-size: 12px;
+  color: #334155;
+  line-height: 1.65;
+}
+
 @media (max-width: 1180px) {
   .semantic-map { grid-template-columns: 1fr; }
+  .semantic-space { grid-template-columns: 1fr; }
   .semantic-entry-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
@@ -931,6 +1088,13 @@ tr:hover td { background: #fafafa; }
   .semantic-cluster-grid,
   .semantic-evidence-grid,
   .semantic-flow { grid-template-columns: 1fr; }
+  .semantic-space { grid-template-columns: 1fr; }
+  .space-visual { min-height: 500px; }
+  .space-formula-card {
+    left: 12px;
+    right: 12px;
+    width: auto;
+  }
 }
 
 
@@ -2981,6 +3145,150 @@ body {
   </div>
 
 
+  <div class="card">
+    <div class="card-title">法税资三维业务语义空间</div>
+    <div class="semantic-space">
+      <div class="space-visual">
+        <svg viewBox="0 0 620 430" role="img" aria-label="法税资三维业务语义空间示意图">
+          <defs>
+            <linearGradient id="axisLegal" x1="0" y1="1" x2="0" y2="0">
+              <stop offset="0%" stop-color="#c084fc"/>
+              <stop offset="100%" stop-color="#7c3aed"/>
+            </linearGradient>
+            <linearGradient id="axisTax" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#fb7185"/>
+              <stop offset="100%" stop-color="#e11d48"/>
+            </linearGradient>
+            <linearGradient id="axisCM" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#60a5fa"/>
+              <stop offset="100%" stop-color="#2563eb"/>
+            </linearGradient>
+            <radialGradient id="entryGlow" cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity=".86"/>
+              <stop offset="100%" stop-color="#bfdbfe" stop-opacity=".28"/>
+            </radialGradient>
+            <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#0f172a" flood-opacity=".13"/>
+            </filter>
+          </defs>
+
+          <g opacity=".7" stroke="#dbeafe" stroke-width="1">
+            <path d="M118 332 L335 332 L510 242"/>
+            <path d="M118 292 L335 292 L510 202"/>
+            <path d="M118 252 L335 252 L510 162"/>
+            <path d="M118 212 L335 212 L510 122"/>
+            <path d="M118 172 L335 172 L510 82"/>
+            <path d="M118 332 L118 132"/>
+            <path d="M172 332 L172 132"/>
+            <path d="M226 332 L226 132"/>
+            <path d="M280 332 L280 132"/>
+            <path d="M335 332 L335 132"/>
+            <path d="M335 332 L510 242"/>
+            <path d="M335 292 L510 202"/>
+            <path d="M335 252 L510 162"/>
+            <path d="M335 212 L510 122"/>
+          </g>
+
+          <g stroke-linecap="round" stroke-width="4" filter="url(#softShadow)">
+            <path d="M118 332 L118 92" stroke="url(#axisLegal)"/>
+            <path d="M118 332 L404 332" stroke="url(#axisTax)"/>
+            <path d="M118 332 L520 126" stroke="url(#axisCM)"/>
+          </g>
+          <polygon points="118,332 404,332 520,126 118,92" fill="none" stroke="#e0e7ff" stroke-width="1.5" stroke-dasharray="6 8"/>
+
+          <ellipse cx="302" cy="244" rx="138" ry="50" fill="url(#entryGlow)" stroke="#60a5fa" stroke-width="1.8" stroke-dasharray="7 7" transform="rotate(-24 302 244)"/>
+          <text x="333" y="178" font-size="13" font-weight="800" fill="#1d4ed8">投影区域 E_s</text>
+          <text x="333" y="197" font-size="11.5" fill="#64748b">场景入口：覆盖较大的语义面积</text>
+
+          <path d="M238 292 C278 252, 330 232, 398 222" fill="none" stroke="#0f766e" stroke-width="3" stroke-dasharray="8 7"/>
+          <text x="390" y="214" font-size="12.5" font-weight="800" fill="#0f766e">收缩切面 q</text>
+
+          <ellipse cx="374" cy="214" rx="58" ry="25" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.8" transform="rotate(-18 374 214)"/>
+          <text x="337" y="208" font-size="11.5" font-weight="800" fill="#92400e">痛点簇 C_k</text>
+          <text x="330" y="225" font-size="10.5" fill="#92400e">相似语义向量族</text>
+
+          <g stroke="#1e293b" stroke-width="1.6" opacity=".62">
+            <path d="M262 272 L350 220"/>
+            <path d="M282 260 L370 213"/>
+            <path d="M302 249 L388 209"/>
+            <path d="M321 238 L410 206"/>
+          </g>
+          <g>
+            <circle cx="262" cy="272" r="5" fill="#2563eb"/>
+            <circle cx="282" cy="260" r="5" fill="#e11d48"/>
+            <circle cx="302" cy="249" r="5" fill="#7c3aed"/>
+            <circle cx="321" cy="238" r="5" fill="#0f766e"/>
+            <circle cx="350" cy="220" r="5" fill="#f59e0b"/>
+            <circle cx="370" cy="213" r="5" fill="#f59e0b"/>
+            <circle cx="388" cy="209" r="5" fill="#f59e0b"/>
+            <circle cx="410" cy="206" r="5" fill="#f59e0b"/>
+          </g>
+
+          <circle cx="438" cy="188" r="7" fill="#111827"/>
+          <text x="450" y="187" font-size="12" font-weight="800" fill="#111827">p_i</text>
+          <text x="450" y="204" font-size="10.5" fill="#64748b">单个已同步痛点向量</text>
+
+          <text x="92" y="78" font-size="13" font-weight="900" fill="#6d28d9">Legal 法律</text>
+          <text x="410" y="348" font-size="13" font-weight="900" fill="#be123c">Tax 税务</text>
+          <text x="512" y="118" font-size="13" font-weight="900" fill="#1d4ed8">CM 资本</text>
+        </svg>
+
+        <div class="space-formula-card">
+          <strong>核心表达</strong>
+          <code>p_i = (Legal_i, Tax_i, CM_i, x_i)</code>
+          <code>E_s = { p_i | cos(p_i, s) >= tau }</code>
+          <code>q = s + alpha f_1 + beta f_2 + gamma f_3</code>
+        </div>
+
+        <div class="space-legend">
+          <div class="space-legend-item"><span class="space-dot" style="--dot:#60a5fa;"></span>场景入口投影区</div>
+          <div class="space-legend-item"><span class="space-dot" style="--dot:#0f766e;"></span>入口特征收缩方向</div>
+          <div class="space-legend-item"><span class="space-dot" style="--dot:#f59e0b;"></span>痛点簇高密度区</div>
+          <div class="space-legend-item"><span class="space-dot" style="--dot:#111827;"></span>单个痛点向量</div>
+        </div>
+      </div>
+
+      <div class="space-method">
+        <div class="space-method-card">
+          <div class="space-method-top">
+            <div class="space-method-title">1. 业务语义空间</div>
+            <div class="space-method-symbol">V = span(L, T, C, x)</div>
+          </div>
+          <p>法、税、资是三条组织能力坐标轴，主体、资产、动作、约束、风险构成业务结构特征 x。每条痛点都是这个空间中的一个业务语义向量。</p>
+          <div class="space-equation">p_i = w_L L + w_T T + w_C C + w_x x_i</div>
+        </div>
+
+        <div class="space-method-card">
+          <div class="space-method-top">
+            <div class="space-method-title">2. 投影形成场景入口</div>
+            <div class="space-method-symbol">E_s</div>
+          </div>
+          <p>场景入口不是单个分类，而是某一业务方向向量 s 在空间中覆盖到的投影区域。面积越大，说明它能承接更多痛点和痛点簇。</p>
+          <div class="space-equation">E_s = { p_i | cos(p_i, s) >= tau }</div>
+        </div>
+
+        <div class="space-method-card">
+          <div class="space-method-top">
+            <div class="space-method-title">3. 入口特征形成收缩切面</div>
+            <div class="space-method-symbol">q</div>
+          </div>
+          <p>入口特征是入口内部的局部语义向量，用来把大投影区域继续压缩。例如财富传承入口下，继承安排、家族治理、跨代分配会共同调整检索方向。</p>
+          <div class="space-equation">q = s + alpha f_继承安排 + beta f_家族治理 + gamma f_跨代分配</div>
+        </div>
+
+        <div class="space-method-card">
+          <div class="space-method-top">
+            <div class="space-method-title">4. 相似向量聚成痛点簇</div>
+            <div class="space-method-symbol">C_k</div>
+          </div>
+          <p>当一组痛点在主体、资产、动作、约束、风险上方向接近，就形成相似语义向量族，也就是可解释的痛点簇。</p>
+          <div class="space-equation">C_k = { p_i | sim(p_i, q_k) >= theta }</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
 
   <div class="card">
     <div class="card-title">场景-痛点语义入口地图</div>
@@ -2993,7 +3301,7 @@ body {
               <div class="semantic-entry-count">225条</div>
             </div>
             <div class="semantic-entry-desc">覆盖实控人、大股东、上市公司围绕增持、减持、控制权、并购重组产生的资金、披露、税务和监管问题。</div>
-            <div class="semantic-tags"><span class="semantic-tag">上市公司资本动作</span><span class="semantic-tag">股权激励</span><span class="semantic-tag">控制权纠纷</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag">上市公司资本动作</span><span class="semantic-tag">股权激励</span><span class="semantic-tag">控制权纠纷</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#1e40af;--entry-soft:#eff6ff;">
@@ -3002,7 +3310,7 @@ body {
               <div class="semantic-entry-count">139条</div>
             </div>
             <div class="semantic-entry-desc">覆盖授予、行权、退出、持股平台、递延备案与员工离职争议，是资本、税务、法律高频交叉入口。</div>
-            <div class="semantic-tags"><span class="semantic-tag">员工持股</span><span class="semantic-tag">行权税负</span><span class="semantic-tag">平台退出</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag">员工持股</span><span class="semantic-tag">行权税负</span><span class="semantic-tag">平台退出</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#991b1b;--entry-soft:#fef2f2;">
@@ -3011,7 +3319,7 @@ body {
               <div class="semantic-entry-count">52条</div>
             </div>
             <div class="semantic-entry-desc">覆盖个税、企税、关联交易、转让定价、税务稽查与交易申报，是多数跨 BU 痛点的约束维度。</div>
-            <div class="semantic-tags"><span class="semantic-tag">企业税务体检</span><span class="semantic-tag">关联交易</span><span class="semantic-tag">稽查应对</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag">企业税务体检</span><span class="semantic-tag">关联交易</span><span class="semantic-tag">稽查应对</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#9a3412;--entry-soft:#fff7ed;">
@@ -3020,7 +3328,7 @@ body {
               <div class="semantic-entry-count">75条</div>
             </div>
             <div class="semantic-entry-desc">覆盖海外身份、税务居民、全球征税、CRS/FATCA、FBAR、弃籍税等自然人跨境合规问题。</div>
-            <div class="semantic-tags"><span class="semantic-tag">税务居民</span><span class="semantic-tag">CRS/FATCA</span><span class="semantic-tag">全球征税</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag">税务居民</span><span class="semantic-tag">CRS/FATCA</span><span class="semantic-tag">全球征税</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#5b21b6;--entry-soft:#f5f3ff;">
@@ -3029,7 +3337,7 @@ body {
               <div class="semantic-entry-count">78条</div>
             </div>
             <div class="semantic-entry-desc">覆盖香港、BVI、开曼、新加坡等境外主体的设立、维护、重组、分红、经济实质和外汇路径。</div>
-            <div class="semantic-tags"><span class="semantic-tag">FSIE</span><span class="semantic-tag">37号文</span><span class="semantic-tag">经济实质</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag">FSIE</span><span class="semantic-tag">37号文</span><span class="semantic-tag">经济实质</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#166534;--entry-soft:#f0fdf4;">
@@ -3038,7 +3346,7 @@ body {
               <div class="semantic-entry-count">42条</div>
             </div>
             <div class="semantic-entry-desc">覆盖债务隔离、代持风险、婚姻财产、资产执行、信托隔离等高净值客户资产安全问题。</div>
-            <div class="semantic-tags"><span class="semantic-tag">资产隔离</span><span class="semantic-tag">代持风险</span><span class="semantic-tag">执行风险</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag">资产隔离</span><span class="semantic-tag">代持风险</span><span class="semantic-tag">执行风险</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#9d174d;--entry-soft:#fdf2f8;">
@@ -3047,7 +3355,7 @@ body {
               <div class="semantic-entry-count">46条</div>
             </div>
             <div class="semantic-entry-desc">覆盖股权代持、股东协议、章程治理、一致行动、控制权安排与争议预防。</div>
-            <div class="semantic-tags"><span class="semantic-tag">股权代持</span><span class="semantic-tag">公司治理</span><span class="semantic-tag">控制权</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag">股权代持</span><span class="semantic-tag">公司治理</span><span class="semantic-tag">控制权</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#3730a3;--entry-soft:#eef2ff;">
@@ -3056,7 +3364,7 @@ body {
               <div class="semantic-entry-count">71条</div>
             </div>
             <div class="semantic-entry-desc">覆盖创一代、配偶、子女、接班人之间围绕继承、婚姻、家族治理和跨代分配产生的问题。</div>
-            <div class="semantic-tags"><span class="semantic-tag">继承安排</span><span class="semantic-tag">家族治理</span><span class="semantic-tag">跨代分配</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag">继承安排</span><span class="semantic-tag">家族治理</span><span class="semantic-tag">跨代分配</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#115e59;--entry-soft:#f0fdfa;">
@@ -3065,7 +3373,7 @@ body {
               <div class="semantic-entry-count">9条</div>
             </div>
             <div class="semantic-entry-desc">覆盖股权捐赠、慈善信托、基金会治理、公益支出与家族声誉管理相关问题。</div>
-            <div class="semantic-tags"><span class="semantic-tag">慈善信托</span><span class="semantic-tag">股权捐赠</span><span class="semantic-tag">公益治理</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag">慈善信托</span><span class="semantic-tag">股权捐赠</span><span class="semantic-tag">公益治理</span></div>
           </div>
         </div>
       </div>
