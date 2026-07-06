@@ -964,34 +964,6 @@ tr:hover td { background: #fafafa; }
   height: 100%;
 }
 
-.space-formula-card {
-  position: absolute;
-  left: 16px;
-  top: 16px;
-  width: 250px;
-  padding: 12px 14px;
-  border: 1px solid rgba(37,99,235,.22);
-  border-radius: 8px;
-  background: rgba(255,255,255,.84);
-  box-shadow: 0 12px 28px rgba(15,23,42,.08);
-  backdrop-filter: blur(8px);
-}
-
-.space-formula-card strong {
-  display: block;
-  font-size: 13px;
-  color: #111827;
-  margin-bottom: 6px;
-}
-
-.space-formula-card code {
-  display: block;
-  font-size: 11.5px;
-  color: #1d4ed8;
-  line-height: 1.65;
-  white-space: normal;
-}
-
 .space-legend {
   position: absolute;
   right: 16px;
@@ -1090,11 +1062,6 @@ tr:hover td { background: #fafafa; }
   .semantic-flow { grid-template-columns: 1fr; }
   .semantic-space { grid-template-columns: 1fr; }
   .space-visual { min-height: 500px; }
-  .space-formula-card {
-    left: 12px;
-    right: 12px;
-    width: auto;
-  }
 }
 
 
@@ -3245,13 +3212,6 @@ body {
           <text x="410" y="348" font-size="13" font-weight="900" fill="#be123c">Tax 税务</text>
           <text x="512" y="118" font-size="13" font-weight="900" fill="#1d4ed8">CM 资本</text>
         </svg>
-
-        <div class="space-formula-card">
-          <strong>核心表达</strong>
-          <code>p_i = (Legal_i, Tax_i, CM_i, x_i)</code>
-          <code>E_s = { p_i | cos(p_i, s) >= tau }</code>
-          <code>q = s + alpha f_1 + beta f_2 + gamma f_3</code>
-        </div>
 
         <div class="space-legend">
           <div class="space-legend-item"><span class="space-dot" style="--dot:#60a5fa;"></span>场景入口投影区</div>
