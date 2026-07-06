@@ -6067,6 +6067,8 @@ function initExpansionCharts() {
 
 function initScenesCharts() {
 
+  renderPainBuPanel();
+
   const el = document.getElementById('chart-scene-bar');
 
   if (!el || chartInstances['scenes-bar']) return;
@@ -6130,10 +6132,6 @@ function initScenesCharts() {
     }]
 
   });
-
-
-
-  renderPainBuPanel();
 
 }
 
