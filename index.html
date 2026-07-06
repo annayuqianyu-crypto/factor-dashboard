@@ -6655,11 +6655,18 @@ function _mgmtDeltaBadge(delta, colorPos) {
 }
 
 // 周度数据：合并「内置默认」与「用户页面编辑版(localStorage)」
-// 规则：以 date 为键，用户编辑版优先（保留其改动）；代码新增的日期(用户版没有的，如新周快照)自动补入。按日期排序。
+// 规则：以 date 为键，当前数据版本内用户编辑版优先；代码固化新口径后自动失效旧缓存。
 const MGMT_WEEKLY_USER_KEY = 'mgmt_weekly_user';
+const MGMT_WEEKLY_USER_VERSION_KEY = 'mgmt_weekly_user_version';
+const MGMT_WEEKLY_DATA_VERSION = '2026-07-06-pain-737';
 function _mgmtGetWeekly() {
   let user = null;
   try {
+    const userVersion = localStorage.getItem(MGMT_WEEKLY_USER_VERSION_KEY);
+    if (userVersion !== MGMT_WEEKLY_DATA_VERSION) {
+      localStorage.removeItem(MGMT_WEEKLY_USER_KEY);
+      localStorage.setItem(MGMT_WEEKLY_USER_VERSION_KEY, MGMT_WEEKLY_DATA_VERSION);
+    }
     const u = JSON.parse(localStorage.getItem(MGMT_WEEKLY_USER_KEY) || 'null');
     if (Array.isArray(u) && u.length) user = u;
   } catch {}
@@ -6924,7 +6931,10 @@ function _mgmtSaveWeeklyFromTable() {
   });
   // 按日期升序排（防止改日期后顺序错乱）
   next.sort((a, b) => a.date.localeCompare(b.date));
-  try { localStorage.setItem(MGMT_WEEKLY_USER_KEY, JSON.stringify(next)); } catch {}
+  try {
+    localStorage.setItem(MGMT_WEEKLY_USER_KEY, JSON.stringify(next));
+    localStorage.setItem(MGMT_WEEKLY_USER_VERSION_KEY, MGMT_WEEKLY_DATA_VERSION);
+  } catch {}
   initMgmtPage();   // KPI/环比/趋势图/表格 全部重算
 }
 
@@ -6936,7 +6946,10 @@ function mgmtAddWeek() {
     sku: (last.sku != null ? last.sku : null),
     newCM: 0, newLegal: 0, newTax: 0, newSkuCM: 0, newSkuLegal: 0, newSkuTax: 0,
     noteFactor: '', notePain: '', noteScene: '', noteSku: '' });
-  try { localStorage.setItem(MGMT_WEEKLY_USER_KEY, JSON.stringify(cur)); } catch {}
+  try {
+    localStorage.setItem(MGMT_WEEKLY_USER_KEY, JSON.stringify(cur));
+    localStorage.setItem(MGMT_WEEKLY_USER_VERSION_KEY, MGMT_WEEKLY_DATA_VERSION);
+  } catch {}
   initMgmtPage();
 }
 
@@ -6945,7 +6958,10 @@ function mgmtDeleteWeek(idx) {
   if (!cur[idx]) return;
   if (!confirm(`确认删除 ${cur[idx].date} 这一期数据？`)) return;
   cur.splice(idx, 1);
-  try { localStorage.setItem(MGMT_WEEKLY_USER_KEY, JSON.stringify(cur)); } catch {}
+  try {
+    localStorage.setItem(MGMT_WEEKLY_USER_KEY, JSON.stringify(cur));
+    localStorage.setItem(MGMT_WEEKLY_USER_VERSION_KEY, MGMT_WEEKLY_DATA_VERSION);
+  } catch {}
   initMgmtPage();
 }
 
@@ -6977,6 +6993,7 @@ function mgmtResetEdits() {
   if (!confirm('确认清除你在本浏览器做的全部修改（文案 + 周度数据），恢复默认？')) return;
   localStorage.removeItem(MGMT_EDIT_KEY);
   localStorage.removeItem(MGMT_WEEKLY_USER_KEY);
+  localStorage.removeItem(MGMT_WEEKLY_USER_VERSION_KEY);
   location.reload();
 }
 
