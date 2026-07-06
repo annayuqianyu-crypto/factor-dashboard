@@ -6632,9 +6632,9 @@ const MGMT_WEEKLY = [
     newCM: 9, newLegal: 53, newTax: 61, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
     note: '因子库完成202607月度更新：基于已同步痛点反哺扩库，主表1706行，本轮新增298行，并完成L6.4归位去重与MECE复检。',
     noteFactor: '6月新增298行，总计1706行，',
-    notePain: '已上线痛点总数737条：本周新增税务+61、法律+53、资本+9；最新导出口径仅统计同步状态为“已同步”的小程序痛点。',
+    notePain: '已上线痛点总数737条：本周新增税务+61、法律+53、资本+9。',
     noteScene: '已更新6月份的慧管家纪要和场景生成',
-    noteSku: '' },
+    noteSku: 'Legal已完成12支需增补SKU PPT，剩余1支准备中，预计本周定稿；Tax已完成' },
 ];
 
 function _mgmtResolve(snap) {
@@ -6658,7 +6658,7 @@ function _mgmtDeltaBadge(delta, colorPos) {
 // 规则：以 date 为键，当前数据版本内用户编辑版优先；代码固化新口径后自动失效旧缓存。
 const MGMT_WEEKLY_USER_KEY = 'mgmt_weekly_user';
 const MGMT_WEEKLY_USER_VERSION_KEY = 'mgmt_weekly_user_version';
-const MGMT_WEEKLY_DATA_VERSION = '2026-07-06-pain-737';
+const MGMT_WEEKLY_DATA_VERSION = '2026-07-06-mgmt-final-737';
 function _mgmtGetWeekly() {
   let user = null;
   try {
