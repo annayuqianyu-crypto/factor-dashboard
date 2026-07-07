@@ -3358,7 +3358,7 @@ body {
             <polygon points="116,318 116,202 354,202 354,318" fill="#fb7185" opacity=".15" stroke="#fb7185" stroke-width="1.1"/>
             <text x="196" y="311" font-size="10.5" font-weight="900" fill="#be123c">LT 法税投影面</text>
             <polygon points="210,316 388,316 486,254 308,254" fill="#60a5fa" opacity=".16" stroke="#60a5fa" stroke-width="1.1"/>
-            <text x="326" y="309" font-size="10.5" font-weight="900" fill="#1d4ed8">CT 税资投影面</text>
+            <text x="326" y="309" font-size="10.5" font-weight="900" fill="#1d4ed8">TC 税资投影面</text>
             <polygon points="114,286 114,190 274,112 274,208" fill="#a78bfa" opacity=".18" stroke="#8b5cf6" stroke-width="1.1"/>
             <text x="126" y="198" font-size="10.5" font-weight="900" fill="#6d28d9">LC 法资投影面</text>
             <ellipse cx="354" cy="226" rx="78" ry="30" fill="#fff7ed" stroke="#f59e0b" stroke-width="1.4" opacity=".72" transform="rotate(-18 354 226)"/>
@@ -3367,6 +3367,13 @@ body {
 
           <g>
             <ellipse cx="318" cy="229" rx="124" ry="51" fill="none" stroke="#60a5fa" stroke-width="1.6" stroke-dasharray="8 8" transform="rotate(-18 318 229)"/>
+          </g>
+
+          <g>
+            <path d="M454 118 C420 156, 379 195, 338 223" fill="none" stroke="#60a5fa" stroke-width="1.3" stroke-dasharray="5 6" opacity=".82"/>
+            <rect x="390" y="68" width="206" height="44" rx="9" fill="#ffffff" opacity=".95" stroke="#bfdbfe"/>
+            <text x="404" y="86" font-size="12" font-weight="900" fill="#1d4ed8">E_m 业务场景入口</text>
+            <text x="404" y="101" font-size="10.2" fill="#64748b">蓝色虚线椭圆：场景入口覆盖区</text>
           </g>
 
           <g>
@@ -3426,13 +3433,6 @@ body {
           </g>
 
           <g>
-            <path d="M118 382 C162 330, 224 285, 287 247" fill="none" stroke="#60a5fa" stroke-width="1.3" stroke-dasharray="5 6" opacity=".82"/>
-            <rect x="24" y="382" width="204" height="36" rx="9" fill="#ffffff" opacity=".94" stroke="#bfdbfe"/>
-            <text x="38" y="399" font-size="12" font-weight="900" fill="#1d4ed8">E_m 业务场景入口</text>
-            <text x="38" y="414" font-size="10.2" fill="#64748b">入口在双轴平面上的投影范围</text>
-          </g>
-
-          <g>
             <path d="M348 382 C335 342, 332 309, 330 268" fill="none" stroke="#0f766e" stroke-width="1.3" stroke-dasharray="5 6" opacity=".82"/>
             <rect x="246" y="382" width="206" height="36" rx="9" fill="#ffffff" opacity=".94" stroke="#99f6e4"/>
             <text x="260" y="399" font-size="12" font-weight="900" fill="#0f766e">F_j 痛点族</text>
@@ -3441,7 +3441,7 @@ body {
         </svg>
 
         <div class="space-legend">
-          <div class="space-legend-item"><span class="space-dot" style="--dot:#60a5fa;"></span>入口投影 E_m</div>
+          <div class="space-legend-item"><span class="space-dot" style="--dot:#60a5fa;"></span>场景入口 E_m</div>
           <div class="space-legend-item"><span class="space-dot" style="--dot:#0f766e;"></span>痛点族 F_j</div>
           <div class="space-legend-item"><span class="space-dot" style="--dot:#f59e0b;"></span>痛点簇 C_k</div>
           <div class="space-legend-item"><span class="space-dot" style="--dot:#6366f1;"></span>单条痛点 p_i</div>
@@ -3472,8 +3472,8 @@ body {
             <div class="space-method-title">3. 业务场景入口 E_m</div>
             <div class="space-method-symbol">入口层</div>
           </div>
-          <p>入口是用户问题在双轴业务平面上的投影范围。LT 看法税交叉，TC 看税资交叉，LC 看法资交叉；投影面积越大，说明该入口能够承接的相邻痛点族越多。</p>
-          <div class="space-note">业务口径：E_m 回答“从哪里进入问题空间”，不是最终分类；双轴投影用于看入口覆盖面，LTC 内部点云用于看真实痛点密度。</div>
+          <p>蓝色虚线椭圆是某个业务场景入口在三维空间中的覆盖区；LT、TC、LC 三块彩色面是观察该入口覆盖范围的双轴投影面。</p>
+          <div class="space-note">业务口径：E_m 回答“从哪里进入问题空间”，不是最终分类；投影面用于观察入口覆盖面，LTC 内部点云用于看真实痛点密度。</div>
         </div>
 
         <div class="space-method-card">
