@@ -3325,59 +3325,49 @@ body {
           </defs>
 
           <g filter="url(#softShadow)">
-            <polygon points="90,335 385,335 540,220 245,220" fill="#f8fafc" stroke="#dbeafe" stroke-width="1.2"/>
-            <polygon points="385,335 540,220 540,35 385,150" fill="#eef6ff" stroke="#dbeafe" stroke-width="1.2" opacity=".82"/>
-            <polygon points="90,150 385,150 540,35 245,35" fill="#faf5ff" stroke="#e9d5ff" stroke-width="1.2" opacity=".72"/>
+            <polygon points="104,332 206,74 506,326" fill="#faf5ff" stroke="#ddd6fe" stroke-width="1.2" opacity=".62"/>
+            <polygon points="104,332 206,74 505,112" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.2" opacity=".58"/>
+            <polygon points="104,332 505,112 506,326" fill="#fff1f2" stroke="#fecdd3" stroke-width="1.2" opacity=".48"/>
+            <polygon points="206,74 505,112 506,326" fill="#f8fafc" stroke="#dbeafe" stroke-width="1.2" opacity=".42"/>
           </g>
 
-          <g stroke="#cbd5e1" stroke-width="1" opacity=".62" fill="none">
-            <path d="M149 335 L304 220"/>
-            <path d="M208 335 L363 220"/>
-            <path d="M267 335 L422 220"/>
-            <path d="M326 335 L481 220"/>
-            <path d="M121 312 L416 312"/>
-            <path d="M152 289 L447 289"/>
-            <path d="M183 266 L478 266"/>
-            <path d="M214 243 L509 243"/>
-            <path d="M385 335 L385 150"/>
-            <path d="M424 306 L424 121"/>
-            <path d="M463 277 L463 92"/>
-            <path d="M501 249 L501 64"/>
-            <path d="M90 288 L385 288"/>
-            <path d="M90 242 L385 242"/>
-            <path d="M90 196 L385 196"/>
+          <g stroke="#cbd5e1" stroke-width="1" opacity=".55" fill="none">
+            <polygon points="132,278 286,152 422,284"/>
+            <polygon points="160,224 366,130 446,242"/>
+            <polygon points="185,166 441,120 474,178"/>
+            <path d="M206 74 L506 326"/>
+            <path d="M505 112 L506 326"/>
+            <path d="M206 74 L505 112"/>
           </g>
 
-          <g stroke-linecap="round" stroke-width="3.6" fill="none">
-            <path d="M90 335 L90 96" stroke="url(#axisLegal)" marker-end="url(#axisArrowLegal)"/>
-            <path d="M90 335 L407 335" stroke="url(#axisTax)" marker-end="url(#axisArrowTax)"/>
-            <path d="M90 335 L255 212" stroke="url(#axisCM)" marker-end="url(#axisArrowCM)"/>
+          <g stroke-linecap="round" stroke-width="3.8" fill="none">
+            <path d="M104 332 L206 74" stroke="url(#axisLegal)" marker-end="url(#axisArrowLegal)"/>
+            <path d="M104 332 L506 326" stroke="url(#axisTax)" marker-end="url(#axisArrowTax)"/>
+            <path d="M104 332 L505 112" stroke="url(#axisCM)" marker-end="url(#axisArrowCM)"/>
           </g>
-          <path d="M255 212 L540 35" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="5 7" opacity=".35"/>
-          <path d="M407 335 L540 220 L540 35" fill="none" stroke="#bfdbfe" stroke-width="1.2" stroke-dasharray="5 7" opacity=".65"/>
-          <path d="M90 96 L245 35 L540 35" fill="none" stroke="#ddd6fe" stroke-width="1.2" stroke-dasharray="5 7" opacity=".65"/>
+          <circle cx="104" cy="332" r="4.5" fill="#334155"/>
+          <text x="70" y="356" font-size="11" font-weight="800" fill="#64748b">业务原点</text>
 
           <g>
-            <ellipse cx="322" cy="228" rx="118" ry="50" fill="url(#entryGlow)" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="8 8" transform="rotate(-23 322 228)"/>
-            <ellipse cx="337" cy="214" rx="102" ry="40" fill="none" stroke="#bfdbfe" stroke-width="1" opacity=".78" transform="rotate(-23 337 214)"/>
-            <path d="M214 275 C242 255, 268 242, 294 232" fill="none" stroke="#60a5fa" stroke-width="1.1" opacity=".7"/>
-            <text x="166" y="266" font-size="13" font-weight="900" fill="#1d4ed8">E_m 业务场景入口</text>
-            <text x="166" y="284" font-size="10.5" fill="#64748b">空间投影体</text>
+            <ellipse cx="315" cy="222" rx="126" ry="56" fill="url(#entryGlow)" stroke="#60a5fa" stroke-width="1.6" stroke-dasharray="8 8" transform="rotate(-15 315 222)"/>
+            <path d="M205 252 C238 232, 265 221, 298 213" fill="none" stroke="#60a5fa" stroke-width="1.1" opacity=".7"/>
+            <text x="164" y="270" font-size="13" font-weight="900" fill="#1d4ed8">E_m 业务场景入口</text>
+            <text x="164" y="288" font-size="10.5" fill="#64748b">三棱锥内的一片投影区域</text>
           </g>
 
           <g>
-            <path d="M235 294 C286 258, 345 225, 452 187 L470 203 C360 234, 306 266, 247 309 Z" fill="#14b8a6" opacity=".16" stroke="#0f766e" stroke-width="1.1"/>
-            <path d="M240 302 C300 262, 356 229, 458 195" fill="none" stroke="#0f766e" stroke-width="2.4" stroke-linecap="round"/>
-            <text x="210" y="324" font-size="13" font-weight="900" fill="#0f766e">F_j 痛点族</text>
-            <text x="210" y="341" font-size="10.5" fill="#64748b">同一业务方向的母级集合</text>
+            <path d="M230 286 C290 252, 358 223, 466 183 L482 199 C372 232, 308 263, 241 301 Z" fill="#14b8a6" opacity=".16" stroke="#0f766e" stroke-width="1.1"/>
+            <path d="M235 294 C302 256, 366 226, 472 191" fill="none" stroke="#0f766e" stroke-width="2.5" stroke-linecap="round"/>
+            <text x="210" y="319" font-size="13" font-weight="900" fill="#0f766e">F_j 痛点族</text>
+            <text x="210" y="336" font-size="10.5" fill="#64748b">沿同一语义方向收敛</text>
           </g>
 
           <g>
             <ellipse cx="352" cy="235" rx="45" ry="20" fill="url(#clusterGlow)" stroke="#f59e0b" stroke-width="1.5" transform="rotate(-20 352 235)"/>
-            <ellipse cx="420" cy="207" rx="35" ry="16" fill="#fff7ed" stroke="#f59e0b" stroke-width="1.2" opacity=".9" transform="rotate(-20 420 207)"/>
+            <ellipse cx="421" cy="207" rx="35" ry="16" fill="#fff7ed" stroke="#f59e0b" stroke-width="1.2" opacity=".9" transform="rotate(-20 421 207)"/>
             <ellipse cx="300" cy="263" rx="30" ry="14" fill="#fef3c7" stroke="#f59e0b" stroke-width="1" opacity=".72" transform="rotate(-20 300 263)"/>
-            <text x="409" y="260" font-size="13" font-weight="900" fill="#92400e">C_k 痛点簇</text>
-            <text x="409" y="277" font-size="10.5" fill="#64748b">局部高密度点云</text>
+            <text x="410" y="258" font-size="13" font-weight="900" fill="#92400e">C_k 痛点簇</text>
+            <text x="410" y="275" font-size="10.5" fill="#64748b">局部高密度点云</text>
           </g>
 
           <g stroke="#64748b" stroke-width="1" opacity=".34" marker-end="url(#vectorArrow)">
@@ -3405,9 +3395,9 @@ body {
           <text x="478" y="185" font-size="12.5" font-weight="900" fill="#4338ca">p_i 单条痛点</text>
           <text x="478" y="202" font-size="10.5" fill="#64748b">BU 已确认真实条目</text>
 
-          <text x="46" y="88" font-size="13" font-weight="900" fill="#6d28d9">Y / Legal 法律</text>
-          <text x="414" y="351" font-size="13" font-weight="900" fill="#be123c">X / Tax 税务</text>
-          <text x="262" y="205" font-size="13" font-weight="900" fill="#1d4ed8">Z / CM 资本</text>
+          <text x="148" y="63" font-size="13" font-weight="900" fill="#6d28d9">Legal 法律边界</text>
+          <text x="420" y="350" font-size="13" font-weight="900" fill="#be123c">Tax 税务边界</text>
+          <text x="472" y="101" font-size="13" font-weight="900" fill="#1d4ed8">CM 资本边界</text>
         </svg>
 
         <div class="space-legend">
@@ -3424,8 +3414,8 @@ body {
             <div class="space-method-title">1. 业务语义空间</div>
             <div class="space-method-symbol">空间底座</div>
           </div>
-          <p>法、税、资是三条组织能力坐标轴；主体、资产、动作、约束、风险是定位痛点的业务结构特征。每条真实痛点都可以看作空间中的一个点 p_i。</p>
-          <div class="space-note">轻量数学口径：p_i 是一个业务语义向量，不是页面上手写出来的总结。</div>
+          <p>法、税、资不是物理坐标轴，而是三条语义边界。三条边界围成一个业务语义三棱锥；主体、资产、动作、约束、风险共同决定真实痛点 p_i 在其中的位置。</p>
+          <div class="space-note">轻量数学口径：p_i 是落在三棱锥内部的业务语义向量，越靠近某条边界，说明越受该 BU 能力牵引。</div>
         </div>
 
         <div class="space-method-card">
@@ -3433,8 +3423,8 @@ body {
             <div class="space-method-title">2. 业务场景入口 E_m</div>
             <div class="space-method-symbol">入口层</div>
           </div>
-          <p>入口是较大的投影区域，负责把用户问题带入空间。它可以覆盖多个族，但页面上只展示最主导、最有识别度的族，避免入口之间互相吞并。</p>
-          <div class="space-note">业务口径：E_m 更像检索区域，不是最终分类。</div>
+          <p>入口是用户问题投射到三棱锥内部后形成的较大区域。它可以同时靠近两条或三条边界，但页面只展示最主导、最有识别度的族。</p>
+          <div class="space-note">业务口径：E_m 更像检索区域，不是最终分类；它回答“从哪里进入问题空间”。</div>
         </div>
 
         <div class="space-method-card">
