@@ -3322,9 +3322,6 @@ body {
             <marker id="axisArrowCM" markerWidth="10" markerHeight="10" refX="8.5" refY="5" orient="auto" markerUnits="strokeWidth">
               <path d="M0,0 L9,5 L0,10 Z" fill="#64748b"/>
             </marker>
-            <marker id="anchorArrow" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto" markerUnits="strokeWidth">
-              <path d="M0,0 L7,3.5 L0,7 Z" fill="#0f172a" opacity=".52"/>
-            </marker>
           </defs>
 
           <g filter="url(#softShadow)">
@@ -3353,11 +3350,6 @@ body {
             <path d="M92 335 L92 82" stroke="#64748b" marker-end="url(#axisArrowLegal)"/>
             <path d="M92 335 L458 335" stroke="#64748b" marker-end="url(#axisArrowTax)"/>
             <path d="M92 335 L292 210" stroke="#64748b" marker-end="url(#axisArrowCM)"/>
-          </g>
-          <g stroke-linecap="round" fill="none" opacity=".9">
-            <path d="M92 335 L92 122" stroke="#7c3aed" stroke-width="2" stroke-dasharray="6 7" marker-end="url(#anchorArrow)"/>
-            <path d="M92 335 L402 335" stroke="#e11d48" stroke-width="2" stroke-dasharray="6 7" marker-end="url(#anchorArrow)"/>
-            <path d="M92 335 L260 230" stroke="#2563eb" stroke-width="2" stroke-dasharray="6 7" marker-end="url(#anchorArrow)"/>
           </g>
           <circle cx="92" cy="335" r="4.5" fill="#334155"/>
           <text x="58" y="358" font-size="11" font-weight="800" fill="#64748b">低复杂度原点</text>
@@ -3451,7 +3443,6 @@ body {
         </svg>
 
         <div class="space-legend">
-          <div class="space-legend-item"><span class="space-dot" style="--dot:#0f172a;"></span>专家锚点 Axis</div>
           <div class="space-legend-item"><span class="space-dot" style="--dot:#60a5fa;"></span>入口投影 E_m</div>
           <div class="space-legend-item"><span class="space-dot" style="--dot:#0f766e;"></span>痛点族 F_j</div>
           <div class="space-legend-item"><span class="space-dot" style="--dot:#f59e0b;"></span>痛点簇 C_k</div>
