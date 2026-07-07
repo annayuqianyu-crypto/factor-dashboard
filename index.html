@@ -3307,6 +3307,21 @@ body {
               <stop offset="62%" stop-color="#fde68a" stop-opacity=".42"/>
               <stop offset="100%" stop-color="#f59e0b" stop-opacity=".16"/>
             </radialGradient>
+            <radialGradient id="legalHeat" cx="50%" cy="50%" r="62%">
+              <stop offset="0%" stop-color="#a78bfa" stop-opacity=".34"/>
+              <stop offset="70%" stop-color="#c4b5fd" stop-opacity=".14"/>
+              <stop offset="100%" stop-color="#c4b5fd" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="taxHeat" cx="50%" cy="50%" r="62%">
+              <stop offset="0%" stop-color="#fb7185" stop-opacity=".32"/>
+              <stop offset="70%" stop-color="#fecdd3" stop-opacity=".13"/>
+              <stop offset="100%" stop-color="#fecdd3" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="cmHeat" cx="50%" cy="50%" r="62%">
+              <stop offset="0%" stop-color="#60a5fa" stop-opacity=".34"/>
+              <stop offset="70%" stop-color="#bfdbfe" stop-opacity=".14"/>
+              <stop offset="100%" stop-color="#bfdbfe" stop-opacity="0"/>
+            </radialGradient>
             <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
               <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#0f172a" flood-opacity=".13"/>
             </filter>
@@ -3325,49 +3340,61 @@ body {
           </defs>
 
           <g filter="url(#softShadow)">
-            <polygon points="104,332 206,74 506,326" fill="#faf5ff" stroke="#ddd6fe" stroke-width="1.2" opacity=".62"/>
-            <polygon points="104,332 206,74 505,112" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.2" opacity=".58"/>
-            <polygon points="104,332 505,112 506,326" fill="#fff1f2" stroke="#fecdd3" stroke-width="1.2" opacity=".48"/>
-            <polygon points="206,74 505,112 506,326" fill="#f8fafc" stroke="#dbeafe" stroke-width="1.2" opacity=".42"/>
+            <polygon points="92,335 388,335 530,245 235,245" fill="#f8fafc" stroke="#dbeafe" stroke-width="1.2" opacity=".9"/>
+            <polygon points="92,150 388,150 530,60 235,60" fill="#ffffff" stroke="#dbeafe" stroke-width="1.2" opacity=".68"/>
+            <polygon points="92,335 92,150 235,60 235,245" fill="#faf5ff" stroke="#e9d5ff" stroke-width="1.2" opacity=".58"/>
+            <polygon points="388,335 388,150 530,60 530,245" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.2" opacity=".62"/>
           </g>
 
-          <g stroke="#cbd5e1" stroke-width="1" opacity=".55" fill="none">
-            <polygon points="132,278 286,152 422,284"/>
-            <polygon points="160,224 366,130 446,242"/>
-            <polygon points="185,166 441,120 474,178"/>
-            <path d="M206 74 L506 326"/>
-            <path d="M505 112 L506 326"/>
-            <path d="M206 74 L505 112"/>
+          <g stroke="#cbd5e1" stroke-width="1" opacity=".58" fill="none">
+            <path d="M151 335 L151 150 L294 60"/>
+            <path d="M210 335 L210 150 L353 60"/>
+            <path d="M269 335 L269 150 L412 60"/>
+            <path d="M328 335 L328 150 L471 60"/>
+            <path d="M120 315 L416 315 L558 225"/>
+            <path d="M149 295 L445 295 L587 205"/>
+            <path d="M178 275 L474 275 L616 185" opacity=".35"/>
+            <path d="M92 289 L388 289 L530 199"/>
+            <path d="M92 243 L388 243 L530 153"/>
+            <path d="M92 197 L388 197 L530 107"/>
+            <path d="M235 245 L235 60"/>
+            <path d="M530 245 L530 60"/>
           </g>
 
-          <g stroke-linecap="round" stroke-width="3.8" fill="none">
-            <path d="M104 332 L206 74" stroke="url(#axisLegal)" marker-end="url(#axisArrowLegal)"/>
-            <path d="M104 332 L506 326" stroke="url(#axisTax)" marker-end="url(#axisArrowTax)"/>
-            <path d="M104 332 L505 112" stroke="url(#axisCM)" marker-end="url(#axisArrowCM)"/>
+          <g stroke-linecap="round" stroke-width="3.7" fill="none">
+            <path d="M92 335 L92 102" stroke="url(#axisLegal)" marker-end="url(#axisArrowLegal)"/>
+            <path d="M92 335 L432 335" stroke="url(#axisTax)" marker-end="url(#axisArrowTax)"/>
+            <path d="M92 335 L264 227" stroke="url(#axisCM)" marker-end="url(#axisArrowCM)"/>
           </g>
-          <circle cx="104" cy="332" r="4.5" fill="#334155"/>
-          <text x="70" y="356" font-size="11" font-weight="800" fill="#64748b">业务原点</text>
+          <circle cx="92" cy="335" r="4.5" fill="#334155"/>
+          <text x="58" y="358" font-size="11" font-weight="800" fill="#64748b">低复杂度原点</text>
+
+          <g opacity=".95">
+            <ellipse cx="292" cy="216" rx="94" ry="48" fill="url(#legalHeat)" stroke="#8b5cf6" stroke-width="1.2" transform="rotate(-25 292 216)"/>
+            <ellipse cx="355" cy="245" rx="98" ry="46" fill="url(#taxHeat)" stroke="#fb7185" stroke-width="1.2" transform="rotate(-10 355 245)"/>
+            <ellipse cx="382" cy="199" rx="100" ry="45" fill="url(#cmHeat)" stroke="#60a5fa" stroke-width="1.2" transform="rotate(-26 382 199)"/>
+            <ellipse cx="350" cy="222" rx="86" ry="34" fill="#ffffff" stroke="#f59e0b" stroke-width="1.1" opacity=".42" transform="rotate(-20 350 222)"/>
+          </g>
 
           <g>
-            <ellipse cx="315" cy="222" rx="126" ry="56" fill="url(#entryGlow)" stroke="#60a5fa" stroke-width="1.6" stroke-dasharray="8 8" transform="rotate(-15 315 222)"/>
-            <path d="M205 252 C238 232, 265 221, 298 213" fill="none" stroke="#60a5fa" stroke-width="1.1" opacity=".7"/>
-            <text x="164" y="270" font-size="13" font-weight="900" fill="#1d4ed8">E_m 业务场景入口</text>
-            <text x="164" y="288" font-size="10.5" fill="#64748b">三棱锥内的一片投影区域</text>
+            <ellipse cx="318" cy="229" rx="124" ry="51" fill="none" stroke="#60a5fa" stroke-width="1.6" stroke-dasharray="8 8" transform="rotate(-18 318 229)"/>
+            <text x="152" y="266" font-size="13" font-weight="900" fill="#1d4ed8">E_m 业务场景入口</text>
+            <text x="152" y="284" font-size="10.5" fill="#64748b">立方体内的检索子空间</text>
           </g>
 
           <g>
-            <path d="M230 286 C290 252, 358 223, 466 183 L482 199 C372 232, 308 263, 241 301 Z" fill="#14b8a6" opacity=".16" stroke="#0f766e" stroke-width="1.1"/>
-            <path d="M235 294 C302 256, 366 226, 472 191" fill="none" stroke="#0f766e" stroke-width="2.5" stroke-linecap="round"/>
-            <text x="210" y="319" font-size="13" font-weight="900" fill="#0f766e">F_j 痛点族</text>
-            <text x="210" y="336" font-size="10.5" fill="#64748b">沿同一语义方向收敛</text>
+            <path d="M240 290 C300 255, 363 225, 468 190" fill="none" stroke="#0f766e" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M235 282 C294 248, 360 218, 462 181 L481 198 C371 231, 309 263, 246 300 Z" fill="#14b8a6" opacity=".15" stroke="#0f766e" stroke-width="1"/>
+            <text x="212" y="319" font-size="13" font-weight="900" fill="#0f766e">F_j 痛点族</text>
+            <text x="212" y="336" font-size="10.5" fill="#64748b">热区内的稳定业务方向</text>
           </g>
 
           <g>
             <ellipse cx="352" cy="235" rx="45" ry="20" fill="url(#clusterGlow)" stroke="#f59e0b" stroke-width="1.5" transform="rotate(-20 352 235)"/>
             <ellipse cx="421" cy="207" rx="35" ry="16" fill="#fff7ed" stroke="#f59e0b" stroke-width="1.2" opacity=".9" transform="rotate(-20 421 207)"/>
             <ellipse cx="300" cy="263" rx="30" ry="14" fill="#fef3c7" stroke="#f59e0b" stroke-width="1" opacity=".72" transform="rotate(-20 300 263)"/>
-            <text x="410" y="258" font-size="13" font-weight="900" fill="#92400e">C_k 痛点簇</text>
-            <text x="410" y="275" font-size="10.5" fill="#64748b">局部高密度点云</text>
+            <text x="410" y="260" font-size="13" font-weight="900" fill="#92400e">C_k 痛点簇</text>
+            <text x="410" y="277" font-size="10.5" fill="#64748b">交叠热区中的点云</text>
           </g>
 
           <g stroke="#64748b" stroke-width="1" opacity=".34" marker-end="url(#vectorArrow)">
@@ -3393,11 +3420,11 @@ body {
           <circle cx="466" cy="190" r="8" fill="#6366f1" opacity=".18"/>
           <circle cx="466" cy="190" r="4.6" fill="#4f46e5"/>
           <text x="478" y="185" font-size="12.5" font-weight="900" fill="#4338ca">p_i 单条痛点</text>
-          <text x="478" y="202" font-size="10.5" fill="#64748b">BU 已确认真实条目</text>
+          <text x="478" y="202" font-size="10.5" fill="#64748b">可同时高 L / T / C</text>
 
-          <text x="148" y="63" font-size="13" font-weight="900" fill="#6d28d9">Legal 法律边界</text>
-          <text x="420" y="350" font-size="13" font-weight="900" fill="#be123c">Tax 税务边界</text>
-          <text x="472" y="101" font-size="13" font-weight="900" fill="#1d4ed8">CM 资本边界</text>
+          <text x="45" y="92" font-size="13" font-weight="900" fill="#6d28d9">L 法律强度</text>
+          <text x="438" y="350" font-size="13" font-weight="900" fill="#be123c">T 税务强度</text>
+          <text x="270" y="225" font-size="13" font-weight="900" fill="#1d4ed8">C 资本市场强度</text>
         </svg>
 
         <div class="space-legend">
@@ -3414,8 +3441,8 @@ body {
             <div class="space-method-title">1. 业务语义空间</div>
             <div class="space-method-symbol">空间底座</div>
           </div>
-          <p>法、税、资不是物理坐标轴，而是三条语义边界。三条边界围成一个业务语义三棱锥；主体、资产、动作、约束、风险共同决定真实痛点 p_i 在其中的位置。</p>
-          <div class="space-note">轻量数学口径：p_i 是落在三棱锥内部的业务语义向量，越靠近某条边界，说明越受该 BU 能力牵引。</div>
+          <p>法律 L、税务 T、资本市场 C 是三个相互独立的业务强度轴。每条真实痛点 p_i 都可以落在长方体内部的某个位置，并允许三个维度同时达到高值。</p>
+          <div class="space-note">轻量数学口径：p_i = (L, T, C)。这不是零和分配，而是三个维度各自归一化后的强度坐标。</div>
         </div>
 
         <div class="space-method-card">
@@ -3423,8 +3450,8 @@ body {
             <div class="space-method-title">2. 业务场景入口 E_m</div>
             <div class="space-method-symbol">入口层</div>
           </div>
-          <p>入口是用户问题投射到三棱锥内部后形成的较大区域。它可以同时靠近两条或三条边界，但页面只展示最主导、最有识别度的族。</p>
-          <div class="space-note">业务口径：E_m 更像检索区域，不是最终分类；它回答“从哪里进入问题空间”。</div>
+          <p>入口是用户问题在长方体内形成的检索子空间。它可以同时覆盖法律、税务、资本市场三个热区，尤其适合承接跨境并购、上市公司资本动作等复合场景。</p>
+          <div class="space-note">业务口径：E_m 回答“从哪里进入问题空间”，不是最终分类；用户可以按 L/T/C 的高、中、低组合继续筛选。</div>
         </div>
 
         <div class="space-method-card">
@@ -3432,8 +3459,8 @@ body {
             <div class="space-method-title">3. 痛点族 F_j</div>
             <div class="space-method-symbol">母级集合</div>
           </div>
-          <p>痛点族是若干痛点簇的上层方向。数学上可以理解为：多个簇中心接近同一个业务方向，就归入同一个族。</p>
-          <div class="space-note">业务口径：族回答“这类问题属于哪个稳定业务问题域”，所以要尽量 MECE。</div>
+          <p>痛点族是热区内部的稳定业务方向。数学上可以理解为：多个簇中心在 L/T/C 空间里方向接近，且业务链路相似，就归入同一个族。</p>
+          <div class="space-note">业务口径：族回答“这类问题属于哪个稳定业务问题域”，不同族之间应尽量 MECE，允许入口层存在重叠。</div>
         </div>
 
         <div class="space-method-card">
@@ -3441,8 +3468,8 @@ body {
             <div class="space-method-title">4. 痛点簇 C_k 与痛点 p_i</div>
             <div class="space-method-symbol">子级聚类</div>
           </div>
-          <p>痛点簇由真实痛点聚成：当多个 p_i 在主体、资产、动作、约束、风险上足够接近，就形成一个 C_k。</p>
-          <div class="space-note">业务口径：簇必须能向下展开到 BU 已确认痛点，不能只停留在抽象提炼。</div>
+          <p>痛点簇由真实痛点聚成：当多个 p_i 在 L/T/C 坐标、主体、资产、动作、约束、风险上都足够接近，就形成一个 C_k。</p>
+          <div class="space-note">业务口径：簇必须能向下展开到 BU 已确认痛点；交叠热区越深，通常说明跨 BU 协同价值越高。</div>
         </div>
       </div>
     </div>
