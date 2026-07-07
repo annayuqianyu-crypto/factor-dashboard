@@ -3446,8 +3446,8 @@ body {
             <div class="space-method-title">1. 向量基座</div>
             <div class="space-method-symbol">p_i</div>
           </div>
-          <p>每条已同步痛点先由 BGE-M3 编码为 1024 维语义向量 p_i。输入包含 BU、痛点描述、法规、Tags、核心冲突、潜在风险、解决方案和预期效果。</p>
-          <div class="space-note">轻量数学口径：p_i = BGE-M3(痛点完整文本)。1024 维向量用于机器计算，页面展示再映射为 L / T / C 三维业务坐标。</div>
+          <p>每条已同步痛点先由 BGE-M3 编码为 1024 维语义向量 p_i。它不是只看标题，而是把 BU、痛点描述、法规、Tags、核心冲突、潜在风险、解决方案和预期效果一起读进去。</p>
+          <div class="space-note">例如“美国税务居民境外持股申报复杂”会同时带入美国税法、境外股权、申报表格和双重征税风险；“大股东增持资金不足”则会带入股东身份、股票资产、融资动作和监管约束。机器看到的是完整语义，不是单个关键词。</div>
         </div>
 
         <div class="space-method-card">
@@ -3456,7 +3456,7 @@ body {
             <div class="space-method-symbol">cos</div>
           </div>
           <p>法律、税务、资本市场三条轴由专家锚点文本经 BGE-M3 编码形成，不从 BU 样本里提取，避免样本既当分子又当分母。痛点靠近哪条轴，由余弦相似度决定。</p>
-          <div class="space-note">核心计算：score_axis = cos(p_i, Axis_anchor)。raw cos 是原始相似度，L / T / C 强度是其在 737 条痛点内归一化后的可读分数。</div>
+          <div class="space-note">举例：个人汇算清缴会更贴近税务锚点；股权代持纠纷会更贴近法律锚点；上市公司减持、增持、再融资会更贴近资本市场锚点。若一条痛点同时靠近两条或三条轴，就说明它是复合业务问题。</div>
         </div>
 
         <div class="space-method-card">
@@ -3474,7 +3474,7 @@ body {
             <div class="space-method-symbol">母级集合</div>
           </div>
           <p>痛点族是在 BGE-M3 高维空间中，围绕同一类业务冲突中心形成的一级稳定向量团。它要求向量距离近、业务冲突同源，并且法税资投影结构相近。</p>
-          <div class="space-note">业务口径：族回答“这批痛点属于哪个问题域”。入口可以重叠，但族本身应尽量 MECE，作为一级业务问题域沉淀。</div>
+          <div class="space-note">例如“上市公司资本动作族”可以覆盖增持、减持、可转债、再融资中的共性冲突：股东要完成资本动作，但受到资金来源、披露义务、税负和监管窗口约束。族回答的是“这一批痛点属于哪个一级问题域”。</div>
         </div>
 
         <div class="space-method-card">
@@ -3483,7 +3483,7 @@ body {
             <div class="space-method-symbol">子级聚类</div>
           </div>
           <p>痛点簇是族内二级局部密度团：多个 p_i 围绕局部质心高度聚集，并在主体、资产、动作、约束、风险结构位上呈现同构关系。</p>
-          <div class="space-note">成簇样本阈值只代表复用稳定性，不代表重要性。高频簇适合标准化，高价值低频簇仍可作为专家介入入口。</div>
+          <div class="space-note">例如在“上市公司资本动作族”里，可以继续形成“大股东增持资金路径”“持股平台减持税负”“股权激励行权与退出”这些痛点簇；簇下面才是具体单条痛点 p_i。高频簇适合标准化，高价值低频痛点仍可作为专家介入入口。</div>
         </div>
       </div>
     </div>
