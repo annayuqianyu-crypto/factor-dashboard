@@ -813,7 +813,7 @@ tr:hover td { background: #fafafa; }
 }
 
 .entry-features::before {
-  content: "入口特征";
+  content: "关联痛点族";
   font-size: 11px;
   font-weight: 800;
   color: #64748b;
@@ -3427,7 +3427,7 @@ body {
             <path d="M228 306 C254 284, 279 266, 306 249" fill="none" stroke="#0f766e" stroke-width="1.2" opacity=".78"/>
             <rect x="150" y="308" width="142" height="48" rx="8" fill="#fff" opacity=".9" stroke="#99f6e4"/>
             <text x="164" y="328" font-size="12.5" font-weight="800" fill="#0f766e">收缩切面 q</text>
-            <text x="164" y="345" font-size="10.5" fill="#64748b">入口特征调整方向</text>
+            <text x="164" y="345" font-size="10.5" fill="#64748b">痛点族收缩方向</text>
           </g>
 
           <g>
@@ -3451,7 +3451,7 @@ body {
 
         <div class="space-legend">
           <div class="space-legend-item"><span class="space-dot" style="--dot:#60a5fa;"></span>场景入口投影区</div>
-          <div class="space-legend-item"><span class="space-dot" style="--dot:#0f766e;"></span>入口特征收缩方向</div>
+          <div class="space-legend-item"><span class="space-dot" style="--dot:#0f766e;"></span>痛点族收缩方向</div>
           <div class="space-legend-item"><span class="space-dot" style="--dot:#f59e0b;"></span>痛点簇高密度区</div>
           <div class="space-legend-item"><span class="space-dot" style="--dot:#6366f1;"></span>单个痛点向量</div>
         </div>
@@ -3478,11 +3478,11 @@ body {
 
         <div class="space-method-card">
           <div class="space-method-top">
-            <div class="space-method-title">3. 入口特征形成收缩切面</div>
+            <div class="space-method-title">3. 痛点族形成收缩切面</div>
             <div class="space-method-symbol">收缩层</div>
           </div>
-          <p>入口特征是在大场景内部继续筛选问题的关键词。例如财富传承入口下，可以继续用继承安排、家族治理、跨代分配来缩小搜索范围。</p>
-          <div class="space-note">业务口径：入口特征不是痛点簇，只是帮助系统从“大方向”收敛到“更具体的问题类型”。</div>
+          <p>痛点族是在业务场景入口下继续收缩问题范围的母级集合。例如财富传承入口下，可以进入继承婚姻与家庭治理族、股权代持与控制权纠纷族等方向。</p>
+          <div class="space-note">业务口径：痛点族不是具体痛点，而是把相似业务链路归为母级集合；再向下才进入痛点簇和真实痛点。</div>
         </div>
 
         <div class="space-method-card">
@@ -3510,7 +3510,7 @@ body {
               <div class="semantic-entry-count">225条</div>
             </div>
             <div class="semantic-entry-desc">覆盖实控人、大股东、上市公司围绕增持、减持、控制权、并购重组产生的资金、披露、税务和监管问题。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('listed-capital-action', this)">上市公司资本动作</span><span class="semantic-tag clickable" onclick="semanticShowDrill('equity-incentive', this)">股权激励</span><span class="semantic-tag clickable" onclick="semanticShowDrill('control-dispute', this)">控制权纠纷</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-listed-action', this)">上市公司资本动作族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-equity-incentive', this)">股权激励与员工持股族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-nominee-control', this)">股权代持与控制权纠纷族</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#1e40af;--entry-soft:#eff6ff;">
@@ -3519,7 +3519,7 @@ body {
               <div class="semantic-entry-count">139条</div>
             </div>
             <div class="semantic-entry-desc">覆盖授予、行权、退出、持股平台、递延备案与员工离职争议，是资本、税务、法律高频交叉入口。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('employee-shareholding', this)">员工持股</span><span class="semantic-tag clickable" onclick="semanticShowDrill('exercise-tax', this)">行权税负</span><span class="semantic-tag clickable" onclick="semanticShowDrill('platform-exit', this)">平台退出</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-equity-incentive', this)">股权激励与员工持股族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-listed-action', this)">上市公司资本动作族</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#991b1b;--entry-soft:#fef2f2;">
@@ -3528,7 +3528,7 @@ body {
               <div class="semantic-entry-count">52条</div>
             </div>
             <div class="semantic-entry-desc">覆盖个税、企税、关联交易、转让定价、税务稽查与交易申报，是多数跨 BU 痛点的约束维度。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('tax-health-check', this)">企业税务体检</span><span class="semantic-tag clickable" onclick="semanticShowDrill('related-transaction', this)">关联交易</span><span class="semantic-tag clickable" onclick="semanticShowDrill('tax-audit-response', this)">稽查应对</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('tax-health-check', this)">企业税务合规族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-cross-border-tax', this)">跨境身份与税务居民族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-offshore-substance', this)">境外公司与经济实质族</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#9a3412;--entry-soft:#fff7ed;">
@@ -3537,7 +3537,7 @@ body {
               <div class="semantic-entry-count">75条</div>
             </div>
             <div class="semantic-entry-desc">覆盖海外身份、税务居民、全球征税、CRS/FATCA、FBAR、弃籍税等自然人跨境合规问题。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('tax-residency', this)">税务居民</span><span class="semantic-tag clickable" onclick="semanticShowDrill('crs-fatca', this)">CRS/FATCA</span><span class="semantic-tag clickable" onclick="semanticShowDrill('worldwide-tax', this)">全球征税</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-cross-border-tax', this)">跨境身份与税务居民族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-offshore-substance', this)">境外公司与经济实质族</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#5b21b6;--entry-soft:#f5f3ff;">
@@ -3546,7 +3546,7 @@ body {
               <div class="semantic-entry-count">78条</div>
             </div>
             <div class="semantic-entry-desc">覆盖香港、BVI、开曼、新加坡等境外主体的设立、维护、重组、分红、经济实质和外汇路径。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('fsie', this)">FSIE</span><span class="semantic-tag clickable" onclick="semanticShowDrill('circular-37', this)">37号文</span><span class="semantic-tag clickable" onclick="semanticShowDrill('economic-substance', this)">经济实质</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-offshore-substance', this)">境外公司与经济实质族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-cross-border-tax', this)">跨境身份与税务居民族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('tax-health-check', this)">企业税务合规族</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#166534;--entry-soft:#f0fdf4;">
@@ -3555,7 +3555,7 @@ body {
               <div class="semantic-entry-count">42条</div>
             </div>
             <div class="semantic-entry-desc">覆盖债务隔离、代持风险、婚姻财产、资产执行、信托隔离等高净值客户资产安全问题。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('asset-isolation', this)">资产隔离</span><span class="semantic-tag clickable" onclick="semanticShowDrill('nominee-risk', this)">代持风险</span><span class="semantic-tag clickable" onclick="semanticShowDrill('enforcement-risk', this)">执行风险</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-nominee-control', this)">股权代持与控制权纠纷族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-family-governance', this)">继承婚姻与家庭治理族</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#9d174d;--entry-soft:#fdf2f8;">
@@ -3564,7 +3564,7 @@ body {
               <div class="semantic-entry-count">46条</div>
             </div>
             <div class="semantic-entry-desc">覆盖股权代持、股东协议、章程治理、一致行动、控制权安排与争议预防。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('nominee-shareholding', this)">股权代持</span><span class="semantic-tag clickable" onclick="semanticShowDrill('corporate-governance', this)">公司治理</span><span class="semantic-tag clickable" onclick="semanticShowDrill('control-right', this)">控制权</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-nominee-control', this)">股权代持与控制权纠纷族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-listed-action', this)">上市公司资本动作族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-equity-incentive', this)">股权激励与员工持股族</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#3730a3;--entry-soft:#eef2ff;">
@@ -3573,7 +3573,7 @@ body {
               <div class="semantic-entry-count">71条</div>
             </div>
             <div class="semantic-entry-desc">覆盖创一代、配偶、子女、接班人之间围绕继承、婚姻、家族治理和跨代分配产生的问题。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('inheritance-arrangement', this)">继承安排</span><span class="semantic-tag clickable" onclick="semanticShowDrill('family-governance', this)">家族治理</span><span class="semantic-tag clickable" onclick="semanticShowDrill('intergenerational-allocation', this)">跨代分配</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-family-governance', this)">继承婚姻与家庭治理族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-nominee-control', this)">股权代持与控制权纠纷族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('charitable-trust', this)">慈善公益族</span></div>
           </div>
 
           <div class="semantic-entry-card" style="--entry-color:#115e59;--entry-soft:#f0fdfa;">
@@ -3582,7 +3582,7 @@ body {
               <div class="semantic-entry-count">9条</div>
             </div>
             <div class="semantic-entry-desc">覆盖股权捐赠、慈善信托、基金会治理、公益支出与家族声誉管理相关问题。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('charitable-trust', this)">慈善信托</span><span class="semantic-tag clickable" onclick="semanticShowDrill('equity-donation', this)">股权捐赠</span><span class="semantic-tag clickable" onclick="semanticShowDrill('charity-governance', this)">公益治理</span></div>
+            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('charitable-trust', this)">慈善公益族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-family-governance', this)">继承婚姻与家庭治理族</span></div>
           </div>
         </div>
       </div>
@@ -3591,7 +3591,7 @@ body {
         <div class="semantic-panel">
           <div class="semantic-panel-title">入口不是分类结果</div>
           <div style="font-size:12.5px;color:#475569;line-height:1.75;">
-            场景入口是覆盖较多痛点向量的语义投影区域。用户先从一个业务方向进入，再通过主体、资产、动作、约束、风险收缩检索范围，定位到具体痛点簇和痛点。
+            场景入口是用户进入 C 客模型的业务方向；每个入口直接关联若干痛点族。用户先选业务场景，再选痛点族，系统继续收缩到痛点簇和真实痛点。
           </div>
         </div>
 
@@ -3599,8 +3599,8 @@ body {
           <div class="semantic-panel-title">检索收缩链路</div>
           <div class="semantic-flow">
             <div class="semantic-flow-step"><strong>场景入口</strong><span>股权激励、境外架构、资产保护等大投影区域</span></div>
-            <div class="semantic-flow-step"><strong>结构特征</strong><span>主体、资产、动作、约束、风险逐层补充</span></div>
-            <div class="semantic-flow-step"><strong>痛点簇</strong><span>相似向量聚集形成可解释的问题族</span></div>
+            <div class="semantic-flow-step"><strong>痛点族</strong><span>同一场景下可复用的业务问题家族</span></div>
+            <div class="semantic-flow-step"><strong>痛点簇</strong><span>结构相近的真实痛点归组</span></div>
             <div class="semantic-flow-step"><strong>痛点 / SKU</strong><span>落到已同步痛点证据和服务承接</span></div>
           </div>
         </div>
@@ -3617,18 +3617,7 @@ body {
       </div>
     </div>
 
-    <div style="margin-top:16px;border-top:1px solid #e5e7eb;padding-top:16px;">
-      <div class="semantic-panel-title">代表性痛点族</div>
-      <div class="semantic-cluster-grid">
-        <div class="semantic-cluster clickable" onclick="semanticShowDrill('cluster-listed-action', this)"><strong>上市公司资本动作族</strong><p>主体集中在实控人、大股东、高管；资产集中在股票、限售股、控制权股份；风险集中在资金、信披、减持规则与税务成本。</p></div>
-        <div class="semantic-cluster clickable" onclick="semanticShowDrill('cluster-equity-incentive', this)"><strong>股权激励与员工持股族</strong><p>主体集中在拟上市企业、核心员工、持股平台；动作集中在授予、行权、退出；约束集中在递延备案、个税、工商和离职争议。</p></div>
-        <div class="semantic-cluster clickable" onclick="semanticShowDrill('cluster-cross-border-tax', this)"><strong>跨境身份与税务居民族</strong><p>主体集中在海外身份客户和跨境企业主；约束集中在 CRS、FATCA、全球征税、FBAR、双重居民和弃籍税。</p></div>
-        <div class="semantic-cluster clickable" onclick="semanticShowDrill('cluster-offshore-substance', this)"><strong>境外公司与经济实质族</strong><p>主体集中在香港、BVI、开曼、新加坡公司；约束集中在 FSIE、经济实质、37号文、TRC 和协定优惠。</p></div>
-        <div class="semantic-cluster clickable" onclick="semanticShowDrill('cluster-nominee-control', this)"><strong>股权代持与控制权纠纷族</strong><p>主体集中在实际出资人、代持人、名义股东和配偶；风险集中在举证、婚变、债务执行、优先购买权和公司僵局。</p></div>
-        <div class="semantic-cluster clickable" onclick="semanticShowDrill('cluster-family-governance', this)"><strong>继承婚姻与家庭治理族</strong><p>主体集中在创一代、配偶、继承人、接班人；资产集中在房产、股权、信托受益权；风险集中在共同财产、遗嘱效力和分配纠纷。</p></div>
-      </div>
-      <div id="semantic-drill-panel" class="semantic-drill-panel" style="display:none;"></div>
-    </div>
+    <div id="semantic-drill-panel" class="semantic-drill-panel" style="display:none;"></div>
 
     <div style="margin-top:16px;border-top:1px solid #e5e7eb;padding-top:16px;">
       <div class="semantic-panel-title">代表痛点证据</div>
