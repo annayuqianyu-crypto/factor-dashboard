@@ -3355,20 +3355,20 @@ body {
           <text x="58" y="358" font-size="11" font-weight="800" fill="#64748b">低复杂度原点</text>
 
           <g opacity=".92">
-            <polygon points="112,318 112,196 198,144 198,266" fill="#a78bfa" opacity=".18" stroke="#8b5cf6" stroke-width="1.1"/>
-            <text x="122" y="204" font-size="10.5" font-weight="900" fill="#6d28d9">L 面投影</text>
-            <polygon points="198,300 390,300 488,240 296,240" fill="#fb7185" opacity=".16" stroke="#fb7185" stroke-width="1.1"/>
-            <text x="316" y="294" font-size="10.5" font-weight="900" fill="#be123c">T 面投影</text>
-            <polygon points="392,292 392,176 510,104 510,220" fill="#60a5fa" opacity=".17" stroke="#60a5fa" stroke-width="1.1"/>
-            <text x="407" y="181" font-size="10.5" font-weight="900" fill="#1d4ed8">C 面投影</text>
+            <polygon points="116,318 116,202 354,202 354,318" fill="#fb7185" opacity=".15" stroke="#fb7185" stroke-width="1.1"/>
+            <text x="196" y="311" font-size="10.5" font-weight="900" fill="#be123c">LT 法税投影面</text>
+            <polygon points="210,316 388,316 486,254 308,254" fill="#60a5fa" opacity=".16" stroke="#60a5fa" stroke-width="1.1"/>
+            <text x="326" y="309" font-size="10.5" font-weight="900" fill="#1d4ed8">CT 税资投影面</text>
+            <polygon points="114,286 114,190 274,112 274,208" fill="#a78bfa" opacity=".18" stroke="#8b5cf6" stroke-width="1.1"/>
+            <text x="126" y="198" font-size="10.5" font-weight="900" fill="#6d28d9">LC 法资投影面</text>
             <ellipse cx="354" cy="226" rx="78" ry="30" fill="#fff7ed" stroke="#f59e0b" stroke-width="1.4" opacity=".72" transform="rotate(-18 354 226)"/>
-            <text x="302" y="225" font-size="11" font-weight="900" fill="#92400e">交叉业务高密度区</text>
+            <text x="303" y="225" font-size="11" font-weight="900" fill="#92400e">LTC 交叉高密度区</text>
           </g>
 
           <g>
             <ellipse cx="318" cy="229" rx="124" ry="51" fill="none" stroke="#60a5fa" stroke-width="1.6" stroke-dasharray="8 8" transform="rotate(-18 318 229)"/>
             <text x="152" y="266" font-size="13" font-weight="900" fill="#1d4ed8">E_m 业务场景入口</text>
-            <text x="152" y="284" font-size="10.5" fill="#64748b">入口在边界面上的投影范围</text>
+            <text x="152" y="284" font-size="10.5" fill="#64748b">入口在双轴平面上的投影范围</text>
           </g>
 
           <g>
@@ -3452,8 +3452,8 @@ body {
             <div class="space-method-title">2. 业务场景入口 E_m</div>
             <div class="space-method-symbol">入口层</div>
           </div>
-          <p>入口是用户问题在三个边界面上的投影范围。投影面积越大，说明这个业务入口能够承接的相邻痛点族越多；投影重叠处会进入内部交叉业务高密度区。</p>
-          <div class="space-note">业务口径：E_m 回答“从哪里进入问题空间”，不是最终分类；边界投影用于看入口覆盖面，内部点云用于看真实痛点密度。</div>
+          <p>入口是用户问题在双轴业务平面上的投影范围。LT 看法税交叉，CT 看税资交叉，LC 看法资交叉；投影面积越大，说明该入口能够承接的相邻痛点族越多。</p>
+          <div class="space-note">业务口径：E_m 回答“从哪里进入问题空间”，不是最终分类；双轴投影用于看入口覆盖面，LTC 内部点云用于看真实痛点密度。</div>
         </div>
 
         <div class="space-method-card">
@@ -3461,7 +3461,7 @@ body {
             <div class="space-method-title">3. 痛点族 F_j</div>
             <div class="space-method-symbol">母级集合</div>
           </div>
-          <p>痛点族是边界投影进入空间后形成的稳定业务方向。数学上可以理解为：多个簇中心在 L/T/C 空间里方向接近，且业务链路相似，就归入同一个族。</p>
+          <p>痛点族是双轴投影进入三维空间后形成的稳定业务方向。数学上可以理解为：多个簇中心在 L/T/C 空间里方向接近，且业务链路相似，就归入同一个族。</p>
           <div class="space-note">业务口径：族回答“这类问题属于哪个稳定业务问题域”，不同族之间应尽量 MECE，允许入口层存在重叠。</div>
         </div>
 
@@ -3471,7 +3471,7 @@ body {
             <div class="space-method-symbol">子级聚类</div>
           </div>
           <p>痛点簇由真实痛点聚成：当多个 p_i 在 L/T/C 坐标、主体、资产、动作、约束、风险上都足够接近，就形成一个 C_k。</p>
-          <div class="space-note">业务口径：簇必须能向下展开到 BU 已确认痛点；越靠近交叉业务高密度区，通常说明跨 BU 协同价值越高。</div>
+          <div class="space-note">业务口径：簇必须能向下展开到 BU 已确认痛点；越靠近 LTC 交叉高密度区，通常说明跨 BU 协同价值越高。</div>
         </div>
       </div>
     </div>
