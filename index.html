@@ -3350,8 +3350,8 @@ body {
 
 
   <div class="card">
-    <div class="card-title">法税资三维业务语义空间</div>
-    <div class="semantic-space-summary">本模块用于把已同步痛点从文字清单转化为可计算、可解释、可治理的业务语义地图：先以法律 / 税务 / 资本市场专家锚点建立三维坐标边界，再将 737 条已匹配 SKU 的痛点落入向量基座，形成当前痛点边界与业务边界基本一致的可服务点云，最终支撑业务场景入口检索、重复治理、因子反哺和 SKU 研发判断。</div>
+    <div class="card-title">朝曦痛点向量模型</div>
+    <div class="semantic-space-summary">本模块用于把已同步痛点从文字清单转化为可计算、可解释、可治理的业务语义地图：先用法律 / 税务 / 资本市场专家锚点建立三维坐标系，再将 737 条痛点编码为向量 p_i 并投影为 s_i=(L_i,T_i,C_i)，由点云逐步形成痛点簇、痛点族、场景云团和三面投影热区，最终支撑场景检索、痛点治理、因子反哺和后续 SKU 能力边界叠加。</div>
     <details class="semantic-math-dict">
       <summary>∑ 数学字典</summary>
       <div class="semantic-math-dict-panel">
@@ -3359,29 +3359,30 @@ body {
         <div class="semantic-math-dict-item"><strong>最低复用样本量 m</strong>形成一个簇所需的最少相似痛点数量。比如 m=3 时，至少要有 3 条已审核痛点在语义和结构上足够接近，才把它视为可复用痛点簇，避免把孤立个案误判成产品机会。</div>
         <div class="semantic-math-dict-item"><strong>余弦相似度 cos</strong>衡量两条向量方向是否接近。方向越接近，cos 越高；在这里用于判断某条痛点是否靠近某个专家锚点、痛点族质心或痛点簇质心。</div>
         <div class="semantic-math-dict-item"><strong>阈值 tau</strong>tau 是“准入线”：当 cos(p_i, center) 高于 tau，才允许痛点进入某个族或簇候选集合。tau 不是固定数学常数，而是用已审核样本分布校准出来的治理阈值；tau_F 偏宽，用来保留同一大问题域，tau_C 更严格，用来确认族内高密度小问题。</div>
-        <div class="semantic-math-dict-item"><strong>三轴投影 s=(L,T,C)</strong>把 1024 维机器向量压到法律、税务、资本市场三条可读业务轴上。它帮助人理解一个痛点更偏法律、税务、资本市场，还是多轴交叉。</div>
+        <div class="semantic-math-dict-item"><strong>单条痛点 p_i</strong>每条已同步痛点先被 BGE-M3 编码为一条 1024 维语义向量 p_i。它不是只包含标题，而是综合 BU、痛点描述、法规、Tags、核心冲突、潜在风险、解决方案和预期效果后的整体语义质心。</div>
+        <div class="semantic-math-dict-item"><strong>三轴坐标 s_i=(L,T,C)</strong>把 1024 维痛点向量 p_i 压到法律、税务、资本市场三条可读业务轴上，形成 s_i=(L_i,T_i,C_i)。它帮助人理解一个痛点更偏法律、税务、资本市场，还是多轴交叉。</div>
         <div class="semantic-math-dict-item"><strong>欧氏距离 d</strong>衡量两个三轴坐标点在 L/T/C 空间里相隔多远：d = sqrt((L_i-L_j)^2 + (T_i-T_j)^2 + (C_i-C_j)^2)。因为 L/T/C 是正交坐标轴，三轴分数可理解为同一空间内的坐标，所以用欧氏距离判断“结构位置近不近”是自然选择；余弦看高维语义方向，欧氏距离看法税资结构位置。</div>
         <div class="semantic-math-dict-item"><strong>局部密度</strong>某个小区域里相似痛点是否足够集中。密度越高，说明这个问题不是偶发，而是在客户场景中反复出现，越值得沉淀打法或 SKU。</div>
-        <div class="semantic-math-dict-item"><strong>痛点簇 C_k 定义</strong>簇优先由痛点生产链路确定：去掉尾标字母后 base_id 相同的一组母/子痛点天然成簇。向量相似度、L/T/C 欧氏距离和最低样本量只做质检与候选发现，避免把孤立案例误判成簇。</div>
-        <div class="semantic-math-dict-item"><strong>痛点族 F_j 定义</strong>族由多个簇向上归并形成，可写成：F_j = { C_k | conflict(C_k)=g_j, sku(C_k)≈sku_j, cos(nu_k, mu_j)≥tau_F, d(s_k, s_j)≤D_F }。意思是：进入同一族的簇，需要主冲突同源、主 SKU/交付打法接近、向量方向足够像、法税资三轴位置不太远。一个痛点只保留一个主族，其他相近族作为关联族用于检索召回。</div>
-        <div class="semantic-math-dict-item"><strong>族校验标准</strong>初始口径：同族候选需满足主冲突同源；primary_sku 或主交付打法高度重叠；cos(p_i, mu_j) 建议不低于同族样本分布 P10/P15；L/T/C 欧氏距离建议不高于同族样本距离 P85。该标准来自向量检索、三轴距离、SKU 交付逻辑和 BU 已审核样本的回测校准。</div>
-        <div class="semantic-math-dict-item"><strong>业务场景 S_m 定义</strong>场景不是分类结果，而是使用入口和检索窗口：S_m=(q_m, B_m, R_m)。S_m 表示第 m 个业务场景；q_m 是入口向量，代表用户从该场景发出的语义查询；B_m 是 L/T/C 三维边界，限定召回范围；R_m 是召回规则，决定哪些痛点、簇、族被带出来。</div>
-        <div class="semantic-math-dict-item"><strong>场景入口向量 q_m</strong>由场景名称、场景描述、典型关键词、代表性痛点和代表性 SKU 一起编码生成。它表示用户从某个业务方向进入系统时，真正发出的语义查询。</div>
-        <div class="semantic-math-dict-item"><strong>q_m 编码逻辑</strong>可理解为 q_m = Encode(name_m + desc_m + tags_m + cases_m + sku_m)。其中 name_m 是场景名称，desc_m 是场景说明，tags_m 是主体/资产/约束/风险关键词，cases_m 是代表性痛点文本，sku_m 是代表性产品或交付打法。编码后得到一条 1024 维入口向量，再用于和痛点向量 p_i 计算余弦相似度。</div>
-        <div class="semantic-math-dict-item"><strong>场景召回分数</strong>SceneScore 可由三部分组成：痛点与 q_m 的余弦相似度、痛点 Tags 与场景关键词的重叠度、痛点 L/T/C 坐标是否落在 B_m 内。它决定场景入口召回哪些痛点、簇和族。</div>
+        <div class="semantic-math-dict-item"><strong>痛点簇 C_k 定义</strong>簇是点云里的局部高密度小问题集合，可写成：C_k = { p_i | cos(p_i, nu_k) ≥ tau_C, d(s_i, s_k) ≤ D_C, density(C_k) ≥ m }。其中 nu_k 是簇的高维质心，s_k 是簇在 L/T/C 空间的三维质心，m 是最低复用样本量。</div>
+        <div class="semantic-math-dict-item"><strong>痛点族 F_j 定义</strong>族由多个痛点簇向上归并形成，可写成：F_j = { C_k | conflict(C_k)=g_j, cos(nu_k, mu_j) ≥ tau_F, d(s_k, s_j) ≤ D_F }。意思是：进入同一族的簇，需要主冲突同源、向量方向足够像、法税资三轴位置不太远。</div>
+        <div class="semantic-math-dict-item"><strong>族校验标准</strong>初始口径：同族候选需满足主冲突同源；主体/资产/动作/约束/风险结构相近；cos(nu_k, mu_j) 建议不低于同族样本分布 P10/P15；L/T/C 欧氏距离建议不高于同族样本距离 P85。该标准来自向量检索、三轴距离和 BU 已审核痛点的回测校准。</div>
+        <div class="semantic-math-dict-item"><strong>场景云团 S_m 定义</strong>场景不是分类结果，而是业务入口形成的召回云团：S_m=(q_m, B_m, R_m)。S_m 表示第 m 个业务场景；q_m 是入口向量；B_m 是该场景在 L/T/C 空间里的不规则召回云团；R_m 是召回痛点、簇、族的规则。</div>
+        <div class="semantic-math-dict-item"><strong>场景入口向量 q_m</strong>由场景名称、场景描述、典型关键词和代表性痛点一起编码生成。它表示用户从某个业务方向进入系统时，真正发出的语义查询。</div>
+        <div class="semantic-math-dict-item"><strong>q_m 编码逻辑</strong>可理解为 q_m = Encode(name_m + desc_m + tags_m + cases_m)。其中 name_m 是场景名称，desc_m 是场景说明，tags_m 是主体/资产/约束/风险关键词，cases_m 是代表性痛点文本。编码后得到一条 1024 维入口向量，再用于和痛点向量 p_i、簇质心 nu_k、族质心 mu_j 计算余弦相似度。</div>
+        <div class="semantic-math-dict-item"><strong>场景召回分数</strong>SceneScore 可由三部分组成：痛点与 q_m 的余弦相似度、痛点 Tags 与场景关键词的重叠度、痛点 L/T/C 坐标是否落在 B_m 云团内。它决定场景入口召回哪些痛点、簇和族。</div>
+        <div class="semantic-math-dict-item"><strong>正交投影 Π</strong>三维点云可以投影到 LT、LC、TC 三个观察面：Π_LT 看法律×税务，Π_LC 看法律×资本市场，Π_TC 看税务×资本市场。投影斑块不是硬边界，而是场景云团在二维业务组合上的热点影子。</div>
         <div class="semantic-math-dict-item"><strong>专家锚点 anchor</strong>锚点的“值”不是人工填一个分数，而是一条 1024 维基准向量。我们先为法律、税务、资本市场各写 3 组专家锚点文本，再用 BGE-M3 编码并取质心：a_L=法律锚点质心，a_T=税务锚点质心，a_C=资本市场锚点质心。它们是三根坐标尺，不是业务边界值。</div>
         <div class="semantic-math-dict-item"><strong>三条锚点文本口径</strong>法律锚点聚焦公司治理、股东权利、代持纠纷、婚姻继承、信托效力、债务隔离、诉讼仲裁；税务锚点聚焦个税/企税、股权转让税、跨境税务、CRS/FATCA、转让定价、税务稽查、税负优化；资本市场锚点聚焦上市公司、IPO、并购重组、股权激励、增减持、信息披露、控制权交易、监管问询。</div>
         <div class="semantic-math-dict-item"><strong>锚点坐标边界</strong>对每条痛点向量 p_i 分别计算 c_L=cos(p_i,a_L)、c_T=cos(p_i,a_T)、c_C=cos(p_i,a_C)，再把本批痛点在每条轴上的 raw cosine 按 P5-P95 分位拉伸为 0-10 分，形成 s_i=(L_i,T_i,C_i)。所以 L/T/C 是痛点相对三条专家锚点的可读强度，不是主观打分。</div>
         <div class="semantic-math-dict-item"><strong>正交边界</strong>法律、税务、资本市场三轴彼此独立，不是零和关系。一个痛点可以法律强、税务强、资本市场也强，不会因为某一轴高就压低另一轴。</div>
-        <div class="semantic-math-dict-item"><strong>向量基座</strong>当前已审核痛点形成的整体点云底座。目前是 737 条；以后每周新增痛点进入后，点云分布、质心和局部密度都会随之微调。</div>
+        <div class="semantic-math-dict-item"><strong>痛点向量基座</strong>当前已审核痛点形成整体点云底座：P = { p_i | p_i ∈ 已上线痛点库 }，目前是 737 条。以后每周新增痛点进入后，点云分布、质心、局部密度、簇和族都会随之微调。</div>
         <div class="semantic-math-dict-item"><strong>痛点边界 B_pain</strong>痛点边界不是单个数，而是当前已上线痛点在 L/T/C 空间中的点云外沿和高密度范围：B_pain = envelope({ s_i | p_i ∈ 已上线痛点库 })。它回答“现有痛点实际覆盖到哪些法税资结构区域”。</div>
-        <div class="semantic-math-dict-item"><strong>业务边界 B_business</strong>业务边界是朝曦当前能够识别、解释、匹配因子链路，并通过 SKU / 服务打法承接的痛点集合：B_business = { p_i | p_i ∈ 已上线痛点库, SKU(p_i) ≠ ∅ }。当前 737 条痛点均已匹配 SKU，所以 B_business 与 B_pain 基本一致；未来若出现 SKU(p_i)=∅ 的真实痛点，说明痛点边界已外扩但业务边界尚未覆盖。</div>
         <div class="semantic-math-dict-item"><strong>阈值口径来源</strong>这些数值不是数学常数，而是初始治理阈值：来自向量检索的余弦相似度、三轴坐标距离、密度聚类的最低样本量思想，以及 BU 已审核痛点的人工校准。后续样本增加后应通过回测继续微调。</div>
       </div>
     </details>
     <div class="semantic-space">
       <div class="space-visual">
-        <svg viewBox="0 0 620 430" role="img" aria-label="法税资三维业务语义空间示意图">
+        <svg viewBox="0 0 620 430" role="img" aria-label="朝曦痛点向量模型示意图">
           <defs>
             <linearGradient id="axisLegal" x1="0" y1="1" x2="0" y2="0">
               <stop offset="0%" stop-color="#c084fc"/>
@@ -3476,8 +3477,8 @@ body {
           <g>
             <path d="M454 78 C453 89, 451 99, 448 109" fill="none" stroke="#60a5fa" stroke-width="1.3" stroke-dasharray="5 6" opacity=".82"/>
             <rect x="390" y="28" width="206" height="44" rx="9" fill="#ffffff" opacity=".95" stroke="#bfdbfe"/>
-            <text x="404" y="46" font-size="12" font-weight="900" fill="#1d4ed8">E_m 当前入口综合检索窗</text>
-            <text x="404" y="61" font-size="10.2" fill="#64748b">蓝色虚线云团：三维召回范围</text>
+            <text x="404" y="46" font-size="12" font-weight="900" fill="#1d4ed8">S_m 场景云团</text>
+            <text x="404" y="61" font-size="10.2" fill="#64748b">蓝色虚线云团：入口召回范围</text>
           </g>
 
           <g>
@@ -3538,8 +3539,8 @@ body {
         </svg>
 
         <div class="space-legend">
-          <div class="space-legend-item"><span class="space-dot" style="--dot:#f59e0b;"></span>半透明斑块：入口投影热区</div>
-          <div class="space-legend-item"><span class="space-dot" style="--dot:#60a5fa;"></span>当前入口检索窗 E_m</div>
+          <div class="space-legend-item"><span class="space-dot" style="--dot:#f59e0b;"></span>半透明斑块：正交投影热区</div>
+          <div class="space-legend-item"><span class="space-dot" style="--dot:#60a5fa;"></span>场景云团 S_m</div>
           <div class="space-legend-item"><span class="space-dot" style="--dot:#0f766e;"></span>痛点族 F_j</div>
           <div class="space-legend-item"><span class="space-dot" style="--dot:#f59e0b;"></span>痛点簇 C_k</div>
           <div class="space-legend-item"><span class="space-dot" style="--dot:#6366f1;"></span>单条痛点 p_i</div>
@@ -3555,27 +3556,27 @@ body {
           <p>专家锚点不是一个抽象概念，而是三条可计算的基准向量：先为法律、税务、资本市场分别写出专家锚点文本，再用 BGE-M3 编码为 1024 维向量并取质心，得到 a_L、a_T、a_C 三根业务坐标尺。</p>
           <div class="space-note">这三条锚点形成的是坐标边界，不是业务边界值。它不是 BU 归口，也不是痛点分类，而是三根独立的业务尺子：法律强度、税务强度、资本市场强度可以同时高，也可以只在某一轴上高。</div>
           <div class="space-note">具体说，法律锚点看公司治理、股权代持、婚姻继承、信托效力和诉讼隔离；税务锚点看个税/企税、跨境税务、CRS、转让定价和税务稽查；资本市场锚点看上市公司、IPO、并购重组、股权激励、增减持和信息披露。</div>
-          <div class="space-note">真正的边界要分开看：锚点给出坐标值 s_i=(L_i,T_i,C_i)；痛点边界是已上线痛点点云覆盖到的范围；业务边界则取决于这些痛点是否能被朝曦 SKU 或服务打法承接。</div>
+          <div class="space-note">锚点的作用是把空间立起来：每条痛点先进入同一套 1024 维语义空间，再分别靠近 a_L、a_T、a_C 三条基准向量，得到可读的三维坐标 s_i=(L_i,T_i,C_i)。</div>
         </div>
 
         <div class="space-method-card">
           <div class="space-method-top">
-            <div class="space-method-title">2. 向量基座</div>
-            <div class="space-method-symbol">737 p_i</div>
+            <div class="space-method-title">2. 单条痛点向量 p_i</div>
+            <div class="space-method-symbol">737 samples</div>
           </div>
-          <p>当前 737 条已同步痛点共同构成向量基座：每条痛点先由 BGE-M3 编码为 1024 维语义向量 p_i，再落入法税资三维空间中的某一个区域。</p>
-          <div class="space-note">当前 737 条痛点都已经匹配朝曦 SKU，因此当前业务边界可以近似看作已上线痛点边界：B_business = { p_i | p_i ∈ 已上线痛点库, SKU(p_i) ≠ ∅ }。这意味着目前点云里的问题，原则上都已经有对应产品或服务打法承接。</div>
-          <div class="space-note">这个基座会随每周已同步痛点增加而变化。若未来出现真实痛点但 SKU 为空，说明痛点边界已经外扩，而业务边界尚未覆盖；这类点会成为新 SKU 研发、打法组合或暂不承接判断的信号。</div>
+          <p>当前 737 条已同步痛点共同构成痛点向量基座：每条痛点先由 BGE-M3 编码为 1024 维语义向量 p_i，再落入法税资三维空间中的某一个区域。</p>
+          <div class="space-note">p_i 不是只看痛点标题，而是综合 BU、痛点描述、法律法规、Tags、核心冲突、潜在风险、解决方案和预期效果后的语义质心。它把一条复杂的业务问题压成一个可比较、可聚类、可检索的点。</div>
+          <div class="space-note">这个基座会随每周已同步痛点增加而变化。新增痛点进入后，整体点云分布、局部密度、族和簇的质心都会微调；因此这是一个持续成长的痛点语义底座。</div>
         </div>
 
         <div class="space-method-card">
           <div class="space-method-top">
-            <div class="space-method-title">3. 单条痛点与余弦定标</div>
-            <div class="space-method-symbol">p_i / cos</div>
+            <div class="space-method-title">3. 三维坐标与正交投影</div>
+            <div class="space-method-symbol">s_i / Π</div>
           </div>
-          <p>单条痛点是最小业务样本，也是 BU 已经审核认可的具体客户问题。它不是只看标题，而是把 BU、痛点描述、法规、Tags、核心冲突、潜在风险、解决方案和预期效果一起读进去。</p>
-          <div class="space-note">余弦定标就是用每条痛点向量分别靠近三条业务锚点：raw_cos = cos(p_i, anchor)，夹角越小，raw_cos 越高。再用本批痛点在该轴的 P5-P95 分位拉伸为 0-10 分：score ≈ (raw_cos - P5) / (P95 - P5) * 10。在“资产保护”入口下，配偶涉诉、代持确权和债权人追索通常更靠近法律锚点；信托分配、CRS 穿透和跨境申报更靠近税务锚点；若底层资产是公司股权或上市公司股份，则会同时靠近资本市场锚点。</div>
-          <div class="space-note">例如“配偶涉诉期间多层信托隔离传承”会同时带入配偶诉讼、债权人追索、代持股票、婚前财产协议、委托人/受益人安排和信托隔离有效性。图上的 p_i 是整条痛点的语义质心点，内部仍可展开为主体、资产、动作、约束、风险和解决方案链路。</div>
+          <p>每条痛点向量 p_i 会分别靠近法律、税务、资本市场三条专家锚点，得到三维坐标 s_i=(L_i,T_i,C_i)。这一步把机器向量翻译成管理层能读懂的业务位置。</p>
+          <div class="space-note">余弦定标的计算是：c_L=cos(p_i,a_L)、c_T=cos(p_i,a_T)、c_C=cos(p_i,a_C)，再用本批痛点在每条轴上的 P5-P95 分位拉伸为 0-10 分。分数越高，说明这条痛点越靠近该业务轴。</div>
+          <div class="space-note">三维点云还会投影到 LT、LC、TC 三个观察面。投影不是降级分类，而是把同一个痛点云团从不同二维视角看清楚：LT 看法税交叉，LC 看法资交叉，TC 看税资交叉。</div>
         </div>
 
         <div class="space-method-card">
@@ -3585,7 +3586,7 @@ body {
           </div>
           <p>痛点簇是痛点之间先形成的局部高密度小集合：多个 p_i 围绕同一个局部质心高度聚集，且主体、资产、动作、约束、风险结构位相似，说明它们在反复出现同一类可复用问题。</p>
           <div class="space-note">例如在资产保护相关痛点中，可以形成“涉诉期间信托隔离有效性”“境外信托 CRS 穿透应对”“不动产装入信托与收益分配”“保险金信托受益人安排”等痛点簇。簇回答的是“哪几类具体问题最高频、最值得被产品化或沉淀成打法”。</div>
-          <div class="space-note">数学上，簇是在点云中寻找局部集合 C_k：p_i 进入 C_k，需要满足 cos(p_i, nu_k) 高于簇阈值 tau_C；同时该局部邻域内要达到最低复用样本量 m，避免把单个孤立案例误判成簇。</div>
+          <div class="space-note">数学上，簇是在点云中寻找局部高密度集合：C_k = { p_i | cos(p_i, nu_k) ≥ tau_C, d(s_i,s_k) ≤ D_C, density(C_k) ≥ m }。它既看高维语义方向，也看 L/T/C 结构位置，避免把单个孤立案例误判成簇。</div>
         </div>
 
         <div class="space-method-card">
@@ -3595,17 +3596,17 @@ body {
           </div>
           <p>痛点族是在簇之上形成的一级稳定问题域：它把若干相近痛点簇收拢到同一类业务冲突中心之下，要求向量距离近、业务冲突同源，并且法税资投影结构相近。</p>
           <div class="space-note">例如在“资产保护”入口下，“信托资产隔离族”可以覆盖诉讼期间设立信托、股权或房产装入信托、保险金信托、境外信托 CRS 穿透和受益人安排中的共性冲突：客户希望把资产从婚姻、债务、经营和跨境披露风险中隔离出来，但受到权属真实转移、控制权保留、债权人撤销、税务居民身份和受托责任约束。族回答的是“这一批痛点簇属于哪个一级问题域”。</div>
-          <div class="space-note">数学上，族可以理解为一组簇和痛点向量围绕同一个“一级质心” mu_j 的稳定集合：F_j = { C_k | conflict(C_k)=g_j, sku(C_k)≈sku_j, cos(nu_k, mu_j)≥tau_F, d(s_k, s_j)≤D_F }。简单说，簇看“局部高频小问题”，族看“这些小问题是否同属一个大问题域”。</div>
+          <div class="space-note">数学上，族可以理解为一组痛点簇围绕同一个“一级质心” mu_j 的稳定集合：F_j = { C_k | conflict(C_k)=g_j, cos(nu_k, mu_j)≥tau_F, d(s_k, s_j)≤D_F }。简单说，簇看“局部高频小问题”，族看“这些小问题是否同属一个大问题域”。</div>
         </div>
 
         <div class="space-method-card">
           <div class="space-method-top">
-            <div class="space-method-title">6. 业务场景入口与检索窗 E_m</div>
+            <div class="space-method-title">6. 场景云团与召回 S_m</div>
             <div class="space-method-symbol">入口层</div>
           </div>
-          <p>业务场景入口放在最后，因为它是使用层，不是建模起点。入口不是单条痛点，也不是痛点族，而是用户进入系统时选择的业务出发点；数学上可理解为一个查询窗口 S_m，用来从既有点云中召回相关痛点、痛点簇和痛点族。</p>
-          <div class="space-note">场景可以表示为 S_m=(q_m, B_m, R_m)：q_m 是由场景名称、关键词、代表性痛点和代表性 SKU 生成的入口向量；B_m 是该场景在 L/T/C 三维空间中的检索边界；R_m 是召回规则。蓝色虚线云团表示当前入口在三维空间里的综合检索窗。</div>
-          <div class="space-note">例如从下方 9 大场景中的“资产保护”入口进入，系统会先圈定婚姻风险、债务隔离、代持确权、诉讼保全、信托隔离、保险受益和跨境资产披露等语义区域；再通过语义相似度、关键词重叠和三轴边界共同召回相关痛点、痛点簇和痛点族。规则投影面代表该二维组合下所有入口热区可落入的整体观察范围；半透明斑块才是具体业务入口的投影热区。</div>
+          <p>业务场景入口放在最后，因为它是使用层，不是建模起点。入口不是单条痛点，也不是痛点族，而是用户进入系统时选择的业务出发点；数学上可理解为一个场景云团 S_m，用来从既有点云中召回相关痛点、痛点簇和痛点族。</p>
+          <div class="space-note">场景可以表示为 S_m=(q_m, B_m, R_m)：q_m 是由场景名称、关键词和代表性痛点生成的入口向量；B_m 是该场景在 L/T/C 三维空间中的不规则召回云团；R_m 是召回规则。蓝色虚线云团表示当前入口的综合召回范围。</div>
+          <div class="space-note">例如从下方 9 大场景中的“资产保护”入口进入，系统会先圈定婚姻风险、债务隔离、代持确权、诉讼保全、信托隔离、保险受益和跨境资产披露等语义区域；再通过语义相似度、关键词重叠和三轴位置共同召回相关痛点、痛点簇和痛点族。SKU 向量基座成熟后，可再与痛点点云叠加，用于识别能力覆盖与创新空白。</div>
         </div>
       </div>
     </div>
