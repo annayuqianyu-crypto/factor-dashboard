@@ -3363,7 +3363,7 @@ body {
         <div class="semantic-math-dict-item"><strong>欧氏距离 d</strong>衡量两个三轴坐标点在 L/T/C 空间里相隔多远：d = sqrt((L_i-L_j)^2 + (T_i-T_j)^2 + (C_i-C_j)^2)。因为 L/T/C 是正交坐标轴，三轴分数可理解为同一空间内的坐标，所以用欧氏距离判断“结构位置近不近”是自然选择；余弦看高维语义方向，欧氏距离看法税资结构位置。</div>
         <div class="semantic-math-dict-item"><strong>局部密度</strong>某个小区域里相似痛点是否足够集中。密度越高，说明这个问题不是偶发，而是在客户场景中反复出现，越值得沉淀打法或 SKU。</div>
         <div class="semantic-math-dict-item"><strong>痛点簇 C_k 定义</strong>簇优先由痛点生产链路确定：去掉尾标字母后 base_id 相同的一组母/子痛点天然成簇。向量相似度、L/T/C 欧氏距离和最低样本量只做质检与候选发现，避免把孤立案例误判成簇。</div>
-        <div class="semantic-math-dict-item"><strong>痛点族 F_j 定义</strong>族由多个簇向上归并形成，主规则是“主冲突同源 + 主 SKU/交付打法相近 + 向量和 L/T/C 结构通过校验”。一个痛点只保留一个主族，其他相近族作为关联族用于检索召回。</div>
+        <div class="semantic-math-dict-item"><strong>痛点族 F_j 定义</strong>族由多个簇向上归并形成，可写成：F_j = { C_k | conflict(C_k)=g_j, sku(C_k)≈sku_j, cos(nu_k, mu_j)≥tau_F, d(s_k, s_j)≤D_F }。意思是：进入同一族的簇，需要主冲突同源、主 SKU/交付打法接近、向量方向足够像、法税资三轴位置不太远。一个痛点只保留一个主族，其他相近族作为关联族用于检索召回。</div>
         <div class="semantic-math-dict-item"><strong>族校验标准</strong>初始口径：同族候选需满足主冲突同源；primary_sku 或主交付打法高度重叠；cos(p_i, mu_j) 建议不低于同族样本分布 P10/P15；L/T/C 欧氏距离建议不高于同族样本距离 P85。该标准来自向量检索、三轴距离、SKU 交付逻辑和 BU 已审核样本的回测校准。</div>
         <div class="semantic-math-dict-item"><strong>业务场景 S_m 定义</strong>场景不是分类结果，而是使用入口和检索窗口：S_m=(q_m, B_m, R_m)。S_m 表示第 m 个业务场景；q_m 是入口向量，代表用户从该场景发出的语义查询；B_m 是 L/T/C 三维边界，限定召回范围；R_m 是召回规则，决定哪些痛点、簇、族被带出来。</div>
         <div class="semantic-math-dict-item"><strong>场景入口向量 q_m</strong>由场景名称、场景描述、典型关键词、代表性痛点和代表性 SKU 一起编码生成。它表示用户从某个业务方向进入系统时，真正发出的语义查询。</div>
@@ -3587,7 +3587,7 @@ body {
           </div>
           <p>痛点族是在簇之上形成的一级稳定问题域：它把若干相近痛点簇收拢到同一类业务冲突中心之下，要求向量距离近、业务冲突同源，并且法税资投影结构相近。</p>
           <div class="space-note">例如在“资产保护”入口下，“信托资产隔离族”可以覆盖诉讼期间设立信托、股权或房产装入信托、保险金信托、境外信托 CRS 穿透和受益人安排中的共性冲突：客户希望把资产从婚姻、债务、经营和跨境披露风险中隔离出来，但受到权属真实转移、控制权保留、债权人撤销、税务居民身份和受托责任约束。族回答的是“这一批痛点簇属于哪个一级问题域”。</div>
-          <div class="space-note">数学上，族可以理解为一组簇和痛点向量围绕同一个“一级质心” mu_j 的稳定集合：C_k 或 p_i 进入 F_j，需要同时满足 cos(p_i, mu_j) 高于族阈值 tau_F，且三轴投影 s_i=(L_i,T_i,C_i) 与该族中心投影 s_j 的距离不过远。简单说，簇看“局部高频小问题”，族看“这些小问题是否同属一个大问题域”。</div>
+          <div class="space-note">数学上，族可以理解为一组簇和痛点向量围绕同一个“一级质心” mu_j 的稳定集合：F_j = { C_k | conflict(C_k)=g_j, sku(C_k)≈sku_j, cos(nu_k, mu_j)≥tau_F, d(s_k, s_j)≤D_F }。简单说，簇看“局部高频小问题”，族看“这些小问题是否同属一个大问题域”。</div>
         </div>
 
         <div class="space-method-card">
