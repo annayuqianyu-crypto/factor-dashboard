@@ -3369,8 +3369,9 @@ body {
         <div class="semantic-math-dict-item"><strong>场景入口向量 q_m</strong>由场景名称、场景描述、典型关键词、代表性痛点和代表性 SKU 一起编码生成。它表示用户从某个业务方向进入系统时，真正发出的语义查询。</div>
         <div class="semantic-math-dict-item"><strong>q_m 编码逻辑</strong>可理解为 q_m = Encode(name_m + desc_m + tags_m + cases_m + sku_m)。其中 name_m 是场景名称，desc_m 是场景说明，tags_m 是主体/资产/约束/风险关键词，cases_m 是代表性痛点文本，sku_m 是代表性产品或交付打法。编码后得到一条 1024 维入口向量，再用于和痛点向量 p_i 计算余弦相似度。</div>
         <div class="semantic-math-dict-item"><strong>场景召回分数</strong>SceneScore 可由三部分组成：痛点与 q_m 的余弦相似度、痛点 Tags 与场景关键词的重叠度、痛点 L/T/C 坐标是否落在 B_m 内。它决定场景入口召回哪些痛点、簇和族。</div>
-        <div class="semantic-math-dict-item"><strong>专家锚点 anchor</strong>用通识性认知和朝曦业务范围定义出来的三条基准方向：法律、税务、资本市场。它们像三根尺子，先把空间立起来，再用于给痛点打 L/T/C 分。锚点本身不是业务边界值，而是坐标参照方向。</div>
-        <div class="semantic-math-dict-item"><strong>锚点坐标边界</strong>先分别写出法律、税务、资本市场三条专家锚点文本，并用同一向量模型编码为 a_L、a_T、a_C；再对每条痛点向量 p_i 计算 cos(p_i,a_L)、cos(p_i,a_T)、cos(p_i,a_C)，换算成可读的 L/T/C 强度分数。三条锚点共同定义的是坐标边界，不等同于朝曦能做哪些业务。</div>
+        <div class="semantic-math-dict-item"><strong>专家锚点 anchor</strong>锚点的“值”不是人工填一个分数，而是一条 1024 维基准向量。我们先为法律、税务、资本市场各写 3 组专家锚点文本，再用 BGE-M3 编码并取质心：a_L=法律锚点质心，a_T=税务锚点质心，a_C=资本市场锚点质心。它们是三根坐标尺，不是业务边界值。</div>
+        <div class="semantic-math-dict-item"><strong>三条锚点文本口径</strong>法律锚点聚焦公司治理、股东权利、代持纠纷、婚姻继承、信托效力、债务隔离、诉讼仲裁；税务锚点聚焦个税/企税、股权转让税、跨境税务、CRS/FATCA、转让定价、税务稽查、税负优化；资本市场锚点聚焦上市公司、IPO、并购重组、股权激励、增减持、信息披露、控制权交易、监管问询。</div>
+        <div class="semantic-math-dict-item"><strong>锚点坐标边界</strong>对每条痛点向量 p_i 分别计算 c_L=cos(p_i,a_L)、c_T=cos(p_i,a_T)、c_C=cos(p_i,a_C)，再把本批痛点在每条轴上的 raw cosine 按 P5-P95 分位拉伸为 0-10 分，形成 s_i=(L_i,T_i,C_i)。所以 L/T/C 是痛点相对三条专家锚点的可读强度，不是主观打分。</div>
         <div class="semantic-math-dict-item"><strong>正交边界</strong>法律、税务、资本市场三轴彼此独立，不是零和关系。一个痛点可以法律强、税务强、资本市场也强，不会因为某一轴高就压低另一轴。</div>
         <div class="semantic-math-dict-item"><strong>向量基座</strong>当前已审核痛点形成的整体点云底座。目前是 737 条；以后每周新增痛点进入后，点云分布、质心和局部密度都会随之微调。</div>
         <div class="semantic-math-dict-item"><strong>痛点边界 B_pain</strong>痛点边界不是单个数，而是当前已上线痛点在 L/T/C 空间中的点云外沿和高密度范围：B_pain = envelope({ s_i | p_i ∈ 已上线痛点库 })。它回答“现有痛点实际覆盖到哪些法税资结构区域”。</div>
@@ -3551,8 +3552,9 @@ body {
             <div class="space-method-title">1. 专家锚点与坐标边界</div>
             <div class="space-method-symbol">anchor</div>
           </div>
-          <p>专家锚点是三条业务轴的基准方向：按照通识性认知，并结合朝曦实际服务范围，综合计算出法律、税务、资本市场各自适格的业务锚点。</p>
+          <p>专家锚点不是一个抽象概念，而是三条可计算的基准向量：先为法律、税务、资本市场分别写出专家锚点文本，再用 BGE-M3 编码为 1024 维向量并取质心，得到 a_L、a_T、a_C 三根业务坐标尺。</p>
           <div class="space-note">这三条锚点形成的是坐标边界，不是业务边界值。它不是 BU 归口，也不是痛点分类，而是三根独立的业务尺子：法律强度、税务强度、资本市场强度可以同时高，也可以只在某一轴上高。</div>
+          <div class="space-note">具体说，法律锚点看公司治理、股权代持、婚姻继承、信托效力和诉讼隔离；税务锚点看个税/企税、跨境税务、CRS、转让定价和税务稽查；资本市场锚点看上市公司、IPO、并购重组、股权激励、增减持和信息披露。</div>
           <div class="space-note">真正的边界要分开看：锚点给出坐标值 s_i=(L_i,T_i,C_i)；痛点边界是已上线痛点点云覆盖到的范围；业务边界则取决于这些痛点是否能被朝曦 SKU 或服务打法承接。</div>
         </div>
 
