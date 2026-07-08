@@ -3360,10 +3360,12 @@ body {
         <div class="semantic-math-dict-item"><strong>余弦相似度 cos</strong>衡量两条向量方向是否接近。方向越接近，cos 越高；在这里用于判断某条痛点是否靠近某个专家锚点、痛点族质心或痛点簇质心。</div>
         <div class="semantic-math-dict-item"><strong>阈值 tau</strong>进入某个集合的最低相似度门槛。族阈值 tau_F 偏宽，用来判断大问题域；簇阈值 tau_C 更严格，用来判断族内的高密度小问题。</div>
         <div class="semantic-math-dict-item"><strong>三轴投影 s=(L,T,C)</strong>把 1024 维机器向量压到法律、税务、资本市场三条可读业务轴上。它帮助人理解一个痛点更偏法律、税务、资本市场，还是多轴交叉。</div>
+        <div class="semantic-math-dict-item"><strong>欧氏距离 d</strong>衡量两个三轴坐标点在 L/T/C 空间里相隔多远：d = sqrt((L_i-L_j)^2 + (T_i-T_j)^2 + (C_i-C_j)^2)。余弦看“语义方向像不像”，欧氏距离看“法税资结构位置近不近”。</div>
         <div class="semantic-math-dict-item"><strong>局部密度</strong>某个小区域里相似痛点是否足够集中。密度越高，说明这个问题不是偶发，而是在客户场景中反复出现，越值得沉淀打法或 SKU。</div>
         <div class="semantic-math-dict-item"><strong>专家锚点 anchor</strong>用通识性认知和朝曦业务范围定义出来的三条基准方向：法律、税务、资本市场。它们像三根尺子，先把空间立起来，再用于给痛点打 L/T/C 分。</div>
         <div class="semantic-math-dict-item"><strong>正交边界</strong>法律、税务、资本市场三轴彼此独立，不是零和关系。一个痛点可以法律强、税务强、资本市场也强，不会因为某一轴高就压低另一轴。</div>
         <div class="semantic-math-dict-item"><strong>向量基座</strong>当前已审核痛点形成的整体点云底座。目前是 737 条；以后每周新增痛点进入后，点云分布、质心和局部密度都会随之微调。</div>
+        <div class="semantic-math-dict-item"><strong>阈值口径来源</strong>这些数值不是数学常数，而是初始治理阈值：来自向量检索的余弦相似度、三轴坐标距离、密度聚类的最低样本量思想，以及 BU 已审核痛点的人工校准。后续样本增加后应通过回测继续微调。</div>
       </div>
     </details>
     <div class="semantic-space">
