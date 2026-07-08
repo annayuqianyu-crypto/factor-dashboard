@@ -1109,6 +1109,65 @@ tr:hover td { background: #fafafa; }
   line-height: 1.8;
 }
 
+.semantic-math-dict {
+  margin: -6px 0 12px;
+  max-width: 1100px;
+}
+
+.semantic-math-dict summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: rgba(248,250,252,.72);
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.semantic-math-dict summary::-webkit-details-marker {
+  display: none;
+}
+
+.semantic-math-dict[open] summary {
+  color: #2563eb;
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.semantic-math-dict-panel {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fbfdff;
+}
+
+.semantic-math-dict-item {
+  padding: 8px 9px;
+  border: 1px solid #edf2f7;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: #475569;
+}
+
+.semantic-math-dict-item strong {
+  display: block;
+  margin-bottom: 3px;
+  color: #0f172a;
+  font-size: 12px;
+}
+
 .semantic-space {
   display: grid;
   grid-template-columns: 1fr;
@@ -1226,6 +1285,7 @@ tr:hover td { background: #fafafa; }
 @media (max-width: 1180px) {
   .semantic-map { grid-template-columns: 1fr; }
   .semantic-space { grid-template-columns: 1fr; }
+  .semantic-math-dict-panel { grid-template-columns: 1fr; }
   .space-method { grid-template-columns: 1fr; }
   .semantic-entry-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -3292,6 +3352,17 @@ body {
   <div class="card">
     <div class="card-title">法税资三维业务语义空间</div>
     <div class="semantic-space-summary">本模块用于把已同步痛点从文字清单转化为可计算、可解释、可治理的业务语义地图：以法律 / 税务 / 资本市场三轴定位每条痛点，识别业务场景入口、痛点族与痛点簇，支撑后续痛点检索、重复治理、因子反哺和 SKU 研发判断。</div>
+    <details class="semantic-math-dict">
+      <summary>∑ 数学字典</summary>
+      <div class="semantic-math-dict-panel">
+        <div class="semantic-math-dict-item"><strong>质心 mu / nu</strong>一组痛点向量的平均中心点。它不是某一条真实痛点，而是这批痛点共同语义方向的“中心坐标”，用来判断新痛点离这个族或簇有多近。</div>
+        <div class="semantic-math-dict-item"><strong>最低复用样本量 m</strong>形成一个簇所需的最少相似痛点数量。比如 m=3 时，至少要有 3 条已审核痛点在语义和结构上足够接近，才把它视为可复用痛点簇，避免把孤立个案误判成产品机会。</div>
+        <div class="semantic-math-dict-item"><strong>余弦相似度 cos</strong>衡量两条向量方向是否接近。方向越接近，cos 越高；在这里用于判断某条痛点是否靠近某个专家锚点、痛点族质心或痛点簇质心。</div>
+        <div class="semantic-math-dict-item"><strong>阈值 tau</strong>进入某个集合的最低相似度门槛。族阈值 tau_F 偏宽，用来判断大问题域；簇阈值 tau_C 更严格，用来判断族内的高密度小问题。</div>
+        <div class="semantic-math-dict-item"><strong>三轴投影 s=(L,T,C)</strong>把 1024 维机器向量压到法律、税务、资本市场三条可读业务轴上。它帮助人理解一个痛点更偏法律、税务、资本市场，还是多轴交叉。</div>
+        <div class="semantic-math-dict-item"><strong>局部密度</strong>某个小区域里相似痛点是否足够集中。密度越高，说明这个问题不是偶发，而是在客户场景中反复出现，越值得沉淀打法或 SKU。</div>
+      </div>
+    </details>
     <div class="semantic-space">
       <div class="space-visual">
         <svg viewBox="0 0 620 430" role="img" aria-label="法税资三维业务语义空间示意图">
