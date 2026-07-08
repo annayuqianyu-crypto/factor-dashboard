@@ -795,6 +795,35 @@ tr:hover td { background: #fafafa; }
   padding: 3px 8px;
 }
 
+.semantic-entry-vector {
+  display: grid;
+  gap: 5px;
+  margin: 9px 0 10px;
+}
+
+.semantic-axis-row {
+  display: grid;
+  grid-template-columns: 16px 1fr 28px;
+  gap: 7px;
+  align-items: center;
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #64748b;
+}
+
+.semantic-axis-track {
+  height: 5px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+.semantic-axis-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--axis-color, #2563eb);
+}
+
 .semantic-entry-desc {
   font-size: 12px;
   color: #475569;
@@ -854,6 +883,50 @@ tr:hover td { background: #fafafa; }
   font-weight: 800;
   color: #111827;
   margin-bottom: 10px;
+}
+
+.semantic-gap-list {
+  display: grid;
+  gap: 8px;
+}
+
+.semantic-gap {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+  padding: 10px;
+}
+
+.semantic-gap-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 6px;
+}
+
+.semantic-gap-title {
+  font-size: 12.5px;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.semantic-gap-kind {
+  flex-shrink: 0;
+  border-radius: 999px;
+  padding: 2px 7px;
+  font-size: 10.5px;
+  font-weight: 900;
+  color: var(--gap-color);
+  background: color-mix(in srgb, var(--gap-color) 10%, #fff);
+  border: 1px solid color-mix(in srgb, var(--gap-color) 28%, #fff);
+}
+
+.semantic-gap p {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: #64748b;
 }
 
 .semantic-flow {
@@ -1067,6 +1140,28 @@ tr:hover td { background: #fafafa; }
   color: #475569;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
+}
+
+.semantic-vector-box {
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background: #eff6ff;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.semantic-vector-box-title {
+  font-size: 12px;
+  font-weight: 900;
+  color: #1e3a8a;
+  margin-bottom: 8px;
+}
+
+.semantic-vector-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
 }
 
 .semantic-drill-structure {
@@ -3616,118 +3711,33 @@ body {
 
   <div class="card">
     <div class="card-title">场景-痛点语义入口地图</div>
+    <div class="semantic-space-summary">基于 737 条已同步痛点的 BGE-M3 向量结果，将 12 个模型族和 36 个模型簇重新命名为业务可读入口：用户从 9 大场景进入，系统召回相关向量族、痛点簇和代表痛点；右侧同步展示低密度、断裂连接和高交叉薄弱区，用于后续机器学习扩散。</div>
     <div class="semantic-map">
       <div>
-        <div class="semantic-entry-grid">
-          <div class="semantic-entry-card" style="--entry-color:#92400e;--entry-soft:#fffbeb;">
-            <div class="semantic-entry-top">
-              <div class="semantic-entry-title">资本市场</div>
-              <div class="semantic-entry-count">225条</div>
-            </div>
-            <div class="semantic-entry-desc">覆盖实控人、大股东、上市公司围绕增持、减持、控制权、并购重组产生的资金、披露、税务和监管问题。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-listed-action', this)">上市公司资本动作族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-equity-incentive', this)">股权激励与员工持股族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-nominee-control', this)">股权代持与控制权纠纷族</span></div>
-          </div>
-
-          <div class="semantic-entry-card" style="--entry-color:#1e40af;--entry-soft:#eff6ff;">
-            <div class="semantic-entry-top">
-              <div class="semantic-entry-title">股权激励</div>
-              <div class="semantic-entry-count">139条</div>
-            </div>
-            <div class="semantic-entry-desc">覆盖授予、行权、退出、持股平台、递延备案与员工离职争议，是资本、税务、法律高频交叉入口。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-equity-incentive', this)">股权激励与员工持股族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-listed-action', this)">上市公司资本动作族</span></div>
-          </div>
-
-          <div class="semantic-entry-card" style="--entry-color:#991b1b;--entry-soft:#fef2f2;">
-            <div class="semantic-entry-top">
-              <div class="semantic-entry-title">税务合规</div>
-              <div class="semantic-entry-count">52条</div>
-            </div>
-            <div class="semantic-entry-desc">覆盖个税、企税、关联交易、转让定价、税务稽查与交易申报，是多数跨 BU 痛点的约束维度。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('tax-health-check', this)">企业税务合规族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-cross-border-tax', this)">跨境身份与税务居民族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-offshore-substance', this)">境外公司与经济实质族</span></div>
-          </div>
-
-          <div class="semantic-entry-card" style="--entry-color:#9a3412;--entry-soft:#fff7ed;">
-            <div class="semantic-entry-top">
-              <div class="semantic-entry-title">身份 / 海外税务</div>
-              <div class="semantic-entry-count">75条</div>
-            </div>
-            <div class="semantic-entry-desc">覆盖海外身份、税务居民、全球征税、CRS/FATCA、FBAR、弃籍税等自然人跨境合规问题。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-cross-border-tax', this)">跨境身份与税务居民族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-offshore-substance', this)">境外公司与经济实质族</span></div>
-          </div>
-
-          <div class="semantic-entry-card" style="--entry-color:#5b21b6;--entry-soft:#f5f3ff;">
-            <div class="semantic-entry-top">
-              <div class="semantic-entry-title">境外架构</div>
-              <div class="semantic-entry-count">78条</div>
-            </div>
-            <div class="semantic-entry-desc">覆盖香港、BVI、开曼、新加坡等境外主体的设立、维护、重组、分红、经济实质和外汇路径。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-offshore-substance', this)">境外公司与经济实质族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-cross-border-tax', this)">跨境身份与税务居民族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('tax-health-check', this)">企业税务合规族</span></div>
-          </div>
-
-          <div class="semantic-entry-card" style="--entry-color:#166534;--entry-soft:#f0fdf4;">
-            <div class="semantic-entry-top">
-              <div class="semantic-entry-title">资产保护</div>
-              <div class="semantic-entry-count">42条</div>
-            </div>
-            <div class="semantic-entry-desc">覆盖债务隔离、代持风险、婚姻财产、资产执行、信托隔离等高净值客户资产安全问题。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-nominee-control', this)">股权代持与控制权纠纷族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-family-governance', this)">继承婚姻与家庭治理族</span></div>
-          </div>
-
-          <div class="semantic-entry-card" style="--entry-color:#9d174d;--entry-soft:#fdf2f8;">
-            <div class="semantic-entry-top">
-              <div class="semantic-entry-title">法律架构</div>
-              <div class="semantic-entry-count">46条</div>
-            </div>
-            <div class="semantic-entry-desc">覆盖股权代持、股东协议、章程治理、一致行动、控制权安排与争议预防。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-nominee-control', this)">股权代持与控制权纠纷族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-listed-action', this)">上市公司资本动作族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-equity-incentive', this)">股权激励与员工持股族</span></div>
-          </div>
-
-          <div class="semantic-entry-card" style="--entry-color:#3730a3;--entry-soft:#eef2ff;">
-            <div class="semantic-entry-top">
-              <div class="semantic-entry-title">财富传承</div>
-              <div class="semantic-entry-count">71条</div>
-            </div>
-            <div class="semantic-entry-desc">覆盖创一代、配偶、子女、接班人之间围绕继承、婚姻、家族治理和跨代分配产生的问题。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-family-governance', this)">继承婚姻与家庭治理族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-nominee-control', this)">股权代持与控制权纠纷族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('charitable-trust', this)">慈善公益族</span></div>
-          </div>
-
-          <div class="semantic-entry-card" style="--entry-color:#115e59;--entry-soft:#f0fdfa;">
-            <div class="semantic-entry-top">
-              <div class="semantic-entry-title">慈善公益</div>
-              <div class="semantic-entry-count">9条</div>
-            </div>
-            <div class="semantic-entry-desc">覆盖股权捐赠、慈善信托、基金会治理、公益支出与家族声誉管理相关问题。</div>
-            <div class="semantic-tags entry-features"><span class="semantic-tag clickable" onclick="semanticShowDrill('charitable-trust', this)">慈善公益族</span><span class="semantic-tag clickable" onclick="semanticShowDrill('cluster-family-governance', this)">继承婚姻与家庭治理族</span></div>
-          </div>
-        </div>
+        <div id="semantic-entry-grid" class="semantic-entry-grid"></div>
       </div>
 
       <div class="semantic-side">
         <div class="semantic-panel">
           <div class="semantic-panel-title">入口不是分类结果</div>
           <div style="font-size:12.5px;color:#475569;line-height:1.75;">
-            场景入口是用户进入 C 客模型的业务方向；每个入口直接关联若干痛点族。用户先选业务场景，再选痛点族，系统继续收缩到痛点簇和真实痛点。
+            场景入口是用户进入 C 客模型的业务方向；每个入口会召回若干向量族。系统先用场景语义圈定云团，再收缩到痛点族、痛点簇和真实痛点。
           </div>
         </div>
 
         <div class="semantic-panel">
-          <div class="semantic-panel-title">检索收缩链路</div>
+          <div class="semantic-panel-title">向量检索收缩链路</div>
           <div class="semantic-flow">
-            <div class="semantic-flow-step"><strong>场景入口</strong><span>股权激励、境外架构、资产保护等大投影区域</span></div>
-            <div class="semantic-flow-step"><strong>痛点族</strong><span>同一场景下可复用的业务问题家族</span></div>
-            <div class="semantic-flow-step"><strong>痛点簇</strong><span>结构相近的真实痛点归组</span></div>
-            <div class="semantic-flow-step"><strong>痛点 / SKU</strong><span>落到已同步痛点证据和服务承接</span></div>
+            <div class="semantic-flow-step"><strong>场景云团</strong><span>资产保护、境外架构等入口向量 q_m</span></div>
+            <div class="semantic-flow-step"><strong>向量族</strong><span>多个簇围绕一级质心 mu_j 汇聚</span></div>
+            <div class="semantic-flow-step"><strong>痛点簇</strong><span>局部高密度小问题 C_k</span></div>
+            <div class="semantic-flow-step"><strong>扩散方向</strong><span>低密度、断裂和高交叉薄弱区</span></div>
           </div>
         </div>
 
         <div class="semantic-panel">
-          <div class="semantic-panel-title">高价值重叠入口</div>
-          <div class="semantic-tags">
-            <span class="semantic-tag">股权激励 ∩ 税务合规 ∩ 资本市场</span>
-            <span class="semantic-tag">境外架构 ∩ 身份/海外税务 ∩ 税务合规</span>
-            <span class="semantic-tag">资产保护 ∩ 财富传承 ∩ 法律架构</span>
-            <span class="semantic-tag">资本市场 ∩ 法律架构 ∩ 控制权风险</span>
-          </div>
+          <div class="semantic-panel-title">向量空缺 / 机器扩散机会</div>
+          <div id="semantic-gap-list" class="semantic-gap-list"></div>
         </div>
       </div>
     </div>
@@ -6673,6 +6683,7 @@ function initExpansionCharts() {
 function initScenesCharts() {
 
   renderPainBuPanel();
+  renderSemanticSceneMap();
 
   const el = document.getElementById('chart-scene-bar');
 
@@ -6773,10 +6784,46 @@ const PAIN_BU_DATA = [
   }
 ];
 
+const SEMANTIC_VECTOR_FAMILIES = {
+  listed: { id: 'F11', name: '上市公司资本动作族', count: 93, axes: { L: 6.11, T: 1.87, C: 7.94 }, projection: 'LC / C', keywords: '上市公司、股东、融资、增持、披露', note: '资本市场主导，同时有较强法律约束，覆盖增持融资、控制权、信披和融资治理。' },
+  incentive: { id: 'F03', name: '股权激励与员工持股族', count: 88, axes: { L: 4.50, T: 2.40, C: 7.08 }, projection: 'C / LC', keywords: '激励、员工、行权、平台、投资人', note: '资本市场强度最高，法律治理次之，主要承接激励方案、平台退出和投资人约束。' },
+  crossBorder: { id: 'F01', name: '跨境身份与税务居民族', count: 51, axes: { L: 1.91, T: 8.32, C: 1.70 }, projection: 'T', keywords: '美国、税务、资产、弃籍、申报', note: '单轴税务主导，主要覆盖全球征税、CRS/FATCA、弃籍税和海外资产申报。' },
+  offshore: { id: 'F06', name: '香港离岸与 FSIE 族', count: 55, axes: { L: 1.91, T: 6.95, C: 3.25 }, projection: 'T', keywords: '香港、离岸、收入、FSIE、豁免', note: '税务主导的境外公司收入合规族，集中在香港离岸收入、FSIE 和来源地举证。' },
+  offshoreOps: { id: 'F10', name: '境外主体维护与经济实质族', count: 25, axes: { L: 2.40, T: 4.54, C: 3.69 }, projection: 'TC', keywords: '开曼、BVI、经济实质、银行、秘书', note: '样本量较薄但边界清晰，适合继续扩散境外实体维护、账户、秘书和经济实质痛点。' },
+  crossBorderCapital: { id: 'F04', name: '跨境资金与 ODI 架构族', count: 52, axes: { L: 3.49, T: 5.71, C: 6.14 }, projection: 'TC', keywords: '外汇、投资、境外、ODI、资金回流', note: '资本市场与税务双轴接近，适合承接出海投资、外汇登记、跨境资金回流和 ODI 审批。' },
+  shareholderTax: { id: 'F05', name: '企业股东税负与架构族', count: 90, axes: { L: 5.21, T: 6.42, C: 6.30 }, projection: 'LTC', keywords: '公司、个人、股东、基金、分配', note: '法税资三轴交叉度高，覆盖股东分配、基金架构、企业持产、慈善与长期保障等复合问题。' },
+  enterpriseTax: { id: 'F07', name: '企业税务合规与交易定价族', count: 80, axes: { L: 2.81, T: 7.71, C: 4.67 }, projection: 'T / TC', keywords: '税务、交易、定价、稽查、关联交易', note: '税务强度最高，覆盖税务体检、关联交易、转让定价、稽查应对和跨境电商合规。' },
+  nominee: { id: 'F08', name: '代持控制权与资产归属族', count: 54, axes: { L: 8.82, T: 2.97, C: 4.33 }, projection: 'L / LC', keywords: '代持、实际出资、资产、确权、执行', note: '法律强度最高，重点覆盖代持人状态变化、证据缺失、不动产代持和股权确权。' },
+  treatyTax: { id: 'F09', name: '协定待遇与境外股东税负族', count: 34, axes: { L: 3.51, T: 8.35, C: 5.06 }, projection: 'T / TC', keywords: '协定、TRC、股息、境外转让、预提税', note: '税务强度最高、资本市场有牵引，集中在 TRC、协定优惠、境外股东分红和减持税负。' },
+  family: { id: 'F02', name: '家族传承与婚姻继承族', count: 95, axes: { L: 7.68, T: 2.50, C: 2.87 }, projection: 'L', keywords: '继承、财产、子女、股权、房产', note: '法律主导的大体量族，覆盖股权传承、房产传承、婚姻财产和接班治理。' },
+  contractLease: { id: 'F12', name: '合同租赁与边缘资产族', count: 20, axes: { L: 3.88, T: 2.30, C: 2.94 }, projection: 'L', keywords: '合同、租赁、办公、抵押、数据安全', note: '当前样本量较低，属于边缘但可扩散的法律/资产管理问题域。' },
+  charity: { id: 'C14', name: '慈善公益治理簇', count: 9, axes: { L: 5.20, T: 6.40, C: 6.30 }, projection: 'LC / LTC', keywords: '慈善、基金会、股权捐赠、公益治理', note: '目前不是独立大族，而是嵌在企业股东税负与上市资本动作中的低样本簇。' }
+};
+
+const SEMANTIC_SCENE_ENTRIES = [
+  { title: '资本市场', count: 225, color: '#92400e', soft: '#fffbeb', families: ['cluster-listed-action', 'cluster-equity-incentive', 'shareholder-tax'], desc: '从上市公司、实控人和股东资本动作进入，机器召回 F11/F03/F05 等高资本强度族，重点观察融资、增减持、披露、激励和股东税负。' },
+  { title: '股权激励', count: 139, color: '#1e40af', soft: '#eff6ff', families: ['cluster-equity-incentive', 'cluster-listed-action', 'shareholder-tax'], desc: '从激励授予、行权、退出、持股平台和投资人约束进入，主召回 F03，并与 F11、F05 形成资本与税务交叉。' },
+  { title: '税务合规', count: 52, color: '#991b1b', soft: '#fef2f2', families: ['tax-health-check', 'shareholder-tax', 'treaty-tax', 'cluster-offshore-substance'], desc: '从税务体检、交易定价、税务稽查和交易申报进入，主召回 F07/F05/F09/F06，适合生成税务约束型痛点。' },
+  { title: '身份 / 海外税务', count: 75, color: '#9a3412', soft: '#fff7ed', families: ['cluster-cross-border-tax', 'treaty-tax', 'cluster-offshore-substance'], desc: '从税务居民身份、全球征税、CRS/FATCA、弃籍税进入，主召回 F01，并与 F09、F06 的境外收入税负形成交叉。' },
+  { title: '境外架构', count: 78, color: '#5b21b6', soft: '#f5f3ff', families: ['cluster-offshore-substance', 'offshore-ops', 'cross-border-capital', 'treaty-tax'], desc: '从香港、BVI、开曼、新加坡等主体设立维护进入，召回 F06/F10/F04/F09，连接离岸收入、经济实质、外汇和资金回流。' },
+  { title: '资产保护', count: 42, color: '#166534', soft: '#f0fdf4', families: ['cluster-nominee-control', 'cluster-family-governance', 'contract-lease'], desc: '从债务隔离、婚姻风险、代持、资产执行和信托隔离进入，召回 F08/F02，并暴露信托隔离与资产执行之间的低密度空缺。' },
+  { title: '法律架构', count: 46, color: '#9d174d', soft: '#fdf2f8', families: ['cluster-nominee-control', 'cluster-listed-action', 'contract-lease'], desc: '从股东协议、章程治理、一致行动、控制权安排和争议预防进入，主召回 F08/F11/F12，偏法律与资本交叉。' },
+  { title: '财富传承', count: 71, color: '#3730a3', soft: '#eef2ff', families: ['cluster-family-governance', 'cluster-nominee-control', 'shareholder-tax', 'charitable-trust'], desc: '从股权、房产、子女接班、婚姻财产和跨代分配进入，主召回 F02/F08/F05，适合向信托、保险和公益治理扩散。' },
+  { title: '慈善公益', count: 9, color: '#115e59', soft: '#f0fdfa', families: ['charitable-trust', 'shareholder-tax'], desc: '从基金会、慈善信托、股权捐赠和公益治理进入，目前只是低样本簇，适合做机器扩散和 BU 复核。' }
+];
+
+const SEMANTIC_VECTOR_GAPS = [
+  { title: '信托隔离与受托责任', kind: '低密度空缺', color: '#0f766e', desc: '资产保护和财富传承入口都提到信托，但机器尚未形成独立高密度族。可围绕信托设立、装入资产、控制权保留、债权人撤销、受托责任和税务居民身份扩散痛点。' },
+  { title: '慈善公益治理', kind: '低样本簇', color: '#115e59', desc: '当前慈善公益仅 9 条，主要挂靠在 F05/F11 的局部簇。可继续扩展基金会强制支出、股权捐赠税负、慈善信托受益安排和公益资产管理。' },
+  { title: '保险 / 医疗 / 长期保障', kind: '断裂连接区', color: '#7c3aed', desc: 'C35 在 F05/F11/F03 中零散出现，没有形成稳定族。可从家庭保障、企业核心员工保障、财富传承和资本市场收益四个方向补痛点。' },
+  { title: '境外主体维护后周期', kind: '薄弱投影区', color: '#d97706', desc: 'F10 只有 25 条，集中在开曼/BVI/香港账户和经济实质。后续可用机器扩散境外秘书、年审、银行合规、注销迁册和本地雇员/办公实质。' }
+];
+
 const SEMANTIC_FAMILY_LIBRARY = {
   listed: {
     type: '痛点族',
     title: '上市公司资本动作族',
+    vectorKey: 'listed',
     scenes: ['资本市场', '法律架构', '税务合规'],
     structure: {
       subject: '实控人、大股东、高管、上市公司',
@@ -6820,6 +6867,7 @@ const SEMANTIC_FAMILY_LIBRARY = {
   incentive: {
     type: '痛点族',
     title: '股权激励与员工持股族',
+    vectorKey: 'incentive',
     scenes: ['股权激励', '税务合规', '资本市场'],
     structure: {
       subject: '拟上市企业、核心员工、创始人、持股平台',
@@ -6864,6 +6912,7 @@ const SEMANTIC_FAMILY_LIBRARY = {
   crossBorder: {
     type: '痛点族',
     title: '跨境身份与税务居民族',
+    vectorKey: 'crossBorder',
     scenes: ['身份 / 海外税务', '税务合规', '境外架构'],
     structure: {
       subject: '海外身份客户、跨境企业主、家庭成员、美国税务人',
@@ -6907,6 +6956,7 @@ const SEMANTIC_FAMILY_LIBRARY = {
   offshore: {
     type: '痛点族',
     title: '境外公司与经济实质族',
+    vectorKey: 'offshore',
     scenes: ['境外架构', '税务合规', '身份 / 海外税务'],
     structure: {
       subject: '香港公司、BVI/开曼公司、新加坡公司、境内实控人',
@@ -6951,6 +7001,7 @@ const SEMANTIC_FAMILY_LIBRARY = {
   nominee: {
     type: '痛点族',
     title: '股权代持与控制权纠纷族',
+    vectorKey: 'nominee',
     scenes: ['法律架构', '资产保护', '财富传承'],
     structure: {
       subject: '实际出资人、代持人、名义股东、配偶、债权人',
@@ -6994,6 +7045,7 @@ const SEMANTIC_FAMILY_LIBRARY = {
   family: {
     type: '痛点族',
     title: '继承婚姻与家庭治理族',
+    vectorKey: 'family',
     scenes: ['财富传承', '资产保护', '法律架构'],
     structure: {
       subject: '创一代、配偶、子女、接班人、家族成员',
@@ -7039,6 +7091,7 @@ const SEMANTIC_FAMILY_LIBRARY = {
 const TAX_COMPLIANCE_ENTRY = {
   type: '业务场景入口',
   title: '企业税务体检',
+  vectorKey: 'enterpriseTax',
   scenes: ['税务合规', '资本市场', '境外架构'],
   structure: {
     subject: '企业主、财务负责人、集团公司、关联企业',
@@ -7081,6 +7134,7 @@ const TAX_COMPLIANCE_ENTRY = {
 const CHARITY_ENTRY = {
   type: '业务场景入口',
   title: '慈善公益',
+  vectorKey: 'charity',
   scenes: ['慈善公益', '财富传承', '法律架构'],
   structure: {
     subject: '企业家、家族成员、慈善基金会、慈善组织',
@@ -7114,9 +7168,135 @@ const CHARITY_ENTRY = {
   sku: '慈善信托架构、公益基金会治理、股权捐赠税务评估'
 };
 
+const CROSS_BORDER_CAPITAL_ENTRY = {
+  type: '痛点族',
+  title: '跨境资金与 ODI 架构族',
+  vectorKey: 'crossBorderCapital',
+  scenes: ['境外架构', '资本市场', '税务合规'],
+  structure: {
+    subject: '出海企业、企业主、境外 SPV、外资股东',
+    asset: '境外资金、境内股权、外汇额度、ODI 项目、跨境资金池',
+    action: 'ODI 备案、返程投资、资金回流、跨境并购、外汇登记',
+    constraint: '外汇管制、商务审批、国资审批、税收协定、资金路径合规',
+    risk: '资金无法回流、审批周期延误、税务穿透、投资窗口错失'
+  },
+  clusters: [
+    { name: '外汇登记与资金回流簇', desc: '围绕境外资金回流、37号文、返程投资和外汇路径形成。', pains: [
+      { code: 'F04-C10', bu: '资本/税务', title: '境外资金合规回流境内投资渠道受限', tags: ['外汇', '境外资金', '资金回流'], conflict: '境外资金投资境内的需求与外汇监管、备案路径和税务合规之间的矛盾。' },
+      { code: 'F04-C10', bu: '法律/资本', title: '个人返程投资遭遇37号文外汇登记障碍', tags: ['返程投资', '37号文', '外汇登记'], conflict: '企业主希望搭建返程架构，与外汇登记和历史架构清理要求之间的冲突。' }
+    ] },
+    { name: 'ODI 审批与跨境并购簇', desc: '围绕对外直接投资审批、跨境并购备案和国资审批形成。', pains: [
+      { code: 'F04-C32', bu: '税务/资本', title: '企业对外直接投资审批流程繁琐成本高', tags: ['ODI', '对外投资', '审批'], conflict: '企业出海投资窗口与商务、发改、外汇等串联审批周期之间的矛盾。' },
+      { code: 'F04-C32', bu: '资本', title: '跨境并购 ODI 备案耗时影响交易节奏', tags: ['跨境并购', 'ODI备案'], conflict: '交易确定性与监管审批时间不确定之间的冲突。' }
+    ] }
+  ],
+  sku: '跨境资金路径设计、ODI/37号文辅导、出海架构体检'
+};
+
+const SHAREHOLDER_TAX_ENTRY = {
+  type: '痛点族',
+  title: '企业股东税负与架构族',
+  vectorKey: 'shareholderTax',
+  scenes: ['税务合规', '资本市场', '财富传承'],
+  structure: {
+    subject: '企业主、股东、基金 GP、持股平台、家族成员',
+    asset: '公司利润、股权、基金份额、不动产、投资收益',
+    action: '利润分配、股权转让、架构重组、借款安排、资产持有',
+    constraint: '个税、企税、双重征税、财产混同、关联交易、持产税负',
+    risk: '税负过高、补税罚款、连带责任、分配效率低、架构失灵'
+  },
+  clusters: [
+    { name: '股东分配与双重征税簇', desc: '围绕公司利润分配、基金 GP 架构和股东借款税前扣除形成。', pains: [
+      { code: 'F05-C23', bu: '税务', title: '有限公司利润分配个人面临双重税负', tags: ['股东分红', '双重征税'], conflict: '股东取得投资回报的需求与公司所得税、个人所得税叠加之间的矛盾。' },
+      { code: 'F05-C23', bu: '税务', title: '股东借款利息税前扣除受限有调整风险', tags: ['股东借款', '利息扣除'], conflict: '企业融资安排与税前扣除、债资比和关联交易合规之间的矛盾。' }
+    ] },
+    { name: '企业持产与财产混同簇', desc: '围绕一人公司、企业持有不动产、股东个人账户和责任隔离形成。', pains: [
+      { code: 'F05-C30', bu: '法律/税务', title: '一人公司股东面临财产混同无限连带责任风险', tags: ['一人公司', '财产混同'], conflict: '股东用公司承接资产和经营，与人格混同导致责任穿透之间的冲突。' },
+      { code: 'F05-C25', bu: '资本/税务', title: '企业直接持有不动产架构不合理税负上升', tags: ['不动产', '企业持产'], conflict: '企业持有资产便利性与持有、转让、传承环节多重税负之间的矛盾。' }
+    ] }
+  ],
+  sku: '企业持产架构、股东税负测算、家族资产持有结构设计'
+};
+
+const TREATY_TAX_ENTRY = {
+  type: '痛点族',
+  title: '协定待遇与境外股东税负族',
+  vectorKey: 'treatyTax',
+  scenes: ['身份 / 海外税务', '境外架构', '税务合规'],
+  structure: {
+    subject: '境外公司、外籍股东、美国税务居民、跨境投资人',
+    asset: '境内公司股权、股息、资本利得、境外公司权益',
+    action: '分红、减持、股权出售、TRC 申请、协定优惠适用',
+    constraint: '税收协定、TRC、预提所得税、FSIE、GILTI、外汇付汇',
+    risk: '协定优惠失败、双重征税、预提税负过高、利润汇回受阻'
+  },
+  clusters: [
+    { name: 'TRC 与协定优惠簇', desc: '围绕境外股东分红、股权出售、TRC 和预提所得税形成。', pains: [
+      { code: 'F09-C36', bu: '税务', title: '境外公司股权出售无法提供 TRC 享受协定优惠', tags: ['TRC', '协定待遇'], conflict: '跨境交易期望适用协定优惠税率，与税收居民身份证明和受益所有人证明不足之间的矛盾。' },
+      { code: 'F09-C36', bu: '税务', title: '境外股东分红无法提供 TRC 享受协定优惠税率', tags: ['股息', '预提税'], conflict: '利润汇出效率需求与协定优惠申请材料、实质要求之间的冲突。' }
+    ] },
+    { name: '境外股东减持与美国税务簇', desc: '围绕境外股东减持 A 股、美国税务居民海外股权和 GILTI 形成。', pains: [
+      { code: 'F09-C13', bu: '税务/资本', title: '境外股东减持 A 股须缴纳预提所得税', tags: ['境外股东', '减持'], conflict: '境外股东退出变现需求与预提所得税、增值税和付汇手续之间的矛盾。' },
+      { code: 'F09-C15', bu: '税务', title: '美国税务居民持有海外公司股权面临 GILTI 及高额美国税', tags: ['美国税居', '海外股权'], conflict: '全球持股安排与美国反递延征税规则之间的冲突。' }
+    ] }
+  ],
+  sku: 'TRC/协定待遇评估、境外股东税负测算、跨境分红路径设计'
+};
+
+const OFFSHORE_OPS_ENTRY = {
+  type: '痛点族',
+  title: '境外主体维护与经济实质族',
+  vectorKey: 'offshoreOps',
+  scenes: ['境外架构', '税务合规'],
+  structure: {
+    subject: '开曼公司、BVI 公司、香港公司、新加坡公司、境外秘书机构',
+    asset: '境外主体、银行账户、董事秘书资料、商业实质文件',
+    action: '年审维护、开户、秘书服务、经济实质申报、主体治理',
+    constraint: '经济实质法、银行 KYC、秘书服务质量、本地合规要求',
+    risk: '账户开立失败、主体失管、经济实质不足、合规状态异常'
+  },
+  clusters: [
+    { name: '经济实质与年度维护簇', desc: '围绕开曼/BVI 年度维护、经济实质和商业目的证明形成。', pains: [
+      { code: 'F10-C28', bu: '税务', title: '开曼公司缺乏专业年度维护与合规支持', tags: ['开曼', '经济实质'], conflict: '离岸主体便捷注册与持续经济实质、年审和合规义务之间的冲突。' },
+      { code: 'F10-C28', bu: '税务', title: 'BVI 公司经济实质法要求证明商业目的', tags: ['BVI', '商业目的'], conflict: '静态持股工具认知与动态经济实质证明要求之间的矛盾。' }
+    ] },
+    { name: '境外账户与秘书服务簇', desc: '围绕境外银行开户、秘书代理质量和跨境收款材料形成。', pains: [
+      { code: 'F10-C26', bu: '税务', title: '境外公司开立对公账户审批困难', tags: ['银行开户', 'KYC'], conflict: '境外主体运营收款需求与银行 KYC 审核持续收紧之间的矛盾。' },
+      { code: 'F10-C26', bu: '税务', title: '香港公司秘书服务质量不佳影响合规状态', tags: ['秘书服务', '香港公司'], conflict: '主体持续合规依赖外部秘书服务，与服务质量不稳定之间的管理风险。' }
+    ] }
+  ],
+  sku: '境外主体年度维护、经济实质辅导、境外开户材料包'
+};
+
+const CONTRACT_LEASE_ENTRY = {
+  type: '痛点族',
+  title: '合同租赁与边缘资产族',
+  vectorKey: 'contractLease',
+  scenes: ['资产保护', '法律架构'],
+  structure: {
+    subject: '企业主、出租方、承租企业、抵押权人、信托持有人',
+    asset: '办公楼、租赁权、抵押房产、装修费用、合同权益',
+    action: '租赁、担保、抵押、装修摊销、合同履行、数据管理',
+    constraint: '租赁合同、抵押登记、税务摊销、关联披露、数据合规',
+    risk: '个人担保暴露、租赁权对抗失败、税务争议、合同纠纷'
+  },
+  clusters: [
+    { name: '租赁合同与担保风险簇', desc: '围绕办公租赁、个人担保、抵押房产和租赁权对抗形成。', pains: [
+      { code: 'F12-C01', bu: '法律', title: '初创企业租金担保的个人风险暴露', tags: ['租赁', '个人担保'], conflict: '企业租赁经营需要与企业主个人担保责任暴露之间的矛盾。' },
+      { code: 'F12-C01', bu: '法律', title: '抵押房产租赁权对抗缺失风险', tags: ['抵押房产', '租赁权'], conflict: '承租使用稳定性与抵押权实现、租赁权对抗不足之间的冲突。' }
+    ] },
+    { name: '办公税务与披露合规簇', desc: '围绕装修费摊销、异地办公、关联租赁披露和数据安全形成。', pains: [
+      { code: 'F12-C02', bu: '法律/税务', title: '异地办公个税社保属地合规冲突', tags: ['异地办公', '个税社保'], conflict: '人员灵活办公与属地社保、个税申报规则之间的矛盾。' },
+      { code: 'F12-C16', bu: '法律', title: '上市公司关联租赁的披露合规风险', tags: ['关联租赁', '信披'], conflict: '关联方办公安排与上市公司关联交易披露要求之间的冲突。' }
+    ] }
+  ],
+  sku: '合同风险体检、租赁结构审查、资产保护法律方案'
+};
+
 const SEMANTIC_DRILL_DATA = {
   'cluster-listed-action': SEMANTIC_FAMILY_LIBRARY.listed,
   'listed-capital-action': { ...SEMANTIC_FAMILY_LIBRARY.listed, type: '业务场景入口', title: '上市公司资本动作' },
+  'shareholder-tax': SHAREHOLDER_TAX_ENTRY,
   'control-dispute': { ...SEMANTIC_FAMILY_LIBRARY.nominee, type: '业务场景入口', title: '控制权纠纷' },
   'cluster-equity-incentive': SEMANTIC_FAMILY_LIBRARY.incentive,
   'equity-incentive': { ...SEMANTIC_FAMILY_LIBRARY.incentive, type: '业务场景入口', title: '股权激励' },
@@ -7124,6 +7304,7 @@ const SEMANTIC_DRILL_DATA = {
   'exercise-tax': { ...SEMANTIC_FAMILY_LIBRARY.incentive, type: '业务场景入口', title: '行权税负' },
   'platform-exit': { ...SEMANTIC_FAMILY_LIBRARY.incentive, type: '业务场景入口', title: '平台退出' },
   'tax-health-check': TAX_COMPLIANCE_ENTRY,
+  'treaty-tax': TREATY_TAX_ENTRY,
   'related-transaction': { ...TAX_COMPLIANCE_ENTRY, type: '业务场景入口', title: '关联交易' },
   'tax-audit-response': { ...TAX_COMPLIANCE_ENTRY, type: '业务场景入口', title: '稽查应对' },
   'cluster-cross-border-tax': SEMANTIC_FAMILY_LIBRARY.crossBorder,
@@ -7131,6 +7312,8 @@ const SEMANTIC_DRILL_DATA = {
   'crs-fatca': { ...SEMANTIC_FAMILY_LIBRARY.crossBorder, type: '业务场景入口', title: 'CRS/FATCA' },
   'worldwide-tax': { ...SEMANTIC_FAMILY_LIBRARY.crossBorder, type: '业务场景入口', title: '全球征税' },
   'cluster-offshore-substance': SEMANTIC_FAMILY_LIBRARY.offshore,
+  'offshore-ops': OFFSHORE_OPS_ENTRY,
+  'cross-border-capital': CROSS_BORDER_CAPITAL_ENTRY,
   'fsie': { ...SEMANTIC_FAMILY_LIBRARY.offshore, type: '业务场景入口', title: 'FSIE' },
   'circular-37': { ...SEMANTIC_FAMILY_LIBRARY.offshore, type: '业务场景入口', title: '37号文' },
   'economic-substance': { ...SEMANTIC_FAMILY_LIBRARY.offshore, type: '业务场景入口', title: '经济实质' },
@@ -7142,6 +7325,7 @@ const SEMANTIC_DRILL_DATA = {
   'corporate-governance': { ...SEMANTIC_FAMILY_LIBRARY.nominee, type: '业务场景入口', title: '公司治理' },
   'control-right': { ...SEMANTIC_FAMILY_LIBRARY.nominee, type: '业务场景入口', title: '控制权' },
   'cluster-family-governance': SEMANTIC_FAMILY_LIBRARY.family,
+  'contract-lease': CONTRACT_LEASE_ENTRY,
   'inheritance-arrangement': { ...SEMANTIC_FAMILY_LIBRARY.family, type: '业务场景入口', title: '继承安排' },
   'family-governance': { ...SEMANTIC_FAMILY_LIBRARY.family, type: '业务场景入口', title: '家族治理' },
   'intergenerational-allocation': { ...SEMANTIC_FAMILY_LIBRARY.family, type: '业务场景入口', title: '跨代分配' },
@@ -7149,6 +7333,84 @@ const SEMANTIC_DRILL_DATA = {
   'equity-donation': { ...CHARITY_ENTRY, type: '业务场景入口', title: '股权捐赠' },
   'charity-governance': { ...CHARITY_ENTRY, type: '业务场景入口', title: '公益治理' }
 };
+
+function semanticVectorFor(data) {
+  return data?.vectorKey ? SEMANTIC_VECTOR_FAMILIES[data.vectorKey] : null;
+}
+
+function semanticAxisRows(axes) {
+  if (!axes) return '';
+  const axisMeta = [
+    ['L', '法律', '#2563eb'],
+    ['T', '税务', '#e11d48'],
+    ['C', '资本', '#7c3aed']
+  ];
+  return `<div class="semantic-entry-vector">${axisMeta.map(([key, label, color]) => {
+    const value = Number(axes[key] || 0);
+    return `
+      <div class="semantic-axis-row">
+        <span>${label}</span>
+        <div class="semantic-axis-track"><div class="semantic-axis-fill" style="--axis-color:${color};width:${Math.max(0, Math.min(10, value)) * 10}%;"></div></div>
+        <span>${value.toFixed(1)}</span>
+      </div>
+    `;
+  }).join('')}</div>`;
+}
+
+function semanticSceneAxes(entry) {
+  const vectors = (entry.families || []).map(key => semanticVectorFor(SEMANTIC_DRILL_DATA[key])).filter(Boolean);
+  if (!vectors.length) return null;
+  const axes = { L: 0, T: 0, C: 0 };
+  vectors.forEach(item => {
+    axes.L += item.axes.L;
+    axes.T += item.axes.T;
+    axes.C += item.axes.C;
+  });
+  axes.L /= vectors.length;
+  axes.T /= vectors.length;
+  axes.C /= vectors.length;
+  return axes;
+}
+
+function semanticRenderSceneCard(entry) {
+  const axes = semanticSceneAxes(entry);
+  return `
+    <div class="semantic-entry-card" style="--entry-color:${entry.color};--entry-soft:${entry.soft};">
+      <div class="semantic-entry-top">
+        <div class="semantic-entry-title">${semanticEscape(entry.title)}</div>
+        <div class="semantic-entry-count">${semanticEscape(entry.count)}条</div>
+      </div>
+      <div class="semantic-entry-desc">${semanticEscape(entry.desc)}</div>
+      ${semanticAxisRows(axes)}
+      <div class="semantic-tags entry-features">
+        ${(entry.families || []).map(key => {
+          const data = SEMANTIC_DRILL_DATA[key];
+          const vector = semanticVectorFor(data);
+          const label = vector ? `${vector.id} · ${data.title}` : data?.title;
+          return data ? `<span class="semantic-tag clickable" onclick="semanticShowDrill('${key}', this)">${semanticEscape(label)}</span>` : '';
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderSemanticSceneMap() {
+  const grid = document.getElementById('semantic-entry-grid');
+  if (grid) grid.innerHTML = SEMANTIC_SCENE_ENTRIES.map(semanticRenderSceneCard).join('');
+
+  const gaps = document.getElementById('semantic-gap-list');
+  if (gaps) {
+    gaps.innerHTML = SEMANTIC_VECTOR_GAPS.map(item => `
+      <div class="semantic-gap" style="--gap-color:${item.color};">
+        <div class="semantic-gap-head">
+          <div class="semantic-gap-title">${semanticEscape(item.title)}</div>
+          <div class="semantic-gap-kind">${semanticEscape(item.kind)}</div>
+        </div>
+        <p>${semanticEscape(item.desc)}</p>
+      </div>
+    `).join('');
+  }
+}
 
 function semanticEscape(value) {
   return String(value ?? '').replace(/[&<>"']/g, ch => ({
@@ -7208,6 +7470,18 @@ function semanticShowDrill(key, trigger) {
   if (trigger) trigger.classList.add('is-active');
 
   const struct = data.structure || {};
+  const vector = semanticVectorFor(data);
+  const vectorBox = vector ? `
+    <div class="semantic-vector-box">
+      <div class="semantic-vector-box-title">${semanticEscape(vector.id)} · ${semanticEscape(vector.name)} · ${semanticEscape(vector.count)} 条痛点</div>
+      ${semanticAxisRows(vector.axes)}
+      <div class="semantic-vector-meta">
+        <span class="semantic-drill-pill">投影面：${semanticEscape(vector.projection)}</span>
+        <span class="semantic-drill-pill">关键词：${semanticEscape(vector.keywords)}</span>
+      </div>
+      <div style="font-size:11.5px;color:#475569;line-height:1.6;margin-top:8px;">${semanticEscape(vector.note)}</div>
+    </div>
+  ` : '';
   panel.style.display = 'block';
   panel.dataset.semanticKey = key;
   panel.innerHTML = `
@@ -7223,6 +7497,7 @@ function semanticShowDrill(key, trigger) {
     <div class="semantic-drill-grid">
       <div data-semantic-drill-body>${semanticRenderPainCluster(data, 0)}</div>
       <div class="semantic-drill-structure">
+        ${vectorBox}
         <h4>痛点族结构特征</h4>
         <dl>
           <dt>主体</dt><dd>${semanticEscape(struct.subject)}</dd>
