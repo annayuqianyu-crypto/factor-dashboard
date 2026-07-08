@@ -3383,14 +3383,14 @@ body {
           </g>
 
           <g>
-            <ellipse cx="318" cy="229" rx="124" ry="51" fill="none" stroke="#60a5fa" stroke-width="1.6" stroke-dasharray="8 8" transform="rotate(-18 318 229)"/>
+            <path d="M195 249 C202 216, 234 192, 274 186 C306 181, 329 194, 356 185 C391 174, 430 190, 444 220 C459 252, 426 276, 389 284 C357 291, 333 276, 302 286 C259 300, 216 281, 195 249 Z" fill="#60a5fa" opacity=".06" stroke="#60a5fa" stroke-width="1.7" stroke-dasharray="9 7"/>
           </g>
 
           <g>
-            <path d="M454 78 C433 112, 413 145, 393 168" fill="none" stroke="#60a5fa" stroke-width="1.3" stroke-dasharray="5 6" opacity=".82"/>
+            <path d="M454 78 C432 113, 415 150, 397 185" fill="none" stroke="#60a5fa" stroke-width="1.3" stroke-dasharray="5 6" opacity=".82"/>
             <rect x="390" y="28" width="206" height="44" rx="9" fill="#ffffff" opacity=".95" stroke="#bfdbfe"/>
-            <text x="404" y="46" font-size="12" font-weight="900" fill="#1d4ed8">E_m 业务场景入口</text>
-            <text x="404" y="61" font-size="10.2" fill="#64748b">蓝色虚线椭圆：场景入口覆盖区</text>
+            <text x="404" y="46" font-size="12" font-weight="900" fill="#1d4ed8">E_m 当前入口综合检索窗</text>
+            <text x="404" y="61" font-size="10.2" fill="#64748b">蓝色虚线云团：三维召回范围</text>
           </g>
 
           <g>
@@ -3453,7 +3453,7 @@ body {
 
         <div class="space-legend">
           <div class="space-legend-item"><span class="space-dot" style="--dot:#f59e0b;"></span>半透明斑块：入口投影热区</div>
-          <div class="space-legend-item"><span class="space-dot" style="--dot:#60a5fa;"></span>场景入口 E_m</div>
+          <div class="space-legend-item"><span class="space-dot" style="--dot:#60a5fa;"></span>当前入口检索窗 E_m</div>
           <div class="space-legend-item"><span class="space-dot" style="--dot:#0f766e;"></span>痛点族 F_j</div>
           <div class="space-legend-item"><span class="space-dot" style="--dot:#f59e0b;"></span>痛点簇 C_k</div>
           <div class="space-legend-item"><span class="space-dot" style="--dot:#6366f1;"></span>单条痛点 p_i</div>
@@ -3481,10 +3481,10 @@ body {
 
         <div class="space-method-card">
           <div class="space-method-top">
-            <div class="space-method-title">3. 业务场景入口 E_m</div>
+            <div class="space-method-title">3. 业务场景入口与检索窗 E_m</div>
             <div class="space-method-symbol">入口层</div>
           </div>
-          <p>规则的 LT / TC / LC 平面只是观察底板；真正的业务场景入口，是落在这些底板上的半透明不规则热区。用户从“上市公司减持”“股权激励”“个人税务合规”等入口进入，系统圈出对应热区，再在区域内寻找痛点族和痛点簇。</p>
+          <p>规则的 LT / TC / LC 平面只是观察底板；真正的业务场景入口，是落在这些底板上的半透明不规则热区。蓝色虚线云团表示当前入口在三维空间里的综合检索窗，用来召回相关点云，再在区域内寻找痛点族和痛点簇。</p>
           <div class="space-note">规则投影面代表该二维组合下所有入口热区可落入的整体观察范围，不代表某一个入口本身；半透明斑块才是具体业务入口的投影热区。业务适格域决定哪些问题能进入坐标系，规则面决定在哪两个维度上观察，入口热区决定当前场景召回哪些痛点。比如“个人汇算清缴”在税务合规入口热区内，但通常不在“持股平台减持”入口热区内。</div>
         </div>
 
