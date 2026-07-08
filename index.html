@@ -3351,7 +3351,7 @@ body {
 
   <div class="card">
     <div class="card-title">法税资三维业务语义空间</div>
-    <div class="semantic-space-summary">本模块用于把已同步痛点从文字清单转化为可计算、可解释、可治理的业务语义地图：先以法律 / 税务 / 资本市场专家锚点建立三维正交边界，再将 737 条痛点落入向量基座，形成痛点簇与痛点族，最终支撑业务场景入口检索、重复治理、因子反哺和 SKU 研发判断。</div>
+    <div class="semantic-space-summary">本模块用于把已同步痛点从文字清单转化为可计算、可解释、可治理的业务语义地图：先以法律 / 税务 / 资本市场专家锚点建立三维坐标边界，再将 737 条已匹配 SKU 的痛点落入向量基座，形成当前痛点边界与业务边界基本一致的可服务点云，最终支撑业务场景入口检索、重复治理、因子反哺和 SKU 研发判断。</div>
     <details class="semantic-math-dict">
       <summary>∑ 数学字典</summary>
       <div class="semantic-math-dict-panel">
@@ -3369,10 +3369,12 @@ body {
         <div class="semantic-math-dict-item"><strong>场景入口向量 q_m</strong>由场景名称、场景描述、典型关键词、代表性痛点和代表性 SKU 一起编码生成。它表示用户从某个业务方向进入系统时，真正发出的语义查询。</div>
         <div class="semantic-math-dict-item"><strong>q_m 编码逻辑</strong>可理解为 q_m = Encode(name_m + desc_m + tags_m + cases_m + sku_m)。其中 name_m 是场景名称，desc_m 是场景说明，tags_m 是主体/资产/约束/风险关键词，cases_m 是代表性痛点文本，sku_m 是代表性产品或交付打法。编码后得到一条 1024 维入口向量，再用于和痛点向量 p_i 计算余弦相似度。</div>
         <div class="semantic-math-dict-item"><strong>场景召回分数</strong>SceneScore 可由三部分组成：痛点与 q_m 的余弦相似度、痛点 Tags 与场景关键词的重叠度、痛点 L/T/C 坐标是否落在 B_m 内。它决定场景入口召回哪些痛点、簇和族。</div>
-        <div class="semantic-math-dict-item"><strong>专家锚点 anchor</strong>用通识性认知和朝曦业务范围定义出来的三条基准方向：法律、税务、资本市场。它们像三根尺子，先把空间立起来，再用于给痛点打 L/T/C 分。</div>
-        <div class="semantic-math-dict-item"><strong>锚点边界形成逻辑</strong>先分别写出法律、税务、资本市场三条专家锚点文本，并用同一向量模型编码为 a_L、a_T、a_C；再对每条痛点向量 p_i 计算 cos(p_i,a_L)、cos(p_i,a_T)、cos(p_i,a_C)，换算成可读的 L/T/C 强度分数。三条锚点不是墙，而是三根正交参照轴：它们共同定义朝曦业务语义空间的坐标边界。</div>
+        <div class="semantic-math-dict-item"><strong>专家锚点 anchor</strong>用通识性认知和朝曦业务范围定义出来的三条基准方向：法律、税务、资本市场。它们像三根尺子，先把空间立起来，再用于给痛点打 L/T/C 分。锚点本身不是业务边界值，而是坐标参照方向。</div>
+        <div class="semantic-math-dict-item"><strong>锚点坐标边界</strong>先分别写出法律、税务、资本市场三条专家锚点文本，并用同一向量模型编码为 a_L、a_T、a_C；再对每条痛点向量 p_i 计算 cos(p_i,a_L)、cos(p_i,a_T)、cos(p_i,a_C)，换算成可读的 L/T/C 强度分数。三条锚点共同定义的是坐标边界，不等同于朝曦能做哪些业务。</div>
         <div class="semantic-math-dict-item"><strong>正交边界</strong>法律、税务、资本市场三轴彼此独立，不是零和关系。一个痛点可以法律强、税务强、资本市场也强，不会因为某一轴高就压低另一轴。</div>
         <div class="semantic-math-dict-item"><strong>向量基座</strong>当前已审核痛点形成的整体点云底座。目前是 737 条；以后每周新增痛点进入后，点云分布、质心和局部密度都会随之微调。</div>
+        <div class="semantic-math-dict-item"><strong>痛点边界 B_pain</strong>痛点边界不是单个数，而是当前已上线痛点在 L/T/C 空间中的点云外沿和高密度范围：B_pain = envelope({ s_i | p_i ∈ 已上线痛点库 })。它回答“现有痛点实际覆盖到哪些法税资结构区域”。</div>
+        <div class="semantic-math-dict-item"><strong>业务边界 B_business</strong>业务边界是朝曦当前能够识别、解释、匹配因子链路，并通过 SKU / 服务打法承接的痛点集合：B_business = { p_i | p_i ∈ 已上线痛点库, SKU(p_i) ≠ ∅ }。当前 737 条痛点均已匹配 SKU，所以 B_business 与 B_pain 基本一致；未来若出现 SKU(p_i)=∅ 的真实痛点，说明痛点边界已外扩但业务边界尚未覆盖。</div>
         <div class="semantic-math-dict-item"><strong>阈值口径来源</strong>这些数值不是数学常数，而是初始治理阈值：来自向量检索的余弦相似度、三轴坐标距离、密度聚类的最低样本量思想，以及 BU 已审核痛点的人工校准。后续样本增加后应通过回测继续微调。</div>
       </div>
     </details>
@@ -3546,11 +3548,12 @@ body {
       <div class="space-method">
         <div class="space-method-card">
           <div class="space-method-top">
-            <div class="space-method-title">1. 专家锚点与正交边界</div>
+            <div class="space-method-title">1. 专家锚点与坐标边界</div>
             <div class="space-method-symbol">anchor</div>
           </div>
           <p>专家锚点是三条业务轴的基准方向：按照通识性认知，并结合朝曦实际服务范围，综合计算出法律、税务、资本市场各自适格的业务锚点。</p>
-          <div class="space-note">这三条锚点先形成正交边界，相当于把朝曦业务适格域立成一个可计算坐标系。它不是 BU 归口，也不是痛点分类，而是三根独立的业务尺子：法律强度、税务强度、资本市场强度可以同时高，也可以只在某一轴上高。</div>
+          <div class="space-note">这三条锚点形成的是坐标边界，不是业务边界值。它不是 BU 归口，也不是痛点分类，而是三根独立的业务尺子：法律强度、税务强度、资本市场强度可以同时高，也可以只在某一轴上高。</div>
+          <div class="space-note">真正的边界要分开看：锚点给出坐标值 s_i=(L_i,T_i,C_i)；痛点边界是已上线痛点点云覆盖到的范围；业务边界则取决于这些痛点是否能被朝曦 SKU 或服务打法承接。</div>
         </div>
 
         <div class="space-method-card">
@@ -3559,7 +3562,8 @@ body {
             <div class="space-method-symbol">737 p_i</div>
           </div>
           <p>当前 737 条已同步痛点共同构成向量基座：每条痛点先由 BGE-M3 编码为 1024 维语义向量 p_i，再落入法税资三维空间中的某一个区域。</p>
-          <div class="space-note">这个基座会随每周已同步痛点增加而变化。新增痛点进入后，整体点云分布、局部密度、族和簇的质心都会微调；因此这不是一次性静态分类，而是一个持续成长的业务语义底座。</div>
+          <div class="space-note">当前 737 条痛点都已经匹配朝曦 SKU，因此当前业务边界可以近似看作已上线痛点边界：B_business = { p_i | p_i ∈ 已上线痛点库, SKU(p_i) ≠ ∅ }。这意味着目前点云里的问题，原则上都已经有对应产品或服务打法承接。</div>
+          <div class="space-note">这个基座会随每周已同步痛点增加而变化。若未来出现真实痛点但 SKU 为空，说明痛点边界已经外扩，而业务边界尚未覆盖；这类点会成为新 SKU 研发、打法组合或暂不承接判断的信号。</div>
         </div>
 
         <div class="space-method-card">
