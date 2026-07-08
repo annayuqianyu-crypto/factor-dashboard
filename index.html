@@ -1111,7 +1111,7 @@ tr:hover td { background: #fafafa; }
 
 .semantic-space {
   display: grid;
-  grid-template-columns: minmax(420px, .95fr) minmax(0, 1.05fr);
+  grid-template-columns: 1fr;
   gap: 16px;
   align-items: stretch;
   margin-bottom: 16px;
@@ -1119,7 +1119,7 @@ tr:hover td { background: #fafafa; }
 
 .space-visual {
   position: relative;
-  min-height: 420px;
+  min-height: 590px;
   border: 1px solid #dbeafe;
   border-radius: 8px;
   overflow: hidden;
@@ -1169,6 +1169,7 @@ tr:hover td { background: #fafafa; }
 
 .space-method {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -1225,6 +1226,7 @@ tr:hover td { background: #fafafa; }
 @media (max-width: 1180px) {
   .semantic-map { grid-template-columns: 1fr; }
   .semantic-space { grid-template-columns: 1fr; }
+  .space-method { grid-template-columns: 1fr; }
   .semantic-entry-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
@@ -3363,13 +3365,21 @@ body {
           <circle cx="92" cy="335" r="4.5" fill="#334155"/>
           <text x="58" y="358" font-size="11" font-weight="800" fill="#64748b">低复杂度原点</text>
 
-          <g opacity=".92">
-            <polygon points="116,318 116,202 354,202 354,318" fill="#fb7185" opacity=".15" stroke="#fb7185" stroke-width="1.1"/>
-            <text x="196" y="311" font-size="10.5" font-weight="900" fill="#be123c">LT 法税投影面</text>
-            <polygon points="210,316 388,316 486,254 308,254" fill="#60a5fa" opacity=".16" stroke="#60a5fa" stroke-width="1.1"/>
-            <text x="326" y="309" font-size="10.5" font-weight="900" fill="#1d4ed8">TC 税资投影面</text>
-            <polygon points="114,286 114,190 274,112 274,208" fill="#a78bfa" opacity=".18" stroke="#8b5cf6" stroke-width="1.1"/>
-            <text x="126" y="198" font-size="10.5" font-weight="900" fill="#6d28d9">LC 法资投影面</text>
+          <g>
+            <polygon points="116,318 116,202 354,202 354,318" fill="#fb7185" opacity=".06" stroke="#fb7185" stroke-width="1"/>
+            <polygon points="210,316 388,316 486,254 308,254" fill="#60a5fa" opacity=".07" stroke="#60a5fa" stroke-width="1"/>
+            <polygon points="114,286 114,190 274,112 274,208" fill="#a78bfa" opacity=".08" stroke="#8b5cf6" stroke-width="1"/>
+            <text x="196" y="311" font-size="10.5" font-weight="900" fill="#be123c">LT 观察面</text>
+            <text x="326" y="309" font-size="10.5" font-weight="900" fill="#1d4ed8">TC 观察面</text>
+            <text x="126" y="198" font-size="10.5" font-weight="900" fill="#6d28d9">LC 观察面</text>
+          </g>
+
+          <g>
+            <path d="M150 286 C163 250, 193 235, 226 241 C259 247, 278 270, 258 294 C237 319, 181 318, 158 302 C149 296, 146 292, 150 286 Z" fill="#f59e0b" opacity=".22" stroke="#f59e0b" stroke-width="1.1"/>
+            <path d="M226 226 C249 205, 292 205, 322 219 C344 230, 347 252, 322 265 C288 282, 232 271, 217 250 C211 242, 214 236, 226 226 Z" fill="#22c55e" opacity=".20" stroke="#16a34a" stroke-width="1.1"/>
+            <path d="M282 304 C310 281, 351 272, 390 266 C422 261, 445 268, 434 286 C419 310, 361 322, 315 318 C288 316, 269 313, 282 304 Z" fill="#60a5fa" opacity=".22" stroke="#2563eb" stroke-width="1.1"/>
+            <path d="M132 263 C139 230, 162 201, 193 181 C224 161, 251 158, 256 179 C264 210, 221 245, 177 266 C153 277, 128 277, 132 263 Z" fill="#a78bfa" opacity=".22" stroke="#7c3aed" stroke-width="1.1"/>
+            <path d="M160 220 C180 204, 209 198, 234 205 C251 210, 254 226, 238 239 C211 260, 168 257, 153 239 C147 232, 149 227, 160 220 Z" fill="#fb7185" opacity=".20" stroke="#e11d48" stroke-width="1.1"/>
           </g>
 
           <g>
@@ -3442,6 +3452,7 @@ body {
         </svg>
 
         <div class="space-legend">
+          <div class="space-legend-item"><span class="space-dot" style="--dot:#f59e0b;"></span>半透明斑块：入口投影热区</div>
           <div class="space-legend-item"><span class="space-dot" style="--dot:#60a5fa;"></span>场景入口 E_m</div>
           <div class="space-legend-item"><span class="space-dot" style="--dot:#0f766e;"></span>痛点族 F_j</div>
           <div class="space-legend-item"><span class="space-dot" style="--dot:#f59e0b;"></span>痛点簇 C_k</div>
@@ -3473,8 +3484,8 @@ body {
             <div class="space-method-title">3. 业务场景入口 E_m</div>
             <div class="space-method-symbol">入口层</div>
           </div>
-          <p>蓝色虚线椭圆可以理解为一个业务检索窗：用户从“上市公司减持”“股权激励”“境外架构”“美加税务合规”这类场景进入，系统先圈出一片可能相关的问题区域，再在区域内寻找痛点族和痛点簇。</p>
-          <div class="space-note">投影面积内，是与当前入口高度相关的痛点集合，例如“持股平台减持”会同时落到资本动作、税务合规和披露约束附近；投影面积外，不代表超出朝曦业务范围，只代表它不应被这个入口强召回。比如“个人汇算清缴”“T1135海外资产申报”更接近税务合规单轴入口，而不是“持股平台减持”入口。</div>
+          <p>规则的 LT / TC / LC 平面只是观察底板；真正的业务场景入口，是落在这些底板上的半透明不规则热区。用户从“上市公司减持”“股权激励”“个人税务合规”等入口进入，系统圈出对应热区，再在区域内寻找痛点族和痛点簇。</p>
+          <div class="space-note">投影热区内，是与当前入口高度相关的痛点集合；热区外，不代表超出朝曦业务范围，只代表它不应被这个入口强召回。比如“个人汇算清缴”在税务合规入口热区内，但通常不在“持股平台减持”入口热区内。</div>
         </div>
 
         <div class="space-method-card">
