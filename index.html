@@ -3364,6 +3364,7 @@ body {
         <div class="semantic-math-dict-item"><strong>局部密度</strong>某个小区域里相似痛点是否足够集中。密度越高，说明这个问题不是偶发，而是在客户场景中反复出现，越值得沉淀打法或 SKU。</div>
         <div class="semantic-math-dict-item"><strong>痛点簇 C_k 定义</strong>簇优先由痛点生产链路确定：去掉尾标字母后 base_id 相同的一组母/子痛点天然成簇。向量相似度、L/T/C 欧氏距离和最低样本量只做质检与候选发现，避免把孤立案例误判成簇。</div>
         <div class="semantic-math-dict-item"><strong>痛点族 F_j 定义</strong>族由多个簇向上归并形成，主规则是“主冲突同源 + 主 SKU/交付打法相近 + 向量和 L/T/C 结构通过校验”。一个痛点只保留一个主族，其他相近族作为关联族用于检索召回。</div>
+        <div class="semantic-math-dict-item"><strong>族校验标准</strong>初始口径：同族候选需满足主冲突同源；primary_sku 或主交付打法高度重叠；cos(p_i, mu_j) 建议不低于同族样本分布 P10/P15；L/T/C 欧氏距离建议不高于同族样本距离 P85。该标准来自向量检索、三轴距离、SKU 交付逻辑和 BU 已审核样本的回测校准。</div>
         <div class="semantic-math-dict-item"><strong>业务场景 S_m 定义</strong>场景不是分类结果，而是使用入口和检索窗口：S_m=(q_m, B_m, R_m)。q_m 是场景入口向量，B_m 是三维检索边界，R_m 是召回痛点、簇、族的规则。</div>
         <div class="semantic-math-dict-item"><strong>场景入口向量 q_m</strong>由场景名称、场景描述、典型关键词、代表性痛点和代表性 SKU 一起编码生成。它表示用户从某个业务方向进入系统时，真正发出的语义查询。</div>
         <div class="semantic-math-dict-item"><strong>场景召回分数</strong>SceneScore 可由三部分组成：痛点与 q_m 的余弦相似度、痛点 Tags 与场景关键词的重叠度、痛点 L/T/C 坐标是否落在 B_m 内。它决定场景入口召回哪些痛点、簇和族。</div>
