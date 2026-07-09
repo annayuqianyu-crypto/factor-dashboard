@@ -7338,18 +7338,18 @@ const SEMANTIC_VECTOR_FAMILIES = {
 };
 
 const SEMANTIC_SCENE_ENTRIES = [
-  { title: '上市公司资本动作族', count: 93, color: '#92400e', soft: '#fffbeb', families: ['cluster-listed-action'], desc: '一级入口 F11：围绕上市公司、实控人、大股东、增减持、控制权、融资治理和信息披露形成，场景应挂在具体资本动作簇之后。' },
-  { title: '股权激励与员工持股族', count: 88, color: '#1e40af', soft: '#eff6ff', families: ['cluster-equity-incentive'], desc: '一级入口 F03：围绕激励授予、行权、平台退出、员工权利边界和税务处理形成，适合继续补足激励工具与员工流转场景。' },
-  { title: '跨境身份与税务居民族', count: 51, color: '#9a3412', soft: '#fff7ed', families: ['cluster-cross-border-tax'], desc: '一级入口 F01：围绕税务居民身份、全球征税、CRS/FATCA、海外资产披露和弃籍规划形成，场景应具体到身份变化或申报触发点。' },
-  { title: '境外公司与经济实质族', count: 55, color: '#5b21b6', soft: '#f5f3ff', families: ['cluster-offshore-substance'], desc: '一级入口 F06：围绕香港离岸、FSIE、来源地举证、境外架构调整和协定优惠形成，重点连接税务证明和主体实质。' },
-  { title: '境外主体维护与经济实质族', count: 25, color: '#d97706', soft: '#fff7ed', families: ['offshore-ops'], desc: '一级入口 F10：围绕 BVI、开曼、香港主体年审、秘书服务、经济实质申报和银行 KYC 形成，是当前较薄但边界清晰的补洞方向。' },
-  { title: '跨境资金与 ODI 架构族', count: 52, color: '#0f766e', soft: '#f0fdfa', families: ['cross-border-capital'], desc: '一级入口 F04：围绕 ODI、37号文、返程投资、跨境并购、资金回流和外汇登记形成，法税资三轴交叉明显。' },
-  { title: '企业股东税负与架构族', count: 90, color: '#7c2d12', soft: '#fff7ed', families: ['shareholder-tax'], desc: '一级入口 F05：围绕股东分配、企业持产、基金架构、借款利息、财产混同和税负测算形成，是法税资复合度较高的大族。' },
-  { title: '企业税务合规与交易定价族', count: 80, color: '#991b1b', soft: '#fef2f2', families: ['tax-health-check'], desc: '一级入口 F07：围绕企业税务体检、关联交易、转让定价、稽查应对和跨境电商合规形成，场景应具体到交易或稽查事项。' },
-  { title: '股权代持与控制权纠纷族', count: 54, color: '#9d174d', soft: '#fdf2f8', families: ['cluster-nominee-control'], desc: '一级入口 F08：围绕代持人状态变化、代持证据、代持资产类型、控制权和执行风险形成，法律强度最高。' },
-  { title: '协定待遇与境外股东税负族', count: 34, color: '#be123c', soft: '#fff1f2', families: ['treaty-tax'], desc: '一级入口 F09：围绕 TRC、协定优惠、境外股东分红、减持预提税和美国税务居民海外股权形成。' },
-  { title: '继承婚姻与家庭治理族', count: 95, color: '#3730a3', soft: '#eef2ff', families: ['cluster-family-governance'], desc: '一级入口 F02：围绕股权传承、不动产传承、多子女分配、婚姻风险、接班治理和家族财产外流形成，是法律主导的大体量族。' },
-  { title: '合同租赁与边缘资产族', count: 20, color: '#475569', soft: '#f8fafc', families: ['contract-lease'], desc: '一级入口 F12：围绕租赁合同、担保、抵押房产、办公税务、关联披露和数据安全形成，目前样本较少，可作为边缘资产管理补充方向。' }
+  { title: 'F01 · 跨境身份与税务居民族', count: 51, color: '#9a3412', soft: '#fff7ed', families: ['cluster-cross-border-tax'], desc: '围绕税务居民身份、全球征税、CRS/FATCA、海外资产披露和弃籍规划形成，场景应具体到身份变化或申报触发点。' },
+  { title: 'F02 · 继承婚姻与家庭治理族', count: 95, color: '#3730a3', soft: '#eef2ff', families: ['cluster-family-governance'], desc: '围绕股权传承、不动产传承、多子女分配、婚姻风险、接班治理和家族财产外流形成，是法律主导的大体量族。' },
+  { title: 'F03 · 股权激励与员工持股族', count: 88, color: '#1e40af', soft: '#eff6ff', families: ['cluster-equity-incentive'], desc: '围绕激励授予、行权、平台退出、员工权利边界和税务处理形成，适合继续补足激励工具与员工流转场景。' },
+  { title: 'F04 · 跨境资金与 ODI 架构族', count: 52, color: '#0f766e', soft: '#f0fdfa', families: ['cross-border-capital'], desc: '围绕 ODI、37号文、返程投资、跨境并购、资金回流和外汇登记形成，法税资三轴交叉明显。' },
+  { title: 'F05 · 企业股东税负与架构族', count: 90, color: '#7c2d12', soft: '#fff7ed', families: ['shareholder-tax'], desc: '围绕股东分配、企业持产、基金架构、借款利息、财产混同和税负测算形成，是法税资复合度较高的大族。' },
+  { title: 'F06 · 境外公司与经济实质族', count: 55, color: '#5b21b6', soft: '#f5f3ff', families: ['cluster-offshore-substance'], desc: '围绕香港离岸、FSIE、来源地举证、境外架构调整和协定优惠形成，重点连接税务证明和主体实质。' },
+  { title: 'F07 · 企业税务合规与交易定价族', count: 80, color: '#991b1b', soft: '#fef2f2', families: ['tax-health-check'], desc: '围绕企业税务体检、关联交易、转让定价、稽查应对和跨境电商合规形成，场景应具体到交易或稽查事项。' },
+  { title: 'F08 · 股权代持与控制权纠纷族', count: 54, color: '#9d174d', soft: '#fdf2f8', families: ['cluster-nominee-control'], desc: '围绕代持人状态变化、代持证据、代持资产类型、控制权和执行风险形成，法律强度最高。' },
+  { title: 'F09 · 协定待遇与境外股东税负族', count: 34, color: '#be123c', soft: '#fff1f2', families: ['treaty-tax'], desc: '围绕 TRC、协定优惠、境外股东分红、减持预提税和美国税务居民海外股权形成。' },
+  { title: 'F10 · 境外主体维护与经济实质族', count: 25, color: '#d97706', soft: '#fff7ed', families: ['offshore-ops'], desc: '围绕 BVI、开曼、香港主体年审、秘书服务、经济实质申报和银行 KYC 形成，是当前较薄但边界清晰的补洞方向。' },
+  { title: 'F11 · 上市公司资本动作族', count: 93, color: '#92400e', soft: '#fffbeb', families: ['cluster-listed-action'], desc: '围绕上市公司、实控人、大股东、增减持、控制权、融资治理和信息披露形成，场景应挂在具体资本动作簇之后。' },
+  { title: 'F12 · 合同租赁与边缘资产族', count: 20, color: '#475569', soft: '#f8fafc', families: ['contract-lease'], desc: '围绕租赁合同、担保、抵押房产、办公税务、关联披露和数据安全形成，目前样本较少，可作为边缘资产管理补充方向。' }
 ];
 
 const SEMANTIC_VECTOR_GAPS = [
@@ -7925,8 +7925,7 @@ function semanticRenderSceneCard(entry) {
       <div class="semantic-tags entry-features">
         ${(entry.families || []).map(key => {
           const data = SEMANTIC_DRILL_DATA[key];
-          const vector = semanticVectorFor(data);
-          const label = vector ? `${vector.id} · ${data.title}` : data?.title;
+          const label = '点击查看族内簇';
           return data ? `<span class="semantic-tag clickable" onclick="semanticShowDrill('${key}', this)">${semanticEscape(label)}</span>` : '';
         }).join('')}
       </div>
