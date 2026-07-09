@@ -1197,6 +1197,123 @@ tr:hover td { background: #fafafa; }
   line-height: 1.35;
 }
 
+.semantic-gap-workbench {
+  margin-bottom: 12px;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+  padding: 12px;
+}
+
+.semantic-gap-workbench-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 9px;
+}
+
+.semantic-gap-workbench-title {
+  font-size: 12.5px;
+  font-weight: 900;
+  color: #1e3a8a;
+}
+
+.semantic-gap-workbench-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: flex-end;
+}
+
+.semantic-gap-mini-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #475569;
+  font-size: 10.5px;
+  font-weight: 900;
+  padding: 2px 7px;
+}
+
+.semantic-gap-mini-badge.is-hot {
+  color: #be123c;
+  border-color: #fecdd3;
+  background: #fff1f2;
+}
+
+.semantic-gap-workbench-copy {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 10px;
+}
+
+.semantic-gap-workbench-copy p {
+  margin: 0;
+  color: #475569;
+  font-size: 11.5px;
+  line-height: 1.65;
+}
+
+.semantic-gap-candidates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.semantic-gap-candidate {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  padding: 10px;
+}
+
+.semantic-gap-candidate strong {
+  display: block;
+  color: #0f172a;
+  font-size: 12px;
+  line-height: 1.35;
+  margin-bottom: 7px;
+}
+
+.semantic-gap-candidate-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.semantic-gap-candidate-meta span {
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 10.5px;
+  font-weight: 800;
+  padding: 2px 7px;
+}
+
+.semantic-gap-send {
+  width: 100%;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 11.5px;
+  font-weight: 900;
+  padding: 7px 9px;
+  cursor: pointer;
+  transition: background .16s ease, box-shadow .16s ease, transform .16s ease;
+}
+
+.semantic-gap-send:hover {
+  transform: translateY(-1px);
+  background: #dbeafe;
+  box-shadow: 0 10px 22px rgba(37,99,235,.12);
+}
+
 .semantic-drill-list {
   display: grid;
   gap: 8px;
@@ -1496,6 +1613,7 @@ tr:hover td { background: #fafafa; }
   .semantic-cluster-grid,
   .semantic-drill-grid,
   .semantic-drill-subclusters,
+  .semantic-gap-candidates,
   .semantic-drill-list,
   .semantic-flow { grid-template-columns: 1fr; }
   .semantic-space { grid-template-columns: 1fr; }
@@ -7433,6 +7551,165 @@ const SEMANTIC_VECTOR_GAPS = [
   { title: '境外主体维护后周期', kind: '薄弱投影区', color: '#d97706', desc: 'F10 只有 25 条，集中在开曼/BVI/香港账户和经济实质。后续可用机器扩散境外秘书、年审、银行合规、注销迁册和本地雇员/办公实质。' }
 ];
 
+const SEMANTIC_GAP_SCENES = {
+  F01: {
+    level: '轻度',
+    priority: 'P0',
+    owner: 'Tax 税务',
+    gap: '身份变化引起的税务居民、资产申报、赠与继承和弃籍退出之间的连续链路仍需补足。',
+    vectorGap: 'T 主轴向 LT 边界过渡不足：税务申报强度高，但身份法、继承法和资产迁移约束的过渡样本不足。',
+    scenes: [
+      { title: '计划移民客户未在登陆前完成境外资产清册', tags: '税务居民 / 跨境身份 / 全球税务居民', ltc: 'L 1.26 · T 9.54 · C 3.37', projection: 'T' },
+      { title: '美国税务居民持有境外家族公司但未区分 GILTI', tags: '分红 / 美国税务居民 / 境外公司', ltc: 'L 2.84 · T 10.0 · C 3.14', projection: 'T' },
+      { title: '加拿大新移民评估登陆日资产公允价值', tags: '加拿大身份 / 登陆日资产 / 税务居民', ltc: 'L 1.30 · T 8.42 · C 3.59', projection: 'T' },
+      { title: '放弃美国绿卡前未处理境外高增值股权', tags: '弃籍税 / 境外股权 / 身份退出', ltc: 'L 2.12 · T 9.68 · C 3.67', projection: 'T' }
+    ]
+  },
+  F02: {
+    level: '中等',
+    priority: 'P0',
+    owner: 'Legal 法律',
+    gap: '传承工具链的中间层仍不连续：遗嘱、保险、信托、监护、境外资产清册、受益人安排之间缺少过渡痛点。',
+    vectorGap: 'L 主轴向 LT / LC 边界过渡不足：法律传承强度高，但与税务成本、资本/股权资产控制权交叉的样本还不连续。',
+    scenes: [
+      { title: '家族信托衔接境外保单受益权', tags: '家族信托 / 境外保单 / 受益权', ltc: 'L 3.51 · T 2.16 · C 0.0', projection: 'L' },
+      { title: '创一代失能后股权表决权无人承接', tags: '失能 / 股权表决权 / 接班治理', ltc: 'L 4.72 · T 2.19 · C 1.62', projection: 'L' },
+      { title: '境外银行保险箱和另类资产未进入资产清册', tags: '境外资产 / 保险箱 / 资产清册', ltc: 'L 3.41 · T 3.42 · C 0.70', projection: 'T' },
+      { title: '子女婚变前已获赠股权但未设置受益限制', tags: '婚变 / 股权赠与 / 受益限制', ltc: 'L 4.66 · T 3.21 · C 1.51', projection: 'L' }
+    ]
+  },
+  F03: {
+    level: '中等',
+    priority: 'P1',
+    owner: 'CM 资本市场',
+    gap: '激励全生命周期链路仍需补足：授予、行权、持股平台、离职/婚变、回购退出、税务备案、投资人保护条款之间缺少过渡痛点。',
+    vectorGap: 'C 向 LC / TC 过渡不足：激励工具资本属性强，但法律退出规则和税务行权现金流样本还不连续。',
+    scenes: [
+      { title: '激励计划有效期过短', tags: '行权 / 股权激励 / 员工持股', ltc: 'L 2.55 · T 1.41 · C 4.91', projection: 'C' },
+      { title: '持股平台份额低价转让评估', tags: '持股平台 / 份额转让 / 评估', ltc: 'L 4.65 · T 6.62 · C 7.79', projection: 'TC', co: 'Tax 税务' },
+      { title: '员工离婚时激励份额被分割引入外部股东干扰', tags: '员工婚变 / 激励份额 / 外部股东', ltc: 'L 6.53 · T 4.44 · C 6.95', projection: 'LC', co: 'Legal 法律' },
+      { title: '投资人反稀释条款', tags: '投资人条款 / 反稀释 / 股权激励', ltc: 'L 2.94 · T 1.88 · C 6.05', projection: 'C' }
+    ]
+  },
+  F04: {
+    level: '中等',
+    priority: 'P1',
+    owner: 'CM 资本市场',
+    gap: '出海投资全流程仍有桥接不足：身份/主体选择、ODI审批、资金出境、境外运营、利润回流、境内再投资之间缺少过渡痛点。',
+    vectorGap: 'TC 双轴中高区不足：资本路径和税务合规都高，但法律审批/主体治理承接不足。',
+    scenes: [
+      { title: '企业完成 ODI 备案但境外账户开立失败', tags: 'ODI / 境外账户 / 跨境资金', ltc: 'L 0.02 · T 4.19 · C 3.66', projection: 'T', co: 'Tax 税务' },
+      { title: '民营企业跨境并购审批周期过长', tags: '跨境并购 / 审批周期 / 资金出境', ltc: 'L 0.04 · T 3.87 · C 4.35', projection: 'C' },
+      { title: '境外利润回流前评估协定待遇', tags: '利润回流 / 协定待遇 / 预提税', ltc: 'L 0.23 · T 6.03 · C 3.38', projection: 'T', co: 'Tax 税务' },
+      { title: '返程投资未补 37 号文登记', tags: '返程投资 / 37号文 / 外汇登记', ltc: 'L 1.80 · T 4.40 · C 5.20', projection: 'TC' }
+    ]
+  },
+  F05: {
+    level: '中等',
+    priority: 'P0',
+    owner: 'Tax 税务',
+    gap: '股东资产从企业到个人/家族载体的迁移链路仍需补足：公司利润、股东借款、持股平台、家族持产、慈善/保险载体之间缺少过渡痛点。',
+    vectorGap: 'LTC 中心区不足：法律责任隔离、税务成本和资本/资产配置同时中高的复合样本不足。',
+    scenes: [
+      { title: '企业主以股东借款替代分红', tags: '股东借款 / 分红 / 个人税负', ltc: 'L 6.42 · T 6.46 · C 5.80', projection: 'LTC' },
+      { title: '家族持产平台承接公司利润但缺失财产隔离', tags: '家族持产 / 公司利润 / 财产隔离', ltc: 'L 6.10 · T 6.20 · C 5.70', projection: 'LTC', co: 'Legal 法律' },
+      { title: '股权捐赠前评估历史留存收益', tags: '股权捐赠 / 留存收益 / 慈善公益', ltc: 'L 5.50 · T 6.80 · C 6.00', projection: 'LTC' },
+      { title: '企业不动产装入家族平台时缺失交易定价依据', tags: '不动产 / 家族平台 / 交易定价', ltc: 'L 5.90 · T 6.60 · C 5.40', projection: 'LTC' }
+    ]
+  },
+  F06: {
+    level: '中等',
+    priority: 'P0',
+    owner: 'Tax 税务',
+    gap: '香港主体从收入确认、来源地证据、经济实质、银行流水到协定待遇的证据链仍不够连续。',
+    vectorGap: 'TC 双轴中高段不足：跨境资金/账户强度中等，税务证明强度较高的样本不连续。',
+    scenes: [
+      { title: '香港公司跨境服务收入合同履约地证据不足', tags: '香港 / 离岸收入 / 来源地证据', ltc: 'L 0.0 · T 4.62 · C 1.78', projection: 'T' },
+      { title: '香港持股平台取得境外股息但未满足 FSIE 经济实质', tags: '香港持股平台 / 股息 / FSIE', ltc: 'L 1.20 · T 6.80 · C 3.20', projection: 'T' },
+      { title: '香港公司离岸贸易物流单据与银行流水不匹配', tags: '离岸贸易 / 物流单据 / 银行流水', ltc: 'L 1.10 · T 6.20 · C 3.80', projection: 'TC' },
+      { title: '香港公司出售境内股权前准备受益所有人证明', tags: '境内股权 / 受益所有人 / 协定待遇', ltc: 'L 2.10 · T 7.20 · C 4.80', projection: 'TC' }
+    ]
+  },
+  F07: {
+    level: '中等',
+    priority: 'P1',
+    owner: 'Tax 税务',
+    gap: '税务体检到交易整改的过程链路仍需补足：发现问题、证据补正、定价报告、申报更正、稽查沟通、交易结构重做之间缺少痛点。',
+    vectorGap: 'T 主轴向 TC 边界过渡不足：税务问题多，但与资金、交易、上市/融资场景结合的样本不够连续。',
+    scenes: [
+      { title: '税务体检发现关联交易缺失可比性分析但历史合同已执行', tags: '关联交易 / 可比性分析 / 税务体检', ltc: 'L 2.41 · T 6.31 · C 5.75', projection: 'TC' },
+      { title: '跨境电商平台流水与报关数据不一致', tags: '跨境电商 / 平台流水 / 报关数据', ltc: 'L 2.10 · T 6.90 · C 5.30', projection: 'TC' },
+      { title: '企业享受地方扶持政策但实际经营地不匹配', tags: '地方扶持 / 实际经营地 / 税务合规', ltc: 'L 2.60 · T 6.70 · C 4.20', projection: 'T' },
+      { title: '上市前历史费用票据缺失', tags: '上市前规范 / 费用票据 / 税务整改', ltc: 'L 3.10 · T 6.40 · C 6.10', projection: 'TC', co: 'CM 资本市场' }
+    ]
+  },
+  F08: {
+    level: '中等',
+    priority: 'P0',
+    owner: 'Legal 法律',
+    gap: '代持人状态变化、代持资产处分、代持还原和税务负担之间的连续风险链仍需补足。',
+    vectorGap: 'L 主轴向 LT / LC 边界过渡不足：权属确认样本多，但与税负还原、控制权和执行风险交叉的样本不足。',
+    scenes: [
+      { title: '代持协议未约定代持人婚变时配偶配合义务', tags: '代持 / 婚变 / 配偶配合', ltc: 'L 10.0 · T 5.21 · C 6.72', projection: 'L' },
+      { title: '代持人突发身故但遗嘱未排除代持资产', tags: '代持 / 身故 / 遗嘱', ltc: 'L 9.50 · T 4.20 · C 5.80', projection: 'LC' },
+      { title: '代持股权还原时未约定税负承担', tags: '代持还原 / 税负承担 / 股权', ltc: 'L 8.60 · T 6.20 · C 6.30', projection: 'LT' },
+      { title: '不动产代持期间代持人私自抵押', tags: '不动产代持 / 私自抵押 / 执行风险', ltc: 'L 9.10 · T 3.20 · C 5.20', projection: 'LC' }
+    ]
+  },
+  F09: {
+    level: '中等',
+    priority: 'P1',
+    owner: 'Tax 税务',
+    gap: '境外股东取得收益、申请协定、减持退出、资金汇回之间的全链路税务证据仍需补足。',
+    vectorGap: 'TC 双轴中段不足：税务强度高，资本退出和跨境资金强度中等的桥接样本不足。',
+    scenes: [
+      { title: '境外股东分红前准备受益所有人证明', tags: '分红 / 受益所有人 / 协定待遇', ltc: 'L 2.26 · T 7.21 · C 3.71', projection: 'T' },
+      { title: '境外公司减持 A 股未同步评估增值税和预提所得税', tags: '减持 / A股 / 预提税', ltc: 'L 2.95 · T 7.62 · C 5.54', projection: 'T' },
+      { title: '美国税务居民通过境外 SPV 持股未识别 GILTI', tags: '美国税务居民 / 境外SPV / GILTI', ltc: 'L 2.06 · T 7.14 · C 3.32', projection: 'T' },
+      { title: '境外股东出售境内公司股权缺失 TRC', tags: '境外股东 / 境内股权 / TRC', ltc: 'L 3.30 · T 7.31 · C 5.16', projection: 'T' }
+    ]
+  },
+  F10: {
+    level: '严重',
+    priority: 'P0',
+    owner: 'Tax 税务',
+    gap: '境外主体设立后的持续维护链路明显偏薄：主体设立、秘书/年审、银行账户、经济实质、实益拥有人披露、税务居民证明、注销迁册之间缺少过渡痛点。',
+    vectorGap: 'T-C 双轴中段不足：税务合规强度中高、资本市场/跨境资金强度中等、法律主体维护强度中等的样本不足。',
+    scenes: [
+      { title: '境外公司秘书服务失管', tags: '经济实质 / 年审 / 境外主体维护', ltc: 'L 3.83 · T 5.46 · C 5.14', projection: 'TC', co: 'CM 资本市场' },
+      { title: '香港公司银行 KYC 更新失败', tags: '香港 / KYC / 银行账户', ltc: 'L 3.21 · T 5.34 · C 5.02', projection: 'TC', co: 'CM 资本市场' },
+      { title: 'BVI/开曼 SPV 缺失实益拥有人资料', tags: 'BVI / 开曼 / 实益拥有人', ltc: 'L 1.96 · T 3.85 · C 4.01', projection: 'C', owner: 'CM 资本市场' },
+      { title: '新加坡公司本地董事和雇员实质不足', tags: '新加坡 / 本地董事 / 经济实质', ltc: 'L 2.67 · T 4.94 · C 4.54', projection: 'T' }
+    ]
+  },
+  F11: {
+    level: '中等',
+    priority: 'P1',
+    owner: 'CM 资本市场',
+    gap: '资本动作前后的治理约束链路仍需补足：资金来源、信披窗口、董事高管责任、投资人条款、控制权稳定之间缺少衔接痛点。',
+    vectorGap: 'C 主轴向 LC 边界过渡不足：纯资本动作样本多，但资本动作叠加法律责任和税务测算的复合样本不足。',
+    scenes: [
+      { title: '实控人增持资金来源穿透披露不足', tags: '增持 / 信披 / 资金来源', ltc: 'L 3.18 · T 2.49 · C 10.0', projection: 'C' },
+      { title: '大股东减持计划与家族资金安排不匹配', tags: '减持 / 家族资金 / 上市公司', ltc: 'L 4.06 · T 3.29 · C 10.0', projection: 'C' },
+      { title: '创始人签署回购条款后个人资产隔离不足', tags: '回购条款 / 创始人 / 资产隔离', ltc: 'L 6.00 · T 2.36 · C 10.0', projection: 'C' },
+      { title: '控制权稳定安排未同步考虑一致行动协议到期', tags: '控制权 / 一致行动 / 协议到期', ltc: 'L 4.75 · T 0.70 · C 9.55', projection: 'C' }
+    ]
+  },
+  F12: {
+    level: '中等',
+    priority: 'P2',
+    owner: 'Legal 法律',
+    gap: '边缘资产进入家族/企业结构后，合同权利、担保责任、税务摊销和资产隔离之间的衔接仍需补足。',
+    vectorGap: 'L 轴低中段向 LT 边界过渡不足：合同法律关系样本有，但税务摊销和家族资产隔离样本不足。',
+    scenes: [
+      { title: '企业主为初创企业租金提供个人担保', tags: '租赁 / 个人担保 / 初创企业', ltc: 'L 7.85 · T 4.30 · C 4.21', projection: 'L' },
+      { title: '抵押房产出租前未确认租赁权对抗安排', tags: '抵押房产 / 租赁权 / 对抗安排', ltc: 'L 7.31 · T 2.70 · C 3.57', projection: 'L' },
+      { title: '办公楼装修费用摊销口径不清', tags: '办公楼 / 装修费用 / 税务摊销', ltc: 'L 5.89 · T 5.44 · C 3.65', projection: 'LT', co: 'Tax 税务' },
+      { title: '家族信托持有办公资产但租赁合同未体现受托人权利', tags: '家族信托 / 办公资产 / 租赁合同', ltc: 'L 8.28 · T 2.84 · C 3.55', projection: 'L' }
+    ]
+  }
+};
+
 const SEMANTIC_FAMILY_LIBRARY = {
   listed: {
     type: '痛点族',
@@ -8081,6 +8358,94 @@ function semanticClusterCode(data, localIndex) {
   return `${familyCode}${String(localIndex + 1).padStart(2, '0')}-${String(globalIndex).padStart(2, '0')}`;
 }
 
+function semanticGapFor(data) {
+  const familyCode = semanticVectorFor(data)?.id;
+  return familyCode ? SEMANTIC_GAP_SCENES[familyCode] : null;
+}
+
+function semanticGapOwner(gap, scene) {
+  return scene?.owner || gap?.owner || '待人工分配';
+}
+
+function semanticBuildGapSceneInput(data, gap, scene) {
+  const vector = semanticVectorFor(data);
+  const owner = semanticGapOwner(gap, scene);
+  const co = scene.co ? `\n协同BU：${scene.co}` : '';
+  return [
+    scene.title,
+    `目标族：${vector?.id || ''} ${data?.title || gap?.name || ''}`,
+    `审核归口BU：${owner}${co}`,
+    `候选标签：${scene.tags || '待补充'}`,
+    `向量位置：${scene.ltc || '待回算'}；投影面：${scene.projection || '待回算'}`,
+    '',
+    `当前向量缺口：${gap.gap}`,
+    `缺失方向：${gap.vectorGap}`,
+    '',
+    `请围绕“${scene.title}”这个具体业务落地场景，生成可审核、可入库的高净值客户业务痛点。`,
+    '生成时请同时回答：',
+    '1. 该场景下哪些主体、资产、动作、约束或风险会触发真实业务冲突？',
+    '2. 该冲突如何影响权属确认、税负测算、资金流转、治理安排、尽调披露或交易交割？',
+    '3. 应如何通过资料补正、结构调整或服务方案设计，形成可沉淀的解决路径？',
+    '',
+    '后台补洞约束：生成痛点需回算向量，优先命中目标族/簇质心附近；若漂移到纯客户画像、泛税表申报、普通合同纠纷或无关销售话术，则不计入补洞成功。'
+  ].join('\n');
+}
+
+function semanticRenderGapWorkbench(data) {
+  const gap = semanticGapFor(data);
+  if (!gap) return '';
+  const vector = semanticVectorFor(data);
+  return `
+    <div class="semantic-gap-workbench">
+      <div class="semantic-gap-workbench-head">
+        <div class="semantic-gap-workbench-title">向量缺口与补洞场景</div>
+        <div class="semantic-gap-workbench-badges">
+          <span class="semantic-gap-mini-badge ${gap.priority === 'P0' ? 'is-hot' : ''}">${semanticEscape(gap.priority)}</span>
+          <span class="semantic-gap-mini-badge ${gap.level === '严重' ? 'is-hot' : ''}">${semanticEscape(gap.level)}</span>
+          <span class="semantic-gap-mini-badge">${semanticEscape(vector?.id || '')}</span>
+        </div>
+      </div>
+      <div class="semantic-gap-workbench-copy">
+        <p><strong>缺口：</strong>${semanticEscape(gap.gap)}</p>
+        <p><strong>向量方向：</strong>${semanticEscape(gap.vectorGap)}</p>
+      </div>
+      <div class="semantic-gap-candidates">
+        ${(gap.scenes || []).map((scene, idx) => `
+          <div class="semantic-gap-candidate">
+            <strong>${semanticEscape(scene.title)}</strong>
+            <div class="semantic-gap-candidate-meta">
+              <span>${semanticEscape(semanticGapOwner(gap, scene))}</span>
+              ${scene.co ? `<span>协同 ${semanticEscape(scene.co)}</span>` : ''}
+              <span>${semanticEscape(scene.projection || '投影待回算')}</span>
+              <span>${semanticEscape(scene.ltc || 'LTC待回算')}</span>
+            </div>
+            <button type="button" class="semantic-gap-send" onclick="semanticPushGapScene('${semanticEscape(vector?.id || '')}', ${idx})">推送到场景触发</button>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function semanticPushGapScene(familyCode, sceneIndex) {
+  const gap = SEMANTIC_GAP_SCENES[familyCode];
+  if (!gap) return;
+  const scene = (gap.scenes || [])[sceneIndex];
+  if (!scene) return;
+  const data = Object.values(SEMANTIC_DRILL_DATA).find(item => semanticVectorFor(item)?.id === familyCode) || {};
+  const input = semanticBuildGapSceneInput(data, gap, scene);
+  showPage('pain-generate');
+  setTimeout(() => {
+    if (typeof setSceneInputMode === 'function') setSceneInputMode('whole');
+    const ta = document.getElementById('manualScenesInput');
+    if (!ta) return;
+    ta.value = input;
+    ta.dispatchEvent(new Event('input'));
+    ta.focus();
+    ta.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 260);
+}
+
 function semanticRenderPainCluster(data, clusterIndex = 0) {
   const clusters = data.clusters || [];
   const cluster = clusters[clusterIndex] || clusters[0] || { name: '暂无痛点簇', desc: '', pains: [] };
@@ -8101,6 +8466,7 @@ function semanticRenderPainCluster(data, clusterIndex = 0) {
           ${scenes.map(scene => `<span class="semantic-drill-scene">${semanticEscape(scene)}</span>`).join('')}
         </div>
       </div>
+      ${semanticRenderGapWorkbench(data)}
       <div class="semantic-drill-list">
         ${(cluster.pains || []).map(pain => `
           <div class="semantic-drill-pain">
