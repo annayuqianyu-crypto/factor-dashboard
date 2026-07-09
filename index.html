@@ -1086,14 +1086,7 @@ tr:hover td { background: #fafafa; }
 
 .semantic-drill-feature {
   margin-top: 9px;
-  color: #475569;
-  font-size: 12px;
-  line-height: 1.7;
-}
-
-.semantic-drill-feature b {
-  color: #0f172a;
-  font-weight: 900;
+  max-width: 100%;
 }
 
 .semantic-drill-badge,
@@ -8128,8 +8121,16 @@ function semanticShowDrill(key, trigger) {
         <div class="semantic-drill-meta">
           ${(data.scenes || []).map(scene => `<span class="semantic-drill-pill">${semanticEscape(scene)}</span>`).join('')}
         </div>
-        <div class="semantic-drill-feature">
-          <b>族特征：</b>主体 ${semanticEscape(struct.subject)}；资产 ${semanticEscape(struct.asset)}；动作 ${semanticEscape(struct.action)}；约束 ${semanticEscape(struct.constraint)}；风险 ${semanticEscape(struct.risk)}；承接 ${semanticEscape(data.sku)}
+        <div class="semantic-drill-feature semantic-drill-structure">
+          <h4>族特征</h4>
+          <dl>
+            <dt>主体</dt><dd>${semanticEscape(struct.subject)}</dd>
+            <dt>资产</dt><dd>${semanticEscape(struct.asset)}</dd>
+            <dt>动作</dt><dd>${semanticEscape(struct.action)}</dd>
+            <dt>约束</dt><dd>${semanticEscape(struct.constraint)}</dd>
+            <dt>风险</dt><dd>${semanticEscape(struct.risk)}</dd>
+            <dt>承接</dt><dd>${semanticEscape(data.sku)}</dd>
+          </dl>
         </div>
       </div>
       <span class="semantic-drill-badge">${semanticEscape(data.type)}</span>
