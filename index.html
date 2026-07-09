@@ -4268,7 +4268,7 @@ body {
         <div id="semantic-drill-panel" class="semantic-drill-panel">
           <div class="semantic-drill-empty">
             <strong>点击左侧族群</strong>
-            <span>查看该族下的痛点簇、挂接场景和代表痛点。</span>
+            <span>查看该族下的痛点簇、向量缺口、补洞场景和代表痛点。</span>
           </div>
         </div>
       </div>
@@ -8449,7 +8449,6 @@ function semanticPushGapScene(familyCode, sceneIndex) {
 function semanticRenderPainCluster(data, clusterIndex = 0) {
   const clusters = data.clusters || [];
   const cluster = clusters[clusterIndex] || clusters[0] || { name: '暂无痛点簇', desc: '', pains: [] };
-  const scenes = semanticClusterScenes(data, cluster);
   return `
     <div>
       <div class="semantic-drill-subclusters">
@@ -8459,12 +8458,6 @@ function semanticRenderPainCluster(data, clusterIndex = 0) {
             <span>${semanticEscape(item.desc)} · ${semanticEscape((item.pains || []).length)} 条痛点</span>
           </button>
         `).join('')}
-      </div>
-      <div class="semantic-drill-scenes">
-        <div class="semantic-drill-scenes-title">挂接场景 S_m · 场景位于簇之后，用于召回或生成具体痛点</div>
-        <div class="semantic-drill-scene-list">
-          ${scenes.map(scene => `<span class="semantic-drill-scene">${semanticEscape(scene)}</span>`).join('')}
-        </div>
       </div>
       ${semanticRenderGapWorkbench(data)}
       <div class="semantic-drill-list">
