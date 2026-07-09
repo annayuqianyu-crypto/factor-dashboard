@@ -740,7 +740,7 @@ tr:hover td { background: #fafafa; }
 
 .semantic-map {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr);
+  grid-template-columns: minmax(0, 1.05fr) minmax(420px, .95fr);
   gap: 16px;
   align-items: start;
 }
@@ -869,6 +869,8 @@ tr:hover td { background: #fafafa; }
   display: flex;
   flex-direction: column;
   gap: 12px;
+  position: sticky;
+  top: 76px;
 }
 
 .semantic-panel {
@@ -1000,6 +1002,43 @@ tr:hover td { background: #fafafa; }
   background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
   box-shadow: 0 16px 36px rgba(30,64,175,.08);
   padding: 14px;
+}
+
+.semantic-side .semantic-drill-panel {
+  margin-top: 0;
+  max-height: calc(100vh - 96px);
+  overflow: auto;
+}
+
+.semantic-side .semantic-drill-grid {
+  grid-template-columns: 1fr;
+}
+
+.semantic-side .semantic-drill-subclusters {
+  grid-template-columns: 1fr;
+}
+
+.semantic-drill-empty {
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: #64748b;
+  padding: 24px;
+}
+
+.semantic-drill-empty strong {
+  color: #0f172a;
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.semantic-drill-empty span {
+  max-width: 320px;
+  font-size: 12.5px;
+  line-height: 1.7;
 }
 
 .semantic-drill-head {
@@ -4068,31 +4107,14 @@ body {
       </div>
 
       <div class="semantic-side">
-        <div class="semantic-panel">
-          <div class="semantic-panel-title">族是主入口，场景是触发器</div>
-          <div style="font-size:12.5px;color:#475569;line-height:1.75;">
-            痛点族来自 737 条已确认痛点的向量分布，是可复用的一级业务问题域；痛点簇是族内高频小问题；场景更具体，挂在簇后面，负责把真实业务输入转化为可生成、可审核、可入库的痛点。
+        <div id="semantic-drill-panel" class="semantic-drill-panel">
+          <div class="semantic-drill-empty">
+            <strong>点击左侧族群</strong>
+            <span>查看该族下的痛点簇、挂接场景和代表痛点。</span>
           </div>
-        </div>
-
-        <div class="semantic-panel">
-          <div class="semantic-panel-title">向量检索收缩链路</div>
-          <div class="semantic-flow">
-            <div class="semantic-flow-step"><strong>痛点族</strong><span>一级问题域 F_j</span></div>
-            <div class="semantic-flow-step"><strong>痛点簇</strong><span>局部高密度小问题 C_k</span></div>
-            <div class="semantic-flow-step"><strong>具体场景</strong><span>慧管家自然场景 / 补洞场景 S_m</span></div>
-            <div class="semantic-flow-step"><strong>具体痛点</strong><span>召回、生成、审核、入库</span></div>
-          </div>
-        </div>
-
-        <div class="semantic-panel">
-          <div class="semantic-panel-title">向量空缺 / 机器扩散机会</div>
-          <div id="semantic-gap-list" class="semantic-gap-list"></div>
         </div>
       </div>
     </div>
-
-    <div id="semantic-drill-panel" class="semantic-drill-panel" style="display:none;"></div>
 
   </div>
 
