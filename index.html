@@ -1091,6 +1091,41 @@ tr:hover td { background: #fafafa; }
   line-height: 1.45;
 }
 
+.semantic-drill-scenes {
+  margin-bottom: 12px;
+  padding: 11px 12px;
+  border: 1px dashed #bfdbfe;
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.semantic-drill-scenes-title {
+  font-size: 12px;
+  font-weight: 900;
+  color: #1d4ed8;
+  margin-bottom: 8px;
+}
+
+.semantic-drill-scene-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.semantic-drill-scene {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  border: 1px solid #dbeafe;
+  border-radius: 999px;
+  background: #fff;
+  color: #334155;
+  padding: 4px 9px;
+  font-size: 11.5px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
 .semantic-drill-list {
   display: grid;
   gap: 8px;
@@ -3761,7 +3796,7 @@ body {
 
   <div class="card">
     <div class="card-title">朝曦痛点向量模型</div>
-    <div class="semantic-space-summary">本模块用于把已同步痛点从文字清单转化为可计算、可解释、可治理的业务语义地图：先用法律 / 税务 / 资本市场专家锚点建立三维坐标系，再将 737 条痛点编码为向量 p_i 并投影为 s_i=(L_i,T_i,C_i)，由点云逐步形成痛点簇、痛点族、场景云团和三面投影热区，最终支撑场景检索、痛点治理、因子反哺和后续 SKU 能力边界叠加。</div>
+    <div class="semantic-space-summary">本模块用于把已同步痛点从文字清单转化为可计算、可解释、可治理的业务语义地图：先用法律 / 税务 / 资本市场专家锚点建立三维坐标系，再将 737 条痛点编码为向量 p_i 并投影为 s_i=(L_i,T_i,C_i)，由点云逐步形成痛点族、痛点簇、具体场景和三面投影热区。后续 BU 推进以痛点族为一级入口，以痛点簇为二级入口，场景挂在簇之后作为生成或召回痛点的具体触发界面。</div>
     <details class="semantic-math-dict">
       <summary>∑ 数学字典</summary>
       <div class="semantic-math-dict-panel">
@@ -3776,11 +3811,11 @@ body {
         <div class="semantic-math-dict-item"><strong>痛点簇 C_k 定义</strong>簇是点云里的局部高密度小问题集合，可写成：C_k = { p_i | cos(p_i, nu_k) ≥ tau_C, d(s_i, s_k) ≤ D_C, density(C_k) ≥ m }。其中 nu_k 是簇的高维质心，s_k 是簇在 L/T/C 空间的三维质心，m 是最低复用样本量。</div>
         <div class="semantic-math-dict-item"><strong>痛点族 F_j 定义</strong>族由多个痛点簇向上归并形成，可写成：F_j = { C_k | conflict(C_k)=g_j, cos(nu_k, mu_j) ≥ tau_F, d(s_k, s_j) ≤ D_F }。意思是：进入同一族的簇，需要主冲突同源、向量方向足够像、法税资三轴位置不太远。</div>
         <div class="semantic-math-dict-item"><strong>族校验标准</strong>初始口径：同族候选需满足主冲突同源；主体/资产/动作/约束/风险结构相近；cos(nu_k, mu_j) 建议不低于同族样本分布 P10/P15；L/T/C 欧氏距离建议不高于同族样本距离 P85。该标准来自向量检索、三轴距离和 BU 已审核痛点的回测校准。</div>
-        <div class="semantic-math-dict-item"><strong>场景云团 S_m 定义</strong>场景不是分类结果，而是业务入口形成的召回云团：S_m=(q_m, B_m, R_m)。S_m 表示第 m 个业务场景；q_m 是入口向量；B_m 是该场景在 L/T/C 空间里的不规则召回云团；R_m 是召回痛点、簇、族的规则。</div>
-        <div class="semantic-math-dict-item"><strong>场景入口向量 q_m</strong>由场景名称、场景描述、典型关键词和代表性痛点一起编码生成。它表示用户从某个业务方向进入系统时，真正发出的语义查询。</div>
+        <div class="semantic-math-dict-item"><strong>场景云团 S_m 定义</strong>场景不是一级分类，而是挂在痛点簇之后的具体业务触发界面：S_m=(q_m, B_m, R_m)。S_m 表示第 m 个业务场景；q_m 是场景向量；B_m 是该场景在 L/T/C 空间里的不规则召回云团；R_m 是从该场景召回具体痛点的规则。</div>
+        <div class="semantic-math-dict-item"><strong>场景入口向量 q_m</strong>由场景名称、场景描述、典型关键词和代表性痛点一起编码生成。它表示用户在某个痛点簇下发出的具体业务查询，而不是统领全部痛点族的一级目录。</div>
         <div class="semantic-math-dict-item"><strong>q_m 编码逻辑</strong>可理解为 q_m = Encode(name_m + desc_m + tags_m + cases_m)。其中 name_m 是场景名称，desc_m 是场景说明，tags_m 是主体/资产/约束/风险关键词，cases_m 是代表性痛点文本。编码后得到一条 1024 维入口向量，再用于和痛点向量 p_i、簇质心 nu_k、族质心 mu_j 计算余弦相似度。</div>
-        <div class="semantic-math-dict-item"><strong>场景召回分数</strong>SceneScore 可由三部分组成：痛点与 q_m 的余弦相似度、痛点 Tags 与场景关键词的重叠度、痛点 L/T/C 坐标是否落在 B_m 云团内。它决定场景入口召回哪些痛点、簇和族。</div>
-        <div class="semantic-math-dict-item"><strong>正交投影 Π</strong>三维点云可以投影到 LT、LC、TC 三个观察面：Π_LT 看法律×税务，Π_LC 看法律×资本市场，Π_TC 看税务×资本市场。投影斑块不是硬边界，而是场景云团在二维业务组合上的热点影子。</div>
+        <div class="semantic-math-dict-item"><strong>场景召回分数</strong>SceneScore 可由三部分组成：痛点与 q_m 的余弦相似度、痛点 Tags 与场景关键词的重叠度、痛点 L/T/C 坐标是否落在 B_m 云团内。它决定一个具体场景在所属簇内召回哪些已有痛点，或者提示哪些新痛点值得生成。</div>
+        <div class="semantic-math-dict-item"><strong>正交投影 Π</strong>三维点云可以投影到 LT、LC、TC 三个观察面：Π_LT 看法律×税务，Π_LC 看法律×资本市场，Π_TC 看税务×资本市场。投影斑块不是硬边界，而是痛点族/簇在二维业务组合上的热点影子。</div>
         <div class="semantic-math-dict-item"><strong>专家锚点 anchor</strong>锚点的“值”不是人工填一个分数，而是一条 1024 维基准向量。我们先为法律、税务、资本市场各写 3 组专家锚点文本，再用 BGE-M3 编码并取质心：a_L=法律锚点质心，a_T=税务锚点质心，a_C=资本市场锚点质心。它们是三根坐标尺，不是业务边界值。</div>
         <div class="semantic-math-dict-item"><strong>三条锚点文本口径</strong>法律锚点聚焦公司治理、股东权利、代持纠纷、婚姻继承、信托效力、债务隔离、诉讼仲裁；税务锚点聚焦个税/企税、股权转让税、跨境税务、CRS/FATCA、转让定价、税务稽查、税负优化；资本市场锚点聚焦上市公司、IPO、并购重组、股权激励、增减持、信息披露、控制权交易、监管问询。</div>
         <div class="semantic-math-dict-item"><strong>锚点坐标边界</strong>对每条痛点向量 p_i 分别计算 c_L=cos(p_i,a_L)、c_T=cos(p_i,a_T)、c_C=cos(p_i,a_C)，再把本批痛点在每条轴上的 raw cosine 按 P5-P95 分位拉伸为 0-10 分，形成 s_i=(L_i,T_i,C_i)。所以 L/T/C 是痛点相对三条专家锚点的可读强度，不是主观打分。</div>
@@ -3887,8 +3922,8 @@ body {
           <g>
             <path d="M454 78 C453 89, 451 99, 448 109" fill="none" stroke="#60a5fa" stroke-width="1.3" stroke-dasharray="5 6" opacity=".82"/>
             <rect x="390" y="28" width="206" height="44" rx="9" fill="#ffffff" opacity=".95" stroke="#bfdbfe"/>
-            <text x="404" y="46" font-size="12" font-weight="900" fill="#1d4ed8">S_m 场景云团</text>
-            <text x="404" y="61" font-size="10.2" fill="#64748b">蓝色虚线云团：入口召回范围</text>
+            <text x="404" y="46" font-size="12" font-weight="900" fill="#1d4ed8">S_m 具体场景</text>
+            <text x="404" y="61" font-size="10.2" fill="#64748b">蓝色虚线云团：簇下触发范围</text>
           </g>
 
           <g>
@@ -3950,7 +3985,7 @@ body {
 
         <div class="space-legend">
           <div class="space-legend-item"><span class="space-dot" style="--dot:#f59e0b;"></span>半透明斑块：正交投影热区</div>
-          <div class="space-legend-item"><span class="space-dot" style="--dot:#60a5fa;"></span>场景云团 S_m</div>
+          <div class="space-legend-item"><span class="space-dot" style="--dot:#60a5fa;"></span>具体场景 S_m</div>
           <div class="space-legend-item"><span class="space-dot" style="--dot:#0f766e;"></span>痛点族 F_j</div>
           <div class="space-legend-item"><span class="space-dot" style="--dot:#f59e0b;"></span>痛点簇 C_k</div>
           <div class="space-legend-item"><span class="space-dot" style="--dot:#6366f1;"></span>单条痛点 p_i</div>
@@ -4011,12 +4046,12 @@ body {
 
         <div class="space-method-card">
           <div class="space-method-top">
-            <div class="space-method-title">6. 场景云团与召回 S_m</div>
-            <div class="space-method-symbol">入口层</div>
+            <div class="space-method-title">6. 具体场景与召回 S_m</div>
+            <div class="space-method-symbol">触发层</div>
           </div>
-          <p>业务场景入口放在最后，因为它是使用层，不是建模起点。入口不是单条痛点，也不是痛点族，而是用户进入系统时选择的业务出发点；数学上可理解为一个场景云团 S_m，用来从既有点云中召回相关痛点、痛点簇和痛点族。</p>
-          <div class="space-note">场景可以表示为 S_m=(q_m, B_m, R_m)：q_m 是由场景名称、关键词和代表性痛点生成的入口向量；B_m 是该场景在 L/T/C 三维空间中的不规则召回云团；R_m 是召回规则。蓝色虚线云团表示当前入口的综合召回范围。</div>
-          <div class="space-note">例如从下方 9 大场景中的“资产保护”入口进入，系统会先圈定婚姻风险、债务隔离、代持确权、诉讼保全、信托隔离、保险受益和跨境资产披露等语义区域；再通过语义相似度、关键词重叠和三轴位置共同召回相关痛点、痛点簇和痛点族。SKU 向量基座成熟后，可再与痛点点云叠加，用于识别能力覆盖与创新空白。</div>
+          <p>场景放在痛点簇之后，因为它是更具体的业务触发界面，不再作为一级目录统领全部痛点。用户先进入痛点族，再进入痛点簇，最后用具体场景召回已有痛点或生成候选痛点。</p>
+          <div class="space-note">场景可以表示为 S_m=(q_m, B_m, R_m)：q_m 是由场景名称、关键词和代表性痛点生成的场景向量；B_m 是该场景在 L/T/C 三维空间中的不规则召回云团；R_m 是召回规则。蓝色虚线云团表示某个簇下具体场景的触发范围。</div>
+          <div class="space-note">例如先进入“股权代持与控制权纠纷族”，再进入“代持人状态变化簇”，最后挂接“代持人婚变导致代持资产被主张共同财产”这类具体场景。场景直接导向痛点，适合用于痛点生成和补洞，不再承担大目录功能。</div>
         </div>
       </div>
     </div>
@@ -4025,8 +4060,8 @@ body {
 
 
   <div class="card">
-    <div class="card-title">场景-痛点语义入口地图</div>
-    <div class="semantic-space-summary">基于 737 条已同步痛点的 BGE-M3 向量结果，将 12 个模型族和 36 个模型簇重新命名为业务可读入口：用户从 9 大场景进入，系统召回相关向量族、痛点簇和代表痛点；右侧同步展示低密度、断裂连接和高交叉薄弱区，用于后续机器学习扩散。</div>
+    <div class="card-title">族-簇-场景语义入口地图</div>
+    <div class="semantic-space-summary">基于 737 条已同步痛点的 BGE-M3 向量结果，将 12 个模型族作为一级业务入口：用户先进入痛点族，再查看族内痛点簇，最后把慧管家自然场景或补洞场景挂接到具体簇后，用于召回已有痛点或生成候选痛点。原 9 大业务版块仅作为辅助筛选标签，不再作为主目录。</div>
     <div class="semantic-map">
       <div>
         <div id="semantic-entry-grid" class="semantic-entry-grid"></div>
@@ -4034,19 +4069,19 @@ body {
 
       <div class="semantic-side">
         <div class="semantic-panel">
-          <div class="semantic-panel-title">入口不是分类结果</div>
+          <div class="semantic-panel-title">族是主入口，场景是触发器</div>
           <div style="font-size:12.5px;color:#475569;line-height:1.75;">
-            场景入口是用户进入 C 客模型的业务方向；每个入口会召回若干向量族。系统先用场景语义圈定云团，再收缩到痛点族、痛点簇和真实痛点。
+            痛点族来自 737 条已确认痛点的向量分布，是可复用的一级业务问题域；痛点簇是族内高频小问题；场景更具体，挂在簇后面，负责把真实业务输入转化为可生成、可审核、可入库的痛点。
           </div>
         </div>
 
         <div class="semantic-panel">
           <div class="semantic-panel-title">向量检索收缩链路</div>
           <div class="semantic-flow">
-            <div class="semantic-flow-step"><strong>场景云团</strong><span>资产保护、境外架构等入口向量 q_m</span></div>
-            <div class="semantic-flow-step"><strong>向量族</strong><span>多个簇围绕一级质心 mu_j 汇聚</span></div>
+            <div class="semantic-flow-step"><strong>痛点族</strong><span>一级问题域 F_j</span></div>
             <div class="semantic-flow-step"><strong>痛点簇</strong><span>局部高密度小问题 C_k</span></div>
-            <div class="semantic-flow-step"><strong>扩散方向</strong><span>低密度、断裂和高交叉薄弱区</span></div>
+            <div class="semantic-flow-step"><strong>具体场景</strong><span>慧管家自然场景 / 补洞场景 S_m</span></div>
+            <div class="semantic-flow-step"><strong>具体痛点</strong><span>召回、生成、审核、入库</span></div>
           </div>
         </div>
 
@@ -6048,7 +6083,7 @@ body {
   <div class="bu-guide-hero">
     <div class="bu-guide-kicker">痛点库补足工作台</div>
     <h2>BU推进指导</h2>
-    <p>本页用于指导 BU 按“业务版块检索入口 → 业务场景 → 覆盖诊断 → 痛点族/簇补足”的顺序推进痛点库增长。核心原则不是自由发散生成，而是在向量空间中补齐缺失的业务表达，避免重复生成、泛化生成和跨 BU 边界不清。</p>
+    <p>本页用于指导 BU 按“痛点族 → 痛点簇 → 具体场景 → 具体痛点”的顺序推进痛点库增长。核心原则不是自由发散生成，而是在向量空间中沿着已形成的业务族和问题簇补齐缺失表达，避免重复生成、泛化生成和跨 BU 边界不清。</p>
   </div>
 
   <div class="bu-guide-section">
@@ -6056,33 +6091,33 @@ body {
     <div class="bu-guide-flow">
       <div class="bu-guide-step">
         <div class="bu-guide-step-num">1</div>
-        <strong>选择业务版块检索入口</strong>
-        <span>先从资产保护、财富传承、税务合规、资本市场等大入口进入，确定本次观察的大业务方向。</span>
+        <strong>选择痛点族入口</strong>
+        <span>先从 12 个向量痛点族进入，确定本次观察的一级问题域，例如股权代持、企业税务合规、跨境身份或上市公司资本动作。</span>
       </div>
       <div class="bu-guide-step">
         <div class="bu-guide-step-num">2</div>
-        <strong>进入业务场景</strong>
-        <span>场景分为慧管家自然场景和补洞场景；前者来自真实纪要，后者来自向量断裂审计。</span>
+        <strong>进入痛点簇</strong>
+        <span>在族内选择高频问题簇，先看已有痛点是否已经覆盖该类问题。</span>
       </div>
       <div class="bu-guide-step">
         <div class="bu-guide-step-num">3</div>
-        <strong>查看覆盖状态</strong>
-        <span>先判断该场景是未覆盖、局部稀疏还是已充分覆盖，再决定是否需要生成新痛点。</span>
+        <strong>挂接具体场景</strong>
+        <span>把慧管家自然场景或补洞场景挂到对应簇后，作为生成或召回痛点的具体业务触发界面。</span>
       </div>
       <div class="bu-guide-step">
         <div class="bu-guide-step-num">4</div>
-        <strong>识别治理标签</strong>
-        <span>同步观察是否存在高重复风险、跨族场景、高价值补洞、多 BU 协同等治理信号。</span>
+        <strong>查看覆盖状态</strong>
+        <span>判断该簇下场景是未覆盖、局部稀疏还是已充分覆盖，并同步识别高重复风险、跨族场景等治理标签。</span>
       </div>
       <div class="bu-guide-step">
         <div class="bu-guide-step-num">5</div>
         <strong>选择推进动作</strong>
-        <span>根据状态和标签选择生成、改写、合并观察、协同复核或暂不处理。</span>
+        <span>根据覆盖状态和治理标签选择生成、改写、合并观察、协同复核或暂不处理。</span>
       </div>
       <div class="bu-guide-step">
         <div class="bu-guide-step-num">6</div>
         <strong>回算入库</strong>
-        <span>新痛点经 BU 审核后进入主库，再回算向量位置、族簇归属和后续因子/SKU联动。</span>
+        <span>新痛点经 BU 审核后进入主库，再回算向量位置、族簇归属和后续因子/SKU 联动。</span>
       </div>
     </div>
   </div>
@@ -6092,11 +6127,11 @@ body {
     <div class="bu-guide-two-col">
       <div class="bu-guide-info">
         <h4>慧管家自然场景</h4>
-        <p>来自真实会议纪要，是客户咨询与业务讨论中自然出现的场景输入。它适合用于发现真实业务触发点，但不应直接盲目生成；需要先检查该场景下是否已有痛点、痛点簇或同族内容。</p>
+        <p>来自真实会议纪要，是客户咨询与业务讨论中自然出现的场景输入。它不再作为一级目录，而是挂到最接近的痛点簇后；使用前需要先检查该簇下是否已有相似痛点。</p>
       </div>
       <div class="bu-guide-info">
         <h4>补洞场景</h4>
-        <p>来自向量断裂审计，是为了补齐痛点族/簇中的稀疏区域而反向生成的场景输入。它的目标不是“多生成”，而是把当前点云中缺少的过渡动作、复合约束和跨轴冲突补完整。</p>
+        <p>来自向量断裂审计，是为了补齐痛点族/簇中的稀疏区域而反向生成的场景输入。它应直接挂到目标簇后，用来补足当前点云缺少的过渡动作、复合约束和跨轴冲突。</p>
       </div>
     </div>
   </div>
@@ -6106,17 +6141,17 @@ body {
     <div class="bu-guide-three-col">
       <div class="bu-guide-status" style="--status-color:#dc2626;--status-soft:#fff1f2;">
         <h4>未覆盖</h4>
-        <p>该场景附近缺少已同步痛点，或者没有稳定的痛点簇承接。说明客户问题已经出现，但主库尚未沉淀出可复用表达。</p>
+        <p>该痛点簇下缺少可复用痛点，或具体场景附近没有已同步痛点承接。说明业务触发点已经出现，但主库尚未沉淀出表达。</p>
         <div class="bu-guide-action">动作：优先生成</div>
       </div>
       <div class="bu-guide-status" style="--status-color:#f97316;--status-soft:#fff7ed;">
         <h4>局部稀疏</h4>
-        <p>已有部分痛点覆盖，但某些主体、资产、动作、约束或风险方向明显缺口，族内/簇内存在向量断裂。</p>
+        <p>族内已有部分痛点覆盖，但某个簇下的主体、资产、动作、约束或风险方向仍有缺口，存在向量断裂。</p>
         <div class="bu-guide-action">动作：定向补足</div>
       </div>
       <div class="bu-guide-status" style="--status-color:#16a34a;--status-soft:#f0fdf4;">
         <h4>已充分覆盖</h4>
-        <p>该区域已有足够痛点、痛点簇和同族表达。BU 应优先查看已有内容，除非出现新的业务冲突，不建议继续生成。</p>
+        <p>该族/簇已有足够痛点和场景表达。BU 应优先查看已有内容，除非出现新的业务冲突，不建议继续生成。</p>
         <div class="bu-guide-action">动作：展示复用</div>
       </div>
     </div>
@@ -6127,11 +6162,11 @@ body {
     <div class="bu-guide-tags">
       <div class="bu-guide-tag">
         <strong>高重复风险</strong>
-        <span>场景或候选痛点与已有痛点高度相似，先合并观察或去重，再决定是否补充。</span>
+        <span>具体场景或候选痛点与同簇已有痛点高度相似，先合并观察或去重，再决定是否补充。</span>
       </div>
       <div class="bu-guide-tag">
         <strong>跨族场景</strong>
-        <span>一个场景同时召回多个痛点族，需明确主冲突，由主 BU 牵头，多 BU 复核。</span>
+        <span>一个具体场景同时触发多个痛点族，需明确主冲突，由主 BU 牵头，多 BU 复核。</span>
       </div>
       <div class="bu-guide-tag">
         <strong>高价值补洞</strong>
@@ -6167,25 +6202,25 @@ body {
         <tr>
           <td><span class="bu-guide-pill">未覆盖 + 高价值补洞</span></td>
           <td>优先生成</td>
-          <td>直接使用补洞场景作为输入，围绕缺失的主体、资产、动作、约束、风险组合生成 3-5 条候选痛点。</td>
+          <td>先定位目标痛点族和痛点簇，再使用补洞场景作为输入，围绕缺失的主体、资产、动作、约束、风险组合生成 3-5 条候选痛点。</td>
           <td>新增候选痛点</td>
         </tr>
         <tr>
           <td><span class="bu-guide-pill">未覆盖 + 低价值泛化</span></td>
           <td>先改写场景</td>
-          <td>把大而空的场景改写成具体业务落地界面，例如从“跨境架构风险”改为“境外主体年审断档影响银行 KYC”。</td>
+          <td>先确认它应挂接到哪个痛点簇，再把大而空的场景改写成具体业务落地界面，例如从“跨境架构风险”改为“境外主体年审断档影响银行 KYC”。</td>
           <td>可生成场景输入</td>
         </tr>
         <tr>
           <td><span class="bu-guide-pill">局部稀疏 + 多BU协同</span></td>
           <td>主 BU 生成，协同 BU 复核</td>
-          <td>按主冲突确定主 BU；如税务处理是主矛盾但涉及法律结构，则 Tax 主导、Legal 复核。</td>
+          <td>按目标簇的主冲突确定主 BU；如税务处理是主矛盾但涉及法律结构，则 Tax 主导、Legal 复核。</td>
           <td>跨 BU 候选痛点</td>
         </tr>
         <tr>
           <td><span class="bu-guide-pill">局部稀疏 + 高重复风险</span></td>
           <td>先查相似痛点</td>
-          <td>先查看同族、同簇和相似痛点；只有当新场景提供了新的约束、风险或解决路径时才新增。</td>
+          <td>先查看同族、同簇和相似痛点；只有当新场景在该簇下提供了新的约束、风险或解决路径时才新增。</td>
           <td>去重判断记录</td>
         </tr>
         <tr>
@@ -6213,11 +6248,11 @@ body {
     <div class="bu-guide-two-col">
       <div class="bu-guide-rule">
         <h4>本轮：先补洞，再开放自然场景</h4>
-        <p>优先完成向量断裂审计形成的补洞场景生成，并进行大汇总、大清洗、大去重。处理完补洞场景后，再把慧管家自然场景开放给 BU 常规使用。</p>
+        <p>优先完成向量断裂审计形成的补洞场景生成，但每个补洞场景都必须先挂接到目标痛点族和痛点簇。生成后进行大汇总、大清洗、大去重，再进入 BU 审核。</p>
       </div>
       <div class="bu-guide-rule">
         <h4>后续：按稀疏度推荐增长</h4>
-        <p>BU 进入慧管家生成页面时，应看到该场景下已有痛点、痛点簇和同族内容，并优先推进向量空间中密度稀疏但业务价值高的区域。</p>
+        <p>BU 后续进入慧管家自然场景时，应先看到该场景对应的痛点族、痛点簇、已有痛点和相似场景，再优先推进向量空间中密度稀疏但业务价值高的区域。</p>
       </div>
     </div>
   </div>
@@ -7303,19 +7338,22 @@ const SEMANTIC_VECTOR_FAMILIES = {
 };
 
 const SEMANTIC_SCENE_ENTRIES = [
-  { title: '资本市场', count: 225, color: '#92400e', soft: '#fffbeb', families: ['cluster-listed-action', 'cluster-equity-incentive', 'shareholder-tax'], desc: '从上市公司、实控人和股东资本动作进入，机器召回 F11/F03/F05 等高资本强度族，重点观察融资、增减持、披露、激励和股东税负。' },
-  { title: '股权激励', count: 139, color: '#1e40af', soft: '#eff6ff', families: ['cluster-equity-incentive', 'cluster-listed-action', 'shareholder-tax'], desc: '从激励授予、行权、退出、持股平台和投资人约束进入，主召回 F03，并与 F11、F05 形成资本与税务交叉。' },
-  { title: '税务合规', count: 52, color: '#991b1b', soft: '#fef2f2', families: ['tax-health-check', 'shareholder-tax', 'treaty-tax', 'cluster-offshore-substance'], desc: '从税务体检、交易定价、税务稽查和交易申报进入，主召回 F07/F05/F09/F06，适合生成税务约束型痛点。' },
-  { title: '身份 / 海外税务', count: 75, color: '#9a3412', soft: '#fff7ed', families: ['cluster-cross-border-tax', 'treaty-tax', 'cluster-offshore-substance'], desc: '从税务居民身份、全球征税、CRS/FATCA、弃籍税进入，主召回 F01，并与 F09、F06 的境外收入税负形成交叉。' },
-  { title: '境外架构', count: 78, color: '#5b21b6', soft: '#f5f3ff', families: ['cluster-offshore-substance', 'offshore-ops', 'cross-border-capital', 'treaty-tax'], desc: '从香港、BVI、开曼、新加坡等主体设立维护进入，召回 F06/F10/F04/F09，连接离岸收入、经济实质、外汇和资金回流。' },
-  { title: '资产保护', count: 42, color: '#166534', soft: '#f0fdf4', families: ['cluster-nominee-control', 'cluster-family-governance', 'contract-lease'], desc: '从债务隔离、婚姻风险、代持、资产执行和信托隔离进入，召回 F08/F02，并暴露信托隔离与资产执行之间的低密度空缺。' },
-  { title: '法律架构', count: 46, color: '#9d174d', soft: '#fdf2f8', families: ['cluster-nominee-control', 'cluster-listed-action', 'contract-lease'], desc: '从股东协议、章程治理、一致行动、控制权安排和争议预防进入，主召回 F08/F11/F12，偏法律与资本交叉。' },
-  { title: '财富传承', count: 71, color: '#3730a3', soft: '#eef2ff', families: ['cluster-family-governance', 'cluster-nominee-control', 'shareholder-tax', 'charitable-trust'], desc: '从股权、房产、子女接班、婚姻财产和跨代分配进入，主召回 F02/F08/F05，适合向信托、保险和公益治理扩散。' },
-  { title: '慈善公益', count: 9, color: '#115e59', soft: '#f0fdfa', families: ['charitable-trust', 'shareholder-tax'], desc: '从基金会、慈善信托、股权捐赠和公益治理进入，目前只是低样本簇，适合做机器扩散和 BU 复核。' }
+  { title: '上市公司资本动作族', count: 93, color: '#92400e', soft: '#fffbeb', families: ['cluster-listed-action'], desc: '一级入口 F11：围绕上市公司、实控人、大股东、增减持、控制权、融资治理和信息披露形成，场景应挂在具体资本动作簇之后。' },
+  { title: '股权激励与员工持股族', count: 88, color: '#1e40af', soft: '#eff6ff', families: ['cluster-equity-incentive'], desc: '一级入口 F03：围绕激励授予、行权、平台退出、员工权利边界和税务处理形成，适合继续补足激励工具与员工流转场景。' },
+  { title: '跨境身份与税务居民族', count: 51, color: '#9a3412', soft: '#fff7ed', families: ['cluster-cross-border-tax'], desc: '一级入口 F01：围绕税务居民身份、全球征税、CRS/FATCA、海外资产披露和弃籍规划形成，场景应具体到身份变化或申报触发点。' },
+  { title: '境外公司与经济实质族', count: 55, color: '#5b21b6', soft: '#f5f3ff', families: ['cluster-offshore-substance'], desc: '一级入口 F06：围绕香港离岸、FSIE、来源地举证、境外架构调整和协定优惠形成，重点连接税务证明和主体实质。' },
+  { title: '境外主体维护与经济实质族', count: 25, color: '#d97706', soft: '#fff7ed', families: ['offshore-ops'], desc: '一级入口 F10：围绕 BVI、开曼、香港主体年审、秘书服务、经济实质申报和银行 KYC 形成，是当前较薄但边界清晰的补洞方向。' },
+  { title: '跨境资金与 ODI 架构族', count: 52, color: '#0f766e', soft: '#f0fdfa', families: ['cross-border-capital'], desc: '一级入口 F04：围绕 ODI、37号文、返程投资、跨境并购、资金回流和外汇登记形成，法税资三轴交叉明显。' },
+  { title: '企业股东税负与架构族', count: 90, color: '#7c2d12', soft: '#fff7ed', families: ['shareholder-tax'], desc: '一级入口 F05：围绕股东分配、企业持产、基金架构、借款利息、财产混同和税负测算形成，是法税资复合度较高的大族。' },
+  { title: '企业税务合规与交易定价族', count: 80, color: '#991b1b', soft: '#fef2f2', families: ['tax-health-check'], desc: '一级入口 F07：围绕企业税务体检、关联交易、转让定价、稽查应对和跨境电商合规形成，场景应具体到交易或稽查事项。' },
+  { title: '股权代持与控制权纠纷族', count: 54, color: '#9d174d', soft: '#fdf2f8', families: ['cluster-nominee-control'], desc: '一级入口 F08：围绕代持人状态变化、代持证据、代持资产类型、控制权和执行风险形成，法律强度最高。' },
+  { title: '协定待遇与境外股东税负族', count: 34, color: '#be123c', soft: '#fff1f2', families: ['treaty-tax'], desc: '一级入口 F09：围绕 TRC、协定优惠、境外股东分红、减持预提税和美国税务居民海外股权形成。' },
+  { title: '继承婚姻与家庭治理族', count: 95, color: '#3730a3', soft: '#eef2ff', families: ['cluster-family-governance'], desc: '一级入口 F02：围绕股权传承、不动产传承、多子女分配、婚姻风险、接班治理和家族财产外流形成，是法律主导的大体量族。' },
+  { title: '合同租赁与边缘资产族', count: 20, color: '#475569', soft: '#f8fafc', families: ['contract-lease'], desc: '一级入口 F12：围绕租赁合同、担保、抵押房产、办公税务、关联披露和数据安全形成，目前样本较少，可作为边缘资产管理补充方向。' }
 ];
 
 const SEMANTIC_VECTOR_GAPS = [
-  { title: '信托隔离与受托责任', kind: '低密度空缺', color: '#0f766e', desc: '资产保护和财富传承入口都提到信托，但机器尚未形成独立高密度族。可围绕信托设立、装入资产、控制权保留、债权人撤销、受托责任和税务居民身份扩散痛点。' },
+  { title: '信托隔离与受托责任', kind: '低密度空缺', color: '#0f766e', desc: '信托相关痛点目前分散在继承婚姻与家庭治理族、股权代持与控制权纠纷族、企业股东税负与架构族中，尚未形成独立高密度族。可围绕信托设立、装入资产、控制权保留、债权人撤销、受托责任和税务居民身份扩散痛点。' },
   { title: '慈善公益治理', kind: '低样本簇', color: '#115e59', desc: '当前慈善公益仅 9 条，主要挂靠在 F05/F11 的局部簇。可继续扩展基金会强制支出、股权捐赠税负、慈善信托受益安排和公益资产管理。' },
   { title: '保险 / 医疗 / 长期保障', kind: '断裂连接区', color: '#7c3aed', desc: 'C35 在 F05/F11/F03 中零散出现，没有形成稳定族。可从家庭保障、企业核心员工保障、财富传承和资本市场收益四个方向补痛点。' },
   { title: '境外主体维护后周期', kind: '薄弱投影区', color: '#d97706', desc: 'F10 只有 25 条，集中在开曼/BVI/香港账户和经济实质。后续可用机器扩散境外秘书、年审、银行合规、注销迁册和本地雇员/办公实质。' }
@@ -7591,7 +7629,7 @@ const SEMANTIC_FAMILY_LIBRARY = {
 };
 
 const TAX_COMPLIANCE_ENTRY = {
-  type: '业务场景入口',
+  type: '痛点族',
   title: '企业税务体检',
   vectorKey: 'enterpriseTax',
   scenes: ['税务合规', '资本市场', '境外架构'],
@@ -7634,7 +7672,7 @@ const TAX_COMPLIANCE_ENTRY = {
 };
 
 const CHARITY_ENTRY = {
-  type: '业务场景入口',
+  type: '低样本痛点簇',
   title: '慈善公益',
   vectorKey: 'charity',
   scenes: ['慈善公益', '财富传承', '法律架构'],
@@ -7797,43 +7835,43 @@ const CONTRACT_LEASE_ENTRY = {
 
 const SEMANTIC_DRILL_DATA = {
   'cluster-listed-action': SEMANTIC_FAMILY_LIBRARY.listed,
-  'listed-capital-action': { ...SEMANTIC_FAMILY_LIBRARY.listed, type: '业务场景入口', title: '上市公司资本动作' },
+  'listed-capital-action': { ...SEMANTIC_FAMILY_LIBRARY.listed, type: '具体场景', title: '上市公司资本动作' },
   'shareholder-tax': SHAREHOLDER_TAX_ENTRY,
-  'control-dispute': { ...SEMANTIC_FAMILY_LIBRARY.nominee, type: '业务场景入口', title: '控制权纠纷' },
+  'control-dispute': { ...SEMANTIC_FAMILY_LIBRARY.nominee, type: '具体场景', title: '控制权纠纷' },
   'cluster-equity-incentive': SEMANTIC_FAMILY_LIBRARY.incentive,
-  'equity-incentive': { ...SEMANTIC_FAMILY_LIBRARY.incentive, type: '业务场景入口', title: '股权激励' },
-  'employee-shareholding': { ...SEMANTIC_FAMILY_LIBRARY.incentive, type: '业务场景入口', title: '员工持股' },
-  'exercise-tax': { ...SEMANTIC_FAMILY_LIBRARY.incentive, type: '业务场景入口', title: '行权税负' },
-  'platform-exit': { ...SEMANTIC_FAMILY_LIBRARY.incentive, type: '业务场景入口', title: '平台退出' },
+  'equity-incentive': { ...SEMANTIC_FAMILY_LIBRARY.incentive, type: '具体场景', title: '股权激励' },
+  'employee-shareholding': { ...SEMANTIC_FAMILY_LIBRARY.incentive, type: '具体场景', title: '员工持股' },
+  'exercise-tax': { ...SEMANTIC_FAMILY_LIBRARY.incentive, type: '具体场景', title: '行权税负' },
+  'platform-exit': { ...SEMANTIC_FAMILY_LIBRARY.incentive, type: '具体场景', title: '平台退出' },
   'tax-health-check': TAX_COMPLIANCE_ENTRY,
   'treaty-tax': TREATY_TAX_ENTRY,
-  'related-transaction': { ...TAX_COMPLIANCE_ENTRY, type: '业务场景入口', title: '关联交易' },
-  'tax-audit-response': { ...TAX_COMPLIANCE_ENTRY, type: '业务场景入口', title: '稽查应对' },
+  'related-transaction': { ...TAX_COMPLIANCE_ENTRY, type: '具体场景', title: '关联交易' },
+  'tax-audit-response': { ...TAX_COMPLIANCE_ENTRY, type: '具体场景', title: '稽查应对' },
   'cluster-cross-border-tax': SEMANTIC_FAMILY_LIBRARY.crossBorder,
-  'tax-residency': { ...SEMANTIC_FAMILY_LIBRARY.crossBorder, type: '业务场景入口', title: '税务居民' },
-  'crs-fatca': { ...SEMANTIC_FAMILY_LIBRARY.crossBorder, type: '业务场景入口', title: 'CRS/FATCA' },
-  'worldwide-tax': { ...SEMANTIC_FAMILY_LIBRARY.crossBorder, type: '业务场景入口', title: '全球征税' },
+  'tax-residency': { ...SEMANTIC_FAMILY_LIBRARY.crossBorder, type: '具体场景', title: '税务居民' },
+  'crs-fatca': { ...SEMANTIC_FAMILY_LIBRARY.crossBorder, type: '具体场景', title: 'CRS/FATCA' },
+  'worldwide-tax': { ...SEMANTIC_FAMILY_LIBRARY.crossBorder, type: '具体场景', title: '全球征税' },
   'cluster-offshore-substance': SEMANTIC_FAMILY_LIBRARY.offshore,
   'offshore-ops': OFFSHORE_OPS_ENTRY,
   'cross-border-capital': CROSS_BORDER_CAPITAL_ENTRY,
-  'fsie': { ...SEMANTIC_FAMILY_LIBRARY.offshore, type: '业务场景入口', title: 'FSIE' },
-  'circular-37': { ...SEMANTIC_FAMILY_LIBRARY.offshore, type: '业务场景入口', title: '37号文' },
-  'economic-substance': { ...SEMANTIC_FAMILY_LIBRARY.offshore, type: '业务场景入口', title: '经济实质' },
-  'asset-isolation': { ...SEMANTIC_FAMILY_LIBRARY.family, type: '业务场景入口', title: '资产隔离' },
-  'nominee-risk': { ...SEMANTIC_FAMILY_LIBRARY.nominee, type: '业务场景入口', title: '代持风险' },
-  'enforcement-risk': { ...SEMANTIC_FAMILY_LIBRARY.nominee, type: '业务场景入口', title: '执行风险' },
+  'fsie': { ...SEMANTIC_FAMILY_LIBRARY.offshore, type: '具体场景', title: 'FSIE' },
+  'circular-37': { ...SEMANTIC_FAMILY_LIBRARY.offshore, type: '具体场景', title: '37号文' },
+  'economic-substance': { ...SEMANTIC_FAMILY_LIBRARY.offshore, type: '具体场景', title: '经济实质' },
+  'asset-isolation': { ...SEMANTIC_FAMILY_LIBRARY.family, type: '具体场景', title: '资产隔离' },
+  'nominee-risk': { ...SEMANTIC_FAMILY_LIBRARY.nominee, type: '具体场景', title: '代持风险' },
+  'enforcement-risk': { ...SEMANTIC_FAMILY_LIBRARY.nominee, type: '具体场景', title: '执行风险' },
   'cluster-nominee-control': SEMANTIC_FAMILY_LIBRARY.nominee,
-  'nominee-shareholding': { ...SEMANTIC_FAMILY_LIBRARY.nominee, type: '业务场景入口', title: '股权代持' },
-  'corporate-governance': { ...SEMANTIC_FAMILY_LIBRARY.nominee, type: '业务场景入口', title: '公司治理' },
-  'control-right': { ...SEMANTIC_FAMILY_LIBRARY.nominee, type: '业务场景入口', title: '控制权' },
+  'nominee-shareholding': { ...SEMANTIC_FAMILY_LIBRARY.nominee, type: '具体场景', title: '股权代持' },
+  'corporate-governance': { ...SEMANTIC_FAMILY_LIBRARY.nominee, type: '具体场景', title: '公司治理' },
+  'control-right': { ...SEMANTIC_FAMILY_LIBRARY.nominee, type: '具体场景', title: '控制权' },
   'cluster-family-governance': SEMANTIC_FAMILY_LIBRARY.family,
   'contract-lease': CONTRACT_LEASE_ENTRY,
-  'inheritance-arrangement': { ...SEMANTIC_FAMILY_LIBRARY.family, type: '业务场景入口', title: '继承安排' },
-  'family-governance': { ...SEMANTIC_FAMILY_LIBRARY.family, type: '业务场景入口', title: '家族治理' },
-  'intergenerational-allocation': { ...SEMANTIC_FAMILY_LIBRARY.family, type: '业务场景入口', title: '跨代分配' },
-  'charitable-trust': { ...CHARITY_ENTRY, type: '业务场景入口', title: '慈善信托' },
-  'equity-donation': { ...CHARITY_ENTRY, type: '业务场景入口', title: '股权捐赠' },
-  'charity-governance': { ...CHARITY_ENTRY, type: '业务场景入口', title: '公益治理' }
+  'inheritance-arrangement': { ...SEMANTIC_FAMILY_LIBRARY.family, type: '具体场景', title: '继承安排' },
+  'family-governance': { ...SEMANTIC_FAMILY_LIBRARY.family, type: '具体场景', title: '家族治理' },
+  'intergenerational-allocation': { ...SEMANTIC_FAMILY_LIBRARY.family, type: '具体场景', title: '跨代分配' },
+  'charitable-trust': { ...CHARITY_ENTRY, type: '具体场景', title: '慈善信托' },
+  'equity-donation': { ...CHARITY_ENTRY, type: '具体场景', title: '股权捐赠' },
+  'charity-governance': { ...CHARITY_ENTRY, type: '具体场景', title: '公益治理' }
 };
 
 function semanticVectorFor(data) {
@@ -7924,9 +7962,25 @@ function semanticEscape(value) {
   }[ch]));
 }
 
+function semanticClusterScenes(data, cluster) {
+  const baseScenes = (data.scenes || []).slice(0, 2);
+  const clusterName = String(cluster?.name || '').replace(/簇$/, '');
+  const cleanDesc = String(cluster?.desc || '')
+    .replace(/^围绕/, '')
+    .replace(/形成[。.]?$/, '')
+    .replace(/的一组真实痛点[。.]?$/, '');
+  const scenes = [
+    `${clusterName}下的客户咨询`,
+    cleanDesc ? `${cleanDesc}的补洞场景` : '',
+    ...baseScenes.map(scene => `${scene}中的${clusterName}`)
+  ].filter(Boolean);
+  return [...new Set(scenes)].slice(0, 4);
+}
+
 function semanticRenderPainCluster(data, clusterIndex = 0) {
   const clusters = data.clusters || [];
   const cluster = clusters[clusterIndex] || clusters[0] || { name: '暂无痛点簇', desc: '', pains: [] };
+  const scenes = semanticClusterScenes(data, cluster);
   return `
     <div>
       <div class="semantic-drill-subclusters">
@@ -7936,6 +7990,12 @@ function semanticRenderPainCluster(data, clusterIndex = 0) {
             <span>${semanticEscape(item.desc)} · ${semanticEscape((item.pains || []).length)} 条痛点</span>
           </button>
         `).join('')}
+      </div>
+      <div class="semantic-drill-scenes">
+        <div class="semantic-drill-scenes-title">挂接场景 S_m · 场景位于簇之后，用于召回或生成具体痛点</div>
+        <div class="semantic-drill-scene-list">
+          ${scenes.map(scene => `<span class="semantic-drill-scene">${semanticEscape(scene)}</span>`).join('')}
+        </div>
       </div>
       <div class="semantic-drill-list">
         ${(cluster.pains || []).map(pain => `
