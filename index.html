@@ -1705,7 +1705,7 @@ tr:hover td { background: #fafafa; }
 
 .bu-guide-flow {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -6153,7 +6153,7 @@ body {
   <div id="bu-guide-vector-model-slot"></div>
 
   <div class="bu-guide-section">
-    <div class="bu-guide-section-title">一、BU推进总流程</div>
+    <div class="bu-guide-section-title">一、数据工作流总览</div>
     <div class="bu-guide-flow">
       <div class="bu-guide-step">
         <div class="bu-guide-step-num">1</div>
@@ -6183,7 +6183,17 @@ body {
       <div class="bu-guide-step">
         <div class="bu-guide-step-num">6</div>
         <strong>回算入库</strong>
-        <span>新痛点经 BU 审核后进入主库，再回算向量位置、族簇归属和后续因子/SKU 联动。</span>
+        <span>新痛点经 BU 审核后进入主库，再回算向量位置、族簇归属、覆盖状态和稀疏区域变化。</span>
+      </div>
+      <div class="bu-guide-step">
+        <div class="bu-guide-step-num">7</div>
+        <strong>因子反哺</strong>
+        <span>根据新痛点在向量空间中的落点和覆盖范围，反推主体、资产、动作、约束、风险等因子缺口，补足因子库原子节点。</span>
+      </div>
+      <div class="bu-guide-step">
+        <div class="bu-guide-step-num">8</div>
+        <strong>SKU创新</strong>
+        <span>识别痛点密度上升但现有 SKU 覆盖不足的区域，形成 SKU 增补、组合或创新建议，进入产品研发池。</span>
       </div>
     </div>
   </div>
