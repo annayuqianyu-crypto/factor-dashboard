@@ -8062,6 +8062,25 @@ function semanticClusterScenes(data, cluster) {
   return [...new Set(scenes)].slice(0, 4);
 }
 
+function semanticClusterCode(data, localIndex) {
+  const vector = semanticVectorFor(data);
+  const familyCode = vector?.id || 'F00';
+  let globalIndex = localIndex + 1;
+  let cursor = 1;
+  for (const entry of SEMANTIC_SCENE_ENTRIES) {
+    const key = (entry.families || [])[0];
+    const entryData = SEMANTIC_DRILL_DATA[key];
+    const entryFamilyCode = semanticVectorFor(entryData)?.id;
+    const clusterCount = (entryData?.clusters || []).length;
+    if (entryFamilyCode === familyCode) {
+      globalIndex = cursor + localIndex;
+      break;
+    }
+    cursor += clusterCount;
+  }
+  return `${familyCode}${String(localIndex + 1).padStart(2, '0')}-${String(globalIndex).padStart(2, '0')}`;
+}
+
 function semanticRenderPainCluster(data, clusterIndex = 0) {
   const clusters = data.clusters || [];
   const cluster = clusters[clusterIndex] || clusters[0] || { name: '暂无痛点簇', desc: '', pains: [] };
@@ -8071,7 +8090,7 @@ function semanticRenderPainCluster(data, clusterIndex = 0) {
       <div class="semantic-drill-subclusters">
         ${clusters.map((item, idx) => `
           <button class="semantic-drill-subcluster ${idx === clusterIndex ? 'is-active' : ''}" onclick="semanticSelectPainCluster(${idx})">
-            <strong><span class="semantic-cluster-code">C${String(idx + 1).padStart(2, '0')}</span> · ${semanticEscape(item.name)}</strong>
+            <strong><span class="semantic-cluster-code">${semanticClusterCode(data, idx)}</span> · ${semanticEscape(item.name)}</strong>
             <span>${semanticEscape(item.desc)} · ${semanticEscape((item.pains || []).length)} 条痛点</span>
           </button>
         `).join('')}
