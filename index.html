@@ -1508,6 +1508,315 @@ tr:hover td { background: #fafafa; }
 
 .gen-empty { text-align: center; padding: 60px 0; color: #9ca3af; font-size: 14px; }
 
+/* ── BU 推进指导 ── */
+#page-bu-guide {
+  max-width: 1380px;
+}
+
+.bu-guide-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 24px 26px;
+  border: 1px solid #dbe7f7;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #ffffff 0%, #f4f8ff 54%, #f7fdf9 100%);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, .06);
+}
+
+.bu-guide-hero::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  background: linear-gradient(180deg, #2563eb, #16a34a 52%, #f97316);
+}
+
+.bu-guide-hero h2 {
+  font-size: 26px;
+  font-weight: 900;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+.bu-guide-hero p {
+  max-width: 880px;
+  font-size: 14px;
+  line-height: 1.75;
+  color: #536179;
+}
+
+.bu-guide-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px;
+  margin-bottom: 12px;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.bu-guide-section {
+  margin-top: 18px;
+  padding: 20px 22px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, .045);
+}
+
+.bu-guide-section-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 14px;
+  color: #0f172a;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.bu-guide-section-title::before {
+  content: '';
+  width: 4px;
+  height: 18px;
+  border-radius: 3px;
+  background: #2563eb;
+}
+
+.bu-guide-flow {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.bu-guide-step {
+  position: relative;
+  min-height: 118px;
+  padding: 14px 13px 13px;
+  border: 1px solid #dbeafe;
+  border-radius: 9px;
+  background: #f8fbff;
+}
+
+.bu-guide-step:not(:last-child)::after {
+  content: '›';
+  position: absolute;
+  right: -9px;
+  top: 42px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  font-size: 18px;
+  line-height: 16px;
+  text-align: center;
+  z-index: 1;
+}
+
+.bu-guide-step-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 24px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.bu-guide-step strong {
+  display: block;
+  color: #0f172a;
+  font-size: 13px;
+  margin-bottom: 7px;
+}
+
+.bu-guide-step span {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.bu-guide-two-col,
+.bu-guide-three-col {
+  display: grid;
+  gap: 14px;
+}
+
+.bu-guide-two-col { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.bu-guide-three-col { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.bu-guide-info,
+.bu-guide-status,
+.bu-guide-tag,
+.bu-guide-rule {
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  background: #fff;
+  padding: 15px 16px;
+}
+
+.bu-guide-info {
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+}
+
+.bu-guide-info h4,
+.bu-guide-status h4,
+.bu-guide-rule h4 {
+  font-size: 14px;
+  color: #0f172a;
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+
+.bu-guide-info p,
+.bu-guide-status p,
+.bu-guide-rule p {
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: #64748b;
+}
+
+.bu-guide-status {
+  position: relative;
+  overflow: hidden;
+  min-height: 166px;
+}
+
+.bu-guide-status::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  background: var(--status-color, #2563eb);
+}
+
+.bu-guide-status h4 {
+  color: var(--status-color, #2563eb);
+}
+
+.bu-guide-action {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 12px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: var(--status-soft, #eff6ff);
+  color: var(--status-color, #2563eb);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.bu-guide-tags {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.bu-guide-tag {
+  background: #fbfdff;
+}
+
+.bu-guide-tag strong {
+  display: block;
+  color: #0f172a;
+  font-size: 13px;
+  margin-bottom: 5px;
+}
+
+.bu-guide-tag span {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.bu-guide-matrix {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 12.5px;
+}
+
+.bu-guide-matrix th {
+  background: #f1f5f9;
+  color: #334155;
+  font-weight: 900;
+  text-align: left;
+  padding: 11px 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.bu-guide-matrix td {
+  padding: 12px;
+  color: #475569;
+  line-height: 1.55;
+  border-bottom: 1px solid #eef2f7;
+  vertical-align: top;
+}
+
+.bu-guide-matrix tr:last-child td {
+  border-bottom: none;
+}
+
+.bu-guide-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  background: #eef4ff;
+  color: #1d4ed8;
+  white-space: nowrap;
+}
+
+.bu-guide-warning {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.bu-guide-warning div {
+  padding: 12px 13px;
+  border: 1px solid #fed7aa;
+  border-radius: 9px;
+  background: #fff7ed;
+  color: #9a3412;
+  font-size: 12.5px;
+  line-height: 1.6;
+  font-weight: 700;
+}
+
+@media (max-width: 1180px) {
+  .bu-guide-flow { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .bu-guide-step:nth-child(3)::after { display: none; }
+  .bu-guide-tags,
+  .bu-guide-warning { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+  .bu-guide-flow,
+  .bu-guide-two-col,
+  .bu-guide-three-col,
+  .bu-guide-tags,
+  .bu-guide-warning { grid-template-columns: 1fr; }
+  .bu-guide-step::after { display: none !important; }
+}
+
 /* ── 管理看板视觉升级：克制彩色系统 ── */
 #page-mgmt {
   max-width: 1480px;
@@ -2097,6 +2406,12 @@ body {
 
 
   <div class="nav-section-title" style="margin-top:12px;">痛点生成</div>
+
+  <div class="nav-item" onclick="showPage('bu-guide')">
+
+    <span class="icon">🧭</span>BU推进指导
+
+  </div>
 
   <div class="nav-item" onclick="showPage('pain-generate')">
 
@@ -5721,6 +6036,193 @@ body {
 </script>
 
 <div id="page-business" class="page" style="display:none;"></div>
+
+<!-- ══════════════════════════════════════
+
+     PAGE 9: BU 推进指导
+
+═══════════════════════════════════════ -->
+
+<div id="page-bu-guide" class="page">
+
+  <div class="bu-guide-hero">
+    <div class="bu-guide-kicker">痛点库补足工作台</div>
+    <h2>BU推进指导</h2>
+    <p>本页用于指导 BU 按“业务版块检索入口 → 业务场景 → 覆盖诊断 → 痛点族/簇补足”的顺序推进痛点库增长。核心原则不是自由发散生成，而是在向量空间中补齐缺失的业务表达，避免重复生成、泛化生成和跨 BU 边界不清。</p>
+  </div>
+
+  <div class="bu-guide-section">
+    <div class="bu-guide-section-title">一、BU推进总流程</div>
+    <div class="bu-guide-flow">
+      <div class="bu-guide-step">
+        <div class="bu-guide-step-num">1</div>
+        <strong>选择业务版块检索入口</strong>
+        <span>先从资产保护、财富传承、税务合规、资本市场等大入口进入，确定本次观察的大业务方向。</span>
+      </div>
+      <div class="bu-guide-step">
+        <div class="bu-guide-step-num">2</div>
+        <strong>进入业务场景</strong>
+        <span>场景分为慧管家自然场景和补洞场景；前者来自真实纪要，后者来自向量断裂审计。</span>
+      </div>
+      <div class="bu-guide-step">
+        <div class="bu-guide-step-num">3</div>
+        <strong>查看覆盖状态</strong>
+        <span>先判断该场景是未覆盖、局部稀疏还是已充分覆盖，再决定是否需要生成新痛点。</span>
+      </div>
+      <div class="bu-guide-step">
+        <div class="bu-guide-step-num">4</div>
+        <strong>识别治理标签</strong>
+        <span>同步观察是否存在高重复风险、跨族场景、高价值补洞、多 BU 协同等治理信号。</span>
+      </div>
+      <div class="bu-guide-step">
+        <div class="bu-guide-step-num">5</div>
+        <strong>选择推进动作</strong>
+        <span>根据状态和标签选择生成、改写、合并观察、协同复核或暂不处理。</span>
+      </div>
+      <div class="bu-guide-step">
+        <div class="bu-guide-step-num">6</div>
+        <strong>回算入库</strong>
+        <span>新痛点经 BU 审核后进入主库，再回算向量位置、族簇归属和后续因子/SKU联动。</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="bu-guide-section">
+    <div class="bu-guide-section-title">二、两类场景口径</div>
+    <div class="bu-guide-two-col">
+      <div class="bu-guide-info">
+        <h4>慧管家自然场景</h4>
+        <p>来自真实会议纪要，是客户咨询与业务讨论中自然出现的场景输入。它适合用于发现真实业务触发点，但不应直接盲目生成；需要先检查该场景下是否已有痛点、痛点簇或同族内容。</p>
+      </div>
+      <div class="bu-guide-info">
+        <h4>补洞场景</h4>
+        <p>来自向量断裂审计，是为了补齐痛点族/簇中的稀疏区域而反向生成的场景输入。它的目标不是“多生成”，而是把当前点云中缺少的过渡动作、复合约束和跨轴冲突补完整。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bu-guide-section">
+    <div class="bu-guide-section-title">三、覆盖状态是主判断</div>
+    <div class="bu-guide-three-col">
+      <div class="bu-guide-status" style="--status-color:#dc2626;--status-soft:#fff1f2;">
+        <h4>未覆盖</h4>
+        <p>该场景附近缺少已同步痛点，或者没有稳定的痛点簇承接。说明客户问题已经出现，但主库尚未沉淀出可复用表达。</p>
+        <div class="bu-guide-action">动作：优先生成</div>
+      </div>
+      <div class="bu-guide-status" style="--status-color:#f97316;--status-soft:#fff7ed;">
+        <h4>局部稀疏</h4>
+        <p>已有部分痛点覆盖，但某些主体、资产、动作、约束或风险方向明显缺口，族内/簇内存在向量断裂。</p>
+        <div class="bu-guide-action">动作：定向补足</div>
+      </div>
+      <div class="bu-guide-status" style="--status-color:#16a34a;--status-soft:#f0fdf4;">
+        <h4>已充分覆盖</h4>
+        <p>该区域已有足够痛点、痛点簇和同族表达。BU 应优先查看已有内容，除非出现新的业务冲突，不建议继续生成。</p>
+        <div class="bu-guide-action">动作：展示复用</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bu-guide-section">
+    <div class="bu-guide-section-title">四、治理标签是辅助判断</div>
+    <div class="bu-guide-tags">
+      <div class="bu-guide-tag">
+        <strong>高重复风险</strong>
+        <span>场景或候选痛点与已有痛点高度相似，先合并观察或去重，再决定是否补充。</span>
+      </div>
+      <div class="bu-guide-tag">
+        <strong>跨族场景</strong>
+        <span>一个场景同时召回多个痛点族，需明确主冲突，由主 BU 牵头，多 BU 复核。</span>
+      </div>
+      <div class="bu-guide-tag">
+        <strong>高价值补洞</strong>
+        <span>向量区域稀疏、业务冲突明确、SKU 有承接能力，优先进入 BU 推进池。</span>
+      </div>
+      <div class="bu-guide-tag">
+        <strong>低价值泛化</strong>
+        <span>场景过宽，只是概念词堆叠，需先改写成具体业务落地界面。</span>
+      </div>
+      <div class="bu-guide-tag">
+        <strong>BU归口明确</strong>
+        <span>法律、税务或资本市场某一轴明显占优，可由对应 BU 单独主导审核。</span>
+      </div>
+      <div class="bu-guide-tag">
+        <strong>多BU协同</strong>
+        <span>多个业务轴同时较强，按主冲突确定主 BU，其余 BU 做专业复核。</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="bu-guide-section">
+    <div class="bu-guide-section-title">五、BU操作矩阵</div>
+    <table class="bu-guide-matrix">
+      <thead>
+        <tr>
+          <th style="width:20%;">诊断结果</th>
+          <th style="width:22%;">BU 应该做什么</th>
+          <th>推进口径</th>
+          <th style="width:18%;">输出物</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="bu-guide-pill">未覆盖 + 高价值补洞</span></td>
+          <td>优先生成</td>
+          <td>直接使用补洞场景作为输入，围绕缺失的主体、资产、动作、约束、风险组合生成 3-5 条候选痛点。</td>
+          <td>新增候选痛点</td>
+        </tr>
+        <tr>
+          <td><span class="bu-guide-pill">未覆盖 + 低价值泛化</span></td>
+          <td>先改写场景</td>
+          <td>把大而空的场景改写成具体业务落地界面，例如从“跨境架构风险”改为“境外主体年审断档影响银行 KYC”。</td>
+          <td>可生成场景输入</td>
+        </tr>
+        <tr>
+          <td><span class="bu-guide-pill">局部稀疏 + 多BU协同</span></td>
+          <td>主 BU 生成，协同 BU 复核</td>
+          <td>按主冲突确定主 BU；如税务处理是主矛盾但涉及法律结构，则 Tax 主导、Legal 复核。</td>
+          <td>跨 BU 候选痛点</td>
+        </tr>
+        <tr>
+          <td><span class="bu-guide-pill">局部稀疏 + 高重复风险</span></td>
+          <td>先查相似痛点</td>
+          <td>先查看同族、同簇和相似痛点；只有当新场景提供了新的约束、风险或解决路径时才新增。</td>
+          <td>去重判断记录</td>
+        </tr>
+        <tr>
+          <td><span class="bu-guide-pill">已充分覆盖</span></td>
+          <td>展示复用，不新增</td>
+          <td>该区域不再追求数量增长，优先把已有痛点、痛点簇和对应 SKU 作为 BU 查询与客户沟通素材。</td>
+          <td>已有痛点清单</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="bu-guide-section">
+    <div class="bu-guide-section-title">六、BU推进原则</div>
+    <div class="bu-guide-warning">
+      <div>不要看到场景就直接生成，先看覆盖状态。</div>
+      <div>不要生成和已有痛点只换说法的重复内容。</div>
+      <div>不要把低价值泛化场景直接提交给模型。</div>
+      <div>不要只按 BU 归属判断，本质冲突和向量位置同样重要。</div>
+    </div>
+  </div>
+
+  <div class="bu-guide-section">
+    <div class="bu-guide-section-title">七、推荐工作节奏</div>
+    <div class="bu-guide-two-col">
+      <div class="bu-guide-rule">
+        <h4>本轮：先补洞，再开放自然场景</h4>
+        <p>优先完成向量断裂审计形成的补洞场景生成，并进行大汇总、大清洗、大去重。处理完补洞场景后，再把慧管家自然场景开放给 BU 常规使用。</p>
+      </div>
+      <div class="bu-guide-rule">
+        <h4>后续：按稀疏度推荐增长</h4>
+        <p>BU 进入慧管家生成页面时，应看到该场景下已有痛点、痛点簇和同族内容，并优先推进向量空间中密度稀疏但业务价值高的区域。</p>
+      </div>
+    </div>
+  </div>
+
+</div>
 
 
 
