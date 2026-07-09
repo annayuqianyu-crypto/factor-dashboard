@@ -846,22 +846,6 @@ tr:hover td { background: #fafafa; }
   margin: 8px 0 10px;
 }
 
-.semantic-entry-rule {
-  margin: 8px 0 10px;
-  padding: 7px 9px;
-  border: 1px dashed color-mix(in srgb, var(--entry-color) 28%, #e2e8f0);
-  border-radius: 8px;
-  background: rgba(255,255,255,.62);
-  color: #475569;
-  font-size: 11px;
-  line-height: 1.55;
-}
-
-.semantic-entry-rule b {
-  color: var(--entry-color);
-  font-weight: 900;
-}
-
 .semantic-entry-desc {
   font-size: 12px;
   color: #475569;
@@ -4156,7 +4140,7 @@ body {
 
   <div class="card">
     <div class="card-title">族-簇-场景语义入口地图</div>
-    <div class="semantic-space-summary">基于 737 条已同步痛点的 BGE-M3 向量结果，将 12 个模型族作为一级业务入口：用户先进入痛点族，再查看族内痛点簇，最后把慧管家自然场景或补洞场景挂接到具体簇后，用于召回已有痛点或生成候选痛点。</div>
+    <div class="semantic-space-summary">基于 737 条已同步痛点的 BGE-M3 向量结果，将 12 个模型族作为一级业务入口：用户先进入痛点族，再查看族内痛点簇，最后把慧管家自然场景或补洞场景挂接到具体簇后，用于召回已有痛点或生成候选痛点。并族规则：同一族内的痛点簇需满足主冲突同源、语义方向接近（簇质心与族质心的余弦相似度达到族级阈值）以及 L/T/C 三维业务结构距离未明显偏离。</div>
     <div class="semantic-map">
       <div>
         <div id="semantic-entry-grid" class="semantic-entry-grid"></div>
@@ -8017,7 +8001,6 @@ function semanticRenderSceneCard(entry) {
           <span>${semanticEscape(vector.keywords)}</span>
         </div>
         <div class="semantic-entry-note">${semanticEscape(vector.note)}</div>
-        <div class="semantic-entry-rule"><b>并族依据</b>：主冲突同源；簇质心与族质心方向相近 cos(nu_k, mu_j) ≥ tau_F；L/T/C 结构距离 d ≤ D_F。</div>
       ` : ''}
       <div class="semantic-tags entry-features">
         ${(entry.families || []).map(key => {
