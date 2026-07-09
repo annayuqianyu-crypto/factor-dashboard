@@ -1695,6 +1695,14 @@ tr:hover td { background: #fafafa; }
   background: #2563eb;
 }
 
+#bu-guide-vector-model-slot {
+  margin-top: 18px;
+}
+
+#bu-guide-vector-model-slot #semantic-vector-model-card {
+  margin-bottom: 18px;
+}
+
 .bu-guide-flow {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -3867,7 +3875,7 @@ body {
   </div>
 
 
-  <div class="card">
+  <div id="semantic-vector-model-card" class="card">
     <div class="card-title">朝曦痛点向量模型</div>
     <div class="semantic-space-summary">本模块用于把已同步痛点从文字清单转化为可计算、可解释、可治理的业务语义地图：先用法律 / 税务 / 资本市场专家锚点建立三维坐标系，再将 737 条痛点编码为向量 p_i 并投影为 s_i=(L_i,T_i,C_i)，由点云逐步形成痛点族、痛点簇、具体场景和三面投影热区。后续 BU 推进以痛点族为一级入口，以痛点簇为二级入口，场景挂在簇之后作为生成或召回痛点的具体触发界面。</div>
     <details class="semantic-math-dict">
@@ -6142,6 +6150,8 @@ body {
     <p>本页用于指导 BU 按“痛点族 → 痛点簇 → 具体场景 → 具体痛点”的顺序推进痛点库增长。核心原则不是自由发散生成，而是在向量空间中沿着已形成的业务族和问题簇补齐缺失表达，避免重复生成、泛化生成和跨 BU 边界不清。</p>
   </div>
 
+  <div id="bu-guide-vector-model-slot"></div>
+
   <div class="bu-guide-section">
     <div class="bu-guide-section-title">一、BU推进总流程</div>
     <div class="bu-guide-flow">
@@ -8013,6 +8023,12 @@ function renderSemanticSceneMap() {
   }
 }
 
+function moveSemanticVectorModelToBuGuide() {
+  const slot = document.getElementById('bu-guide-vector-model-slot');
+  const card = document.getElementById('semantic-vector-model-card');
+  if (slot && card && card.parentElement !== slot) slot.appendChild(card);
+}
+
 function semanticEscape(value) {
   return String(value ?? '').replace(/[&<>"']/g, ch => ({
     '&': '&amp;',
@@ -8873,6 +8889,8 @@ function toggleFactorHistory() {
 
 window.addEventListener('load', () => {
 
+  moveSemanticVectorModelToBuGuide();
+
   initMgmtPage();   // 管理看板（首页）
 
   initOverviewCharts();
@@ -8904,6 +8922,8 @@ const PAGE_INIT_MAP = {
   'scenes':    initScenesCharts,
 
   'forecast':  initForecastCharts,
+
+  'bu-guide':  moveSemanticVectorModelToBuGuide,
 
   'business':  initBusinessCharts,  // 旧页保留兼容
 
