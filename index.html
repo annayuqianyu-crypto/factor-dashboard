@@ -740,14 +740,14 @@ tr:hover td { background: #fafafa; }
 
 .semantic-map {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(420px, .95fr);
+  grid-template-columns: minmax(430px, .86fr) minmax(520px, 1.14fr);
   gap: 16px;
   align-items: start;
 }
 
 .semantic-entry-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -796,32 +796,54 @@ tr:hover td { background: #fafafa; }
 }
 
 .semantic-entry-vector {
-  display: grid;
-  gap: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
   margin: 9px 0 10px;
 }
 
-.semantic-axis-row {
-  display: grid;
-  grid-template-columns: 16px 1fr 28px;
-  gap: 7px;
+.semantic-axis-pill {
+  display: inline-flex;
   align-items: center;
-  font-size: 10.5px;
+  gap: 4px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: rgba(255,255,255,.74);
+  color: #334155;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  padding: 5px 8px;
+}
+
+.semantic-axis-pill.is-peak {
+  color: var(--axis-color, #2563eb);
+  border-color: color-mix(in srgb, var(--axis-color, #2563eb) 36%, #fff);
+  background: color-mix(in srgb, var(--axis-color, #2563eb) 10%, #fff);
+}
+
+.semantic-entry-projection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.semantic-entry-projection span {
+  color: #475569;
+  background: rgba(248,250,252,.92);
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  font-size: 11px;
   font-weight: 800;
-  color: #64748b;
+  padding: 3px 8px;
 }
 
-.semantic-axis-track {
-  height: 5px;
-  border-radius: 999px;
-  background: #e5e7eb;
-  overflow: hidden;
-}
-
-.semantic-axis-fill {
-  height: 100%;
-  border-radius: 999px;
-  background: var(--axis-color, #2563eb);
+.semantic-entry-note {
+  color: #475569;
+  font-size: 11.5px;
+  line-height: 1.6;
+  margin: 8px 0 10px;
 }
 
 .semantic-entry-desc {
@@ -1060,6 +1082,18 @@ tr:hover td { background: #fafafa; }
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+.semantic-drill-feature {
+  margin-top: 9px;
+  color: #475569;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.semantic-drill-feature b {
+  color: #0f172a;
+  font-weight: 900;
 }
 
 .semantic-drill-badge,
@@ -7903,18 +7937,16 @@ function semanticVectorFor(data) {
 function semanticAxisRows(axes) {
   if (!axes) return '';
   const axisMeta = [
-    ['L', '法律', '#2563eb'],
-    ['T', '税务', '#e11d48'],
-    ['C', '资本', '#7c3aed']
+    ['L', '#2563eb'],
+    ['T', '#e11d48'],
+    ['C', '#7c3aed']
   ];
-  return `<div class="semantic-entry-vector">${axisMeta.map(([key, label, color]) => {
+  const maxValue = Math.max(...axisMeta.map(([key]) => Number(axes[key] || 0)));
+  return `<div class="semantic-entry-vector">${axisMeta.map(([key, color]) => {
     const value = Number(axes[key] || 0);
+    const isPeak = value === maxValue;
     return `
-      <div class="semantic-axis-row">
-        <span>${label}</span>
-        <div class="semantic-axis-track"><div class="semantic-axis-fill" style="--axis-color:${color};width:${Math.max(0, Math.min(10, value)) * 10}%;"></div></div>
-        <span>${value.toFixed(1)}</span>
-      </div>
+      <span class="semantic-axis-pill ${isPeak ? 'is-peak' : ''}" style="--axis-color:${color};">${key} ${value.toFixed(1)}</span>
     `;
   }).join('')}</div>`;
 }
@@ -7936,6 +7968,7 @@ function semanticSceneAxes(entry) {
 
 function semanticRenderSceneCard(entry) {
   const axes = semanticSceneAxes(entry);
+  const vector = semanticVectorFor(SEMANTIC_DRILL_DATA[(entry.families || [])[0]]);
   return `
     <div class="semantic-entry-card" style="--entry-color:${entry.color};--entry-soft:${entry.soft};">
       <div class="semantic-entry-top">
@@ -7944,6 +7977,13 @@ function semanticRenderSceneCard(entry) {
       </div>
       <div class="semantic-entry-desc">${semanticEscape(entry.desc)}</div>
       ${semanticAxisRows(axes)}
+      ${vector ? `
+        <div class="semantic-entry-projection">
+          <span>投影面 ${semanticEscape(vector.projection)}</span>
+          <span>${semanticEscape(vector.keywords)}</span>
+        </div>
+        <div class="semantic-entry-note">${semanticEscape(vector.note)}</div>
+      ` : ''}
       <div class="semantic-tags entry-features">
         ${(entry.families || []).map(key => {
           const data = SEMANTIC_DRILL_DATA[key];
@@ -8053,18 +8093,6 @@ function semanticShowDrill(key, trigger) {
   if (trigger) trigger.classList.add('is-active');
 
   const struct = data.structure || {};
-  const vector = semanticVectorFor(data);
-  const vectorBox = vector ? `
-    <div class="semantic-vector-box">
-      <div class="semantic-vector-box-title">${semanticEscape(vector.id)} · ${semanticEscape(vector.name)} · ${semanticEscape(vector.count)} 条痛点</div>
-      ${semanticAxisRows(vector.axes)}
-      <div class="semantic-vector-meta">
-        <span class="semantic-drill-pill">投影面：${semanticEscape(vector.projection)}</span>
-        <span class="semantic-drill-pill">关键词：${semanticEscape(vector.keywords)}</span>
-      </div>
-      <div style="font-size:11.5px;color:#475569;line-height:1.6;margin-top:8px;">${semanticEscape(vector.note)}</div>
-    </div>
-  ` : '';
   panel.style.display = 'block';
   panel.dataset.semanticKey = key;
   panel.innerHTML = `
@@ -8074,23 +8102,14 @@ function semanticShowDrill(key, trigger) {
         <div class="semantic-drill-meta">
           ${(data.scenes || []).map(scene => `<span class="semantic-drill-pill">${semanticEscape(scene)}</span>`).join('')}
         </div>
+        <div class="semantic-drill-feature">
+          <b>族特征：</b>主体 ${semanticEscape(struct.subject)}；资产 ${semanticEscape(struct.asset)}；动作 ${semanticEscape(struct.action)}；约束 ${semanticEscape(struct.constraint)}；风险 ${semanticEscape(struct.risk)}；承接 ${semanticEscape(data.sku)}
+        </div>
       </div>
       <span class="semantic-drill-badge">${semanticEscape(data.type)}</span>
     </div>
     <div class="semantic-drill-grid">
       <div data-semantic-drill-body>${semanticRenderPainCluster(data, 0)}</div>
-      <div class="semantic-drill-structure">
-        ${vectorBox}
-        <h4>痛点族结构特征</h4>
-        <dl>
-          <dt>主体</dt><dd>${semanticEscape(struct.subject)}</dd>
-          <dt>资产</dt><dd>${semanticEscape(struct.asset)}</dd>
-          <dt>动作</dt><dd>${semanticEscape(struct.action)}</dd>
-          <dt>约束</dt><dd>${semanticEscape(struct.constraint)}</dd>
-          <dt>风险</dt><dd>${semanticEscape(struct.risk)}</dd>
-          <dt>承接</dt><dd>${semanticEscape(data.sku)}</dd>
-        </dl>
-      </div>
     </div>
   `;
 }
