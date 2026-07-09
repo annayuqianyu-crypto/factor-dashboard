@@ -8396,6 +8396,12 @@ function semanticPushGapScene(familyCode, sceneIndex) {
   }, 260);
 }
 
+function semanticPainCodePill(code) {
+  const value = String(code || '').trim();
+  if (!/^P-\d/i.test(value)) return '';
+  return `<span class="semantic-drill-pill semantic-drill-pain-code">${semanticEscape(value)}</span>`;
+}
+
 function semanticRenderPainCluster(data, clusterIndex = 0) {
   const clusters = data.clusters || [];
   const cluster = clusters[clusterIndex] || clusters[0] || { name: '暂无痛点簇', desc: '', pains: [] };
@@ -8416,7 +8422,7 @@ function semanticRenderPainCluster(data, clusterIndex = 0) {
             <strong>${semanticEscape(pain.title)}</strong>
             <span>${semanticEscape(pain.conflict)}</span>
             <div class="semantic-drill-pain-meta">
-              <span class="semantic-drill-pill semantic-drill-pain-code">${semanticEscape(pain.code)}</span>
+              ${semanticPainCodePill(pain.code)}
               <span class="semantic-drill-pill semantic-drill-pain-bu">${semanticEscape(pain.bu)}</span>
               ${(pain.tags || []).filter(Boolean).map(tag => `<span class="semantic-drill-pill semantic-drill-pain-tag">${semanticEscape(tag)}</span>`).join('')}
             </div>
