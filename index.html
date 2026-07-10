@@ -8393,8 +8393,11 @@ function semanticGapAssignment(gap, scene) {
   const coByScore = primaryValue !== null && secondaryValue !== null && (primaryValue - secondaryValue) <= 1.5
     ? semanticAxisBu(secondaryAxis)
     : '';
-  const co = scene?.co || (coByScore && coByScore !== mathOwner ? coByScore : '');
-  return { axes, primaryAxis, mathOwner, owner, co };
+  const reviewOwner = owner && owner !== mathOwner ? owner : '';
+  const explicitCo = scene?.co && scene.co !== reviewOwner && scene.co !== mathOwner ? scene.co : '';
+  const scoreCo = coByScore && coByScore !== mathOwner && coByScore !== reviewOwner ? coByScore : '';
+  const co = explicitCo || scoreCo;
+  return { axes, primaryAxis, mathOwner, owner, reviewOwner, co };
 }
 
 function semanticRenderGapAxisPills(scene) {
@@ -8414,8 +8417,8 @@ function semanticBuildGapSceneInput(data, gap, scene) {
   return [
     scene.title,
     `目标族：${vector?.id || ''} ${data?.title || gap?.name || ''}`,
-    `主推BU建议：${assignment.mathOwner}${co}`,
-    `人工审核归口：${assignment.owner}`,
+    `派工归口BU：${assignment.mathOwner}${co}`,
+    assignment.reviewOwner ? `复核协同BU：${assignment.reviewOwner}` : '',
     `候选标签：${scene.tags || '待补充'}`,
     `向量位置：${scene.ltc || '待回算'}；投影面：${scene.projection || '待回算'}`,
     '',
@@ -8429,7 +8432,7 @@ function semanticBuildGapSceneInput(data, gap, scene) {
     '3. 应如何通过资料补正、结构调整或服务方案设计，形成可沉淀的解决路径？',
     '',
     '后台补洞约束：生成痛点需回算向量，优先命中目标族/簇质心附近；若漂移到纯客户画像、泛税表申报、普通合同纠纷或无关销售话术，则不计入补洞成功。'
-  ].join('\n');
+  ].filter(line => line !== '').join('\n');
 }
 
 function semanticRenderGapWorkbench(data) {
@@ -8458,15 +8461,22 @@ function semanticRenderGapWorkbench(data) {
               <strong>${semanticEscape(scene.title)}</strong>
               <div class="semantic-gap-owner">
                 <div class="semantic-gap-owner-row">
-                  <span class="semantic-gap-owner-label">主推建议</span>
+                  <span class="semantic-gap-owner-label">派工归口</span>
                   <span>${semanticEscape(assignment.mathOwner)}</span>
                   ${assignment.co ? `<span>协同 ${semanticEscape(assignment.co)}</span>` : ''}
                 </div>
-                <div class="semantic-gap-owner-row">
-                  <span class="semantic-gap-owner-label">审核归口</span>
-                  <span>${semanticEscape(assignment.owner)}</span>
-                  <span>${semanticEscape(scene.projection || '投影待回算')}</span>
-                </div>
+                ${assignment.reviewOwner ? `
+                  <div class="semantic-gap-owner-row">
+                    <span class="semantic-gap-owner-label">复核协同</span>
+                    <span>${semanticEscape(assignment.reviewOwner)}</span>
+                    <span>${semanticEscape(scene.projection || '投影待回算')}</span>
+                  </div>
+                ` : `
+                  <div class="semantic-gap-owner-row">
+                    <span class="semantic-gap-owner-label">投影面</span>
+                    <span>${semanticEscape(scene.projection || '投影待回算')}</span>
+                  </div>
+                `}
               </div>
               <div class="semantic-gap-axis">${semanticRenderGapAxisPills(scene)}</div>
               <button type="button" class="semantic-gap-send" onclick="semanticPushGapScene('${semanticEscape(vector?.id || '')}', ${idx})">推送到场景触发</button>
