@@ -1260,6 +1260,50 @@ tr:hover td { background: #fafafa; }
   padding: 2px 7px;
 }
 
+.semantic-gap-owner {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+  margin: 0 0 8px;
+}
+
+.semantic-gap-owner-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+  font-size: 10.5px;
+  color: #64748b;
+}
+
+.semantic-gap-owner-label {
+  color: #475569;
+  font-weight: 900;
+}
+
+.semantic-gap-axis {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.semantic-gap-axis-pill {
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 10.5px;
+  font-weight: 900;
+  padding: 3px 8px;
+}
+
+.semantic-gap-axis-pill.is-peak {
+  color: var(--axis-color);
+  border-color: color-mix(in srgb, var(--axis-color) 36%, #fff);
+  background: color-mix(in srgb, var(--axis-color) 10%, #fff);
+}
+
 .semantic-gap-send {
   width: 100%;
   border: 1px solid #bfdbfe;
@@ -8317,14 +8361,61 @@ function semanticGapOwner(gap, scene) {
   return scene?.owner || gap?.owner || '待人工分配';
 }
 
+function semanticParseLtc(ltc) {
+  const text = String(ltc || '');
+  const result = {};
+  ['L', 'T', 'C'].forEach(axis => {
+    const match = text.match(new RegExp(`${axis}\\s*=?\\s*([0-9]+(?:\\.[0-9]+)?)`, 'i'));
+    result[axis] = match ? Number(match[1]) : null;
+  });
+  return result;
+}
+
+function semanticAxisBu(axis) {
+  return ({ L: 'Legal 法律', T: 'Tax 税务', C: 'CM 资本市场' })[axis] || '待人工分配';
+}
+
+function semanticAxisColor(axis) {
+  return ({ L: '#7c3aed', T: '#e11d48', C: '#2563eb' })[axis] || '#475569';
+}
+
+function semanticGapAssignment(gap, scene) {
+  const axes = semanticParseLtc(scene?.ltc);
+  const sorted = Object.entries(axes)
+    .filter(([, value]) => Number.isFinite(value))
+    .sort((a, b) => b[1] - a[1]);
+  const primaryAxis = sorted[0]?.[0] || '';
+  const secondaryAxis = sorted[1]?.[0] || '';
+  const primaryValue = sorted[0]?.[1] ?? null;
+  const secondaryValue = sorted[1]?.[1] ?? null;
+  const owner = semanticGapOwner(gap, scene);
+  const mathOwner = primaryAxis ? semanticAxisBu(primaryAxis) : owner;
+  const coByScore = primaryValue !== null && secondaryValue !== null && (primaryValue - secondaryValue) <= 1.5
+    ? semanticAxisBu(secondaryAxis)
+    : '';
+  const co = scene?.co || (coByScore && coByScore !== mathOwner ? coByScore : '');
+  return { axes, primaryAxis, mathOwner, owner, co };
+}
+
+function semanticRenderGapAxisPills(scene) {
+  const assignment = semanticGapAssignment({}, scene);
+  return ['L', 'T', 'C'].map(axis => {
+    const value = assignment.axes[axis];
+    if (!Number.isFinite(value)) return '';
+    const active = axis === assignment.primaryAxis ? ' is-peak' : '';
+    return `<span class="semantic-gap-axis-pill${active}" style="--axis-color:${semanticAxisColor(axis)};">${axis} ${semanticEscape(value)}</span>`;
+  }).join('');
+}
+
 function semanticBuildGapSceneInput(data, gap, scene) {
   const vector = semanticVectorFor(data);
-  const owner = semanticGapOwner(gap, scene);
-  const co = scene.co ? `\n协同BU：${scene.co}` : '';
+  const assignment = semanticGapAssignment(gap, scene);
+  const co = assignment.co ? `\n协同BU：${assignment.co}` : '';
   return [
     scene.title,
     `目标族：${vector?.id || ''} ${data?.title || gap?.name || ''}`,
-    `审核归口BU：${owner}${co}`,
+    `主推BU建议：${assignment.mathOwner}${co}`,
+    `人工审核归口：${assignment.owner}`,
     `候选标签：${scene.tags || '待补充'}`,
     `向量位置：${scene.ltc || '待回算'}；投影面：${scene.projection || '待回算'}`,
     '',
@@ -8360,18 +8451,28 @@ function semanticRenderGapWorkbench(data) {
         <p><strong>向量方向：</strong>${semanticEscape(gap.vectorGap)}</p>
       </div>
       <div class="semantic-gap-candidates">
-        ${(gap.scenes || []).map((scene, idx) => `
-          <div class="semantic-gap-candidate">
-            <strong>${semanticEscape(scene.title)}</strong>
-            <div class="semantic-gap-candidate-meta">
-              <span>${semanticEscape(semanticGapOwner(gap, scene))}</span>
-              ${scene.co ? `<span>协同 ${semanticEscape(scene.co)}</span>` : ''}
-              <span>${semanticEscape(scene.projection || '投影待回算')}</span>
-              <span>${semanticEscape(scene.ltc || 'LTC待回算')}</span>
+        ${(gap.scenes || []).map((scene, idx) => {
+          const assignment = semanticGapAssignment(gap, scene);
+          return `
+            <div class="semantic-gap-candidate">
+              <strong>${semanticEscape(scene.title)}</strong>
+              <div class="semantic-gap-owner">
+                <div class="semantic-gap-owner-row">
+                  <span class="semantic-gap-owner-label">主推建议</span>
+                  <span>${semanticEscape(assignment.mathOwner)}</span>
+                  ${assignment.co ? `<span>协同 ${semanticEscape(assignment.co)}</span>` : ''}
+                </div>
+                <div class="semantic-gap-owner-row">
+                  <span class="semantic-gap-owner-label">审核归口</span>
+                  <span>${semanticEscape(assignment.owner)}</span>
+                  <span>${semanticEscape(scene.projection || '投影待回算')}</span>
+                </div>
+              </div>
+              <div class="semantic-gap-axis">${semanticRenderGapAxisPills(scene)}</div>
+              <button type="button" class="semantic-gap-send" onclick="semanticPushGapScene('${semanticEscape(vector?.id || '')}', ${idx})">推送到场景触发</button>
             </div>
-            <button type="button" class="semantic-gap-send" onclick="semanticPushGapScene('${semanticEscape(vector?.id || '')}', ${idx})">推送到场景触发</button>
-          </div>
-        `).join('')}
+          `;
+        }).join('')}
       </div>
     </div>
   `;
