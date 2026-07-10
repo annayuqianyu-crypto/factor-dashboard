@@ -129,6 +129,25 @@ body {
 
 .nav-item .icon { display: none; }
 
+.secret-sku-vector-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-left: 6px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, .16);
+  border: 1px solid rgba(148, 163, 184, .18);
+  cursor: default;
+  vertical-align: middle;
+  transition: background .16s ease, border-color .16s ease, transform .16s ease;
+}
+
+.secret-sku-vector-dot:hover {
+  background: rgba(37, 99, 235, .28);
+  border-color: rgba(37, 99, 235, .32);
+  transform: scale(1.2);
+}
+
 
 
 /* ── 内容区 ── */
@@ -1436,6 +1455,151 @@ tr:hover td { background: #fafafa; }
   line-height: 1.8;
 }
 
+.sku-vector-private {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: rgba(248,250,252,.9);
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.sku-vector-grid {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(360px, .72fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.sku-vector-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+  padding: 16px;
+}
+
+.sku-vector-title {
+  font-size: 14px;
+  font-weight: 900;
+  color: #0f172a;
+  margin-bottom: 10px;
+}
+
+.sku-vector-note {
+  color: #475569;
+  font-size: 12.5px;
+  line-height: 1.75;
+}
+
+.sku-vector-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0 0;
+}
+
+.sku-vector-metric {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  padding: 12px;
+}
+
+.sku-vector-metric strong {
+  display: block;
+  color: #1d4ed8;
+  font-size: 20px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.sku-vector-metric span {
+  display: block;
+  color: #64748b;
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+
+.sku-vector-space {
+  min-height: 390px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 28% 30%, rgba(219,234,254,.82), transparent 28%),
+    radial-gradient(circle at 70% 26%, rgba(254,226,226,.72), transparent 30%),
+    radial-gradient(circle at 48% 78%, rgba(237,233,254,.66), transparent 32%),
+    linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.sku-vector-space svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.sku-vector-flow {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.sku-vector-step {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  padding: 11px;
+  min-height: 96px;
+}
+
+.sku-vector-step strong {
+  display: block;
+  color: #0f172a;
+  font-size: 12.5px;
+  margin-bottom: 6px;
+}
+
+.sku-vector-step span {
+  display: block;
+  color: #64748b;
+  font-size: 11.5px;
+  line-height: 1.55;
+}
+
+.sku-vector-rules {
+  display: grid;
+  gap: 10px;
+}
+
+.sku-vector-rule {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  padding: 12px;
+}
+
+.sku-vector-rule strong {
+  display: block;
+  font-size: 12.5px;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+
+.sku-vector-rule p {
+  margin: 0;
+  color: #64748b;
+  font-size: 11.8px;
+  line-height: 1.65;
+}
+
 .semantic-math-dict {
   margin: -6px 0 12px;
   max-width: 1100px;
@@ -2610,7 +2774,7 @@ body {
 
 
 
-  <div class="nav-section-title" style="margin-top:12px;">C客模型总览</div>
+  <div class="nav-section-title" style="margin-top:12px;">C客模型总览<span class="secret-sku-vector-dot" title="" onclick="event.stopPropagation(); showPage('sku-vector');"></span></div>
 
   <div class="nav-item" onclick="showPage('overview')">
 
@@ -4289,6 +4453,130 @@ body {
 
 
 
+
+
+<!-- ══════════════════════════════════════
+
+     PRIVATE PAGE: SKU 向量分析
+
+═══════════════════════════════════════ -->
+
+<div id="page-sku-vector" class="page">
+  <div class="page-header">
+    <h2>SKU 向量分析<span class="sku-vector-private">private · hidden entry</span></h2>
+    <p>以匿名聚合方式观察 SKU 能力边界、痛点需求密度与创新候选区；本页不展示具体 SKU 名称和知识卡片内容。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">SKU 创新雷达 · 概念版</div>
+    <div class="sku-vector-grid">
+      <div>
+        <div class="sku-vector-space" aria-label="SKU向量空间示意">
+          <svg viewBox="0 0 760 430" role="img">
+            <defs>
+              <linearGradient id="skuBox" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#dbeafe" stop-opacity=".35"/>
+                <stop offset="100%" stop-color="#f8fafc" stop-opacity=".88"/>
+              </linearGradient>
+              <radialGradient id="skuNeed" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#f97316" stop-opacity=".26"/>
+                <stop offset="100%" stop-color="#f97316" stop-opacity=".03"/>
+              </radialGradient>
+              <radialGradient id="skuAbility" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#2563eb" stop-opacity=".26"/>
+                <stop offset="100%" stop-color="#2563eb" stop-opacity=".04"/>
+              </radialGradient>
+              <radialGradient id="skuGap" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#14b8a6" stop-opacity=".34"/>
+                <stop offset="100%" stop-color="#14b8a6" stop-opacity=".04"/>
+              </radialGradient>
+            </defs>
+
+            <polygon points="96,322 498,322 644,238 236,238" fill="url(#skuBox)" stroke="#cbd5e1"/>
+            <polygon points="96,322 96,116 236,42 236,238" fill="#fff" opacity=".52" stroke="#dbeafe"/>
+            <polygon points="236,238 644,238 644,74 236,42" fill="#fff" opacity=".42" stroke="#dbeafe"/>
+            <line x1="96" y1="322" x2="96" y2="96" stroke="#94a3b8" stroke-width="2.2"/>
+            <line x1="96" y1="322" x2="530" y2="322" stroke="#94a3b8" stroke-width="2.2"/>
+            <line x1="96" y1="322" x2="244" y2="236" stroke="#94a3b8" stroke-width="2.2"/>
+            <text x="70" y="88" font-size="13" font-weight="900" fill="#7c3aed">L 法律</text>
+            <text x="535" y="326" font-size="13" font-weight="900" fill="#2563eb">C 资本市场</text>
+            <text x="248" y="232" font-size="13" font-weight="900" fill="#e11d48">T 税务</text>
+
+            <ellipse cx="330" cy="230" rx="184" ry="64" transform="rotate(-10 330 230)" fill="url(#skuAbility)" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="6 6"/>
+            <text x="176" y="184" font-size="13" font-weight="900" fill="#1d4ed8">现有 SKU 能力边界</text>
+            <text x="176" y="204" font-size="11" fill="#64748b">312 个 SKU 的匿名能力向量云团</text>
+
+            <ellipse cx="405" cy="158" rx="130" ry="50" transform="rotate(-15 405 158)" fill="url(#skuNeed)" stroke="#fb923c" stroke-width="1.4"/>
+            <text x="486" y="126" font-size="13" font-weight="900" fill="#c2410c">需求密度区</text>
+            <text x="486" y="145" font-size="11" fill="#64748b">痛点 / 场景聚集</text>
+
+            <ellipse cx="520" cy="195" rx="92" ry="38" transform="rotate(-18 520 195)" fill="url(#skuGap)" stroke="#14b8a6" stroke-width="1.5"/>
+            <text x="548" y="209" font-size="13" font-weight="900" fill="#0f766e">SKU 创新区</text>
+            <text x="548" y="228" font-size="11" fill="#64748b">需求存在，能力覆盖不足</text>
+
+            <g fill="#2563eb" opacity=".86">
+              <circle cx="228" cy="232" r="4"/><circle cx="270" cy="214" r="4"/><circle cx="308" cy="244" r="4"/>
+              <circle cx="350" cy="226" r="4"/><circle cx="396" cy="240" r="4"/><circle cx="438" cy="214" r="4"/>
+            </g>
+            <g fill="#f97316" opacity=".86">
+              <circle cx="348" cy="156" r="4"/><circle cx="383" cy="145" r="4"/><circle cx="416" cy="171" r="4"/>
+              <circle cx="452" cy="152" r="4"/><circle cx="476" cy="183" r="4"/>
+            </g>
+            <g fill="#14b8a6" opacity=".92">
+              <circle cx="500" cy="192" r="4"/><circle cx="525" cy="180" r="4"/><circle cx="550" cy="200" r="4"/>
+            </g>
+
+            <rect x="28" y="360" width="704" height="44" rx="10" fill="#fff" opacity=".88" stroke="#e2e8f0"/>
+            <text x="48" y="384" font-size="12" font-weight="900" fill="#0f172a">判定逻辑：</text>
+            <text x="118" y="384" font-size="12" fill="#475569">朝曦业务边界内 + 需求向量高密度 + 与现有 SKU 最近距离偏远 = SKU 创新候选区</text>
+          </svg>
+        </div>
+
+        <div class="sku-vector-metrics">
+          <div class="sku-vector-metric"><strong>312</strong><span>现有 SKU 能力底座<br/>仅做匿名聚合呈现</span></div>
+          <div class="sku-vector-metric"><strong>BGE</strong><span>统一向量基座<br/>SKU / 痛点 / 场景同空间</span></div>
+          <div class="sku-vector-metric"><strong>cos</strong><span>覆盖相似度<br/>判断是否能承接需求</span></div>
+          <div class="sku-vector-metric"><strong>gap</strong><span>创新空白区<br/>进入产品论证池</span></div>
+        </div>
+      </div>
+
+      <div class="sku-vector-card">
+        <div class="sku-vector-title">本页使用原则</div>
+        <div class="sku-vector-rules">
+          <div class="sku-vector-rule"><strong>1. 不展示具体 SKU</strong><p>页面只展示匿名能力边界、聚合密度和创新区域，不暴露 SKU 名称、交付材料、知识卡片和 PPT 内容。</p></div>
+          <div class="sku-vector-rule"><strong>2. 不是自动发明产品</strong><p>BGE 负责发现“需求有密度但 SKU 覆盖不足”的区域；新 SKU 仍需产品中心与 BU 人工论证后入库。</p></div>
+          <div class="sku-vector-rule"><strong>3. 创新不只由单个痛点触发</strong><p>单条痛点无法匹配 SKU 只是信号之一。更重要的是一组痛点或场景在空间中反复聚集，但远离现有 SKU 能力云团。</p></div>
+          <div class="sku-vector-rule"><strong>4. SKU 边界应定期重算</strong><p>随着 SKU 知识卡片、PPT 和交付经验更新，能力边界会变化；每次 SKU 主库大更新后应重新计算覆盖概率。</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">SKU 创新工作流</div>
+    <div class="sku-vector-flow">
+      <div class="sku-vector-step"><strong>1. SKU 向量化</strong><span>用 SKU 知识卡片、适用客户、解决痛点、交付内容和 PPT 文本生成能力向量。</span></div>
+      <div class="sku-vector-step"><strong>2. 需求向量进入</strong><span>痛点、慧管家场景、行业报告线索进入同一 BGE 语义空间。</span></div>
+      <div class="sku-vector-step"><strong>3. 覆盖度计算</strong><span>计算需求向量与所有 SKU 的最近余弦相似度和 Top-K 覆盖信心。</span></div>
+      <div class="sku-vector-step"><strong>4. 创新区识别</strong><span>筛选朝曦业务边界内、需求密度高、SKU 覆盖不足的局部区域。</span></div>
+      <div class="sku-vector-step"><strong>5. 人工论证入库</strong><span>形成候选 SKU 命题，由产品中心和 BU 判断是否产品化、合并或迭代。</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">创新判定口径</div>
+    <div class="sku-vector-grid">
+      <div class="sku-vector-card">
+        <div class="sku-vector-title">被动触发：痛点无法承接</div>
+        <div class="sku-vector-note">当某条新痛点在现有 SKU Top-K 匹配中覆盖信心不足，且人工确认不是描述质量问题时，进入 SKU 创新候选池。这是原有逻辑，适合发现单点缺口。</div>
+      </div>
+      <div class="sku-vector-card">
+        <div class="sku-vector-title">主动触发：空间空白高密度</div>
+        <div class="sku-vector-note">当一片痛点或场景向量区域持续聚集，但离现有 SKU 能力云团较远时，系统主动提示“可能需要新 SKU”。这是更适合产品中心的创新雷达。</div>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 <!-- ══════════════════════════════════════
@@ -7022,13 +7310,16 @@ function showPage(pageId) {
 
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
 
-  document.getElementById('page-' + pageId).classList.add('active');
+  const targetPage = document.getElementById('page-' + pageId);
+  if (targetPage) targetPage.classList.add('active');
 
   // 切换导航高亮
 
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
-  event.currentTarget.classList.add('active');
+  const trigger = window.event?.currentTarget;
+  const navItem = trigger?.classList?.contains('nav-item') ? trigger : trigger?.closest?.('.nav-item');
+  if (navItem) navItem.classList.add('active');
 
   // 痛点结果页：恢复缓存
   if (pageId === 'pain-results') {
