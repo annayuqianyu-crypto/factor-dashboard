@@ -7401,6 +7401,7 @@ function showPage(pageId) {
             _pgLastPoints  = cache.results;
             _pgLastNewSkus = cache.newSkus || [];
             _pgLastBu      = cache.bu || 'All Department';
+            _pgLastSceneMeta = cache.sceneMeta || {};
           }
         }
       } catch(e) { /* 忽略损坏缓存 */ }
@@ -12727,6 +12728,8 @@ async function pgStartGenerate() {
 
   if (!scenes.length) { alert('请先选择或输入至少一个场景'); return; }
 
+  _pgLastSceneMeta = pgBuildSceneMetaMap(scenes);
+
 
 
   const { key, model, base } = pgGetConfig();
@@ -13027,6 +13030,65 @@ let _pgLastPoints  = [];
 let _pgLastNewSkus = [];
 
 let _pgLastBu      = 'All Department';
+
+let _pgLastSceneMeta = {};
+
+function pgGetSceneTitle(sceneText) {
+  return String(sceneText || '').split(/\r?\n/)[0].replace(/^[-\s]+/, '').trim();
+}
+
+function pgReadSceneMetaLine(text, label) {
+  const m = String(text || '').match(new RegExp(`${label}：([^\\n\\r]+)`));
+  return m ? m[1].trim() : '';
+}
+
+function pgParseSceneMeta(sceneText) {
+  const text = String(sceneText || '');
+  const matrixItems = [];
+  const matrixBlock = text.match(/补洞生成矩阵：([\s\S]*?)(?:\n\s*生成分配要求：|\n\s*请围绕|$)/);
+  if (matrixBlock) {
+    matrixBlock[1].split(/\r?\n/).forEach(line => {
+      const m = line.match(/^\s*(\d+)[.、]\s*(.+?)\s*$/);
+      if (m) matrixItems.push(`${m[1]}-${m[2]}`);
+    });
+  }
+  return {
+    title: pgGetSceneTitle(text),
+    targetFamily: pgReadSceneMetaLine(text, '目标族'),
+    dispatchBu: pgReadSceneMetaLine(text, '派工归口BU'),
+    coBu: pgReadSceneMetaLine(text, '协同BU'),
+    candidateTags: pgReadSceneMetaLine(text, '候选标签'),
+    vectorPosition: pgReadSceneMetaLine(text, '向量位置'),
+    projection: pgReadSceneMetaLine(text, '投影面'),
+    currentGap: pgReadSceneMetaLine(text, '当前向量缺口'),
+    vectorGap: pgReadSceneMetaLine(text, '缺失方向'),
+    matrixItems,
+    sourceText: text
+  };
+}
+
+function pgBuildSceneMetaMap(scenes) {
+  const map = {};
+  (scenes || []).forEach(sceneText => {
+    const meta = pgParseSceneMeta(sceneText);
+    if (meta.title) map[meta.title] = meta;
+    map[String(sceneText || '')] = meta;
+  });
+  return map;
+}
+
+function pgMetaForPoint(point) {
+  const scene = point?.scene || '';
+  return _pgLastSceneMeta[scene] || _pgLastSceneMeta[pgGetSceneTitle(scene)] || {};
+}
+
+function pgNormalizeBu(value, fallback = 'All Department') {
+  const s = String(value || '').toLowerCase();
+  if (s.includes('tax') || s.includes('税务')) return 'Tax';
+  if (s.includes('legal') || s.includes('法律')) return 'Legal';
+  if (s.includes('cm') || s.includes('资本')) return 'CM';
+  return fallback || 'All Department';
+}
 
 
 
@@ -13378,6 +13440,7 @@ function pgRenderResults(results, newSkus, bu, failNote) {
       results:  results || [],               // Excel 导出
       newSkus:  newSkus || [],
       bu:       bu || 'All Department',
+      sceneMeta: _pgLastSceneMeta || {},
     }));
   } catch(e) { console.warn('痛点缓存写入失败:', e.message); }
 
@@ -13818,14 +13881,17 @@ function pgExportExcel() {
 
 
   const rows = [];
+  const auditRows = [];
 
-  _pgLastPoints.forEach(p => {
+  _pgLastPoints.forEach((p, idx) => {
 
     const tags = p.tags || [];
+    const meta = pgMetaForPoint(p);
+    const rowBu = pgNormalizeBu(meta.dispatchBu, _pgLastBu || 'All Department');
 
     const row = {
 
-      'BU':     _pgLastBu || 'All Department',
+      'BU':     rowBu,
 
       '场景':   p.scene  || '',
 
@@ -13872,6 +13938,26 @@ function pgExportExcel() {
 
     rows.push(row);
 
+    auditRows.push({
+      '序号': idx + 1,
+      '场景': p.scene || '',
+      '痛点标题': p.title || '',
+      '补洞矩阵项': p.gap_matrix_item || '',
+      '目标族': meta.targetFamily || '',
+      '派工归口BU': rowBu,
+      '派工归口原文': meta.dispatchBu || '',
+      '协同BU': meta.coBu || '',
+      '候选标签': meta.candidateTags || '',
+      '向量位置': meta.vectorPosition || '',
+      '投影面': meta.projection || '',
+      '当前向量缺口': meta.currentGap || '',
+      '缺失方向': meta.vectorGap || '',
+      '页面BU原值': _pgLastBu || 'All Department',
+      '适配SKU': row['适配SKU'] || '',
+      '核心冲突': p.conflict || '',
+      '补洞回查口径': '第一张 sheet 保持入库字段；本 sheet 用于人工复核矩阵覆盖、派工归口和向量补洞效果。'
+    });
+
   });
 
 
@@ -13895,6 +13981,13 @@ function pgExportExcel() {
   const wb = XLSX.utils.book_new();
 
   XLSX.utils.book_append_sheet(wb, ws, '痛点结果');
+
+  const auditWs = XLSX.utils.json_to_sheet(auditRows);
+  auditWs['!cols'] = [
+    {wch:6},{wch:22},{wch:22},{wch:22},{wch:22},{wch:14},{wch:14},{wch:24},
+    {wch:24},{wch:24},{wch:10},{wch:42},{wch:50},{wch:14},{wch:44},{wch:36},{wch:54},
+  ];
+  XLSX.utils.book_append_sheet(wb, auditWs, '补洞回查');
 
   XLSX.writeFile(wb, `痛点生成结果_${new Date().toLocaleDateString('zh-CN').replace(/\//g,'-')}.xlsx`);
 
