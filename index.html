@@ -15003,9 +15003,18 @@ function piExportExcel() {
 
   if (!_piLastPoints.length) { alert('暂无数据，请先导入并补全痛点'); return; }
 
-  const rows = _piLastPoints.map(p => {
+  const auditRows = [];
+
+  const rows = _piLastPoints.map((p, idx) => {
 
     const tags = pgNormalizePointTags(p);
+    const skuText = (p.skus||[]).map(item => {
+      const id=(typeof item==='object'&&item)?item.id||'':String(item);
+      const hint=(typeof item==='object'&&item)?item.name||'':'';
+      const s=SKU_DB.find(x=>x.id===id);
+      const name=(s?s.name:null)||hint||'';
+      return id+(name?' '+name:'');
+    }).join(' / ');
 
     const row  = {
 
@@ -15035,7 +15044,7 @@ function piExportExcel() {
 
     }
 
-    row['适配SKU'] = (p.skus||[]).map(item => { const id=(typeof item==='object'&&item)?item.id||'':String(item); const hint=(typeof item==='object'&&item)?item.name||'':''; const s=SKU_DB.find(x=>x.id===id); const name=(s?s.name:null)||hint||''; return id+(name?' '+name:''); }).join(' / ');
+    row['适配SKU'] = skuText;
 
     row['核心冲突'] = p.conflict || '';
 
@@ -15044,6 +15053,26 @@ function piExportExcel() {
     row['解决方案'] = p.solution || '';
 
     row['预期效果'] = p.effect   || '';
+
+    auditRows.push({
+      '序号': idx + 1,
+      '痛点编码': p.code || '',
+      '场景': p.scene || '',
+      '痛点标题': p.title || '',
+      '补洞矩阵项': p.gap_matrix_item || '',
+      '目标族': '',
+      '派工归口BU': _piLastBu || 'All Department',
+      '协同BU': '',
+      '候选标签': tags.map(t => `[${t.dim}]${t.label}`).join(' / '),
+      '向量位置': '',
+      '投影面': '',
+      '当前向量缺口': '',
+      '缺失方向': '',
+      '页面BU原值': _piLastBu || 'All Department',
+      '适配SKU': skuText,
+      '核心冲突': p.conflict || '',
+      '补洞回查口径': '外部补全导出默认保留回查 sheet；如补洞字段为空，说明该批不是结构化补洞场景。'
+    });
 
     return row;
 
@@ -15060,6 +15089,13 @@ function piExportExcel() {
   const wb = XLSX.utils.book_new();
 
   XLSX.utils.book_append_sheet(wb, ws, '导入痛点结果');
+
+  const auditWs = XLSX.utils.json_to_sheet(auditRows);
+  auditWs['!cols'] = [
+    {wch:6},{wch:12},{wch:22},{wch:22},{wch:22},{wch:22},{wch:14},{wch:14},
+    {wch:38},{wch:24},{wch:10},{wch:42},{wch:50},{wch:14},{wch:44},{wch:36},{wch:54},
+  ];
+  XLSX.utils.book_append_sheet(wb, auditWs, '补洞回查');
 
   XLSX.writeFile(wb, `外部痛点补全结果_${new Date().toLocaleDateString('zh-CN').replace(/\//g,'-')}.xlsx`);
 
