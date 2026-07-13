@@ -12644,9 +12644,7 @@ function updateConfigPanel() {
 
 
 
-  list.innerHTML = scenes.map(name => {
-
-    const safeName = name.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+  list.innerHTML = scenes.map((name, idx) => {
 
     return `<div class="config-scene-row">
 
@@ -12658,7 +12656,7 @@ function updateConfigPanel() {
 
         value="${pgState.counts[name]||3}"
 
-        oninput="pgState.counts['${safeName}']=Math.max(1,Math.min(10,parseInt(this.value)||3));pgRefreshSummary()">
+        oninput="pgSetSceneCount(${idx}, this.value)">
 
     </div>`;
 
@@ -12668,6 +12666,14 @@ function updateConfigPanel() {
 
   pgRefreshSummary(scenes);
 
+}
+
+function pgSetSceneCount(sceneIndex, rawValue) {
+  const scenes = getAllScenes();
+  const name = scenes[sceneIndex];
+  if (!name) return;
+  pgState.counts[name] = Math.max(1, Math.min(10, parseInt(rawValue, 10) || 3));
+  pgRefreshSummary(scenes);
 }
 
 
@@ -12772,6 +12778,12 @@ async function pgStartGenerate() {
 
 ${sceneLines}
 
+重要：上方每条场景可能是多行结构化的「向量补洞场景建议」，不是普通短标题。请完整读取并消化其中所有字段，尤其是：目标族、派工归口BU、候选标签、向量位置、投影面、当前向量缺口、缺失方向、后台补洞约束。生成痛点时必须围绕缺失方向补齐，不得只根据第一行标题自由发挥。
+
+数量硬约束：每条场景括号中的“生成 N 个”是必须精确完成的数量，不是建议数量。points 数组总长度必须等于 ${total}。如果某一条场景写“生成 10 个”，则必须返回该场景 10 个 point，不得只返回 3 个示例。
+
+补洞质量约束：如果场景写明目标族/簇或 L/T/C 方向，生成结果必须优先靠近该目标族/簇；如果写明“缺失方向”，每条痛点都应体现该方向上的新增信息，例如从纯税务申报向身份法、继承法、权属确认、资产迁移、治理披露等约束过渡。
+
 
 
 整体输出格式为一个 JSON 对象：{"points":[...],"new_skus":[...]}
@@ -12782,7 +12794,7 @@ ${sceneLines}
 
 {
 
-  "scene":"场景名称（与上方完全一致）",
+  "scene":"场景名称（若上方为多行补洞建议，仅取第一行标题；不要把目标族、向量位置、后台约束等整段文字塞入 scene 字段）",
 
   "desc":"【第一步·先写】痛点说明（严格不超过60字）：一段自然段落，无需编号，须覆盖：客户是谁、持有什么资产、发生了什么/计划做什么、在什么外部条件下、因何制度性矛盾、最终遇到什么障碍或风险。语言极度精炼，每字必要，超过60字必须压缩后再输出",
 
@@ -12905,7 +12917,13 @@ ${factorPathsText}
 
 
 
-    pgRenderResults(points, newSkus, bu);
+    const expectedTotal = scenes.reduce((sum, n) => sum + (pgState.counts[n] || 3), 0);
+    const failNote = points.length === expectedTotal ? '' : `
+      <div style="padding:12px 14px;margin-bottom:16px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;color:#9a3412;font-size:13px;line-height:1.7;">
+        ⚠️ 数量校验：本次配置要求生成 <strong>${expectedTotal}</strong> 条痛点，模型实际返回 <strong>${points.length}</strong> 条。请优先检查模型是否截断、是否忽略数量硬约束，必要时重试或分批生成。
+      </div>`;
+
+    pgRenderResults(points, newSkus, bu, failNote);
 
 
 
