@@ -12838,7 +12838,7 @@ MECE 去重约束：同一场景下各痛点的 title、核心冲突、资产类
 
   "factors_chain":"【硬性规则】必须从下方【因子库路径表】中精确选取**恰好 4 条**与该痛点最匹配的完整路径，用中文分号「；」拼接。路径必须与因子库中完全一致，禁止编造或修改。**4 条路径必须分别属于以下 4 个不同维度，每个维度恰好 1 条，禁止 2 条同维度（例如绝不可出现 2 条「发生了什么」）**：①谁（必以「商业/职业身份」「家庭角色」「核心家庭成员」「核心员工」开头）②有什么（必以「资产类型」「财富标的」「持有形式」「持有结构」「所在地」「财富规模」「公司架构」「金融账户」开头）③发生了什么（必以「资本动作」「流动性管理」「价值管理」「架构搭建」「身份规划」「身份优化」「成长动作」「健康管理」「个人税务申报」「企业税务申报」开头）④约束条件（必以「外部监管触发」「税务合规」「法律风险」「合规要求」「政策变化」「身份维护」开头）。生成前请检查：4 条路径是否分别覆盖 4 个不同维度，缺一不可。",
 
-  "tags":[{"label":"标签短语","dim":"主体|资产|动作|约束","weight":"C|B|A"}],
+  "tags":[{"label":"标签短语","dim":"主体|资产|动作|约束|风险","weight":"C|B|A"}],
 
   "skus":[{"id":"匹配的SKU_ID","name":"对应SKU名称"}],
 
@@ -12856,7 +12856,7 @@ MECE 去重约束：同一场景下各痛点的 title、核心冲突、资产类
 
 
 
-标签规则：dim 必须是 主体/资产/动作/约束 之一；weight C=核心 B=中等 A=弱；每痛点4-6个标签覆盖多维度。
+标签规则：dim 必须是 主体/资产/动作/约束/风险 之一；weight C=核心 B=中等 A=弱。每个痛点必须输出至少5个关键业务标签，且必须分别包含：1个主体、1个资产、1个动作、1个约束、1个风险；可额外补充第6个标签。禁止只输出资产和约束标签。标签应服务于业务检索，不要写成泛泛的“风险较高/合规问题”。
 
 
 
@@ -13019,7 +13019,63 @@ const DIM_STYLE = {
 
   '约束': { bg:'#fef3c7', color:'#92400e' },
 
+  '风险': { bg:'#fee2e2', color:'#991b1b' },
+
 };
+
+const TAG_DIM_ALIAS = {
+  '谁': '主体',
+  '有什么': '资产',
+  '发生了什么': '动作',
+  '约束条件': '约束'
+};
+
+function pgTagLabelFromPath(path) {
+  const parts = String(path || '').split('>').map(s => s.trim()).filter(Boolean);
+  return (parts[parts.length - 1] || parts[0] || '').replace(/\s+/g, ' ').slice(0, 18);
+}
+
+function pgRiskTagFromPoint(p) {
+  const text = [p?.title, p?.conflict, p?.risk].filter(Boolean).join(' ');
+  if (/FATCA|FBAR|8938|T1135|CRS|申报|稽查|罚款|处罚/.test(text)) return '申报处罚风险';
+  if (/弃籍|退出税|视同处置/.test(text)) return '退出税风险';
+  if (/继承|遗嘱|受益人|遗产/.test(text)) return '继承冲突风险';
+  if (/信披|上市|交易所|披露|问询/.test(text)) return '信披监管风险';
+  if (/信托|隔离|穿透|控制权/.test(text)) return '穿透认定风险';
+  if (/婚姻|赠与|代持|权属|来源/.test(text)) return '权属争议风险';
+  return '风险暴露';
+}
+
+function pgNormalizePointTags(p) {
+  const out = [];
+  const seen = new Set();
+  const add = (dim, label, weight = 'B') => {
+    dim = TAG_DIM_ALIAS[dim] || dim;
+    label = String(label || '').trim();
+    if (!['主体','资产','动作','约束','风险'].includes(dim) || !label) return;
+    const key = `${dim}:${label}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push({ dim, label, weight });
+  };
+
+  (p?.tags || []).forEach(t => add(t.dim, t.label, t.weight || 'B'));
+
+  const chainStr = p?.factors_chain || (p?.factors
+    ? [p.factors.who, p.factors.what, p.factors.event].filter(Boolean).join('；')
+    : '');
+  String(chainStr || '').split(/；|;/).map(s => s.trim()).filter(Boolean).forEach(path => {
+    const dim = TAG_DIM_ALIAS[pgDetectDim(path).label] || pgDetectDim(path).label;
+    if (!out.some(t => t.dim === dim)) {
+      add(dim, pgTagLabelFromPath(path), dim === '主体' || dim === '资产' ? 'C' : 'B');
+    }
+  });
+
+  if (!out.some(t => t.dim === '风险')) add('风险', pgRiskTagFromPoint(p), 'B');
+
+  const order = ['主体','资产','动作','约束','风险'];
+  return out.sort((a, b) => order.indexOf(a.dim) - order.indexOf(b.dim)).slice(0, 6);
+}
 
 
 
@@ -13205,7 +13261,7 @@ function pgRenderResults(results, newSkus, bu, failNote) {
 
       // 客户画像标签
 
-      const tagsHtml = (p.tags || []).map(t => {
+      const tagsHtml = pgNormalizePointTags(p).map(t => {
 
         const s = DIM_STYLE[t.dim] || { bg:'#f3f4f6', color:'#374151' };
 
@@ -13885,7 +13941,7 @@ function pgExportExcel() {
 
   _pgLastPoints.forEach((p, idx) => {
 
-    const tags = p.tags || [];
+    const tags = pgNormalizePointTags(p);
     const meta = pgMetaForPoint(p);
     const rowBu = pgNormalizeBu(meta.dispatchBu, _pgLastBu || 'All Department');
 
@@ -14785,7 +14841,7 @@ function piRenderResults(results, newSkus, bu, failNote) {
 
       const factorHtml = pgRenderFactorChain(p);
 
-      const tagsHtml = (p.tags || []).map(t => {
+      const tagsHtml = pgNormalizePointTags(p).map(t => {
 
         const s = DIM_STYLE[t.dim] || { bg:'#f3f4f6', color:'#374151' };
 
@@ -14949,7 +15005,7 @@ function piExportExcel() {
 
   const rows = _piLastPoints.map(p => {
 
-    const tags = p.tags || [];
+    const tags = pgNormalizePointTags(p);
 
     const row  = {
 
