@@ -13211,6 +13211,7 @@ function pgRecommendBuByPoint(p, meta = {}, fallback = 'All Department') {
   ].filter(Boolean).join('；');
   return {
     bu: lead,
+    leadAxis,
     scores,
     evidence: evidence || '按场景向量位置兜底判断'
   };
@@ -14098,10 +14099,11 @@ function pgExportExcel() {
       'L强度': Number(buRec.scores.L.toFixed(2)),
       'T强度': Number(buRec.scores.T.toFixed(2)),
       'C强度': Number(buRec.scores.C.toFixed(2)),
+      '单条主导轴': buRec.leadAxis || '',
       '归口依据': buRec.evidence,
       '候选标签': meta.candidateTags || '',
       '向量位置': meta.vectorPosition || '',
-      '投影面': meta.projection || '',
+      '场景投影面': meta.projection || '',
       '当前向量缺口': meta.currentGap || '',
       '缺失方向': meta.vectorGap || '',
       '页面BU原值': _pgLastBu || 'All Department',
@@ -14137,7 +14139,7 @@ function pgExportExcel() {
   const auditWs = XLSX.utils.json_to_sheet(auditRows);
   auditWs['!cols'] = [
     {wch:6},{wch:22},{wch:22},{wch:24},{wch:22},{wch:14},
-    {wch:8},{wch:8},{wch:8},{wch:28},{wch:24},{wch:24},{wch:10},
+    {wch:8},{wch:8},{wch:8},{wch:12},{wch:28},{wch:24},{wch:24},{wch:12},
     {wch:42},{wch:50},{wch:14},{wch:44},{wch:36},{wch:54},
   ];
   XLSX.utils.book_append_sheet(wb, auditWs, '补洞回查');
@@ -15165,10 +15167,11 @@ function piExportExcel() {
       'L强度': Number(buRec.scores.L.toFixed(2)),
       'T强度': Number(buRec.scores.T.toFixed(2)),
       'C强度': Number(buRec.scores.C.toFixed(2)),
+      '单条主导轴': buRec.leadAxis || '',
       '归口依据': buRec.evidence,
       '候选标签': tags.map(t => `[${t.dim}]${t.label}`).join(' / '),
       '向量位置': '',
-      '投影面': '',
+      '场景投影面': '',
       '当前向量缺口': '',
       '缺失方向': '',
       '页面BU原值': _piLastBu || 'All Department',
@@ -15196,7 +15199,7 @@ function piExportExcel() {
   const auditWs = XLSX.utils.json_to_sheet(auditRows);
   auditWs['!cols'] = [
     {wch:6},{wch:12},{wch:22},{wch:22},{wch:24},{wch:22},{wch:14},
-    {wch:8},{wch:8},{wch:8},{wch:28},{wch:38},{wch:24},{wch:10},
+    {wch:8},{wch:8},{wch:8},{wch:12},{wch:28},{wch:38},{wch:24},{wch:12},
     {wch:42},{wch:50},{wch:14},{wch:44},{wch:36},{wch:54},
   ];
   XLSX.utils.book_append_sheet(wb, auditWs, '补洞回查');
