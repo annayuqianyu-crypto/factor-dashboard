@@ -9251,6 +9251,13 @@ const MGMT_WEEKLY = [
     notePain: '已上线痛点总数737条：本周新增税务+61、法律+53、资本+9。',
     noteScene: '已更新6月份的慧管家纪要和场景生成，新增126个业务场景',
     noteSku: '1、Legal已完成12支需增补SKU PPT，剩余1支准备中，预计本周定稿；2、Tax已完成12支需增补SKU PPT，剩余12支准备中。' },
+  { date: '2026-07-13', factors: 1706, pains: 773, scenes: 631, sku: 312,
+    newCM: 13, newLegal: 0, newTax: 23, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
+    note: '已上线小程序痛点同步：总数737 → 773条，本周新增36条，其中税务+23、资本+13、法律+0。',
+    noteFactor: '',
+    notePain: '已上线痛点总数773条：本周新增税务+23、资本+13、法律+0。',
+    noteScene: '',
+    noteSku: '' },
 ];
 
 function _mgmtResolve(snap) {
@@ -9274,7 +9281,7 @@ function _mgmtDeltaBadge(delta, colorPos) {
 // 规则：以 date 为键，当前数据版本内用户编辑版优先；代码固化新口径后自动失效旧缓存。
 const MGMT_WEEKLY_USER_KEY = 'mgmt_weekly_user';
 const MGMT_WEEKLY_USER_VERSION_KEY = 'mgmt_weekly_user_version';
-const MGMT_WEEKLY_DATA_VERSION = '2026-07-06-mgmt-final-v2-737';
+const MGMT_WEEKLY_DATA_VERSION = '2026-07-13-mgmt-pain-773';
 function _mgmtGetWeekly() {
   let user = null;
   try {
@@ -9319,7 +9326,7 @@ function initMgmtPage() {
 
   const sceneMeetings = window._mgmtSceneStats ? window._mgmtSceneStats.meetings : '—';
   set('mgmt-factor-sub', `1706条因子覆盖C端高净值客户 15 个分析维度，按月更新<br>主体/资产/动作/约束 四维链路形成痛点`);
-  set('mgmt-pain-sub',   `小程序已上线 737 条，按周更新<br>PLM痛点协作平台持续迭代，痛点持续修改中`);
+  set('mgmt-pain-sub',   `小程序已上线 ${latest.pains.toLocaleString()} 条，按周更新<br>PLM痛点协作平台持续迭代，痛点持续修改中`);
   set('mgmt-scene-sub',  '覆盖 2025-2026年 302 场HGJ会议纪要，按月更新<br>202606新增慧管家纪要已完成全口径场景蒸馏');
   set('mgmt-sku-sub',    'Tax 197 / Legal 62 / CM 53<br>知识卡片存量数据，BU研发后实时更新');
 
