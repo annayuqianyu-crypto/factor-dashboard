@@ -12830,7 +12830,7 @@ MECE 去重约束：同一场景下各痛点的 title、核心冲突、资产类
 
   "scene":"场景名称（若上方为多行补洞建议，仅取第一行标题；不要把目标族、向量位置、后台约束等整段文字塞入 scene 字段）",
 
-  "gap_matrix_item":"若场景包含补洞生成矩阵，填写本痛点命中的矩阵序号和主题；若没有矩阵则填空字符串",
+  "gap_matrix_item":"若场景包含补洞生成矩阵，填写本痛点命中的矩阵序号和主题；若没有显式矩阵，也必须按本痛点核心冲突填写“自动-主题”，例如“自动-信托有效性与资产隔离”“自动-税务申报与信息交换”，禁止留空",
 
   "desc":"【第一步·先写】痛点说明（严格不超过60字）：一段自然段落，无需编号，须覆盖：客户是谁、持有什么资产、发生了什么/计划做什么、在什么外部条件下、因何制度性矛盾、最终遇到什么障碍或风险。语言极度精炼，每字必要，超过60字必须压缩后再输出",
 
@@ -13144,6 +13144,98 @@ function pgNormalizeBu(value, fallback = 'All Department') {
   if (s.includes('legal') || s.includes('法律')) return 'Legal';
   if (s.includes('cm') || s.includes('资本')) return 'CM';
   return fallback || 'All Department';
+}
+
+function pgPointTextForAudit(p) {
+  const tagText = (p?.tags || []).map(t => `${t.dim || ''}${t.label || ''}`).join(' ');
+  const skuText = (p?.skus || []).map(item => {
+    if (typeof item === 'object' && item) return `${item.id || ''} ${item.name || ''}`;
+    return String(item || '');
+  }).join(' ');
+  return [
+    p?.title, p?.desc, p?.laws, p?.factors_chain, tagText, skuText,
+    p?.conflict, p?.risk, p?.solution, p?.effect
+  ].filter(Boolean).join(' ');
+}
+
+function pgParseLtcValue(text, axis) {
+  const m = String(text || '').match(new RegExp(`${axis}\\s*([0-9]+(?:\\.[0-9]+)?)`, 'i'));
+  return m ? Number(m[1]) : 0;
+}
+
+function pgAddKeywordScore(text, scores, axis, keywords, weight) {
+  keywords.forEach(k => {
+    const re = k instanceof RegExp ? k : new RegExp(k, 'i');
+    if (re.test(text)) scores[axis] += weight;
+  });
+}
+
+function pgRecommendBuByPoint(p, meta = {}, fallback = 'All Department') {
+  const text = pgPointTextForAudit(p);
+  const scores = {
+    L: pgParseLtcValue(meta.vectorPosition, 'L') * 0.18,
+    T: pgParseLtcValue(meta.vectorPosition, 'T') * 0.18,
+    C: pgParseLtcValue(meta.vectorPosition, 'C') * 0.18
+  };
+
+  (p?.skus || []).forEach(item => {
+    const id = (typeof item === 'object' && item) ? (item.id || '') : String(item || '');
+    if (/^Tax-/i.test(id)) scores.T += 2.8;
+    if (/^Legal-/i.test(id)) scores.L += 2.8;
+    if (/^CM-/i.test(id)) scores.C += 2.8;
+  });
+
+  pgAddKeywordScore(text, scores, 'T', [
+    /税务|个税|所得税|增值税|税负|纳税|申报|补税|罚款|稽查/,
+    /CRS|FATCA|FBAR|8938|T1135|IRS|CRA|GILTI|Form\s*709|Form\s*8854/i,
+    /税务居民|全球收入|全球征税|弃籍税|退出税|视同处置/
+  ], 1.4);
+  pgAddKeywordScore(text, scores, 'L', [
+    /法律|诉讼|仲裁|法院|债权|债务|执行|冻结|撤销|追索|无效/,
+    /信托法|民法典|公司法|婚姻|继承|遗嘱|受益人|受托人|保护人/,
+    /信托文件|信托契约|控制权|权属|隔离|虚假信托|穿透/
+  ], 1.4);
+  pgAddKeywordScore(text, scores, 'C', [
+    /资本市场|上市|IPO|交易所|信披|披露|问询|实控人|控股股东/,
+    /股权激励|减持|增持|并购|重组|红筹|VIE|股价|再融资/
+  ], 1.4);
+
+  const ranked = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  const axisToBu = { L: 'Legal', T: 'Tax', C: 'CM' };
+  const leadAxis = ranked[0]?.[0] || '';
+  const lead = ranked[0]?.[1] > 0 ? axisToBu[leadAxis] : pgNormalizeBu(meta.dispatchBu, fallback);
+  const evidence = [
+    /Tax-/i.test(text) || /税务|CRS|FATCA|FBAR|8938|T1135|IRS|CRA|申报|弃籍税|退出税/.test(text) ? '税务/申报/SKU信号' : '',
+    /Legal-/i.test(text) || /法律|信托|继承|诉讼|债权|权属|控制权|受益人/.test(text) ? '法律/信托/权属信号' : '',
+    /CM-/i.test(text) || /上市|IPO|信披|交易所|实控人|股权激励|减持|并购|红筹|VIE/.test(text) ? '资本市场/股权信号' : ''
+  ].filter(Boolean).join('；');
+  return {
+    bu: lead,
+    scores,
+    evidence: evidence || '按场景向量位置兜底判断'
+  };
+}
+
+function pgInferGapMatrixItem(p, meta = {}) {
+  if (p?.gap_matrix_item) return p.gap_matrix_item;
+  const text = pgPointTextForAudit(p);
+  if (Array.isArray(meta.matrixItems) && meta.matrixItems.length) {
+    let best = '', bestScore = 0;
+    meta.matrixItems.forEach(item => {
+      const body = String(item).replace(/^\d+-/, '');
+      const tokens = body.split(/[：，。、/／与和及；;（）()、\s]+/).filter(x => x.length >= 2);
+      const score = tokens.reduce((sum, token) => sum + (text.includes(token) ? 1 : 0), 0);
+      if (score > bestScore) { best = item; bestScore = score; }
+    });
+    if (best) return `自动匹配-${best}`;
+  }
+  if (/虚假信托|隔离失效|债权|追索|执行|撤销|无效/.test(text)) return '自动归类-信托有效性与资产隔离';
+  if (/受益人|受益权|分配|美国受益人/.test(text)) return '自动归类-受益权与跨境分配';
+  if (/FATCA|CRS|FBAR|8938|T1135|申报|稽查|税务居民/.test(text)) return '自动归类-税务申报与信息交换';
+  if (/保单|寿险|IUL|Whole Life|UL|现金价值/.test(text)) return '自动归类-保单权益与现金价值';
+  if (/控制权|委托人|受托人|保护人|信托契约/.test(text)) return '自动归类-信托控制权识别';
+  if (/继承|遗嘱|身故|遗产/.test(text)) return '自动归类-继承与受益安排';
+  return '自动归类-待人工复核';
 }
 
 
@@ -13943,7 +14035,9 @@ function pgExportExcel() {
 
     const tags = pgNormalizePointTags(p);
     const meta = pgMetaForPoint(p);
-    const rowBu = pgNormalizeBu(meta.dispatchBu, _pgLastBu || 'All Department');
+    const buRec = pgRecommendBuByPoint(p, meta, _pgLastBu || 'All Department');
+    const rowBu = buRec.bu;
+    const matrixItem = pgInferGapMatrixItem(p, meta);
 
     const row = {
 
@@ -13998,11 +14092,13 @@ function pgExportExcel() {
       '序号': idx + 1,
       '场景': p.scene || '',
       '痛点标题': p.title || '',
-      '补洞矩阵项': p.gap_matrix_item || '',
+      '补洞矩阵项': matrixItem,
       '目标族': meta.targetFamily || '',
-      '派工归口BU': rowBu,
-      '派工归口原文': meta.dispatchBu || '',
-      '协同BU': meta.coBu || '',
+      '归口建议BU': rowBu,
+      'L强度': Number(buRec.scores.L.toFixed(2)),
+      'T强度': Number(buRec.scores.T.toFixed(2)),
+      'C强度': Number(buRec.scores.C.toFixed(2)),
+      '归口依据': buRec.evidence,
       '候选标签': meta.candidateTags || '',
       '向量位置': meta.vectorPosition || '',
       '投影面': meta.projection || '',
@@ -14040,8 +14136,9 @@ function pgExportExcel() {
 
   const auditWs = XLSX.utils.json_to_sheet(auditRows);
   auditWs['!cols'] = [
-    {wch:6},{wch:22},{wch:22},{wch:22},{wch:22},{wch:14},{wch:14},{wch:24},
-    {wch:24},{wch:24},{wch:10},{wch:42},{wch:50},{wch:14},{wch:44},{wch:36},{wch:54},
+    {wch:6},{wch:22},{wch:22},{wch:24},{wch:22},{wch:14},
+    {wch:8},{wch:8},{wch:8},{wch:28},{wch:24},{wch:24},{wch:10},
+    {wch:42},{wch:50},{wch:14},{wch:44},{wch:36},{wch:54},
   ];
   XLSX.utils.book_append_sheet(wb, auditWs, '补洞回查');
 
@@ -15008,6 +15105,9 @@ function piExportExcel() {
   const rows = _piLastPoints.map((p, idx) => {
 
     const tags = pgNormalizePointTags(p);
+    const buRec = pgRecommendBuByPoint(p, {}, _piLastBu || 'All Department');
+    const rowBu = buRec.bu;
+    const matrixItem = pgInferGapMatrixItem(p, {});
     const skuText = (p.skus||[]).map(item => {
       const id=(typeof item==='object'&&item)?item.id||'':String(item);
       const hint=(typeof item==='object'&&item)?item.name||'':'';
@@ -15020,7 +15120,7 @@ function piExportExcel() {
 
       '痛点编码': p.code   || '',
 
-      'BU':     _piLastBu || 'All Department',
+      'BU':     rowBu,
 
       '场景':   p.scene  || '',
 
@@ -15059,10 +15159,13 @@ function piExportExcel() {
       '痛点编码': p.code || '',
       '场景': p.scene || '',
       '痛点标题': p.title || '',
-      '补洞矩阵项': p.gap_matrix_item || '',
+      '补洞矩阵项': matrixItem,
       '目标族': '',
-      '派工归口BU': _piLastBu || 'All Department',
-      '协同BU': '',
+      '归口建议BU': rowBu,
+      'L强度': Number(buRec.scores.L.toFixed(2)),
+      'T强度': Number(buRec.scores.T.toFixed(2)),
+      'C强度': Number(buRec.scores.C.toFixed(2)),
+      '归口依据': buRec.evidence,
       '候选标签': tags.map(t => `[${t.dim}]${t.label}`).join(' / '),
       '向量位置': '',
       '投影面': '',
@@ -15092,8 +15195,9 @@ function piExportExcel() {
 
   const auditWs = XLSX.utils.json_to_sheet(auditRows);
   auditWs['!cols'] = [
-    {wch:6},{wch:12},{wch:22},{wch:22},{wch:22},{wch:22},{wch:14},{wch:14},
-    {wch:38},{wch:24},{wch:10},{wch:42},{wch:50},{wch:14},{wch:44},{wch:36},{wch:54},
+    {wch:6},{wch:12},{wch:22},{wch:22},{wch:24},{wch:22},{wch:14},
+    {wch:8},{wch:8},{wch:8},{wch:28},{wch:38},{wch:24},{wch:10},
+    {wch:42},{wch:50},{wch:14},{wch:44},{wch:36},{wch:54},
   ];
   XLSX.utils.book_append_sheet(wb, auditWs, '补洞回查');
 
