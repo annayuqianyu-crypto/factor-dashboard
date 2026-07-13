@@ -7916,7 +7916,24 @@ const SEMANTIC_GAP_SCENES = {
     gap: '身份变化引起的税务居民、资产申报、赠与继承和弃籍退出之间的连续链路仍需补足。',
     vectorGap: 'T 主轴向 LT 边界过渡不足：税务申报强度高，但身份法、继承法和资产迁移约束的过渡样本不足。',
     scenes: [
-      { title: '计划移民客户未在登陆前完成境外资产清册', tags: '税务居民 / 跨境身份 / 全球税务居民', ltc: 'L 1.26 · T 9.54 · C 3.37', projection: 'T' },
+      {
+        title: '计划移民客户未在登陆前完成境外资产清册',
+        tags: '税务居民 / 跨境身份 / 全球税务居民',
+        ltc: 'L 1.26 · T 9.54 · C 3.37',
+        projection: 'T',
+        generationPlan: [
+          '境外公司股权：登陆前未确认实际控制、成本基础和股权权属，导致登陆后 CRS/FBAR/8938/T1135 申报与股权归属证明冲突。',
+          '境外金融账户：登陆日前银行存款、券商账户或基金份额未做清册和流水留痕，导致资金来源、税基和申报口径无法闭环。',
+          '境外保单/年金：Whole Life、年金或保险现金价值未在登陆日前估值，导致弃籍、遗产税或未来退保税负测算失真。',
+          '境外信托/基金会：受益权、保护人权利或控制权未识别，导致税务居民申报与信托法律属性认定之间出现冲突。',
+          '境外不动产：购置合同、贷款、租金和历史增值未留痕，导致登陆日公允价值、未来出售税基和继承安排不清。',
+          '家庭赠与与共同财产：登陆前家族成员间转账、赠与或代持未做证据固化，导致登陆后赠与税、婚姻财产和资产来源解释冲突。',
+          '继承与受益人安排：境外资产清册未同步遗嘱、保险受益人和信托受益权，导致跨境继承、税务申报和资产接收口径不一致。',
+          '身份退出与弃籍路径：登陆前未同步评估未来放弃绿卡/国籍时的资产视同处置和退出税口径，导致长期身份规划断档。',
+          '上市公司/实控人披露：拟上市或上市公司实控人登陆前未披露境外资产，导致尽调、信息披露和税务居民申报口径冲突。',
+          '资料补正与服务路径：登陆后才发现清册缺口，需要通过资产盘点、估值底稿、权属文件和申报路径重建形成可审核方案。'
+        ]
+      },
       { title: '美国税务居民持有境外家族公司但未区分 GILTI', tags: '分红 / 美国税务居民 / 境外公司', ltc: 'L 2.84 · T 10.0 · C 3.14', projection: 'T' },
       { title: '加拿大新移民评估登陆日资产公允价值', tags: '加拿大身份 / 登陆日资产 / 税务居民', ltc: 'L 1.30 · T 8.42 · C 3.59', projection: 'T' },
       { title: '放弃美国绿卡前未处理境外高增值股权', tags: '弃籍税 / 境外股权 / 身份退出', ltc: 'L 2.12 · T 9.68 · C 3.67', projection: 'T' }
@@ -8762,6 +8779,15 @@ function semanticBuildGapSceneInput(data, gap, scene) {
   const vector = semanticVectorFor(data);
   const assignment = semanticGapAssignment(gap, scene);
   const co = assignment.co ? `\n协同BU：${assignment.co}` : '';
+  const generationPlan = Array.isArray(scene?.generationPlan) && scene.generationPlan.length
+    ? [
+        '',
+        '补洞生成矩阵：',
+        ...scene.generationPlan.map((item, idx) => `${idx + 1}. ${item}`),
+        '',
+        '生成分配要求：若生成数量大于等于矩阵条数，请按上述矩阵逐条覆盖；若生成数量少于矩阵条数，请优先选择最能补足缺失方向的矩阵项。每条痛点只能主打一个矩阵项，禁止多条痛点反复围绕同一个核心冲突。'
+      ]
+    : [];
   return [
     scene.title,
     `目标族：${vector?.id || ''} ${data?.title || gap?.name || ''}`,
@@ -8772,6 +8798,7 @@ function semanticBuildGapSceneInput(data, gap, scene) {
     '',
     `当前向量缺口：${gap.gap}`,
     `缺失方向：${gap.vectorGap}`,
+    ...generationPlan,
     '',
     `请围绕“${scene.title}”这个具体业务落地场景，生成可审核、可入库的高净值客户业务痛点。`,
     '生成时请同时回答：',
@@ -12784,6 +12811,10 @@ ${sceneLines}
 
 补洞质量约束：如果场景写明目标族/簇或 L/T/C 方向，生成结果必须优先靠近该目标族/簇；如果写明“缺失方向”，每条痛点都应体现该方向上的新增信息，例如从纯税务申报向身份法、继承法、权属确认、资产迁移、治理披露等约束过渡。
 
+补洞矩阵约束：如果场景中包含“补洞生成矩阵”，必须优先按矩阵逐条生成。每个 point 必须填写 gap_matrix_item 字段，格式为“矩阵序号-矩阵主题”，例如“3-境外保单/年金”。同一场景内不得连续生成同一矩阵项，不得把所有痛点都写成同一种“未清册/未申报”问题；未清册只能作为触发点，真正痛点必须落到不同的主体、资产、动作、约束或风险组合上。
+
+MECE 去重约束：同一场景下各痛点的 title、核心冲突、资产类型和约束条件应明显不同。若两个痛点只是国家、资产名称或申报表名称不同，但核心冲突相同，应合并或改写为不同矩阵方向。
+
 
 
 整体输出格式为一个 JSON 对象：{"points":[...],"new_skus":[...]}
@@ -12795,6 +12826,8 @@ ${sceneLines}
 {
 
   "scene":"场景名称（若上方为多行补洞建议，仅取第一行标题；不要把目标族、向量位置、后台约束等整段文字塞入 scene 字段）",
+
+  "gap_matrix_item":"若场景包含补洞生成矩阵，填写本痛点命中的矩阵序号和主题；若没有矩阵则填空字符串",
 
   "desc":"【第一步·先写】痛点说明（严格不超过60字）：一段自然段落，无需编号，须覆盖：客户是谁、持有什么资产、发生了什么/计划做什么、在什么外部条件下、因何制度性矛盾、最终遇到什么障碍或风险。语言极度精炼，每字必要，超过60字必须压缩后再输出",
 
@@ -13188,6 +13221,8 @@ function pgRenderResults(results, newSkus, bu, failNote) {
         </div>
 
         <div style="font-size:13.5px;color:#4b5563;line-height:1.7;margin-bottom:14px;">${p.desc||''}</div>
+
+        ${p.gap_matrix_item ? `<div style="display:inline-flex;align-items:center;gap:6px;margin:-4px 0 12px;padding:4px 10px;border-radius:999px;background:#f0f9ff;border:1px solid #bae6fd;color:#0369a1;font-size:12px;font-weight:700;">补洞矩阵：${p.gap_matrix_item}</div>` : ''}
 
 
 
