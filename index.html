@@ -272,6 +272,36 @@ body {
 
 .pain-rank-fill { height: 100%; border-radius: 999px; }
 
+.mgmt-detail-btn {
+  margin-top: 12px; padding: 7px 12px; border-radius: 999px;
+  border: 1px solid rgba(220, 38, 38, .22); background: rgba(255, 255, 255, .7);
+  color: #991b1b; font-size: 12px; font-weight: 800; cursor: pointer;
+}
+
+.mgmt-detail-btn:hover { background: #fff; box-shadow: 0 8px 18px rgba(153, 27, 27, .12); }
+
+.mgmt-modal {
+  position: fixed; inset: 0; z-index: 9999; display: none;
+  align-items: center; justify-content: center; padding: 26px;
+  background: rgba(15, 23, 42, .45); backdrop-filter: blur(5px);
+}
+
+.mgmt-modal-panel {
+  width: min(1040px, 96vw); max-height: 86vh; overflow: auto;
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 16px;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, .22); padding: 24px 26px 26px;
+}
+
+.mgmt-modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
+
+.mgmt-modal-close {
+  width: 32px; height: 32px; border-radius: 999px; border: 1px solid #e5e7eb;
+  background: #fff; color: #64748b; font-size: 18px; line-height: 1;
+  cursor: pointer;
+}
+
+.mgmt-modal-close:hover { color: #dc2626; border-color: #fecaca; background: #fff5f5; }
+
 
 
 /* ── 图表容器 ── */
@@ -2916,6 +2946,7 @@ body {
       </div>
       <div id="mgmt-pain-total" style="font-size:34px;font-weight:800;color:#7f1d1d;margin:10px 0 4px;">—</div>
       <div id="mgmt-pain-sub" data-ek="kpi-pain-sub" style="font-size:12px;color:#b91c1c;line-height:1.7;"></div>
+      <button class="mgmt-detail-btn" type="button" onclick="openMgmtPainBuModal()">点击查看BU详情</button>
     </div>
 
     <div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1px solid #ddd6fe;border-radius:14px;padding:20px 22px;">
@@ -2927,6 +2958,20 @@ body {
       <div id="mgmt-sku-sub" data-ek="kpi-sku-sub" style="font-size:12px;color:#6d28d9;line-height:1.7;"></div>
     </div>
 
+  </div>
+
+  <div id="mgmt-pain-bu-modal" class="mgmt-modal" onclick="if(event.target===this) closeMgmtPainBuModal()">
+    <div class="mgmt-modal-panel" role="dialog" aria-modal="true" aria-label="各 BU 痛点分布">
+      <div class="mgmt-modal-head">
+        <div>
+          <div class="card-title">各 BU 痛点分布</div>
+          <div id="mgmt-pain-bu-modal-total" class="pain-total-value">—<span>条</span></div>
+          <div class="pain-total-sub">已同步上线痛点主库 · 按 BU 归属观察覆盖结构</div>
+        </div>
+        <button class="mgmt-modal-close" type="button" onclick="closeMgmtPainBuModal()" aria-label="关闭">×</button>
+      </div>
+      <div id="mgmt-pain-bu-panel" class="pain-bu-panel"></div>
+    </div>
   </div>
 
   <!-- ── 动态追踪：周度趋势 ── -->
@@ -4141,28 +4186,9 @@ body {
 
     <h2>痛点向量分析</h2>
 
-    <p>基于已同步上线痛点，观察各 BU、业务板块与细分场景的当前覆盖状态</p>
+    <p>基于已同步上线痛点，观察痛点族、痛点簇与场景触发的向量覆盖状态</p>
 
   </div>
-
-
-
-  <!-- 各 BU 痛点分布（按 CM/Tax/Legal 三大业务单元统计） -->
-
-  <div class="card pain-bu-card" style="margin-bottom:16px;">
-
-    <div class="pain-bu-head">
-      <div>
-        <div class="card-title">各 BU 痛点分布</div>
-        <div class="pain-total-value">737<span>条</span></div>
-        <div class="pain-total-sub">已同步上线痛点主库 · 按 BU 归属观察覆盖结构</div>
-      </div>
-    </div>
-
-    <div id="chart-bu-bar" class="pain-bu-panel"></div>
-
-  </div>
-
 
   <div id="semantic-vector-model-card" class="card">
     <div class="card-title">朝曦痛点向量模型</div>
@@ -7784,8 +7810,8 @@ const PAIN_BU_DATA = [
   {
     key: 'cm',
     name: 'CM 资本市场',
-    value: 115,
-    delta: 9,
+    value: 128,
+    delta: 13,
     color: '#2563eb',
     soft: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
     fill: 'linear-gradient(90deg, #60a5fa 0%, #2563eb 100%)',
@@ -7794,8 +7820,8 @@ const PAIN_BU_DATA = [
   {
     key: 'tax',
     name: 'Tax 税务',
-    value: 271,
-    delta: 61,
+    value: 294,
+    delta: 23,
     color: '#e11d48',
     soft: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)',
     fill: 'linear-gradient(90deg, #fb7185 0%, #e11d48 100%)',
@@ -7805,7 +7831,7 @@ const PAIN_BU_DATA = [
     key: 'legal',
     name: 'Legal 法律',
     value: 351,
-    delta: 53,
+    delta: 0,
     color: '#9333ea',
     soft: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
     fill: 'linear-gradient(90deg, #c084fc 0%, #9333ea 100%)',
@@ -8882,8 +8908,8 @@ function semanticShowDrill(key, trigger) {
   `;
 }
 
-function renderPainBuPanel() {
-  const el = document.getElementById('chart-bu-bar');
+function renderPainBuPanel(targetId = 'chart-bu-bar') {
+  const el = document.getElementById(targetId);
   if (!el) return;
 
   const total = PAIN_BU_DATA.reduce((sum, item) => sum + item.value, 0);
@@ -8892,6 +8918,7 @@ function renderPainBuPanel() {
     <div class="pain-bu-grid">
       ${PAIN_BU_DATA.map(item => {
         const pct = (item.value / total * 100).toFixed(1);
+        const deltaText = item.delta > 0 ? `最近一轮新增 +${item.delta} 条。` : '最近一轮无新增。';
         return `
           <div class="pain-bu-mini" style="background:${item.soft};">
             <div class="pain-bu-mini-top">
@@ -8902,12 +8929,30 @@ function renderPainBuPanel() {
             <div class="pain-rank-track">
               <div class="pain-rank-fill" style="width:${pct}%;background:${item.fill};"></div>
             </div>
-            <div class="pain-bu-desc">${item.note} 最近一轮新增 +${item.delta} 条。</div>
+            <div class="pain-bu-desc">${item.note} ${deltaText}</div>
           </div>
         `;
       }).join('')}
     </div>
   `;
+}
+
+function openMgmtPainBuModal() {
+  const modal = document.getElementById('mgmt-pain-bu-modal');
+  if (!modal) return;
+  const total = PAIN_BU_DATA.reduce((sum, item) => sum + item.value, 0);
+  const totalEl = document.getElementById('mgmt-pain-bu-modal-total');
+  if (totalEl) totalEl.innerHTML = `${total.toLocaleString()}<span>条</span>`;
+  renderPainBuPanel('mgmt-pain-bu-panel');
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMgmtPainBuModal() {
+  const modal = document.getElementById('mgmt-pain-bu-modal');
+  if (!modal) return;
+  modal.style.display = 'none';
+  document.body.style.overflow = '';
 }
 
 
