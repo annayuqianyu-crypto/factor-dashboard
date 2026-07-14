@@ -1485,6 +1485,242 @@ tr:hover td { background: #fafafa; }
   line-height: 1.8;
 }
 
+.semantic-cloud-card {
+  border-color: #dbeafe;
+}
+
+.semantic-cloud-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 2px 0 14px;
+}
+
+.semantic-cloud-filter {
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: #fff;
+  color: #475569;
+  font-size: 11.5px;
+  font-weight: 900;
+  padding: 6px 11px;
+  cursor: pointer;
+  transition: border-color .16s ease, background .16s ease, color .16s ease, box-shadow .16s ease;
+}
+
+.semantic-cloud-filter:hover,
+.semantic-cloud-filter.is-active {
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  box-shadow: 0 8px 18px rgba(37,99,235,.10);
+}
+
+.semantic-cloud-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(360px, .62fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+.semantic-cloud-stage {
+  min-height: 520px;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(219,234,254,.82), transparent 28%),
+    radial-gradient(circle at 78% 22%, rgba(254,226,226,.58), transparent 30%),
+    radial-gradient(circle at 42% 88%, rgba(220,252,231,.58), transparent 32%),
+    linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.semantic-cloud-stage svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.semantic-cloud-point {
+  cursor: pointer;
+  transition: opacity .16s ease;
+}
+
+.semantic-cloud-point circle {
+  filter: drop-shadow(0 6px 10px rgba(15,23,42,.14));
+  transition: r .16s ease, stroke-width .16s ease;
+}
+
+.semantic-cloud-point:hover circle,
+.semantic-cloud-point.is-active circle {
+  r: 10;
+  stroke-width: 4;
+}
+
+.semantic-cloud-label {
+  pointer-events: none;
+  paint-order: stroke;
+  stroke: rgba(255,255,255,.92);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.semantic-cloud-detail {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+  padding: 14px;
+  box-shadow: 0 16px 34px rgba(15,23,42,.06);
+}
+
+.semantic-cloud-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.semantic-cloud-detail-title {
+  font-size: 15px;
+  font-weight: 900;
+  color: #0f172a;
+  line-height: 1.4;
+}
+
+.semantic-cloud-detail-title span {
+  display: inline-flex;
+  margin-right: 6px;
+  color: #1d4ed8;
+}
+
+.semantic-cloud-count {
+  flex-shrink: 0;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 11.5px;
+  font-weight: 900;
+  padding: 4px 9px;
+}
+
+.semantic-cloud-note {
+  margin: 0 0 11px;
+  color: #475569;
+  font-size: 12.2px;
+  line-height: 1.7;
+}
+
+.semantic-cloud-axis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 12px;
+}
+
+.semantic-cloud-axis span {
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 4px 9px;
+}
+
+.semantic-cloud-axis span.is-peak {
+  color: var(--axis-color);
+  border-color: color-mix(in srgb, var(--axis-color) 38%, #fff);
+  background: color-mix(in srgb, var(--axis-color) 10%, #fff);
+}
+
+.semantic-cloud-block {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 11px;
+  margin-top: 11px;
+}
+
+.semantic-cloud-block h4 {
+  margin: 0 0 8px;
+  color: #0f172a;
+  font-size: 12.5px;
+  font-weight: 900;
+}
+
+.semantic-cloud-words,
+.semantic-cloud-clusters,
+.semantic-cloud-scenes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.semantic-cloud-word {
+  border: 1px solid #dbeafe;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1e40af;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 9px;
+}
+
+.semantic-cloud-cluster {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  color: #334155;
+  font-size: 11.3px;
+  font-weight: 800;
+  padding: 7px 9px;
+  line-height: 1.35;
+}
+
+.semantic-cloud-scene {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 9px;
+  align-items: center;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background: #fff;
+  padding: 9px 10px;
+}
+
+.semantic-cloud-scene strong {
+  display: block;
+  color: #0f172a;
+  font-size: 11.8px;
+  line-height: 1.35;
+}
+
+.semantic-cloud-scene span {
+  display: block;
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 10.8px;
+}
+
+.semantic-cloud-scene button {
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 6px 9px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.semantic-cloud-scene button:hover {
+  background: #dbeafe;
+}
+
 .sku-vector-private {
   display: inline-flex;
   align-items: center;
@@ -1832,6 +2068,7 @@ tr:hover td { background: #fafafa; }
 
 @media (max-width: 1180px) {
   .semantic-map { grid-template-columns: 1fr; }
+  .semantic-cloud-layout { grid-template-columns: 1fr; }
   .semantic-space { grid-template-columns: 1fr; }
   .semantic-math-dict-panel { grid-template-columns: 1fr; }
   .space-method { grid-template-columns: 1fr; }
@@ -1840,6 +2077,7 @@ tr:hover td { background: #fafafa; }
 
 @media (max-width: 760px) {
   .semantic-entry-grid,
+  .semantic-cloud-layout,
   .semantic-cluster-grid,
   .semantic-drill-grid,
   .semantic-drill-subclusters,
@@ -4481,6 +4719,18 @@ body {
           <div class="space-note">例如先进入“股权代持与控制权纠纷族”，再进入“代持人状态变化簇”，最后挂接“代持人婚变导致代持资产被主张共同财产”这类具体场景。场景直接导向痛点，适合用于痛点生成和补洞，不再承担大目录功能。</div>
         </div>
       </div>
+    </div>
+  </div>
+
+
+
+  <div class="card semantic-cloud-card">
+    <div class="card-title">法税资三维点云工作台</div>
+    <div class="semantic-space-summary">把当前痛点族投影到 L / T / C 三维业务空间中：点击点云可以查看族内簇、代表语义词和补洞场景；后续接入完整 BGE 点云后，可升级为可框选、可回算、可反推场景的交互式向量工作台。</div>
+    <div id="semantic-cloud-toolbar" class="semantic-cloud-toolbar"></div>
+    <div class="semantic-cloud-layout">
+      <div id="semantic-cloud-stage" class="semantic-cloud-stage"></div>
+      <div id="semantic-cloud-detail" class="semantic-cloud-detail"></div>
     </div>
   </div>
 
@@ -7771,6 +8021,7 @@ function initScenesCharts() {
 
   renderPainBuPanel();
   renderSemanticSceneMap();
+  renderSemanticCloudWorkbench();
 
   const el = document.getElementById('chart-scene-bar');
 
@@ -8602,6 +8853,243 @@ const SEMANTIC_DRILL_DATA = {
 
 function semanticVectorFor(data) {
   return data?.vectorKey ? SEMANTIC_VECTOR_FAMILIES[data.vectorKey] : null;
+}
+
+let semanticCloudFilter = 'ALL';
+let semanticCloudSelected = 'F01';
+
+function semanticCloudFamilies() {
+  return SEMANTIC_SCENE_ENTRIES.map(entry => {
+    const key = (entry.families || [])[0];
+    const data = SEMANTIC_DRILL_DATA[key];
+    const vector = semanticVectorFor(data);
+    if (!key || !data || !vector) return null;
+    return { key, entry, data, vector, gap: SEMANTIC_GAP_SCENES[vector.id] || null };
+  }).filter(Boolean).sort((a, b) => String(a.vector.id).localeCompare(String(b.vector.id), 'zh-CN', { numeric: true }));
+}
+
+function semanticCloudPrimaryAxis(axes) {
+  const rows = Object.entries(axes || {}).filter(([, value]) => Number.isFinite(Number(value)));
+  rows.sort((a, b) => Number(b[1]) - Number(a[1]));
+  return rows[0]?.[0] || 'L';
+}
+
+function semanticCloudAxisColor(axis) {
+  return ({ L: '#7c3aed', T: '#e11d48', C: '#2563eb' })[axis] || '#2563eb';
+}
+
+function semanticCloudProjection(axes) {
+  const L = Number(axes?.L || 0);
+  const T = Number(axes?.T || 0);
+  const C = Number(axes?.C || 0);
+  const origin = { x: 96, y: 398 };
+  return {
+    x: origin.x + T * 36 + C * 20,
+    y: origin.y - L * 26 - C * 16,
+    origin
+  };
+}
+
+function semanticCloudAxisPills(axes) {
+  const primary = semanticCloudPrimaryAxis(axes);
+  return ['L', 'T', 'C'].map(axis => {
+    const value = Number(axes?.[axis] || 0);
+    const active = axis === primary ? ' is-peak' : '';
+    return `<span class="${active}" style="--axis-color:${semanticCloudAxisColor(axis)};">${axis} ${value.toFixed(1)}</span>`;
+  }).join('');
+}
+
+function semanticCloudWordList(item) {
+  const fields = [
+    item.vector?.keywords,
+    item.vector?.note,
+    item.entry?.desc,
+    item.data?.structure?.subject,
+    item.data?.structure?.asset,
+    item.data?.structure?.action,
+    item.data?.structure?.constraint,
+    item.data?.structure?.risk,
+    ...(item.data?.clusters || []).flatMap(cluster => [
+      cluster.name,
+      cluster.desc,
+      ...(cluster.pains || []).flatMap(pain => pain.tags || [])
+    ])
+  ];
+  const text = fields.filter(Boolean).join('、');
+  const stop = new Set(['痛点', '场景', '形成', '主要', '当前', '覆盖', '围绕', '之间', '风险', '约束', '资产', '主体', '动作', '法律', '税务', '资本市场']);
+  const words = [];
+  text.split(/[、，,；;\/\s]+/).forEach(raw => {
+    const word = raw.replace(/[。.“”"'（）()：:]/g, '').trim();
+    if (!word || word.length < 2 || stop.has(word) || words.includes(word)) return;
+    words.push(word);
+  });
+  return words.slice(0, 16);
+}
+
+function semanticCloudSceneButtons(item) {
+  const scenes = item.gap?.scenes || [];
+  if (!scenes.length) {
+    return '<div class="semantic-cloud-note">当前族暂未配置补洞场景，后续可从向量断裂审计表继续补充。</div>';
+  }
+  return scenes.map((scene, idx) => `
+    <div class="semantic-cloud-scene">
+      <div>
+        <strong>${semanticEscape(scene.title)}</strong>
+        <span>${semanticEscape(scene.tags || '候选标签待补充')} · ${semanticEscape(scene.ltc || '向量待回算')}</span>
+      </div>
+      <button type="button" onclick="semanticPushGapScene('${semanticEscape(item.vector.id)}', ${idx})">推送</button>
+    </div>
+  `).join('');
+}
+
+function semanticCloudRenderDetail(item) {
+  const el = document.getElementById('semantic-cloud-detail');
+  if (!el || !item) return;
+  const words = semanticCloudWordList(item);
+  const clusters = item.data?.clusters || [];
+  el.innerHTML = `
+    <div class="semantic-cloud-detail-head">
+      <div class="semantic-cloud-detail-title"><span>${semanticEscape(item.vector.id)}</span>${semanticEscape(item.data.title || item.entry.title)}</div>
+      <div class="semantic-cloud-count">${semanticEscape(item.vector.count)}条</div>
+    </div>
+    <p class="semantic-cloud-note">${semanticEscape(item.entry.desc || item.vector.note)}</p>
+    <div class="semantic-cloud-axis">${semanticCloudAxisPills(item.vector.axes)}</div>
+    <div class="semantic-cloud-block">
+      <h4>语义词云</h4>
+      <div class="semantic-cloud-words">
+        ${words.map(word => `<span class="semantic-cloud-word">${semanticEscape(word)}</span>`).join('')}
+      </div>
+    </div>
+    <div class="semantic-cloud-block">
+      <h4>族内簇</h4>
+      <div class="semantic-cloud-clusters">
+        ${clusters.map((cluster, idx) => `
+          <button type="button" class="semantic-cloud-cluster" onclick="semanticShowDrill('${semanticEscape(item.key)}');semanticSelectPainCluster(${idx});document.getElementById('semantic-drill-panel')?.scrollIntoView({behavior:'smooth',block:'start'});">
+            ${semanticEscape(semanticClusterCode(item.data, idx))} · ${semanticEscape(cluster.name)}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+    <div class="semantic-cloud-block">
+      <h4>补洞场景反推</h4>
+      <div class="semantic-cloud-scenes">${semanticCloudSceneButtons(item)}</div>
+    </div>
+  `;
+}
+
+function semanticCloudSelect(familyId) {
+  semanticCloudSelected = familyId || semanticCloudSelected || 'F01';
+  renderSemanticCloudWorkbench();
+}
+
+function semanticCloudSetFilter(filter) {
+  semanticCloudFilter = filter || 'ALL';
+  const current = semanticCloudFamilies().find(item => item.vector.id === semanticCloudSelected);
+  if (semanticCloudFilter !== 'ALL' && current && semanticCloudPrimaryAxis(current.vector.axes) !== semanticCloudFilter) {
+    const first = semanticCloudFamilies().find(item => semanticCloudPrimaryAxis(item.vector.axes) === semanticCloudFilter);
+    if (first) semanticCloudSelected = first.vector.id;
+  }
+  renderSemanticCloudWorkbench();
+}
+
+function renderSemanticCloudWorkbench() {
+  const stage = document.getElementById('semantic-cloud-stage');
+  const toolbar = document.getElementById('semantic-cloud-toolbar');
+  if (!stage || !toolbar) return;
+
+  const allItems = semanticCloudFamilies();
+  if (!allItems.some(item => item.vector.id === semanticCloudSelected)) semanticCloudSelected = allItems[0]?.vector.id || 'F01';
+  const items = allItems.filter(item => semanticCloudFilter === 'ALL' || semanticCloudPrimaryAxis(item.vector.axes) === semanticCloudFilter);
+  const selectedItem = allItems.find(item => item.vector.id === semanticCloudSelected) || items[0] || allItems[0];
+  if (selectedItem) semanticCloudSelected = selectedItem.vector.id;
+
+  const filterMeta = [
+    ['ALL', '全部族'],
+    ['L', '法律主导'],
+    ['T', '税务主导'],
+    ['C', '资本主导']
+  ];
+  toolbar.innerHTML = filterMeta.map(([key, label]) => `
+    <button type="button" class="semantic-cloud-filter ${semanticCloudFilter === key ? 'is-active' : ''}" onclick="semanticCloudSetFilter('${key}')">${label}</button>
+  `).join('');
+
+  const origin = { x: 96, y: 398 };
+  const axisEnd = {
+    L: { x: origin.x, y: 72 },
+    T: { x: 620, y: origin.y },
+    C: { x: 332, y: 208 }
+  };
+  const axisGrid = [2, 4, 6, 8, 10].map(step => {
+    const lY = origin.y - step * 26;
+    const tX = origin.x + step * 36;
+    const cX = origin.x + step * 20;
+    const cY = origin.y - step * 16;
+    return `
+      <path d="M${origin.x} ${lY} L${origin.x + 360} ${lY} L${origin.x + 560} ${lY - 160}" />
+      <path d="M${tX} ${origin.y} L${tX} ${origin.y - 260}" />
+      <path d="M${cX} ${cY} L${cX + 360} ${cY}" />
+    `;
+  }).join('');
+
+  const pointMarkup = items.map(item => {
+    const pos = semanticCloudProjection(item.vector.axes);
+    const axis = semanticCloudPrimaryAxis(item.vector.axes);
+    const color = semanticCloudAxisColor(axis);
+    const active = item.vector.id === semanticCloudSelected ? ' is-active' : '';
+    const radius = Math.max(6, Math.min(13, 5 + Math.sqrt(item.vector.count || 1) / 1.5));
+    const labelY = pos.y - radius - 8;
+    return `
+      <g class="semantic-cloud-point${active}" onclick="semanticCloudSelect('${semanticEscape(item.vector.id)}')">
+        <circle cx="${pos.x.toFixed(1)}" cy="${pos.y.toFixed(1)}" r="${radius.toFixed(1)}" fill="${color}" stroke="#fff" stroke-width="2.5"/>
+        <text class="semantic-cloud-label" x="${(pos.x + radius + 5).toFixed(1)}" y="${labelY.toFixed(1)}" font-size="11" font-weight="900" fill="#0f172a">${semanticEscape(item.vector.id)}</text>
+      </g>
+    `;
+  }).join('');
+
+  const selectedPos = selectedItem ? semanticCloudProjection(selectedItem.vector.axes) : { x: 0, y: 0 };
+  stage.innerHTML = `
+    <svg viewBox="0 0 760 500" role="img" aria-label="法税资三维痛点点云">
+      <defs>
+        <marker id="semanticCloudArrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="strokeWidth">
+          <path d="M0,0 L9,4.5 L0,9 Z" fill="#64748b"/>
+        </marker>
+        <radialGradient id="semanticCloudHot" cx="50%" cy="50%" r="58%">
+          <stop offset="0%" stop-color="#bfdbfe" stop-opacity=".42"/>
+          <stop offset="100%" stop-color="#bfdbfe" stop-opacity=".04"/>
+        </radialGradient>
+      </defs>
+      <g fill="none" stroke="#cbd5e1" stroke-width="1" opacity=".42">${axisGrid}</g>
+      <polygon points="${origin.x},${origin.y} 620,${origin.y} 332,208 ${origin.x},72" fill="url(#semanticCloudHot)" opacity=".38" stroke="#dbeafe"/>
+      <g stroke="#64748b" stroke-width="3" stroke-linecap="round" marker-end="url(#semanticCloudArrow)">
+        <path d="M${origin.x} ${origin.y} L${axisEnd.L.x} ${axisEnd.L.y}"/>
+        <path d="M${origin.x} ${origin.y} L${axisEnd.T.x} ${axisEnd.T.y}"/>
+        <path d="M${origin.x} ${origin.y} L${axisEnd.C.x} ${axisEnd.C.y}"/>
+      </g>
+      <g font-size="13" font-weight="900">
+        <text x="58" y="64" fill="#7c3aed">L 法律强度</text>
+        <text x="626" y="403" fill="#e11d48">T 税务强度</text>
+        <text x="336" y="204" fill="#2563eb">C 资本市场强度</text>
+      </g>
+      <g opacity=".52" fill="none" stroke-width="1.4" stroke-dasharray="7 7">
+        <ellipse cx="268" cy="274" rx="125" ry="54" transform="rotate(-18 268 274)" stroke="#7c3aed"/>
+        <ellipse cx="422" cy="330" rx="132" ry="48" transform="rotate(-8 422 330)" stroke="#e11d48"/>
+        <ellipse cx="384" cy="238" rx="112" ry="46" transform="rotate(-16 384 238)" stroke="#2563eb"/>
+      </g>
+      <g>${pointMarkup}</g>
+      ${selectedItem ? `
+        <g pointer-events="none">
+          <circle cx="${selectedPos.x.toFixed(1)}" cy="${selectedPos.y.toFixed(1)}" r="18" fill="none" stroke="${semanticCloudAxisColor(semanticCloudPrimaryAxis(selectedItem.vector.axes))}" stroke-width="2" stroke-dasharray="5 5"/>
+          <path d="M${selectedPos.x.toFixed(1)} ${selectedPos.y.toFixed(1)} L${Math.min(690, selectedPos.x + 72).toFixed(1)} ${Math.max(42, selectedPos.y - 72).toFixed(1)}" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="5 5"/>
+        </g>
+      ` : ''}
+      <g>
+        <rect x="24" y="430" width="712" height="46" rx="9" fill="rgba(255,255,255,.88)" stroke="#e2e8f0"/>
+        <text x="42" y="452" font-size="12" font-weight="900" fill="#0f172a">交互说明：</text>
+        <text x="116" y="452" font-size="12" fill="#475569">每个点代表一个痛点族质心；位置由 L/T/C 强度投影决定。点击点云后，右侧展示族内簇、语义词云与可推送的补洞场景。</text>
+      </g>
+    </svg>
+  `;
+  semanticCloudRenderDetail(selectedItem);
 }
 
 function semanticAxisRows(axes) {
