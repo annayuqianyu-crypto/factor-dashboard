@@ -1543,6 +1543,35 @@ tr:hover td { background: #fafafa; }
   height: 100%;
 }
 
+.semantic-cloud-stage canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+.semantic-cloud-stage canvas:active {
+  cursor: grabbing;
+}
+
+.semantic-cloud-stage-hint {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: 2;
+  max-width: calc(100% - 28px);
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: rgba(255,255,255,.88);
+  color: #475569;
+  font-size: 11.5px;
+  font-weight: 800;
+  padding: 7px 11px;
+  box-shadow: 0 10px 22px rgba(15,23,42,.08);
+  pointer-events: none;
+}
+
 .semantic-cloud-point {
   cursor: pointer;
   transition: opacity .16s ease;
@@ -4726,7 +4755,7 @@ body {
 
   <div class="card semantic-cloud-card">
     <div class="card-title">法税资三维点云工作台</div>
-    <div class="semantic-space-summary">把当前痛点族投影到 L / T / C 三维业务空间中：点击点云可以查看族内簇、代表语义词和补洞场景；后续接入完整 BGE 点云后，可升级为可框选、可回算、可反推场景的交互式向量工作台。</div>
+    <div class="semantic-space-summary">把当前痛点族放入 L / T / C 三维业务空间中：鼠标拖动可旋转查看，滚轮可缩放，点击点云可以查看族内簇、代表语义词和补洞场景；后续接入完整 BGE 点云后，可升级为可框选、可回算、可反推场景的交互式向量工作台。</div>
     <div id="semantic-cloud-toolbar" class="semantic-cloud-toolbar"></div>
     <div class="semantic-cloud-layout">
       <div id="semantic-cloud-stage" class="semantic-cloud-stage"></div>
@@ -8857,6 +8886,13 @@ function semanticVectorFor(data) {
 
 let semanticCloudFilter = 'ALL';
 let semanticCloudSelected = 'F01';
+const semanticCloud3dState = {
+  rotX: -0.62,
+  rotY: 0.78,
+  zoom: 1,
+  hover: '',
+  screenPoints: []
+};
 
 function semanticCloudFamilies() {
   return SEMANTIC_SCENE_ENTRIES.map(entry => {
@@ -9013,82 +9049,227 @@ function renderSemanticCloudWorkbench() {
     <button type="button" class="semantic-cloud-filter ${semanticCloudFilter === key ? 'is-active' : ''}" onclick="semanticCloudSetFilter('${key}')">${label}</button>
   `).join('');
 
-  const origin = { x: 96, y: 398 };
-  const axisEnd = {
-    L: { x: origin.x, y: 72 },
-    T: { x: 620, y: origin.y },
-    C: { x: 332, y: 208 }
-  };
-  const axisGrid = [2, 4, 6, 8, 10].map(step => {
-    const lY = origin.y - step * 26;
-    const tX = origin.x + step * 36;
-    const cX = origin.x + step * 20;
-    const cY = origin.y - step * 16;
-    return `
-      <path d="M${origin.x} ${lY} L${origin.x + 360} ${lY} L${origin.x + 560} ${lY - 160}" />
-      <path d="M${tX} ${origin.y} L${tX} ${origin.y - 260}" />
-      <path d="M${cX} ${cY} L${cX + 360} ${cY}" />
-    `;
-  }).join('');
-
-  const pointMarkup = items.map(item => {
-    const pos = semanticCloudProjection(item.vector.axes);
-    const axis = semanticCloudPrimaryAxis(item.vector.axes);
-    const color = semanticCloudAxisColor(axis);
-    const active = item.vector.id === semanticCloudSelected ? ' is-active' : '';
-    const radius = Math.max(6, Math.min(13, 5 + Math.sqrt(item.vector.count || 1) / 1.5));
-    const labelY = pos.y - radius - 8;
-    return `
-      <g class="semantic-cloud-point${active}" onclick="semanticCloudSelect('${semanticEscape(item.vector.id)}')">
-        <circle cx="${pos.x.toFixed(1)}" cy="${pos.y.toFixed(1)}" r="${radius.toFixed(1)}" fill="${color}" stroke="#fff" stroke-width="2.5"/>
-        <text class="semantic-cloud-label" x="${(pos.x + radius + 5).toFixed(1)}" y="${labelY.toFixed(1)}" font-size="11" font-weight="900" fill="#0f172a">${semanticEscape(item.vector.id)}</text>
-      </g>
-    `;
-  }).join('');
-
-  const selectedPos = selectedItem ? semanticCloudProjection(selectedItem.vector.axes) : { x: 0, y: 0 };
   stage.innerHTML = `
-    <svg viewBox="0 0 760 500" role="img" aria-label="法税资三维痛点点云">
-      <defs>
-        <marker id="semanticCloudArrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="strokeWidth">
-          <path d="M0,0 L9,4.5 L0,9 Z" fill="#64748b"/>
-        </marker>
-        <radialGradient id="semanticCloudHot" cx="50%" cy="50%" r="58%">
-          <stop offset="0%" stop-color="#bfdbfe" stop-opacity=".42"/>
-          <stop offset="100%" stop-color="#bfdbfe" stop-opacity=".04"/>
-        </radialGradient>
-      </defs>
-      <g fill="none" stroke="#cbd5e1" stroke-width="1" opacity=".42">${axisGrid}</g>
-      <polygon points="${origin.x},${origin.y} 620,${origin.y} 332,208 ${origin.x},72" fill="url(#semanticCloudHot)" opacity=".38" stroke="#dbeafe"/>
-      <g stroke="#64748b" stroke-width="3" stroke-linecap="round" marker-end="url(#semanticCloudArrow)">
-        <path d="M${origin.x} ${origin.y} L${axisEnd.L.x} ${axisEnd.L.y}"/>
-        <path d="M${origin.x} ${origin.y} L${axisEnd.T.x} ${axisEnd.T.y}"/>
-        <path d="M${origin.x} ${origin.y} L${axisEnd.C.x} ${axisEnd.C.y}"/>
-      </g>
-      <g font-size="13" font-weight="900">
-        <text x="58" y="64" fill="#7c3aed">L 法律强度</text>
-        <text x="626" y="403" fill="#e11d48">T 税务强度</text>
-        <text x="336" y="204" fill="#2563eb">C 资本市场强度</text>
-      </g>
-      <g opacity=".52" fill="none" stroke-width="1.4" stroke-dasharray="7 7">
-        <ellipse cx="268" cy="274" rx="125" ry="54" transform="rotate(-18 268 274)" stroke="#7c3aed"/>
-        <ellipse cx="422" cy="330" rx="132" ry="48" transform="rotate(-8 422 330)" stroke="#e11d48"/>
-        <ellipse cx="384" cy="238" rx="112" ry="46" transform="rotate(-16 384 238)" stroke="#2563eb"/>
-      </g>
-      <g>${pointMarkup}</g>
-      ${selectedItem ? `
-        <g pointer-events="none">
-          <circle cx="${selectedPos.x.toFixed(1)}" cy="${selectedPos.y.toFixed(1)}" r="18" fill="none" stroke="${semanticCloudAxisColor(semanticCloudPrimaryAxis(selectedItem.vector.axes))}" stroke-width="2" stroke-dasharray="5 5"/>
-          <path d="M${selectedPos.x.toFixed(1)} ${selectedPos.y.toFixed(1)} L${Math.min(690, selectedPos.x + 72).toFixed(1)} ${Math.max(42, selectedPos.y - 72).toFixed(1)}" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="5 5"/>
-        </g>
-      ` : ''}
-      <g>
-        <rect x="24" y="430" width="712" height="46" rx="9" fill="rgba(255,255,255,.88)" stroke="#e2e8f0"/>
-        <text x="42" y="452" font-size="12" font-weight="900" fill="#0f172a">交互说明：</text>
-        <text x="116" y="452" font-size="12" fill="#475569">每个点代表一个痛点族质心；位置由 L/T/C 强度投影决定。点击点云后，右侧展示族内簇、语义词云与可推送的补洞场景。</text>
-      </g>
-    </svg>
+    <canvas id="semantic-cloud-canvas" aria-label="法税资三维动态点云"></canvas>
+    <div class="semantic-cloud-stage-hint">按住拖动旋转 · 滚轮缩放 · 点击族质心查看族内簇与补洞场景</div>
   `;
+
+  const canvas = document.getElementById('semantic-cloud-canvas');
+  const ctx = canvas?.getContext?.('2d');
+  if (!canvas || !ctx) return;
+
+  const to3d = axes => ({
+    x: (Number(axes?.T || 0) - 5) / 5,
+    y: (Number(axes?.L || 0) - 5) / 5,
+    z: (Number(axes?.C || 0) - 5) / 5
+  });
+  const rotate = p => {
+    const sx = Math.sin(semanticCloud3dState.rotX);
+    const cx = Math.cos(semanticCloud3dState.rotX);
+    const sy = Math.sin(semanticCloud3dState.rotY);
+    const cy = Math.cos(semanticCloud3dState.rotY);
+    const x1 = p.x * cy + p.z * sy;
+    const z1 = -p.x * sy + p.z * cy;
+    const y1 = p.y;
+    return {
+      x: x1,
+      y: y1 * cx - z1 * sx,
+      z: y1 * sx + z1 * cx
+    };
+  };
+  const project = (p, w, h) => {
+    const r = rotate(p);
+    const scale = Math.min(w, h) * 0.29 * semanticCloud3dState.zoom;
+    return {
+      x: w / 2 + r.x * scale,
+      y: h / 2 - r.y * scale,
+      z: r.z
+    };
+  };
+  const drawLine = (a, b, color = '#cbd5e1', width = 1, dash = []) => {
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.setLineDash(dash);
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.stroke();
+    ctx.restore();
+  };
+  const drawLabel = (text, x, y, color = '#334155', align = 'left') => {
+    ctx.save();
+    ctx.font = '800 12px "Microsoft YaHei", Arial, sans-serif';
+    ctx.textAlign = align;
+    ctx.textBaseline = 'middle';
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = 'rgba(255,255,255,.92)';
+    ctx.strokeText(text, x, y);
+    ctx.fillStyle = color;
+    ctx.fillText(text, x, y);
+    ctx.restore();
+  };
+  const withAlpha = (hex, alpha) => {
+    const value = String(hex || '').replace('#', '');
+    if (value.length !== 6) return hex;
+    const r = parseInt(value.slice(0, 2), 16);
+    const g = parseInt(value.slice(2, 4), 16);
+    const b = parseInt(value.slice(4, 6), 16);
+    return `rgba(${r},${g},${b},${alpha})`;
+  };
+  const draw = () => {
+    const rect = stage.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const w = Math.max(320, rect.width);
+    const h = Math.max(420, rect.height);
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    canvas.style.width = `${w}px`;
+    canvas.style.height = `${h}px`;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+
+    const bg = ctx.createLinearGradient(0, 0, w, h);
+    bg.addColorStop(0, 'rgba(255,255,255,.92)');
+    bg.addColorStop(1, 'rgba(248,250,252,.96)');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, w, h);
+
+    const corners = [
+      { x: -1, y: -1, z: -1 }, { x: 1, y: -1, z: -1 }, { x: 1, y: 1, z: -1 }, { x: -1, y: 1, z: -1 },
+      { x: -1, y: -1, z: 1 }, { x: 1, y: -1, z: 1 }, { x: 1, y: 1, z: 1 }, { x: -1, y: 1, z: 1 }
+    ].map(p => project(p, w, h));
+    const edges = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+    edges.forEach(([a, b]) => drawLine(corners[a], corners[b], 'rgba(148,163,184,.36)', 1));
+    [0, .25, .5, .75, 1].forEach(t => {
+      const n = -1 + t * 2;
+      drawLine(project({ x: n, y: -1, z: -1 }, w, h), project({ x: n, y: 1, z: -1 }, w, h), 'rgba(203,213,225,.24)', 1);
+      drawLine(project({ x: -1, y: n, z: -1 }, w, h), project({ x: 1, y: n, z: -1 }, w, h), 'rgba(203,213,225,.24)', 1);
+      drawLine(project({ x: -1, y: -1, z: n }, w, h), project({ x: 1, y: -1, z: n }, w, h), 'rgba(203,213,225,.24)', 1);
+    });
+
+    const origin = project({ x: -1, y: -1, z: -1 }, w, h);
+    const axisL = project({ x: -1, y: 1.18, z: -1 }, w, h);
+    const axisT = project({ x: 1.18, y: -1, z: -1 }, w, h);
+    const axisC = project({ x: -1, y: -1, z: 1.18 }, w, h);
+    drawLine(origin, axisL, '#64748b', 2.4);
+    drawLine(origin, axisT, '#64748b', 2.4);
+    drawLine(origin, axisC, '#64748b', 2.4);
+    drawLabel('L 法律强度', axisL.x + 8, axisL.y - 8, '#7c3aed');
+    drawLabel('T 税务强度', axisT.x + 8, axisT.y, '#e11d48');
+    drawLabel('C 资本市场强度', axisC.x + 8, axisC.y + 2, '#2563eb');
+
+    const selected = items.find(item => item.vector.id === semanticCloudSelected);
+    semanticCloud3dState.screenPoints = items.map(item => {
+      const p = project(to3d(item.vector.axes), w, h);
+      const axis = semanticCloudPrimaryAxis(item.vector.axes);
+      const radius = Math.max(7, Math.min(15, 5.5 + Math.sqrt(item.vector.count || 1) / 1.55));
+      return { item, ...p, axis, color: semanticCloudAxisColor(axis), radius };
+    }).sort((a, b) => a.z - b.z);
+
+    semanticCloud3dState.screenPoints.forEach(point => {
+      const active = point.item.vector.id === semanticCloudSelected;
+      const hover = point.item.vector.id === semanticCloud3dState.hover;
+      const r = point.radius + (active ? 4 : hover ? 2 : 0);
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, r + 7, 0, Math.PI * 2);
+      ctx.fillStyle = withAlpha(point.color, active ? .18 : .10);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = point.color;
+      ctx.fill();
+      ctx.lineWidth = active ? 4 : 2.5;
+      ctx.strokeStyle = active ? '#0f172a' : '#fff';
+      ctx.stroke();
+      ctx.restore();
+      drawLabel(point.item.vector.id, point.x + r + 7, point.y - r - 4, '#0f172a');
+      if (active) {
+        drawLine(point, { x: point.x + 58, y: point.y - 48 }, point.color, 1.2, [5, 5]);
+      }
+    });
+
+    ctx.save();
+    ctx.fillStyle = 'rgba(255,255,255,.84)';
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1;
+    roundRect(ctx, w - 224, h - 76, 200, 44, 9);
+    ctx.fill();
+    ctx.stroke();
+    ctx.font = '800 11.5px "Microsoft YaHei", Arial, sans-serif';
+    ctx.fillStyle = '#475569';
+    ctx.fillText('族质心点：12 个痛点族', w - 206, h - 50);
+    ctx.fillText(`当前选择：${selected?.vector?.id || semanticCloudSelected}`, w - 206, h - 31);
+    ctx.restore();
+  };
+  const roundRect = (context, x, y, width, height, radius) => {
+    context.beginPath();
+    context.moveTo(x + radius, y);
+    context.arcTo(x + width, y, x + width, y + height, radius);
+    context.arcTo(x + width, y + height, x, y + height, radius);
+    context.arcTo(x, y + height, x, y, radius);
+    context.arcTo(x, y, x + width, y, radius);
+    context.closePath();
+  };
+
+  let dragging = false;
+  let last = null;
+  canvas.addEventListener('pointerdown', e => {
+    dragging = true;
+    last = { x: e.clientX, y: e.clientY };
+    canvas.setPointerCapture?.(e.pointerId);
+  });
+  canvas.addEventListener('pointermove', e => {
+    if (dragging && last) {
+      const dx = e.clientX - last.x;
+      const dy = e.clientY - last.y;
+      semanticCloud3dState.rotY += dx * 0.008;
+      semanticCloud3dState.rotX += dy * 0.008;
+      semanticCloud3dState.rotX = Math.max(-1.35, Math.min(1.15, semanticCloud3dState.rotX));
+      last = { x: e.clientX, y: e.clientY };
+      draw();
+      return;
+    }
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const hit = [...semanticCloud3dState.screenPoints].reverse().find(point => Math.hypot(point.x - mx, point.y - my) <= point.radius + 8);
+    const nextHover = hit?.item?.vector?.id || '';
+    if (nextHover !== semanticCloud3dState.hover) {
+      semanticCloud3dState.hover = nextHover;
+      canvas.style.cursor = nextHover ? 'pointer' : 'grab';
+      draw();
+    }
+  });
+  canvas.addEventListener('pointerup', e => {
+    dragging = false;
+    last = null;
+    canvas.releasePointerCapture?.(e.pointerId);
+  });
+  canvas.addEventListener('pointerleave', () => {
+    dragging = false;
+    last = null;
+    if (semanticCloud3dState.hover) {
+      semanticCloud3dState.hover = '';
+      draw();
+    }
+  });
+  canvas.addEventListener('click', e => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const hit = [...semanticCloud3dState.screenPoints].reverse().find(point => Math.hypot(point.x - mx, point.y - my) <= point.radius + 8);
+    if (hit) semanticCloudSelect(hit.item.vector.id);
+  });
+  canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    semanticCloud3dState.zoom *= e.deltaY < 0 ? 1.08 : 0.92;
+    semanticCloud3dState.zoom = Math.max(.68, Math.min(1.75, semanticCloud3dState.zoom));
+    draw();
+  }, { passive: false });
+
+  draw();
   semanticCloudRenderDetail(selectedItem);
 }
 
