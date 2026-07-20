@@ -8122,8 +8122,8 @@ const PAIN_BU_DATA = [
   {
     key: 'cm',
     name: 'CM 资本市场',
-    value: 128,
-    delta: 13,
+    value: 144,
+    delta: 16,
     color: '#2563eb',
     soft: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
     fill: 'linear-gradient(90deg, #60a5fa 0%, #2563eb 100%)',
@@ -8132,8 +8132,8 @@ const PAIN_BU_DATA = [
   {
     key: 'tax',
     name: 'Tax 税务',
-    value: 294,
-    delta: 23,
+    value: 340,
+    delta: 46,
     color: '#e11d48',
     soft: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)',
     fill: 'linear-gradient(90deg, #fb7185 0%, #e11d48 100%)',
@@ -8142,8 +8142,8 @@ const PAIN_BU_DATA = [
   {
     key: 'legal',
     name: 'Legal 法律',
-    value: 351,
-    delta: 0,
+    value: 360,
+    delta: 9,
     color: '#9333ea',
     soft: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
     fill: 'linear-gradient(90deg, #c084fc 0%, #9333ea 100%)',
@@ -10040,6 +10040,13 @@ const MGMT_WEEKLY = [
     notePain: '1、朝曦痛点向量模型落地，后续第二代痛点增补将从母子痛点裂变转为数学计算向量空缺进行增补，详见*数据工作流*和*痛点向量分析*栏目；2、已上线痛点总数773条：本周新增税务+23、资本+13、法律+0。',
     noteScene: '',
     noteSku: '1、Legal已完成所有增补PPT制作，本周启动对应宽表生成和修改。' },
+  { date: '2026-07-20', factors: 1706, pains: 844, scenes: 631, sku: 312,
+    newCM: 16, newLegal: 9, newTax: 46, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
+    note: '已上线小程序痛点同步：总数773 → 844条，本周净增71条，其中税务+46、资本+16、法律+9。',
+    noteFactor: '',
+    notePain: '已上线痛点总数844条：本周净增税务+46、资本+16、法律+9；本批新增编码72条，另有1条税务痛点移出已同步口径。',
+    noteScene: '',
+    noteSku: '' },
 ];
 
 function _mgmtResolve(snap) {
@@ -10063,7 +10070,7 @@ function _mgmtDeltaBadge(delta, colorPos) {
 // 规则：以 date 为键，当前数据版本内用户编辑版优先；代码固化新口径后自动失效旧缓存。
 const MGMT_WEEKLY_USER_KEY = 'mgmt_weekly_user';
 const MGMT_WEEKLY_USER_VERSION_KEY = 'mgmt_weekly_user_version';
-const MGMT_WEEKLY_DATA_VERSION = '2026-07-13-mgmt-pain-773';
+const MGMT_WEEKLY_DATA_VERSION = '2026-07-20-mgmt-pain-844';
 function _mgmtGetWeekly() {
   let user = null;
   try {
