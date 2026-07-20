@@ -10003,7 +10003,7 @@ const MGMT_WEEKLY = [
   { date: '2026-06-07', factors: 1408, pains: 488, scenes: 505, sku: 318,
     newCM: null, newLegal: null, newTax: null, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
     note: '因子库扩充，根据法律新增的128条痛点反哺+57行；SKU宽表修订完毕，SKU精简至318支。',
-    noteFactor: '因子库扩充，根据法律新增的128条痛点反哺+57行；总计1408条因子',
+    noteFactor: '因子库反哺+57行；总计1408条因子',
     notePain: '1049条子痛点完成相似性、合规性、专业性审查',
     noteScene: 'HGJ会议纪要数增加至234场，场景数增加至505个',
     noteSku: 'SKU宽表修订完毕，SKU精简至318支。' },
@@ -10024,7 +10024,7 @@ const MGMT_WEEKLY = [
   { date: '2026-06-29', factors: 1408, pains: 614, scenes: 505, sku: 312,
     newCM: 16, newLegal: 51, newTax: 29, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
     note: '已上线小程序痛点同步：税务 +29 / 法律 +51 / 资本 +16，已上线总痛点数 518 → 614 条（法律批次、香港离岸 FSIE、股东借款债资比等专题集中上线）',
-    noteFactor: '预计本周更新6月底批次，完成新增痛点轮询反推因子库扩充',
+    noteFactor: '预计本周更新6月底批次',
     notePain: '1、已上线痛点总数614条：本周新增税务+29、法律+51、资本+16；2、PLM痛点库实现痛点库导出和因子上传功能，预计本周上线字段修改和索引功能',
     noteScene: '本周更新6月底批次',
     noteSku: '1、“SKU 创新迭代系统”搭建中，已完成立项&研发管理看板搭建，其余各项功能正在建设，预计本周产品中心组织集中汇报；产品中心近期将参与各BU的业务讨论会，萃取真实业务经验和SKU研发相关skill。2、小程序上线：Legal & Tax 共计 49支SKU的PPT缺失，BU正在制备中' },
@@ -10046,9 +10046,9 @@ const MGMT_WEEKLY = [
     newCM: 16, newLegal: 9, newTax: 46, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
     note: '已上线小程序痛点同步：总数773 → 844条，本周净增71条，其中税务+46、资本+16、法律+9。',
     noteFactor: '',
-    notePain: '已上线痛点总数844条：本周净增税务+46、资本+16、法律+9；本批新增编码72条，另有1条税务痛点移出已同步口径。',
+    notePain: '已上线痛点总数844条：本周净增税务+46、资本+16、法律+9。',
     noteScene: '',
-    noteSku: '' },
+    noteSku: 'Legal&Tax正在推进PPT修改，Legal新增SKU常年法律顾问的宽表已经完成' },
 ];
 
 function _mgmtResolve(snap) {
@@ -10117,7 +10117,7 @@ function initMgmtPage() {
 
   const sceneMeetings = window._mgmtSceneStats ? window._mgmtSceneStats.meetings : '—';
   set('mgmt-factor-sub', `1706条因子覆盖C端高净值客户 15 个分析维度，按月更新<br>主体/资产/动作/约束 四维链路形成痛点`);
-  set('mgmt-pain-sub',   `小程序已上线 ${latest.pains.toLocaleString()} 条，按周更新<br>PLM痛点协作平台持续迭代，痛点持续修改中`);
+  set('mgmt-pain-sub',   `小程序已上线 ${latest.pains.toLocaleString()}条，按周更新<br>PLM痛点协作平台持续迭代，痛点持续修改中`);
   set('mgmt-scene-sub',  '覆盖 2025-2026年 302 场HGJ会议纪要，按月更新<br>202606新增慧管家纪要已完成全口径场景蒸馏');
   set('mgmt-sku-sub',    'Tax 197 / Legal 62 / CM 53<br>知识卡片存量数据，BU研发后实时更新');
 
