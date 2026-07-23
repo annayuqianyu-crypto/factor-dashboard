@@ -6948,7 +6948,10 @@ body {
   // 键=被合并场景下标，值=保留场景下标。
   // 注意：这里只做「标记隐藏」不做「数组删除」——删除会让后面所有场景的
   // 下标前移，SC 编号跟着全部漂移，那就破坏了编号永不变动的承诺。
-  const HGJ_MERGED = { 506: 505, 508: 507, 623: 622 };
+  // 只合并「同一场会议被硬拆成识别/规划两条」这一类，合并无信息损失。
+  // 跨会议但问题相同的那批不并——它们问题一样是因为素材缺失、至今仍是占位模板，
+  // 并了会让「阀门电商」这类独立场景消失在别的标题下。
+  const HGJ_MERGED = { 506: 505, 508: 507, 573: 572, 575: 574, 623: 622, 630: 629 };
 
   (function assignSceneIds(){
     if (HGJ_LTC.length !== ALL_HGJ_DATA.length) {
@@ -6976,7 +6979,9 @@ body {
     ALL_HGJ_DATA.forEach((d, i) => {
       if (d._isMerged) {
         const host = ALL_HGJ_DATA[d._mergedTo];
-        if (host) (host._absorbed = host._absorbed || []).push(d._sid);
+        // 连标题一起挂过去：被并的那条标题不一样（识别 / 规划），
+        // 只留编号的话，搜「处理规划」就再也搜不到了
+        if (host) (host._absorbed = host._absorbed || []).push({ sid: d._sid, title: d.title || '' });
       }
     });
     // 各轴分位排名（用于「本轴 Top N」检索，避免绝对分数在 T 轴饱和时无法区分）
@@ -7055,7 +7060,7 @@ body {
       <div class="hgj-card${pushed ? ' is-pushed' : ''}" data-cat="${d.cat}" data-novelty="${d.novelty}">
         <div class="hgj-card-header">
           <span class="hgj-sid" title="场景编号（固定不变，可用于线下台账对照）">${d._sid || ''}</span>
-          ${d._absorbed ? `<span class="hgj-merged" title="问题重复度超过60%（向量比对），已并入本场景：${d._absorbed.join('、')}">已并含 ${d._absorbed.join('、')}</span>` : ''}
+          ${d._absorbed ? `<span class="hgj-merged" title="同一场会议被拆成两条、问题重复度超过60%（向量比对），已并入本场景：${d._absorbed.map(a=>a.sid+' '+a.title).join('；')}">已并含 ${d._absorbed.map(a=>a.sid).join('、')}</span>` : ''}
           <span style="font-size:15px;font-weight:800;color:#1e293b;flex:1;cursor:pointer;text-decoration:underline;text-decoration-color:#cbd5e1;text-underline-offset:3px;" onclick="hgjSendToPainGenerate(this.dataset.title, this.dataset.key)" data-title="${d.title.replace(/"/g,'&quot;')}" data-key="${key.replace(/"/g,'&quot;')}" title="点击添加为场景（并自动标记已推送）">${d.title}</span>
           <span class="hgj-tag ${noveltyClass(d.novelty)}">${noveltyLabel(d.novelty)}</span>
         </div>
@@ -7315,6 +7320,7 @@ body {
         const blob = [
           d._sid||'', d._face||'',
           d.title||'',
+          (d._absorbed||[]).map(a=>a.sid+' '+a.title).join(' '),   // 被并条目仍可搜到
           (d.tags||[]).join(' '),
           ((d.questions||d.dirs)||[]).join(' '),
           d.file||'',
@@ -7417,7 +7423,7 @@ body {
       const hits = sceneHits(d);
       const row = {
         '场景编号': d._sid || '',
-        '已并含场景': (d._absorbed || []).join(' / '),
+        '已并含场景': (d._absorbed || []).map(a=>`${a.sid} ${a.title}`).join(' / '),
         'L法律强度': d._ltc ? d._ltc.L : '',
         'T税务强度': d._ltc ? d._ltc.T : '',
         'C资本市场强度': d._ltc ? d._ltc.C : '',
