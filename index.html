@@ -6756,7 +6756,7 @@ body {
   const HGJ_LTC_CUT = 5.8;
 
   // 供管理看板（initMgmtPage）读取的全局统计
-  window._mgmtSceneStats = { scenes: HGJ_LIVE.length, meetings: new Set(HGJ_LIVE.map(d => d.file)).size };
+  // 供管理看板读取的场景统计，挪到 HGJ_LIVE 声明之后（const 有暂时性死区，提前引用会整段报错）
 
   function noveltyLabel(n){ return n==='高'?'⭐ 高新颖度':n==='中'?'中等':' 常见'; }
   function noveltyClass(n){ return n==='高'?'hgj-novelty-high':n==='中'?'hgj-novelty-mid':'hgj-novelty-low'; }
@@ -6989,6 +6989,7 @@ body {
 
   // 展示与统计一律走这里，已合并场景不再单独出现
   const HGJ_LIVE = ALL_HGJ_DATA.filter(d => !d._isMerged);
+  window._mgmtSceneStats = { scenes: HGJ_LIVE.length, meetings: new Set(HGJ_LIVE.map(d => d.file)).size };
 
   // 对每个场景卡片，找出全量会议中所有含相同tag的文件（去重）
   const TOTAL_FILES = new Set(HGJ_LIVE.map(d=>d.file)).size;
