@@ -16,6 +16,8 @@
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- JSZip：SheetJS 社区版不写 dataValidation，导出后用它注入下拉框 XML -->
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
 <style>
 
@@ -5632,7 +5634,7 @@ body {
     </div>
 
     <div class="hgj-push-bar">
-      <div class="hgj-toolbar-label" title="来自各 BU 回填表格：「已生成痛点标题」有值即视为已产出">产出状态</div>
+      <div class="hgj-toolbar-label" title="来自各 BU 回填表格：「推送状态」标为已推送即计入">推送状态</div>
       <div id="hgjPushChips" class="hgj-topic-chips"></div>
       <button class="hgj-export-btn ghost" onclick="hgjResetPushLog()" title="清空本浏览器的个人推送便签（不影响回填进度）">↺ 重置个人标记</button>
       <button class="hgj-export-btn" onclick="hgjExportCurrent()" title="导出当前 BU / 主题 / 搜索筛选后的场景">📥 导出当前筛选结果</button>
@@ -5648,13 +5650,13 @@ body {
     </div>
     <div id="hgjSyncBody" class="hgj-sync-body" style="display:none;">
       <div class="hgj-sync-intro">
-        各 BU 在导出的 Excel 里自行标记（填「已生成痛点标题」或把「推送状态」改成 已推送），
-        把文件发回后在这里批量导入即可汇总。同一个场景允许多个 BU 各做一次，不做去重限制。
+        各 BU 在导出的 Excel 里用下拉框标记「已推送BU」和「推送状态」，把文件发回后在这里批量导入即可汇总。
+        同一个场景允许多个 BU 各推一次，不做去重限制。
       </div>
       <div class="hgj-sync-drop" id="hgjSyncDrop" onclick="document.getElementById('hgjSyncFile').click()">
         <div style="font-size:24px;">📥</div>
         <div style="font-size:13px;font-weight:700;color:#334155;">点击选择 BU 返回的 Excel（可多选）</div>
-        <div style="font-size:11.5px;color:#94a3b8;margin-top:3px;">识别「场景编号 / 推送状态 / 已生成痛点标题 / 负责人」列</div>
+        <div style="font-size:11.5px;color:#94a3b8;margin-top:3px;">识别「场景编号 / 推送状态 / 已推送BU」列</div>
       </div>
       <input type="file" id="hgjSyncFile" accept=".xlsx,.xls" multiple style="display:none;"
              onchange="hgjSyncImport(this.files); this.value='';" />
@@ -7032,7 +7034,7 @@ body {
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:-2px 0 10px;">
           <span class="hgj-cat-tag" style="background:#f1f5f9;color:#475569;">${topic}</span>
           <span class="hgj-cat-tag" style="background:#eff6ff;color:#1d4ed8;">${d.cat}</span>
-          ${hgjSceneBus(d).map(b=>`<span class="hgj-bu-chip" title="${b} 已就该场景产出痛点（来自回填表格）">✓ ${b}</span>`).join('')}
+          ${hgjSceneBus(d).map(b=>`<span class="hgj-bu-chip" title="${b} 已推送过该场景（来自回填表格）">✓ ${b}</span>`).join('')}
           <button class="hgj-push-flag${pushed ? ' on' : ''}" data-key="${key.replace(/"/g,'&quot;')}"
             onclick="hgjTogglePush(this, this.dataset.key)"
             title="${pushed ? '已推送于 ' + pushedAt + '，点击取消标记' : '点击标记为已推送'}">${pushed ? '✅ 已推送' : '○ 未推送'}</button>
@@ -7109,7 +7111,7 @@ body {
     if(!el) return;
     const cur = window._hgjActiveAxis || 'ALL';
 
-    // 进度口径 = 各 BU 回填表格里「已生成痛点标题」有值的场景（本地点击标记只是个人便签，不计入）
+    // 进度口径 = 各 BU 回填表格里「推送状态=已推送」的场景（本地点击标记只是个人便签，不计入）
     const allPushed = ALL_HGJ_DATA.filter(hgjSceneDone).length;
     const cards = [`
       <div class="hgj-bu-card${cur==='ALL'?' active':''}" role="button" tabindex="0" onclick="hgjSelectAxis('ALL')">
@@ -7121,7 +7123,7 @@ body {
         <div class="hgj-bu-foot">
           <div class="hgj-bu-prog">
             <div class="hgj-bu-prog-bar"><i style="width:${ALL_HGJ_DATA.length?Math.round(allPushed/ALL_HGJ_DATA.length*100):0}%"></i></div>
-            <span>已产出 ${allPushed}/${ALL_HGJ_DATA.length}</span>
+            <span>已推送 ${allPushed}/${ALL_HGJ_DATA.length}</span>
           </div>
           <button class="hgj-bu-export" title="导出全部 ${ALL_HGJ_DATA.length} 个场景"
             onclick="event.stopPropagation();hgjExportAxis('ALL')">📥 导出</button>
@@ -7144,7 +7146,7 @@ body {
         <div class="hgj-bu-foot">
           <div class="hgj-bu-prog">
             <div class="hgj-bu-prog-bar"><i style="width:${pct}%;background:${a.color};"></i></div>
-            <span>已产出 ${pushed}/${list.length}</span>
+            <span>已推送 ${pushed}/${list.length}</span>
           </div>
           <button class="hgj-bu-export" title="导出 ${a.name}强度 ≥${HGJ_LTC_CUT} 的 ${list.length} 个场景"
             onclick="event.stopPropagation();hgjExportAxis('${a.key}')">📥 导出</button>
@@ -7221,7 +7223,7 @@ body {
     const cur     = window._hgjActivePush || '全部';
     const chip = (label, count) =>
       `<button class="hgj-topic-chip${label === cur ? ' active' : ''}" onclick="hgjSelectPush('${label}')">${label} ${count}</button>`;
-    el.innerHTML = chip('全部', data.length) + chip('未产出', pending) + chip('已产出', done);
+    el.innerHTML = chip('全部', data.length) + chip('未推送', pending) + chip('已推送', done);
   }
 
   function hgjSelectPush(v){
@@ -7248,8 +7250,8 @@ body {
 
     renderPushChips(data);
     const pushFilter = window._hgjActivePush || '全部';
-    if(pushFilter === '未产出') data = data.filter(d => !hgjSceneDone(d));
-    if(pushFilter === '已产出') data = data.filter(d =>  hgjSceneDone(d));
+    if(pushFilter === '未推送') data = data.filter(d => !hgjSceneDone(d));
+    if(pushFilter === '已推送') data = data.filter(d =>  hgjSceneDone(d));
 
     const kw = (document.getElementById('hgjSearchInput')?.value || '').trim().toLowerCase();
     const clearBtn = document.getElementById('hgjSearchClear');
@@ -7309,7 +7311,7 @@ body {
       const topicText = topic === '全部' ? '全部细分主题' : topic;
       const subtopicText = subtopic === '全部' ? '' : ` / ${subtopic}`;
       const moreText = data.length > (window._hgjDisplayLimit || 40) ? `，当前展示前 ${window._hgjDisplayLimit || 40} 条` : '';
-      const doneText = `，其中已产出痛点 ${data.filter(hgjSceneDone).length} 个`;
+      const doneText = `，其中已推送 ${data.filter(hgjSceneDone).length} 个`;
       const avg = axDef && data.length
         ? `，本轴平均 ${(data.reduce((s,d)=>s+(d._ltc?.[axDef.key]||0),0)/data.length).toFixed(1)} 分` : '';
       meta.innerHTML = `<strong>${scopeName}</strong> / ${topicText}${subtopicText}：共 ${data.length} 个可推导业务场景，覆盖 ${totalMeetings} 份会议纪要${avg}${doneText}${moreText}`;
@@ -7408,15 +7410,17 @@ body {
       row['来源会议文件'] = d.file || '';
       row['出现会议数'] = hits.size;
       row['命中会议清单'] = [...hits.keys()].map(f=>f.replace(/-转写结果\.docx|\.docx/g,'')).join(' / ');
-      // 已有哪些 BU 就该场景产出过痛点（来自回填汇总，只读参考，不限制重复做）
-      row['已产出BU']   = hgjSceneBus(d).join(' / ');
-      row['推送状态']   = hgjIsPushed(d) ? '已推送' : '未推送';
-      row['推送时间']   = hgjPushedAt(d);
-      // 以下为线下痛点生成填写列，导出时留空
-      row['已生成痛点标题'] = '';
-      row['痛点说明']   = '';
-      row['负责人']     = '';
-      row['备注']       = '';
+      // 推送内容：整段复制粘贴到「场景触发」页即可，不用自己拼
+      const qs2 = (d.questions || d.dirs) || [];
+      row['推送内容'] = [
+        d.title || '',
+        ...qs2.map((q,k)=>`${k+1}. ${q}`),
+        (d.tags||[]).length ? `[标签] ${(d.tags||[]).join(' / ')}` : ''
+      ].filter(Boolean).join('\n');
+      // 以下两列为 BU 推送后自行记录（导出时留空，Excel 内是下拉框）
+      row['已推送BU'] = '';
+      row['推送状态'] = '';
+      row['备注']     = '';
       return row;
     });
 
@@ -7425,8 +7429,8 @@ body {
       {wch:11},{wch:11},{wch:11},{wch:14},{wch:8},{wch:16},{wch:15},{wch:9},{wch:9},{wch:9},
       {wch:16},{wch:18},{wch:12},{wch:34},{wch:10},
       ...Array.from({length:maxQ}, ()=>({wch:52})),
-      {wch:30},{wch:10},{wch:28},{wch:10},{wch:46},{wch:22},{wch:10},{wch:20},
-      {wch:30},{wch:44},{wch:12},{wch:24},
+      {wch:30},{wch:10},{wch:28},{wch:10},{wch:46},
+      {wch:60},{wch:12},{wch:11},{wch:24},
     ];
     ws['!autofilter'] = { ref: XLSX.utils.encode_range({
       s:{r:0,c:0}, e:{r:rows.length, c:Object.keys(rows[0]).length-1}
@@ -7447,9 +7451,9 @@ body {
           return ids.length ? `${ids[0]} ~ ${ids[ids.length-1]}` : '—';
         })() },
       { '项目':'覆盖会议纪要', '值': new Set(list.map(d=>d.file)).size },
-      { '项目':'已产出痛点',   '值': done },
-      { '项目':'尚未产出',     '值': list.length - done },
-      { '项目':'产出覆盖率',   '值': list.length ? Math.round(done/list.length*100) + '%' : '—' },
+      { '项目':'已被推送',     '值': done },
+      { '项目':'尚未推送',     '值': list.length - done },
+      { '项目':'推送覆盖率',   '值': list.length ? Math.round(done/list.length*100) + '%' : '—' },
       { '项目':'', '值':'' },
       { '项目':'── 三轴强度分布 ──', '值':'' },
       ...HGJ_AXES.map(a=>{
@@ -7470,8 +7474,8 @@ body {
       { '项目':'编号规则', '值':'场景编号为全局连续编号 SC-0001，与业务线彻底解耦。采番基准是场景数据的固定数组顺序，一经生成永不变动；新增场景一律追加在末尾依次向下取号（SC-0632、SC-0633…），任何分类规则调整都不会影响已有编号。可直接作为线下台账的对照主键。' },
       { '项目':'三轴强度口径', '值':'L/T/C 为该场景与法律、税务、资本市场三条专家锚点的语义关系强度（0-10），由 BGE-M3 离线预计算，与痛点向量模型完全同源：同一套 9 条锚点、同一 P5-P95 分位拉伸基准，故与痛点侧 L/T/C 直接可比。分数≥5.8 视为该轴活跃；主导轴=三轴中最高者；投影面=全部活跃轴的组合。场景不再被硬分到某个 BU，各 BU 按本轴强度自行取用。' },
       { '项目':'轴排名口径', '值':'L/T/C 轴排名是该场景在全部 631 个场景中按该轴分数的降序位次（1 = 该轴最强）。因场景池整体偏税务，T 轴绝对分数偏高，用排名做「本轴 Top N」筛选比用绝对分数更好区分。' },
-      { '项目':'BU 填写说明', '值':'请在右侧空列填写：「已生成痛点标题」「痛点说明」「负责人」「备注」。填了「已生成痛点标题」即视为该场景已产出；只把「推送状态」改成 已推送 则视为已领取但尚未产出。填完把本文件发回产品中心，会在驾驶舱统一回填汇总。' },
-      { '项目':'重复口径', '值':'同一个场景允许多个 BU 各做一次，不做去重限制。「已产出BU」列是其他 BU 已经做过的记录，仅供参考，不代表你不能再做。' },
+      { '项目':'BU 填写说明', '值':'① 复制「推送内容」整格，粘贴到驾驶舱「场景触发」页即可生成痛点，不用自己拼标题和问题。② 推送完在「已推送BU」下拉选择你所在的 BU（税务/法律/资本），「推送状态」下拉选择 已推送。③ 需要备注的写在最后一列。填完把本文件发回产品中心统一汇总。' },
+      { '项目':'重复口径', '值':'同一个场景允许多个 BU 各推一次，不做去重限制，各自记录各自的即可。' },
     ];
     const sw = XLSX.utils.json_to_sheet(stat);
     sw['!cols'] = [{wch:22},{wch:80}];
@@ -7482,7 +7486,56 @@ body {
 
     const stamp = new Date().toLocaleDateString('zh-CN').replace(/\//g,'-');
     const safe  = scopeLabel.replace(/[\\\/:*?"<>|]/g, '_');
-    XLSX.writeFile(wb, `渠道场景_${safe}_${stamp}.xlsx`);
+    const cols  = Object.keys(rows[0]);
+    hgjWriteWithDropdowns(wb, `渠道场景_${safe}_${stamp}.xlsx`, rows.length, cols);
+  }
+
+  // SheetJS 社区版不写 dataValidation，用 JSZip 在生成后往 sheet XML 里注入下拉框
+  function hgjWriteWithDropdowns(wb, filename, rowCount, cols){
+    const dropdowns = {
+      '已推送BU': '税务,法律,资本',
+      '推送状态': '未推送,已推送',
+    };
+    const colLetter = i => { let s=''; i++; while(i>0){ const m=(i-1)%26; s=String.fromCharCode(65+m)+s; i=(i-m-1)/26; } return s; };
+    const dvs = Object.entries(dropdowns).map(([name, list])=>{
+      const idx = cols.indexOf(name);
+      if(idx < 0) return '';
+      const L = colLetter(idx);
+      return `<dataValidation type="list" allowBlank="1" showInputMessage="1" showErrorMessage="1" sqref="${L}2:${L}${rowCount+1}">`
+           + `<formula1>"${list}"</formula1></dataValidation>`;
+    }).filter(Boolean);
+
+    const buf = XLSX.write(wb, { type:'array', bookType:'xlsx' });
+
+    // JSZip 没加载上就退回普通导出：宁可没有下拉框，也不能导不出来
+    if(typeof JSZip === 'undefined' || !dvs.length){
+      if(!dvs.length) console.warn('[驾驶舱] 未找到下拉框目标列，按普通表导出');
+      else console.warn('[驾驶舱] JSZip 未加载，导出的表格没有下拉框');
+      XLSX.writeFile(wb, filename);
+      return;
+    }
+
+    JSZip.loadAsync(buf).then(zip=>{
+      const path = 'xl/worksheets/sheet1.xml';   // 场景清单是第一个 sheet
+      return zip.file(path).async('string').then(xml=>{
+        const block = `<dataValidations count="${dvs.length}">${dvs.join('')}</dataValidations>`;
+        // dataValidations 必须排在 sheetData 之后、ignoredErrors 之前
+        xml = xml.includes('<ignoredErrors')
+          ? xml.replace('<ignoredErrors', block + '<ignoredErrors')
+          : xml.replace('</worksheet>', block + '</worksheet>');
+        zip.file(path, xml);
+        return zip.generateAsync({ type:'blob', mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      });
+    }).then(blob=>{
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 2000);
+    }).catch(err=>{
+      console.warn('[驾驶舱] 注入下拉框失败，改用普通导出：', err);
+      XLSX.writeFile(wb, filename);
+    });
   }
 
   window.hgjExportAxis = function(ax){
@@ -7504,8 +7557,7 @@ body {
 
   // ── 全BU跑动进度：回填各 BU 标记后返回的 Excel ──────────────────
   // 口径：同一场景允许多个 BU 各做一次，不做去重限制；
-  //      「已生成痛点标题」有值 = 真的产出了痛点（进度主口径）
-  //      「推送状态=已推送」   = 只是领了任务（次要口径）
+  //      「推送状态=已推送」即计入；BU 取行内「已推送BU」下拉框的值
   const HGJ_SYNC_KEY = 'hgj_progress_v1';
 
   let _hgjSyncCache = null;   // 渲染一次要查 631 次，缓存掉避免反复解析 localStorage
@@ -7562,25 +7614,25 @@ body {
           // 同名文件视为重新导入，先清掉它上一次的记录
           hgjSyncDropFile(store, f.name);
 
-          let matched = 0, gen = 0, pushed = 0;
+          let matched = 0, pushed = 0;
+          const seenBus = new Set();
           rows.forEach(r=>{
             const sid = String(r['场景编号']||'').trim();
             if(!/^SC-\d{4}$/.test(sid)) return;
             matched++;
-            const pain = String(r['已生成痛点标题']||'').trim();
-            const isGen = !!pain;
-            const isPush = String(r['推送状态']||'').trim() === '已推送';
-            if(isGen) gen++;
-            if(isPush) pushed++;
-            if(!isGen && !isPush) return;      // 没动过的行不记
+            if(String(r['推送状态']||'').trim() !== '已推送') return;   // 没标已推送的行不记
+            pushed++;
+            // BU 取行内下拉框的值；BU 忘了选就退回文件级推断
+            const rowBu = String(r['已推送BU']||'').trim() || bu;
+            seenBus.add(rowBu);
             (store.scenes[sid] = store.scenes[sid] || []).push({
-              bu, file: f.name, generated: isGen, pushed: isPush,
-              pain, who: String(r['负责人']||'').trim(), note: String(r['备注']||'').trim()
+              bu: rowBu, file: f.name, pushed: true,
+              note: String(r['备注']||'').trim()
             });
           });
 
           store.files.push({ name: f.name, bu, at: new Date().toLocaleString('zh-CN',{hour12:false}),
-                             rows: rows.length, matched, generated: gen, pushed });
+                             rows: rows.length, matched, pushed, bus: [...seenBus] });
           if(!matched) alert(`「${f.name}」里没找到「场景编号」列（SC-0000 格式），该文件已跳过。\n请确认导入的是本页导出的场景清单。`);
         } catch(err){
           alert(`读取「${f.name}」失败：${err.message}`);
@@ -7603,10 +7655,19 @@ body {
     const s = hgjSyncGet(); hgjSyncDropFile(s, name); hgjSyncSave(s);
     hgjSyncRender(); applyHgjFilters();
   };
+  // 改兜底 BU：只改那些当初没在表里选 BU、落到兜底值上的行，
+  // 不动 BU 自己用下拉框选好的行
   window.hgjSyncSetBu = function(name, val){
     const s = hgjSyncGet();
-    s.files.forEach(f=>{ if(f.name===name) f.bu = val || '未标注'; });
-    Object.values(s.scenes).forEach(list=>list.forEach(r=>{ if(r.file===name) r.bu = val || '未标注'; }));
+    const f = s.files.find(x=>x.name===name);
+    if(!f) return;
+    const oldBu = f.bu, newBu = val || '未标注';
+    if(oldBu === newBu) return;
+    f.bu = newBu;
+    Object.values(s.scenes).forEach(list=>list.forEach(r=>{
+      if(r.file===name && r.bu===oldBu) r.bu = newBu;
+    }));
+    f.bus = (f.bus||[]).map(b=> b===oldBu ? newBu : b);
     hgjSyncSave(s); hgjSyncRender(); applyHgjFilters();   // 卡片上的 BU 徽章也要跟着改名刷新
   };
   window.hgjSyncClear = function(){
@@ -7616,22 +7677,22 @@ body {
     hgjSyncSave({ files:[], scenes:{} }); hgjSyncRender(); applyHgjFilters();
   };
 
-  // 该场景被哪些 BU 真正产出了痛点
+  // 该场景被哪些 BU 推送过（来自回填表格「推送状态=已推送」的行）
   function hgjSceneBus(d){
     const s = hgjSyncGet().scenes[d._sid];
     if(!s) return [];
-    return [...new Set(s.filter(r=>r.generated).map(r=>r.bu))];
+    return [...new Set(s.filter(r=>r.pushed).map(r=>r.bu))];
   }
   function hgjSceneDone(d){ return hgjSceneBus(d).length > 0; }
 
   function hgjSyncRender(){
     const s = hgjSyncGet();
     const sumEl = document.getElementById('hgjSyncSummary');
-    const doneScenes = Object.keys(s.scenes).filter(sid=>s.scenes[sid].some(r=>r.generated));
-    const bus = [...new Set(s.files.map(f=>f.bu))];
+    const doneScenes = Object.keys(s.scenes).filter(sid=>s.scenes[sid].some(r=>r.pushed));
+    const allBus = [...new Set(Object.values(s.scenes).flat().map(r=>r.bu))];
     if(sumEl){
       sumEl.textContent = s.files.length
-        ? `${bus.length} 个BU · ${s.files.length} 份表 · 已产出痛点场景 ${doneScenes.length}/${ALL_HGJ_DATA.length}`
+        ? `${allBus.length} 个BU · ${s.files.length} 份表 · 已推送场景 ${doneScenes.length}/${ALL_HGJ_DATA.length}`
         : '尚未回填任何 BU 表格';
     }
 
@@ -7640,9 +7701,9 @@ body {
       fEl.innerHTML = s.files.map(f=>`
         <div class="hgj-sync-file">
           <span>📄 ${f.name}</span>
-          <input value="${String(f.bu).replace(/"/g,'&quot;')}" title="BU 名称，可改"
+          <input value="${String(f.bu).replace(/"/g,'&quot;')}" title="兜底 BU：表格里没选「已推送BU」的行归到这个名字下，可改"
                  onchange="hgjSyncSetBu('${f.name.replace(/'/g,"\\'")}', this.value)" />
-          <span style="color:#64748b;">识别 ${f.matched} 行 · 已产出 ${f.generated} · 已领取 ${f.pushed}</span>
+          <span style="color:#64748b;">识别 ${f.matched} 行 · 已推送 ${f.pushed}${(f.bus||[]).length?' · BU：'+f.bus.join('、'):''}</span>
           <span style="color:#94a3b8;">${f.at}</span>
           <button class="del" title="移除这份回填" onclick="hgjSyncRemove('${f.name.replace(/'/g,"\\'")}')">✕</button>
         </div>`).join('');
@@ -7653,15 +7714,15 @@ body {
     if(!s.files.length){ rEl.innerHTML = ''; return; }
 
     const total = ALL_HGJ_DATA.length;
-    const multi = doneScenes.filter(sid=>new Set(s.scenes[sid].filter(r=>r.generated).map(r=>r.bu)).size > 1).length;
-    const painCount = Object.values(s.scenes).reduce((n,l)=>n + l.filter(r=>r.generated).length, 0);
+    const multi = doneScenes.filter(sid=>new Set(s.scenes[sid].filter(r=>r.pushed).map(r=>r.bu)).size > 1).length;
+    const painCount = Object.values(s.scenes).reduce((n,l)=>n + l.filter(r=>r.pushed).length, 0);
 
     // 各 BU 明细
     const byBu = {};
     Object.entries(s.scenes).forEach(([sid,l])=>l.forEach(r=>{
-      const b = byBu[r.bu] = byBu[r.bu] || { scenes:new Set(), pain:0, took:new Set() };
-      if(r.generated){ b.scenes.add(sid); b.pain++; }
-      if(r.pushed) b.took.add(sid);
+      if(!r.pushed) return;
+      const b = byBu[r.bu] = byBu[r.bu] || { scenes:new Set() };
+      b.scenes.add(sid);
     }));
 
     // 各轴覆盖
@@ -7673,21 +7734,21 @@ body {
 
     rEl.innerHTML = `
       <div class="hgj-sync-grid">
-        <div class="hgj-sync-kpi"><b>${doneScenes.length}<span style="font-size:13px;color:#94a3b8;">/${total}</span></b><span>已产出痛点的场景</span></div>
+        <div class="hgj-sync-kpi"><b>${doneScenes.length}<span style="font-size:13px;color:#94a3b8;">/${total}</span></b><span>已被推送的场景</span></div>
         <div class="hgj-sync-kpi"><b>${Math.round(doneScenes.length/total*100)}%</b><span>场景覆盖率</span></div>
-        <div class="hgj-sync-kpi"><b>${painCount}</b><span>累计产出痛点条数</span></div>
-        <div class="hgj-sync-kpi"><b>${multi}</b><span>多个BU重复产出的场景</span></div>
+        <div class="hgj-sync-kpi"><b>${painCount}</b><span>累计推送次数</span></div>
+        <div class="hgj-sync-kpi"><b>${multi}</b><span>多个BU都推过的场景</span></div>
       </div>
       <table class="hgj-sync-table">
-        <thead><tr><th>BU</th><th>已产出场景</th><th>产出痛点条数</th><th>仅领取未产出</th></tr></thead>
+        <thead><tr><th>BU</th><th>已推送场景数</th><th>占全库</th></tr></thead>
         <tbody>
           ${Object.entries(byBu).sort((x,y)=>y[1].scenes.size-x[1].scenes.size).map(([b,v])=>`
-            <tr><td><strong>${b}</strong></td><td>${v.scenes.size}</td><td>${v.pain}</td>
-                <td>${[...v.took].filter(sid=>!v.scenes.has(sid)).length}</td></tr>`).join('')}
+            <tr><td><strong>${b}</strong></td><td>${v.scenes.size}</td>
+                <td>${Math.round(v.scenes.size/total*100)}%</td></tr>`).join('')}
         </tbody>
       </table>
       <table class="hgj-sync-table" style="margin-top:10px;">
-        <thead><tr><th>强度轴</th><th>场景数</th><th>已产出</th><th>覆盖率</th></tr></thead>
+        <thead><tr><th>强度轴</th><th>场景数</th><th>已推送</th><th>覆盖率</th></tr></thead>
         <tbody>
           ${axRows.map(r=>`<tr>
             <td><strong style="color:${r.a.color};">${r.a.key} ${r.a.name}</strong></td>
@@ -7699,7 +7760,7 @@ body {
       </table>
       <div style="display:flex;gap:8px;margin-top:11px;">
         <button class="hgj-export-btn ghost" style="margin-left:0;" onclick="hgjSyncClear()">↺ 清空回填</button>
-        <button class="hgj-export-btn" onclick="hgjSyncExportGaps()" title="导出还没有任何 BU 产出痛点的场景">📥 导出未覆盖场景</button>
+        <button class="hgj-export-btn" onclick="hgjSyncExportGaps()" title="导出还没有任何 BU 推送过的场景">📥 导出未覆盖场景</button>
       </div>`;
   }
 
