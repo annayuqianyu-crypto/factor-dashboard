@@ -5632,10 +5632,34 @@ body {
     </div>
 
     <div class="hgj-push-bar">
-      <div class="hgj-toolbar-label">推送状态</div>
+      <div class="hgj-toolbar-label" title="来自各 BU 回填表格：「已生成痛点标题」有值即视为已产出">产出状态</div>
       <div id="hgjPushChips" class="hgj-topic-chips"></div>
-      <button class="hgj-export-btn ghost" onclick="hgjResetPushLog()" title="清空本浏览器记录的全部推送标记">↺ 重置标记</button>
+      <button class="hgj-export-btn ghost" onclick="hgjResetPushLog()" title="清空本浏览器的个人推送便签（不影响回填进度）">↺ 重置个人标记</button>
       <button class="hgj-export-btn" onclick="hgjExportCurrent()" title="导出当前 BU / 主题 / 搜索筛选后的场景">📥 导出当前筛选结果</button>
+    </div>
+  </div>
+
+  <!-- 全BU进度回填：导入各 BU 标记后返回的 Excel，汇总跑动进度 -->
+  <div class="hgj-sync">
+    <div class="hgj-sync-head" onclick="hgjToggleSync()">
+      <span class="hgj-sync-caret" id="hgjSyncCaret">▸</span>
+      <strong>全BU跑动进度</strong>
+      <span id="hgjSyncSummary" class="hgj-sync-summary">尚未回填任何 BU 表格</span>
+    </div>
+    <div id="hgjSyncBody" class="hgj-sync-body" style="display:none;">
+      <div class="hgj-sync-intro">
+        各 BU 在导出的 Excel 里自行标记（填「已生成痛点标题」或把「推送状态」改成 已推送），
+        把文件发回后在这里批量导入即可汇总。同一个场景允许多个 BU 各做一次，不做去重限制。
+      </div>
+      <div class="hgj-sync-drop" id="hgjSyncDrop" onclick="document.getElementById('hgjSyncFile').click()">
+        <div style="font-size:24px;">📥</div>
+        <div style="font-size:13px;font-weight:700;color:#334155;">点击选择 BU 返回的 Excel（可多选）</div>
+        <div style="font-size:11.5px;color:#94a3b8;margin-top:3px;">识别「场景编号 / 推送状态 / 已生成痛点标题 / 负责人」列</div>
+      </div>
+      <input type="file" id="hgjSyncFile" accept=".xlsx,.xls" multiple style="display:none;"
+             onchange="hgjSyncImport(this.files); this.value='';" />
+      <div id="hgjSyncFiles" class="hgj-sync-files"></div>
+      <div id="hgjSyncReport" class="hgj-sync-report"></div>
     </div>
   </div>
 
@@ -5805,6 +5829,57 @@ body {
   font-size: 10px; font-weight: 800; color: #64748b;
   background: #eef2f7; border-radius: 5px; padding: 2px 7px;
   white-space: nowrap; flex-shrink: 0;
+}
+
+/* ── 全BU进度回填 ── */
+.hgj-sync {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+  margin: 14px 0 0; overflow: hidden;
+}
+.hgj-sync-head {
+  display: flex; align-items: center; gap: 8px; cursor: pointer;
+  padding: 11px 14px; font-size: 13px; color: #0f172a; user-select: none;
+}
+.hgj-sync-head:hover { background: #f8fafc; }
+.hgj-sync-caret { color: #94a3b8; font-size: 11px; transition: transform .15s; display: inline-block; }
+.hgj-sync-caret.open { transform: rotate(90deg); }
+.hgj-sync-summary { margin-left: auto; font-size: 12px; color: #64748b; font-weight: 600; }
+.hgj-sync-body { padding: 0 14px 14px; border-top: 1px dashed #e2e8f0; }
+.hgj-sync-intro { font-size: 12px; color: #64748b; line-height: 1.6; margin: 11px 0; }
+.hgj-sync-drop {
+  border: 1.5px dashed #cbd5e1; border-radius: 10px; background: #f8fafc;
+  padding: 16px; text-align: center; cursor: pointer; transition: all .15s;
+}
+.hgj-sync-drop:hover { border-color: #0369a1; background: #f0f9ff; }
+.hgj-sync-files { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.hgj-sync-file {
+  display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
+  border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 10px; background: #fafbfc;
+  font-size: 12px; color: #334155;
+}
+.hgj-sync-file input {
+  border: 1px solid #cbd5e1; border-radius: 6px; padding: 3px 8px;
+  font-size: 12px; font-family: inherit; width: 130px;
+}
+.hgj-sync-file .del {
+  margin-left: auto; border: 0; background: none; color: #94a3b8;
+  font-size: 15px; cursor: pointer; padding: 0 4px; font-family: inherit;
+}
+.hgj-sync-file .del:hover { color: #dc2626; }
+.hgj-sync-report { margin-top: 12px; }
+.hgj-sync-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 9px; margin-bottom: 11px; }
+.hgj-sync-kpi { border: 1px solid #e2e8f0; border-radius: 9px; padding: 10px 11px; background: #fafbfc; }
+.hgj-sync-kpi b { display: block; font-size: 21px; font-weight: 850; color: #0f172a; line-height: 1.15; }
+.hgj-sync-kpi span { font-size: 11px; color: #64748b; font-weight: 600; }
+.hgj-sync-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.hgj-sync-table th {
+  text-align: left; padding: 6px 9px; background: #f8fafc; color: #475569;
+  font-weight: 800; border-bottom: 1px solid #e2e8f0; font-size: 11.5px;
+}
+.hgj-sync-table td { padding: 6px 9px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+.hgj-bu-chip {
+  display: inline-block; font-size: 10px; font-weight: 800; border-radius: 4px;
+  padding: 1px 6px; margin-right: 3px; background: #ecfdf5; color: #047857;
 }
 
 /* ── 场景卡片：推送标记 ── */
@@ -6957,6 +7032,7 @@ body {
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:-2px 0 10px;">
           <span class="hgj-cat-tag" style="background:#f1f5f9;color:#475569;">${topic}</span>
           <span class="hgj-cat-tag" style="background:#eff6ff;color:#1d4ed8;">${d.cat}</span>
+          ${hgjSceneBus(d).map(b=>`<span class="hgj-bu-chip" title="${b} 已就该场景产出痛点（来自回填表格）">✓ ${b}</span>`).join('')}
           <button class="hgj-push-flag${pushed ? ' on' : ''}" data-key="${key.replace(/"/g,'&quot;')}"
             onclick="hgjTogglePush(this, this.dataset.key)"
             title="${pushed ? '已推送于 ' + pushedAt + '，点击取消标记' : '点击标记为已推送'}">${pushed ? '✅ 已推送' : '○ 未推送'}</button>
@@ -7033,7 +7109,8 @@ body {
     if(!el) return;
     const cur = window._hgjActiveAxis || 'ALL';
 
-    const allPushed = ALL_HGJ_DATA.filter(hgjIsPushed).length;
+    // 进度口径 = 各 BU 回填表格里「已生成痛点标题」有值的场景（本地点击标记只是个人便签，不计入）
+    const allPushed = ALL_HGJ_DATA.filter(hgjSceneDone).length;
     const cards = [`
       <div class="hgj-bu-card${cur==='ALL'?' active':''}" role="button" tabindex="0" onclick="hgjSelectAxis('ALL')">
         <div class="hgj-bu-top">
@@ -7044,7 +7121,7 @@ body {
         <div class="hgj-bu-foot">
           <div class="hgj-bu-prog">
             <div class="hgj-bu-prog-bar"><i style="width:${ALL_HGJ_DATA.length?Math.round(allPushed/ALL_HGJ_DATA.length*100):0}%"></i></div>
-            <span>已推送 ${allPushed}/${ALL_HGJ_DATA.length}</span>
+            <span>已产出 ${allPushed}/${ALL_HGJ_DATA.length}</span>
           </div>
           <button class="hgj-bu-export" title="导出全部 ${ALL_HGJ_DATA.length} 个场景"
             onclick="event.stopPropagation();hgjExportAxis('ALL')">📥 导出</button>
@@ -7053,7 +7130,7 @@ body {
 
     HGJ_AXES.forEach(a=>{
       const list   = hgjDataByAxis(a.key);
-      const pushed = list.filter(hgjIsPushed).length;
+      const pushed = list.filter(hgjSceneDone).length;
       const pct    = list.length ? Math.round(pushed/list.length*100) : 0;
       const lead   = ALL_HGJ_DATA.filter(d=>d._lead===a.key).length;
       cards.push(`
@@ -7067,7 +7144,7 @@ body {
         <div class="hgj-bu-foot">
           <div class="hgj-bu-prog">
             <div class="hgj-bu-prog-bar"><i style="width:${pct}%;background:${a.color};"></i></div>
-            <span>已推送 ${pushed}/${list.length}</span>
+            <span>已产出 ${pushed}/${list.length}</span>
           </div>
           <button class="hgj-bu-export" title="导出 ${a.name}强度 ≥${HGJ_LTC_CUT} 的 ${list.length} 个场景"
             onclick="event.stopPropagation();hgjExportAxis('${a.key}')">📥 导出</button>
@@ -7139,12 +7216,12 @@ body {
   function renderPushChips(data){
     const el = document.getElementById('hgjPushChips');
     if(!el) return;
-    const done    = data.filter(hgjIsPushed).length;
+    const done    = data.filter(hgjSceneDone).length;
     const pending = data.length - done;
     const cur     = window._hgjActivePush || '全部';
     const chip = (label, count) =>
       `<button class="hgj-topic-chip${label === cur ? ' active' : ''}" onclick="hgjSelectPush('${label}')">${label} ${count}</button>`;
-    el.innerHTML = chip('全部', data.length) + chip('未推送', pending) + chip('已推送', done);
+    el.innerHTML = chip('全部', data.length) + chip('未产出', pending) + chip('已产出', done);
   }
 
   function hgjSelectPush(v){
@@ -7171,8 +7248,8 @@ body {
 
     renderPushChips(data);
     const pushFilter = window._hgjActivePush || '全部';
-    if(pushFilter === '未推送') data = data.filter(d => !hgjIsPushed(d));
-    if(pushFilter === '已推送') data = data.filter(d =>  hgjIsPushed(d));
+    if(pushFilter === '未产出') data = data.filter(d => !hgjSceneDone(d));
+    if(pushFilter === '已产出') data = data.filter(d =>  hgjSceneDone(d));
 
     const kw = (document.getElementById('hgjSearchInput')?.value || '').trim().toLowerCase();
     const clearBtn = document.getElementById('hgjSearchClear');
@@ -7232,7 +7309,7 @@ body {
       const topicText = topic === '全部' ? '全部细分主题' : topic;
       const subtopicText = subtopic === '全部' ? '' : ` / ${subtopic}`;
       const moreText = data.length > (window._hgjDisplayLimit || 40) ? `，当前展示前 ${window._hgjDisplayLimit || 40} 条` : '';
-      const doneText = `，其中已推送 ${data.filter(hgjIsPushed).length} 个`;
+      const doneText = `，其中已产出痛点 ${data.filter(hgjSceneDone).length} 个`;
       const avg = axDef && data.length
         ? `，本轴平均 ${(data.reduce((s,d)=>s+(d._ltc?.[axDef.key]||0),0)/data.length).toFixed(1)} 分` : '';
       meta.innerHTML = `<strong>${scopeName}</strong> / ${topicText}${subtopicText}：共 ${data.length} 个可推导业务场景，覆盖 ${totalMeetings} 份会议纪要${avg}${doneText}${moreText}`;
@@ -7331,6 +7408,8 @@ body {
       row['来源会议文件'] = d.file || '';
       row['出现会议数'] = hits.size;
       row['命中会议清单'] = [...hits.keys()].map(f=>f.replace(/-转写结果\.docx|\.docx/g,'')).join(' / ');
+      // 已有哪些 BU 就该场景产出过痛点（来自回填汇总，只读参考，不限制重复做）
+      row['已产出BU']   = hgjSceneBus(d).join(' / ');
       row['推送状态']   = hgjIsPushed(d) ? '已推送' : '未推送';
       row['推送时间']   = hgjPushedAt(d);
       // 以下为线下痛点生成填写列，导出时留空
@@ -7346,7 +7425,7 @@ body {
       {wch:11},{wch:11},{wch:11},{wch:14},{wch:8},{wch:16},{wch:15},{wch:9},{wch:9},{wch:9},
       {wch:16},{wch:18},{wch:12},{wch:34},{wch:10},
       ...Array.from({length:maxQ}, ()=>({wch:52})),
-      {wch:30},{wch:10},{wch:28},{wch:10},{wch:46},{wch:10},{wch:20},
+      {wch:30},{wch:10},{wch:28},{wch:10},{wch:46},{wch:22},{wch:10},{wch:20},
       {wch:30},{wch:44},{wch:12},{wch:24},
     ];
     ws['!autofilter'] = { ref: XLSX.utils.encode_range({
@@ -7355,7 +7434,7 @@ body {
     ws['!freeze'] = { xSplit:0, ySplit:1 };
 
     // 统计概览
-    const done = list.filter(hgjIsPushed).length;
+    const done = list.filter(hgjSceneDone).length;
     const topicCount = new Map();
     list.forEach(d=>{ const t = hgjTopicOf(d); topicCount.set(t, (topicCount.get(t)||0)+1); });
 
@@ -7368,9 +7447,9 @@ body {
           return ids.length ? `${ids[0]} ~ ${ids[ids.length-1]}` : '—';
         })() },
       { '项目':'覆盖会议纪要', '值': new Set(list.map(d=>d.file)).size },
-      { '项目':'已推送',       '值': done },
-      { '项目':'未推送',       '值': list.length - done },
-      { '项目':'推送进度',     '值': list.length ? Math.round(done/list.length*100) + '%' : '—' },
+      { '项目':'已产出痛点',   '值': done },
+      { '项目':'尚未产出',     '值': list.length - done },
+      { '项目':'产出覆盖率',   '值': list.length ? Math.round(done/list.length*100) + '%' : '—' },
       { '项目':'', '值':'' },
       { '项目':'── 三轴强度分布 ──', '值':'' },
       ...HGJ_AXES.map(a=>{
@@ -7391,7 +7470,8 @@ body {
       { '项目':'编号规则', '值':'场景编号为全局连续编号 SC-0001，与业务线彻底解耦。采番基准是场景数据的固定数组顺序，一经生成永不变动；新增场景一律追加在末尾依次向下取号（SC-0632、SC-0633…），任何分类规则调整都不会影响已有编号。可直接作为线下台账的对照主键。' },
       { '项目':'三轴强度口径', '值':'L/T/C 为该场景与法律、税务、资本市场三条专家锚点的语义关系强度（0-10），由 BGE-M3 离线预计算，与痛点向量模型完全同源：同一套 9 条锚点、同一 P5-P95 分位拉伸基准，故与痛点侧 L/T/C 直接可比。分数≥5.8 视为该轴活跃；主导轴=三轴中最高者；投影面=全部活跃轴的组合。场景不再被硬分到某个 BU，各 BU 按本轴强度自行取用。' },
       { '项目':'轴排名口径', '值':'L/T/C 轴排名是该场景在全部 631 个场景中按该轴分数的降序位次（1 = 该轴最强）。因场景池整体偏税务，T 轴绝对分数偏高，用排名做「本轴 Top N」筛选比用绝对分数更好区分。' },
-      { '项目':'口径说明', '值':'「推送状态」记录该场景是否已推送去做痛点生成，存于本浏览器；换电脑或清缓存会重置。线下生成痛点后请回填右侧空列。' },
+      { '项目':'BU 填写说明', '值':'请在右侧空列填写：「已生成痛点标题」「痛点说明」「负责人」「备注」。填了「已生成痛点标题」即视为该场景已产出；只把「推送状态」改成 已推送 则视为已领取但尚未产出。填完把本文件发回产品中心，会在驾驶舱统一回填汇总。' },
+      { '项目':'重复口径', '值':'同一个场景允许多个 BU 各做一次，不做去重限制。「已产出BU」列是其他 BU 已经做过的记录，仅供参考，不代表你不能再做。' },
     ];
     const sw = XLSX.utils.json_to_sheet(stat);
     sw['!cols'] = [{wch:22},{wch:80}];
@@ -7422,17 +7502,224 @@ body {
     hgjBuildExport(window._hgjFilteredData || [], parts.join('-'));
   };
 
+  // ── 全BU跑动进度：回填各 BU 标记后返回的 Excel ──────────────────
+  // 口径：同一场景允许多个 BU 各做一次，不做去重限制；
+  //      「已生成痛点标题」有值 = 真的产出了痛点（进度主口径）
+  //      「推送状态=已推送」   = 只是领了任务（次要口径）
+  const HGJ_SYNC_KEY = 'hgj_progress_v1';
+
+  let _hgjSyncCache = null;   // 渲染一次要查 631 次，缓存掉避免反复解析 localStorage
+  function hgjSyncGet(){
+    if(_hgjSyncCache) return _hgjSyncCache;
+    try { const o = JSON.parse(localStorage.getItem(HGJ_SYNC_KEY) || '{}');
+          _hgjSyncCache = { files: o.files || [], scenes: o.scenes || {} }; }
+    catch(e){ _hgjSyncCache = { files: [], scenes: {} }; }
+    return _hgjSyncCache;
+  }
+  function hgjSyncSave(o){
+    _hgjSyncCache = o;
+    try { localStorage.setItem(HGJ_SYNC_KEY, JSON.stringify(o)); }
+    catch(e){ alert('本地存储写入失败，回填结果可能未保存：' + e.message); }
+  }
+
+  window.hgjToggleSync = function(){
+    const b = document.getElementById('hgjSyncBody'), c = document.getElementById('hgjSyncCaret');
+    const open = b.style.display === 'none';
+    b.style.display = open ? '' : 'none';
+    c.classList.toggle('open', open);
+    if(open) hgjSyncRender();
+  };
+
+  // 从「统计概览」的导出范围或文件名里猜 BU，导入后可手工改
+  function hgjSyncGuessBu(wb, fname){
+    try {
+      const sw = wb.Sheets['统计概览'];
+      if(sw){
+        const r = XLSX.utils.sheet_to_json(sw).find(x=>x['项目']==='导出范围');
+        if(r && r['值']) return String(r['值']).split('-')[0];
+      }
+    } catch(e){}
+    return (fname||'').replace(/\.(xlsx|xls)$/i,'').replace(/^渠道场景_/,'').split('_')[0] || '未标注';
+  }
+
+  window.hgjSyncImport = function(fileList){
+    const files = [...(fileList||[])];
+    if(!files.length) return;
+    if(typeof XLSX === 'undefined'){ alert('Excel 组件尚未加载完成，请稍后重试'); return; }
+
+    let pending = files.length;
+    const store = hgjSyncGet();
+
+    files.forEach(f=>{
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const wb = XLSX.read(ev.target.result, { type:'array' });
+          const ws = wb.Sheets['场景清单'] || wb.Sheets[wb.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(ws, { defval:'' });
+          const bu = hgjSyncGuessBu(wb, f.name);
+
+          // 同名文件视为重新导入，先清掉它上一次的记录
+          hgjSyncDropFile(store, f.name);
+
+          let matched = 0, gen = 0, pushed = 0;
+          rows.forEach(r=>{
+            const sid = String(r['场景编号']||'').trim();
+            if(!/^SC-\d{4}$/.test(sid)) return;
+            matched++;
+            const pain = String(r['已生成痛点标题']||'').trim();
+            const isGen = !!pain;
+            const isPush = String(r['推送状态']||'').trim() === '已推送';
+            if(isGen) gen++;
+            if(isPush) pushed++;
+            if(!isGen && !isPush) return;      // 没动过的行不记
+            (store.scenes[sid] = store.scenes[sid] || []).push({
+              bu, file: f.name, generated: isGen, pushed: isPush,
+              pain, who: String(r['负责人']||'').trim(), note: String(r['备注']||'').trim()
+            });
+          });
+
+          store.files.push({ name: f.name, bu, at: new Date().toLocaleString('zh-CN',{hour12:false}),
+                             rows: rows.length, matched, generated: gen, pushed });
+          if(!matched) alert(`「${f.name}」里没找到「场景编号」列（SC-0000 格式），该文件已跳过。\n请确认导入的是本页导出的场景清单。`);
+        } catch(err){
+          alert(`读取「${f.name}」失败：${err.message}`);
+        }
+        if(--pending === 0){ hgjSyncSave(store); hgjSyncRender(); applyHgjFilters(); }
+      };
+      reader.readAsArrayBuffer(f);
+    });
+  };
+
+  function hgjSyncDropFile(store, name){
+    store.files = store.files.filter(x=>x.name !== name);
+    Object.keys(store.scenes).forEach(sid=>{
+      store.scenes[sid] = store.scenes[sid].filter(r=>r.file !== name);
+      if(!store.scenes[sid].length) delete store.scenes[sid];
+    });
+  }
+
+  window.hgjSyncRemove = function(name){
+    const s = hgjSyncGet(); hgjSyncDropFile(s, name); hgjSyncSave(s);
+    hgjSyncRender(); applyHgjFilters();
+  };
+  window.hgjSyncSetBu = function(name, val){
+    const s = hgjSyncGet();
+    s.files.forEach(f=>{ if(f.name===name) f.bu = val || '未标注'; });
+    Object.values(s.scenes).forEach(list=>list.forEach(r=>{ if(r.file===name) r.bu = val || '未标注'; }));
+    hgjSyncSave(s); hgjSyncRender(); applyHgjFilters();   // 卡片上的 BU 徽章也要跟着改名刷新
+  };
+  window.hgjSyncClear = function(){
+    const s = hgjSyncGet();
+    if(!s.files.length){ alert('当前没有回填记录'); return; }
+    if(!confirm(`确定清空全部 ${s.files.length} 份回填记录？此操作只影响本浏览器，不可撤销。`)) return;
+    hgjSyncSave({ files:[], scenes:{} }); hgjSyncRender(); applyHgjFilters();
+  };
+
+  // 该场景被哪些 BU 真正产出了痛点
+  function hgjSceneBus(d){
+    const s = hgjSyncGet().scenes[d._sid];
+    if(!s) return [];
+    return [...new Set(s.filter(r=>r.generated).map(r=>r.bu))];
+  }
+  function hgjSceneDone(d){ return hgjSceneBus(d).length > 0; }
+
+  function hgjSyncRender(){
+    const s = hgjSyncGet();
+    const sumEl = document.getElementById('hgjSyncSummary');
+    const doneScenes = Object.keys(s.scenes).filter(sid=>s.scenes[sid].some(r=>r.generated));
+    const bus = [...new Set(s.files.map(f=>f.bu))];
+    if(sumEl){
+      sumEl.textContent = s.files.length
+        ? `${bus.length} 个BU · ${s.files.length} 份表 · 已产出痛点场景 ${doneScenes.length}/${ALL_HGJ_DATA.length}`
+        : '尚未回填任何 BU 表格';
+    }
+
+    const fEl = document.getElementById('hgjSyncFiles');
+    if(fEl){
+      fEl.innerHTML = s.files.map(f=>`
+        <div class="hgj-sync-file">
+          <span>📄 ${f.name}</span>
+          <input value="${String(f.bu).replace(/"/g,'&quot;')}" title="BU 名称，可改"
+                 onchange="hgjSyncSetBu('${f.name.replace(/'/g,"\\'")}', this.value)" />
+          <span style="color:#64748b;">识别 ${f.matched} 行 · 已产出 ${f.generated} · 已领取 ${f.pushed}</span>
+          <span style="color:#94a3b8;">${f.at}</span>
+          <button class="del" title="移除这份回填" onclick="hgjSyncRemove('${f.name.replace(/'/g,"\\'")}')">✕</button>
+        </div>`).join('');
+    }
+
+    const rEl = document.getElementById('hgjSyncReport');
+    if(!rEl) return;
+    if(!s.files.length){ rEl.innerHTML = ''; return; }
+
+    const total = ALL_HGJ_DATA.length;
+    const multi = doneScenes.filter(sid=>new Set(s.scenes[sid].filter(r=>r.generated).map(r=>r.bu)).size > 1).length;
+    const painCount = Object.values(s.scenes).reduce((n,l)=>n + l.filter(r=>r.generated).length, 0);
+
+    // 各 BU 明细
+    const byBu = {};
+    Object.entries(s.scenes).forEach(([sid,l])=>l.forEach(r=>{
+      const b = byBu[r.bu] = byBu[r.bu] || { scenes:new Set(), pain:0, took:new Set() };
+      if(r.generated){ b.scenes.add(sid); b.pain++; }
+      if(r.pushed) b.took.add(sid);
+    }));
+
+    // 各轴覆盖
+    const axRows = HGJ_AXES.map(a=>{
+      const list = hgjDataByAxis(a.key);
+      const done = list.filter(hgjSceneDone).length;
+      return { a, n:list.length, done, pct: list.length? Math.round(done/list.length*100):0 };
+    });
+
+    rEl.innerHTML = `
+      <div class="hgj-sync-grid">
+        <div class="hgj-sync-kpi"><b>${doneScenes.length}<span style="font-size:13px;color:#94a3b8;">/${total}</span></b><span>已产出痛点的场景</span></div>
+        <div class="hgj-sync-kpi"><b>${Math.round(doneScenes.length/total*100)}%</b><span>场景覆盖率</span></div>
+        <div class="hgj-sync-kpi"><b>${painCount}</b><span>累计产出痛点条数</span></div>
+        <div class="hgj-sync-kpi"><b>${multi}</b><span>多个BU重复产出的场景</span></div>
+      </div>
+      <table class="hgj-sync-table">
+        <thead><tr><th>BU</th><th>已产出场景</th><th>产出痛点条数</th><th>仅领取未产出</th></tr></thead>
+        <tbody>
+          ${Object.entries(byBu).sort((x,y)=>y[1].scenes.size-x[1].scenes.size).map(([b,v])=>`
+            <tr><td><strong>${b}</strong></td><td>${v.scenes.size}</td><td>${v.pain}</td>
+                <td>${[...v.took].filter(sid=>!v.scenes.has(sid)).length}</td></tr>`).join('')}
+        </tbody>
+      </table>
+      <table class="hgj-sync-table" style="margin-top:10px;">
+        <thead><tr><th>强度轴</th><th>场景数</th><th>已产出</th><th>覆盖率</th></tr></thead>
+        <tbody>
+          ${axRows.map(r=>`<tr>
+            <td><strong style="color:${r.a.color};">${r.a.key} ${r.a.name}</strong></td>
+            <td>${r.n}</td><td>${r.done}</td>
+            <td><span style="display:inline-block;width:70px;height:5px;background:#eef2f6;border-radius:99px;vertical-align:middle;overflow:hidden;">
+              <i style="display:block;height:100%;width:${r.pct}%;background:${r.a.color};"></i></span> ${r.pct}%</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+      <div style="display:flex;gap:8px;margin-top:11px;">
+        <button class="hgj-export-btn ghost" style="margin-left:0;" onclick="hgjSyncClear()">↺ 清空回填</button>
+        <button class="hgj-export-btn" onclick="hgjSyncExportGaps()" title="导出还没有任何 BU 产出痛点的场景">📥 导出未覆盖场景</button>
+      </div>`;
+  }
+
+  window.hgjSyncExportGaps = function(){
+    const gaps = ALL_HGJ_DATA.filter(d=>!hgjSceneDone(d));
+    hgjBuildExport(gaps, '未覆盖场景');
+  };
+
   // 初始化渲染（页面切换时触发）
   const origShowPage = window.showPage;
   window.showPage = function(pageId){
     origShowPage && origShowPage.apply(this, arguments);
-    if(pageId==='hgj'){ applyHgjFilters(); updateHgjSummary(); }
+    if(pageId==='hgj'){ applyHgjFilters(); updateHgjSummary(); hgjSyncRender(); }
   };
 
   // 页面加载后立即计算计数+渲染卡片（兜底，避免全部按钮初次无内容）
   setTimeout(()=>{
     applyHgjFilters();
     updateHgjSummary();
+    hgjSyncRender();
   }, 300);
 })();
 </script>
