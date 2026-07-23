@@ -5626,9 +5626,16 @@ body {
       </div>
       <div class="hgj-search-box">
         <span>🔍</span>
-        <input type="text" id="hgjSearchInput" placeholder="搜索标题、标签、客户问题、文件名…" oninput="hgjSearch()" />
+        <input type="text" id="hgjSearchInput" placeholder="搜索 SC-0001 / 标题标签 / 强度 L&gt;7、税务&gt;=8" title="支持强度查询：L&gt;7、T&gt;=8、C&lt;3，也可用中文 法律&gt;7、税务&gt;=8、资本市场&gt;5；多条件空格分隔" oninput="hgjSearch()" />
         <button id="hgjSearchClear" onclick="document.getElementById('hgjSearchInput').value='';hgjSearch();" title="清空搜索">×</button>
       </div>
+    </div>
+
+    <div class="hgj-push-bar">
+      <div class="hgj-toolbar-label">推送状态</div>
+      <div id="hgjPushChips" class="hgj-topic-chips"></div>
+      <button class="hgj-export-btn ghost" onclick="hgjResetPushLog()" title="清空本浏览器记录的全部推送标记">↺ 重置标记</button>
+      <button class="hgj-export-btn" onclick="hgjExportCurrent()" title="导出当前 BU / 主题 / 搜索筛选后的场景">📥 导出当前筛选结果</button>
     </div>
   </div>
 
@@ -5657,7 +5664,7 @@ body {
 .hgj-eyebrow { font-size: 11px; color: #64748b; font-weight: 800; letter-spacing: .08em; }
 .hgj-workbench-title { font-size: 18px; color: #0f172a; font-weight: 850; margin-top: 4px; }
 .hgj-result-count { font-size: 12px; color: #64748b; white-space: nowrap; }
-.hgj-bu-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+.hgj-bu-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
 .hgj-bu-card {
   border: 1px solid #e2e8f0;
   border-radius: 12px;
@@ -5723,6 +5730,93 @@ body {
   font-size: 12.5px;
 }
 .hgj-card-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+
+/* ── BU 卡片：推送进度 + 导出 ── */
+.hgj-bu-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; margin-top: 10px; padding-top: 9px; border-top: 1px dashed #e2e8f0;
+}
+.hgj-bu-prog { flex: 1; min-width: 0; }
+.hgj-bu-prog-bar {
+  height: 4px; border-radius: 999px; background: #e2e8f0; overflow: hidden; margin-bottom: 4px;
+}
+.hgj-bu-prog-bar i { display: block; height: 100%; border-radius: 999px; background: #16a34a; transition: width .25s ease; }
+.hgj-bu-prog span { font-size: 10.5px; color: #64748b; font-weight: 700; white-space: nowrap; }
+.hgj-bu-export {
+  flex-shrink: 0; border: 1px solid #bbf7d0; background: #f0fdf4; color: #15803d;
+  border-radius: 7px; padding: 4px 9px; font-size: 11px; font-weight: 800;
+  cursor: pointer; font-family: inherit; transition: all .15s;
+}
+.hgj-bu-export:hover { background: #dcfce7; border-color: #16a34a; }
+
+/* ── 推送状态筛选条 ── */
+.hgj-push-bar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-top: 13px; padding-top: 12px; border-top: 1px dashed #e2e8f0;
+}
+.hgj-push-bar .hgj-toolbar-label { margin-bottom: 0; }
+.hgj-export-btn {
+  margin-left: auto; border: 0; background: #0369a1; color: #fff;
+  border-radius: 8px; padding: 7px 14px; font-size: 12.5px; font-weight: 700;
+  cursor: pointer; font-family: inherit; white-space: nowrap; transition: background .15s;
+}
+.hgj-export-btn:hover { background: #075985; }
+.hgj-export-btn.ghost { background: #fff; color: #475569; border: 1px solid #cbd5e1; margin-left: 0; }
+.hgj-export-btn.ghost:hover { background: #f8fafc; }
+
+/* ── 场景编号 ── */
+.hgj-sid {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px; font-weight: 800; letter-spacing: .02em;
+  color: #475569; background: #f1f5f9; border: 1px solid #e2e8f0;
+  border-radius: 5px; padding: 2px 7px; white-space: nowrap; flex-shrink: 0;
+}
+.hgj-axis-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px; font-weight: 900; border-radius: 4px;
+  padding: 1px 6px; margin-right: 5px;
+}
+
+/* ── 场景卡片：三轴强度条 ── */
+.hgj-ltc {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin: 2px 0 9px; padding: 7px 9px;
+  background: #fafbfc; border: 1px solid #eef2f6; border-radius: 8px;
+}
+.hgj-ltc-item { display: flex; align-items: center; gap: 5px; flex: 1; min-width: 88px; }
+.hgj-ltc-item b {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10.5px; font-weight: 900; color: #94a3b8; width: 9px; flex-shrink: 0;
+}
+.hgj-ltc-item i {
+  display: block; height: 5px; border-radius: 999px;
+  background: #cbd5e1; min-width: 2px;
+}
+.hgj-ltc-item em {
+  font-style: normal; font-size: 10.5px; font-weight: 800; color: #94a3b8;
+  width: 24px; text-align: right; flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+.hgj-ltc-item .barwrap { flex: 1; height: 5px; background: #eef2f6; border-radius: 999px; overflow: hidden; min-width: 20px; }
+.hgj-ltc-item.on b  { color: var(--ax); }
+.hgj-ltc-item.on i  { background: var(--ax); }
+.hgj-ltc-item.on em { color: var(--ax); }
+.hgj-face {
+  font-size: 10px; font-weight: 800; color: #64748b;
+  background: #eef2f7; border-radius: 5px; padding: 2px 7px;
+  white-space: nowrap; flex-shrink: 0;
+}
+
+/* ── 场景卡片：推送标记 ── */
+.hgj-card.is-pushed { background: #f6fdf9; border-color: #bbf7d0; }
+.hgj-push-flag {
+  display: inline-flex; align-items: center; gap: 4px; border-radius: 999px;
+  padding: 2px 9px; font-size: 10.5px; font-weight: 800; cursor: pointer;
+  border: 1px solid #cbd5e1; background: #fff; color: #94a3b8;
+  font-family: inherit; transition: all .15s; white-space: nowrap;
+}
+.hgj-push-flag:hover { border-color: #16a34a; color: #15803d; }
+.hgj-push-flag.on { background: #dcfce7; border-color: #16a34a; color: #15803d; }
 .hgj-filter-btn {
   padding: 5px 14px;
   border-radius: 20px;
@@ -6442,23 +6536,200 @@ body {
   ];
 
   const ALL_HGJ_DATA = [...HGJ_DATA, ...HANS_DATA, ...HUAIYU_DATA, ...TAX_BU_DATA, ...HGJ_202606_NEW_DATA];
+  // ── 场景三轴强度（L 法律 / T 税务 / C 资本市场，0-10）────────────────
+  // 由 BGE-M3 离线预计算，与痛点向量模型完全同源：同一套 9 条专家锚点、同一 P5-P95
+  // 分位拉伸口径（痛点批次基准），故本表分数与痛点侧 L/T/C 直接可比。
+  // 顺序严格对应 ALL_HGJ_DATA 下标；新增场景在数组末尾追加对应三元组即可。
+  // 生成脚本见 04_驾驶舱/vector/  ·  样本数 631  ·  投影面激活阈值 5.8
+  const HGJ_LTC = [
+  [6.44,8.97,8.58],[3.98,7.78,3.78],[2.42,9.69,2.16],[0.10,5.34,0.00],[4.62,10.00,6.26],
+  [6.83,4.54,7.03],[10.00,5.46,9.48],[8.39,0.43,4.78],[2.12,8.64,2.58],[0.32,5.42,2.75],
+  [7.61,5.18,6.33],[3.05,0.57,3.43],[4.17,6.51,4.52],[3.01,8.00,2.84],[4.13,8.44,7.53],
+  [3.15,7.50,3.81],[0.00,6.85,2.66],[1.88,0.00,0.79],[6.73,8.87,6.76],[4.71,6.83,4.07],
+  [8.36,7.34,9.17],[3.24,6.92,3.19],[3.97,3.26,2.39],[9.17,4.95,4.59],[1.38,0.32,0.00],
+  [1.79,10.00,3.71],[2.97,7.61,5.83],[5.94,7.39,8.08],[7.40,8.89,8.79],[4.46,10.00,4.77],
+  [5.30,10.00,5.53],[0.62,10.00,2.17],[1.55,8.57,0.00],[5.23,5.32,1.81],[3.85,3.67,2.66],
+  [9.40,6.01,3.66],[0.00,5.50,3.06],[3.46,9.45,5.89],[6.20,7.76,6.05],[6.82,8.48,9.41],
+  [1.26,6.22,4.14],[6.54,8.59,5.69],[8.31,8.13,9.32],[6.05,2.74,5.83],[0.00,5.81,2.86],
+  [10.00,4.85,3.82],[1.00,6.52,3.52],[2.18,10.00,2.76],[9.01,4.71,9.90],[4.20,7.19,6.17],
+  [6.92,3.42,10.00],[0.00,5.85,0.00],[0.00,5.57,1.88],[0.00,7.01,0.00],[3.46,6.71,5.58],
+  [4.56,7.43,5.33],[0.00,7.69,2.11],[3.64,2.38,4.27],[0.00,2.84,0.00],[0.70,8.10,5.22],
+  [6.20,8.49,6.18],[2.62,7.19,3.47],[0.00,4.43,0.00],[4.03,7.17,8.05],[1.76,4.77,5.78],
+  [0.41,7.92,3.81],[3.88,9.73,5.08],[5.23,1.75,3.29],[7.04,8.24,7.71],[6.94,4.25,0.13],
+  [6.04,8.63,6.91],[5.54,9.16,6.03],[3.22,6.90,0.98],[2.98,3.67,4.12],[0.35,6.46,0.80],
+  [3.64,9.12,6.27],[2.83,10.00,5.10],[5.88,6.97,7.50],[3.52,0.21,0.00],[3.52,0.53,0.72],
+  [2.78,1.21,0.70],[0.00,6.83,0.85],[5.52,4.29,10.00],[7.68,9.34,8.48],[5.61,8.90,8.42],
+  [4.04,9.37,3.22],[0.73,3.47,0.00],[2.66,2.15,2.38],[0.49,6.43,0.00],[0.00,8.93,0.00],
+  [0.93,10.00,1.90],[4.26,6.62,3.38],[3.66,10.00,6.49],[2.90,8.65,3.05],[4.97,3.29,2.15],
+  [10.00,6.95,9.32],[8.31,10.00,8.54],[6.05,4.87,4.78],[5.54,2.68,2.55],[6.16,3.91,1.52],
+  [2.46,1.69,0.15],[1.79,10.00,3.79],[4.17,7.08,5.59],[3.83,7.67,2.27],[4.45,10.00,3.70],
+  [1.13,10.00,3.44],[4.24,8.53,4.82],[5.69,8.19,2.56],[9.13,5.88,3.04],[3.78,8.37,5.51],
+  [1.28,7.39,3.59],[3.21,7.05,5.49],[2.41,8.09,2.97],[7.53,10.00,6.68],[5.14,8.90,6.53],
+  [1.69,3.84,2.95],[3.99,8.23,4.06],[6.01,8.35,6.52],[1.45,8.52,2.50],[2.38,10.00,3.77],
+  [5.32,9.40,5.93],[7.04,6.61,3.02],[8.55,3.42,2.77],[5.62,10.00,5.19],[3.76,7.52,0.18],
+  [6.35,10.00,9.31],[0.00,2.88,0.56],[0.34,10.00,1.87],[3.31,10.00,2.83],[6.88,7.79,8.91],
+  [2.42,3.33,6.33],[4.51,10.00,3.35],[2.57,8.90,5.08],[6.55,10.00,8.29],[4.74,8.05,6.57],
+  [0.90,5.87,4.81],[1.17,6.02,4.48],[6.92,10.00,7.25],[4.88,10.00,6.63],[5.39,10.00,3.45],
+  [0.00,6.35,0.52],[1.90,7.70,2.53],[3.36,7.57,7.50],[5.01,8.61,7.38],[0.00,10.00,1.01],
+  [0.00,8.13,2.67],[0.00,5.63,3.51],[3.68,10.00,4.90],[6.87,10.00,6.19],[2.01,8.55,2.72],
+  [5.12,10.00,7.29],[2.09,8.25,7.74],[0.00,3.46,1.59],[0.14,8.54,1.06],[0.55,6.31,1.87],
+  [1.80,10.00,3.87],[3.08,7.36,1.17],[0.19,7.56,2.83],[2.97,10.00,4.65],[5.71,10.00,5.37],
+  [4.39,7.86,6.78],[8.43,10.00,10.00],[2.44,9.68,2.91],[2.88,4.59,4.80],[0.00,3.40,0.92],
+  [0.00,4.06,0.01],[0.00,4.18,0.00],[0.00,4.06,2.37],[3.24,8.18,5.33],[4.89,6.56,4.57],
+  [4.52,5.39,5.27],[5.08,9.18,6.00],[5.80,5.58,8.28],[6.68,7.24,7.34],[3.72,5.99,6.84],
+  [4.85,7.72,9.19],[1.40,7.18,4.66],[3.36,10.00,4.81],[0.96,5.82,1.33],[1.24,10.00,3.40],
+  [0.00,8.45,0.13],[5.27,10.00,6.82],[5.40,8.94,5.57],[0.00,5.87,2.56],[8.44,9.28,8.69],
+  [1.11,8.34,5.06],[2.94,5.29,2.71],[1.18,8.19,4.10],[5.78,8.82,7.60],[5.39,10.00,8.98],
+  [1.56,8.58,1.87],[3.66,8.88,4.95],[8.23,7.32,4.37],[0.29,6.40,1.39],[1.28,9.24,3.45],
+  [4.61,7.09,2.25],[4.23,8.68,5.28],[3.65,9.94,7.37],[7.12,7.15,8.50],[3.47,7.69,4.86],
+  [2.59,7.96,2.57],[0.00,6.50,1.70],[5.35,8.34,6.14],[0.03,8.00,2.72],[0.00,9.60,2.70],
+  [2.09,9.29,4.18],[6.03,10.00,7.90],[0.72,7.29,0.00],[6.13,10.00,6.87],[6.84,8.46,7.55],
+  [10.00,5.95,4.89],[0.72,8.08,2.47],[1.77,6.29,3.24],[0.60,4.37,3.30],[4.34,10.00,5.87],
+  [2.74,7.88,5.83],[8.22,10.00,8.91],[2.15,6.53,4.80],[0.00,8.50,0.00],[4.53,10.00,6.23],
+  [2.21,10.00,3.24],[2.79,10.00,2.92],[4.21,10.00,6.16],[1.00,7.80,1.58],[3.99,10.00,4.67],
+  [0.00,8.77,2.69],[0.49,7.30,1.35],[0.04,7.38,0.83],[1.20,9.06,2.07],[6.47,9.73,6.00],
+  [0.00,5.28,2.23],[0.00,7.87,1.45],[5.05,8.42,8.83],[8.54,7.71,7.24],[6.33,9.69,5.18],
+  [5.51,8.66,5.12],[10.00,7.81,10.00],[2.14,4.67,2.15],[0.53,9.18,1.40],[3.55,7.25,2.44],
+  [0.00,2.43,1.93],[3.76,7.84,5.81],[2.58,10.00,4.05],[7.30,10.00,7.00],[0.17,9.41,3.34],
+  [1.87,7.60,8.10],[6.01,10.00,7.52],[4.28,10.00,6.78],[5.27,9.63,7.23],[3.99,10.00,6.06],
+  [0.19,6.18,3.79],[0.00,2.92,1.37],[5.23,8.43,4.53],[7.03,8.85,8.01],[4.85,9.48,6.61],
+  [2.40,6.65,6.87],[2.70,7.59,5.72],[0.00,6.39,1.39],[3.16,10.00,4.85],[3.02,8.67,4.94],
+  [7.28,10.00,10.00],[3.71,10.00,4.38],[0.00,6.58,2.58],[3.35,7.22,3.83],[2.29,6.00,5.51],
+  [2.17,8.95,3.51],[0.00,7.78,1.54],[3.23,10.00,6.41],[0.00,7.57,1.13],[2.50,9.10,4.67],
+  [1.31,7.92,5.05],[2.02,6.47,5.81],[1.83,9.99,4.76],[2.01,5.81,4.08],[0.00,2.65,0.00],
+  [0.00,3.79,0.00],[5.52,10.00,6.21],[1.53,9.26,4.26],[9.88,10.00,8.78],[0.00,7.19,1.23],
+  [4.96,10.00,8.82],[0.00,6.45,0.00],[3.20,10.00,3.28],[3.22,8.08,6.04],[0.00,7.16,2.63],
+  [5.91,10.00,8.22],[9.31,7.32,7.57],[5.59,10.00,7.30],[3.86,10.00,5.29],[6.24,9.64,8.10],
+  [5.42,10.00,7.56],[1.94,6.91,4.76],[0.00,6.98,2.40],[2.34,5.56,8.53],[9.94,9.14,7.75],
+  [6.61,9.29,7.54],[6.58,8.79,7.71],[3.87,10.00,5.22],[5.99,6.78,8.02],[3.58,7.11,4.10],
+  [4.44,6.43,5.13],[2.34,7.67,5.17],[0.00,4.04,0.00],[0.93,4.98,3.49],[0.17,1.83,0.00],
+  [0.00,4.88,0.00],[0.00,9.72,3.02],[3.15,1.58,3.07],[0.00,8.80,2.71],[0.00,8.48,2.12],
+  [6.45,9.70,8.43],[5.03,5.86,3.78],[2.76,9.10,3.28],[4.31,2.71,4.03],[6.53,10.00,7.88],
+  [1.29,8.38,4.66],[6.66,2.77,8.19],[1.48,8.60,3.14],[0.00,8.44,2.17],[0.88,8.09,4.00],
+  [3.46,7.54,5.03],[2.23,10.00,5.24],[5.61,10.00,7.40],[4.29,6.84,5.41],[0.75,6.77,4.42],
+  [2.44,6.74,4.75],[3.47,4.89,5.15],[4.29,5.52,4.71],[6.32,7.54,3.65],[0.00,5.81,0.00],
+  [0.00,7.71,1.87],[6.21,4.17,6.83],[10.00,4.76,9.07],[3.46,9.90,4.72],[3.23,8.89,3.38],
+  [7.26,7.66,6.89],[5.40,8.38,8.06],[3.81,7.97,3.01],[3.13,8.39,3.19],[7.14,10.00,9.48],
+  [3.91,9.10,3.03],[3.69,8.52,3.73],[5.77,10.00,7.16],[5.38,10.00,7.13],[0.00,9.01,1.68],
+  [4.61,10.00,7.80],[3.75,8.57,3.82],[1.66,3.98,3.98],[6.16,5.81,6.63],[2.44,6.62,3.16],
+  [5.56,9.23,5.62],[0.55,6.13,2.29],[2.72,4.90,9.45],[4.35,7.11,6.28],[3.44,8.50,5.90],
+  [4.54,7.28,2.64],[3.36,8.58,2.58],[3.92,10.00,4.31],[3.24,8.26,3.87],[2.95,10.00,5.07],
+  [3.17,10.00,3.45],[5.13,9.36,7.04],[1.47,7.75,3.95],[3.95,9.52,6.68],[4.80,6.82,6.06],
+  [6.55,8.06,6.06],[6.18,6.84,3.25],[5.37,5.37,4.66],[2.53,10.00,5.06],[0.00,2.82,0.00],
+  [1.72,10.00,4.48],[6.13,10.00,9.58],[0.00,8.88,1.67],[2.90,10.00,4.32],[5.02,9.13,5.46],
+  [6.76,7.17,5.15],[1.53,7.26,4.65],[1.13,7.03,1.87],[2.34,8.17,2.90],[0.00,9.18,1.93],
+  [2.93,10.00,5.02],[2.76,7.95,5.52],[1.33,8.14,2.01],[3.71,9.30,6.84],[4.90,9.04,7.52],
+  [4.08,7.62,4.05],[0.48,4.38,0.00],[0.95,7.12,1.65],[4.89,10.00,6.36],[2.61,8.98,5.94],
+  [2.65,10.00,5.57],[1.04,7.62,1.11],[4.20,6.83,5.38],[4.14,9.18,6.33],[1.17,6.58,4.51],
+  [9.02,10.00,8.80],[8.12,6.20,8.08],[8.69,9.66,8.32],[4.05,5.22,3.71],[2.63,8.36,3.10],
+  [3.97,4.24,1.80],[2.93,10.00,5.47],[2.84,7.75,5.31],[6.93,10.00,7.07],[3.40,8.21,0.80],
+  [3.73,8.25,4.40],[10.00,4.82,2.13],[2.11,6.81,4.27],[4.92,10.00,6.80],[3.28,6.79,4.82],
+  [6.71,9.22,7.78],[2.72,7.74,3.66],[7.06,8.82,10.00],[6.78,4.75,8.96],[2.79,4.36,3.26],
+  [5.54,6.00,7.03],[1.31,3.92,5.64],[5.37,6.90,5.40],[0.62,4.31,3.04],[4.66,10.00,5.78],
+  [0.52,4.89,3.40],[2.37,7.22,4.38],[5.71,10.00,7.17],[5.86,9.57,6.30],[1.42,8.44,2.96],
+  [7.28,7.73,6.54],[5.07,9.66,6.23],[0.99,8.02,3.01],[0.34,7.53,4.16],[3.02,10.00,4.24],
+  [3.16,5.52,0.07],[5.05,7.11,4.00],[5.07,6.20,5.13],[1.08,6.75,2.38],[4.09,7.91,5.03],
+  [3.88,7.92,4.13],[1.00,7.23,2.48],[10.00,10.00,10.00],[0.00,7.18,1.90],[3.58,6.88,5.07],
+  [0.00,3.55,0.91],[2.36,7.33,1.58],[5.54,9.69,3.21],[7.60,7.27,4.15],[7.79,3.94,6.03],
+  [6.23,8.50,5.31],[4.32,9.83,3.92],[7.23,8.24,6.31],[4.91,8.90,7.39],[3.67,7.04,9.32],
+  [7.22,2.11,10.00],[3.30,10.00,2.06],[3.11,10.00,2.30],[0.00,7.37,0.00],[0.00,6.88,0.95],
+  [8.16,9.27,7.07],[5.44,7.05,4.58],[2.21,9.33,1.88],[3.08,2.20,2.04],[5.45,7.22,0.53],
+  [2.50,9.79,2.90],[5.78,6.76,6.39],[4.53,10.00,6.68],[5.58,7.90,5.14],[6.04,7.88,7.23],
+  [5.95,7.73,5.34],[1.17,8.61,3.14],[4.81,8.94,6.96],[5.27,9.37,8.88],[1.21,8.71,4.82],
+  [2.22,9.25,3.65],[1.78,6.94,4.11],[0.00,6.75,0.00],[5.18,9.24,4.96],[3.16,8.65,3.74],
+  [6.98,7.45,5.67],[5.14,7.85,6.32],[0.00,8.60,0.00],[0.00,9.81,1.69],[0.49,9.07,2.25],
+  [5.46,10.00,7.21],[4.45,3.30,5.45],[1.39,9.58,3.88],[1.33,9.51,4.64],[0.00,5.45,0.00],
+  [0.00,8.44,0.43],[1.52,8.91,4.72],[1.00,7.84,1.70],[3.13,8.54,4.57],[0.00,5.10,0.00],
+  [3.84,9.72,4.07],[0.47,6.80,2.83],[1.76,9.14,2.79],[2.63,6.79,5.88],[3.79,10.00,5.28],
+  [3.14,10.00,4.89],[0.00,7.03,3.17],[4.62,10.00,4.66],[0.58,4.60,0.78],[0.00,7.79,1.44],
+  [2.25,10.00,8.73],[0.94,4.20,4.24],[0.94,7.61,2.81],[1.66,7.41,3.06],[3.77,2.89,5.78],
+  [2.26,10.00,3.91],[1.80,10.00,3.78],[9.61,3.59,4.59],[8.03,3.31,4.68],[0.00,9.12,1.18],
+  [7.62,10.00,5.75],[7.16,6.27,3.68],[10.00,8.26,6.18],[3.95,10.00,6.49],[3.14,10.00,5.79],
+  [7.68,4.01,2.44],[10.00,4.72,4.02],[4.62,10.00,4.45],[5.48,4.40,2.11],[10.00,4.45,4.26],
+  [2.09,9.39,4.75],[1.80,8.74,4.55],[6.63,10.00,9.11],[6.02,10.00,8.24],[9.22,6.86,6.52],
+  [3.29,9.80,4.27],[4.23,5.59,2.03],[7.52,4.31,1.73],[7.22,2.74,2.37],[8.54,5.67,10.00],
+  [8.71,4.83,8.82],[4.39,9.86,7.08],[5.49,10.00,8.64],[6.14,8.57,9.65],[5.05,10.00,4.28],
+  [4.67,8.17,1.25],[4.56,9.51,6.91],[7.97,7.42,6.39],[3.77,10.00,6.64],[4.19,10.00,6.41],
+  [4.74,10.00,6.60],[5.22,10.00,6.99],[10.00,5.52,4.65],[9.41,3.16,3.75],[3.77,8.18,4.86],
+  [3.94,7.61,4.95],[2.81,7.93,5.29],[4.27,4.13,6.80],[8.10,5.37,2.80],[10.00,6.77,5.26],
+  [3.07,10.00,7.03],[1.77,8.86,4.05],[0.73,8.02,3.83],[2.85,10.00,6.50],[4.20,10.00,7.84],
+  [3.41,9.33,6.76],[1.95,8.38,3.82],[1.63,7.77,3.51],[1.42,10.00,4.07],[1.81,10.00,4.33],
+  [2.79,10.00,2.94],[4.63,7.26,0.56],[4.26,8.69,5.39],[3.22,7.81,4.62],[6.99,9.49,8.47],
+  [10.00,6.95,10.00],[5.90,10.00,8.75],[5.73,4.19,9.20],[2.49,10.00,2.77],[1.83,10.00,2.78],
+  [1.94,9.63,3.81],[1.17,10.00,3.11],[0.61,7.96,4.00],[0.00,7.30,3.55],[0.67,6.45,4.24],
+  [0.23,6.23,3.97],[1.56,9.75,4.47],[4.60,9.92,6.07],[4.44,9.81,5.99],[4.92,10.00,6.97],
+  [4.04,10.00,5.83],[3.73,10.00,4.61],[5.07,6.11,1.71],[5.82,10.00,5.99],[7.16,7.57,3.53],
+  [4.72,9.92,7.00],[4.63,9.91,6.92],[2.36,9.09,3.61],[2.42,9.04,3.86],[6.44,10.00,7.89],
+  [6.22,9.11,7.75],[8.87,5.63,10.00],[2.57,7.06,4.40],[2.30,7.59,4.35],[2.56,10.00,5.05],
+  [1.28,10.00,4.16],[3.06,7.88,5.00],[2.95,7.46,4.91],[10.00,3.50,2.86],[7.62,2.06,2.51],
+  [3.14,10.00,5.69],[6.65,10.00,8.77],[8.84,6.92,10.00],[5.51,8.54,5.09],[10.00,8.33,5.17],
+  [5.77,9.76,7.53],[5.81,9.09,7.60],[6.37,10.00,7.73],[6.06,10.00,7.37],[3.11,10.00,4.43],
+  [3.64,10.00,5.06],[3.21,10.00,4.90],[3.78,10.00,5.61],[4.05,10.00,6.47],[4.13,9.53,6.45],
+  [5.45,10.00,6.84],[7.95,8.80,5.86],[3.78,10.00,5.61],[3.45,10.00,5.00],[1.14,8.06,2.47],
+  [0.81,9.88,2.34],[2.83,6.32,4.38],[3.47,6.74,8.23],[3.47,6.74,8.23],[2.72,7.44,4.82],
+  [2.27,7.84,4.56],[3.56,7.80,4.17],[10.00,4.04,4.38],[2.39,10.00,5.91],[5.30,10.00,6.84],
+  [5.01,9.90,6.75]
+  ];
+  const HGJ_LTC_CUT = 5.8;
+
   // 供管理看板（initMgmtPage）读取的全局统计
   window._mgmtSceneStats = { scenes: ALL_HGJ_DATA.length, meetings: new Set(ALL_HGJ_DATA.map(d => d.file)).size };
 
   function noveltyLabel(n){ return n==='高'?'⭐ 高新颖度':n==='中'?'中等':' 常见'; }
   function noveltyClass(n){ return n==='高'?'hgj-novelty-high':n==='中'?'hgj-novelty-mid':'hgj-novelty-low'; }
 
-  const HGJ_BU_GROUPS = [
-    { id:'Tax', label:'Tax 税务', desc:'企业税务、CRS、跨境申报、公转私、清算注销', cats:['税务合规'] },
-    { id:'Legal', label:'Legal 法律', desc:'婚姻家事、继承纠纷、房产代持、合同诉讼', cats:['合规诉讼','资产保护'] },
-    { id:'CM', label:'CM 资本市场', desc:'股权架构、合资协议、控制权、上市/拟上市', cats:['股权架构'] },
-    { id:'Cross', label:'跨境身份', desc:'身份规划、境外账户、海外资产、CRS/FATCA', cats:['跨境规划'] },
-    { id:'Family', label:'家族资产', desc:'财富传承、保单信托、家庭资产配置', cats:['财富传承','资产保护'] },
-  ];
+  // 注：原先按业务线硬分类的 HGJ_BU_GROUPS 已废弃。场景不再归属某个 BU，
+  // 改由 BGE-M3 预计算的 L/T/C 三轴强度描述（见 HGJ_LTC / HGJ_AXES）。
+  // hgjBuOf() 保留下来，但只作为 hgjTopicOf() 生成细分主题标签的内部依据，
+  // 不再影响编号、入口和导出口径。
 
   function hgjBlob(d){
     return [d.title||'', d.cat||'', d.source||'', d.file||'', (d.tags||[]).join(' '), ((d.questions||d.dirs)||[]).join(' ')].join(' ');
   }
+
+  // ── 推送台账：记录哪些场景已推送去做痛点生成（存本浏览器 localStorage）──
+  const HGJ_PUSH_KEY = 'hgj_push_log_v1';
+
+  // 用全局场景编号做台账主键：SC 编号唯一且永不变动
+  // （旧的 source|file|title 组合键在本批数据里有 3 组重复，会互相串标记）
+  function hgjSceneKey(d){
+    return d._sid || [d.source||'', d.file||'', d.title||''].join('|');
+  }
+  function hgjGetPushLog(){
+    try { return JSON.parse(localStorage.getItem(HGJ_PUSH_KEY) || '{}') || {}; }
+    catch(e){ return {}; }
+  }
+  function hgjSavePushLog(log){
+    try { localStorage.setItem(HGJ_PUSH_KEY, JSON.stringify(log)); } catch(e){}
+  }
+  function hgjIsPushed(d){
+    return !!hgjGetPushLog()[hgjSceneKey(d)];
+  }
+  function hgjPushedAt(d){
+    const rec = hgjGetPushLog()[hgjSceneKey(d)];
+    return rec && rec.at ? rec.at : '';
+  }
+  function hgjMarkPushed(key, on){
+    const log = hgjGetPushLog();
+    if(on){
+      log[key] = { at: new Date().toLocaleString('zh-CN', { hour12:false }) };
+    } else {
+      delete log[key];
+    }
+    hgjSavePushLog(log);
+  }
+  // 点击卡片上的标记按钮
+  window.hgjTogglePush = function(btn, key){
+    hgjMarkPushed(key, !hgjGetPushLog()[key]);
+    applyHgjFilters();
+  };
+  window.hgjResetPushLog = function(){
+    const n = Object.keys(hgjGetPushLog()).length;
+    if(!n){ alert('当前没有任何推送标记'); return; }
+    if(!confirm(`确定清空全部 ${n} 条推送标记？此操作只影响本浏览器，不可撤销。`)) return;
+    hgjSavePushLog({});
+    applyHgjFilters();
+  };
 
   function hgjBuOf(d){
     const blob = hgjBlob(d);
@@ -6578,6 +6849,43 @@ body {
     return topic;
   }
 
+  // ── 场景编号 + 三轴强度挂载 ──────────────────────────────────
+  // 编号：全局连续 SC-0001，与业务线彻底解耦。采番基准是 ALL_HGJ_DATA 的固定数组顺序
+  // （不是页面展示顺序，展示顺序会随命中数/筛选变化）。新批次追加到数组末尾即可，
+  // 已有编号永不变动，新场景依次向下取号；分类规则怎么调都不影响编号。
+  const HGJ_AXES = [
+    { key:'L', name:'法律',     bu:'Legal 法律',    color:'#7c3aed', soft:'#f5f3ff' },
+    { key:'T', name:'税务',     bu:'Tax 税务',      color:'#e11d48', soft:'#fff1f2' },
+    { key:'C', name:'资本市场', bu:'CM 资本市场',   color:'#2563eb', soft:'#eff6ff' },
+  ];
+
+  (function assignSceneIds(){
+    if (HGJ_LTC.length !== ALL_HGJ_DATA.length) {
+      console.warn(`[驾驶舱] 三轴强度表与场景数不一致：HGJ_LTC=${HGJ_LTC.length} vs 场景=${ALL_HGJ_DATA.length}。` +
+                   `新增场景后请重新跑 04_驾驶舱/vector/ 下的向量脚本补齐，否则末尾场景缺分数。`);
+    }
+    ALL_HGJ_DATA.forEach((d, i) => {
+      d._sid = `SC-${String(i + 1).padStart(4, '0')}`;
+      const v = HGJ_LTC[i];
+      if (v) {
+        const [L, T, C] = v;
+        let act = HGJ_AXES.filter(a => ({L,T,C})[a.key] >= HGJ_LTC_CUT).map(a => a.key);
+        if (!act.length) act = [[['L',L],['T',T],['C',C]].sort((a,b)=>b[1]-a[1])[0][0]];
+        d._ltc  = { L, T, C };
+        d._lead = [['L',L],['T',T],['C',C]].sort((a,b)=>b[1]-a[1])[0][0];
+        d._face = act.join('') + (act.length===1 ? '_单轴主导' : act.length===2 ? '_双轴投影' : '_法税资交叉');
+        d._act  = act;
+      } else {
+        d._ltc = null; d._lead = ''; d._face = ''; d._act = [];
+      }
+    });
+    // 各轴分位排名（用于「本轴 Top N」检索，避免绝对分数在 T 轴饱和时无法区分）
+    HGJ_AXES.forEach(a => {
+      const order = ALL_HGJ_DATA.filter(d=>d._ltc).sort((x,y)=> y._ltc[a.key] - x._ltc[a.key]);
+      order.forEach((d, i) => { (d._rank = d._rank || {})[a.key] = i + 1; });
+    });
+  })();
+
   // 对每个场景卡片，找出全量会议中所有含相同tag的文件（去重）
   const TOTAL_FILES = new Set(ALL_HGJ_DATA.map(d=>d.file)).size;
   const HGJ_MATCH_STOP_TAGS = new Set([
@@ -6602,8 +6910,11 @@ body {
   function renderCards(data, opts={}){
     const container = document.getElementById('hgjCards');
     if(!container) return;
-    // 按出现次数降序排列
-    const sorted = [...data].sort((a,b) => sceneHits(b).size - sceneHits(a).size);
+    // 选中某条强度轴时按该轴分数降序；否则按出现次数降序
+    const sortAx = window._hgjActiveAxis;
+    const sorted = (sortAx && sortAx !== 'ALL')
+      ? [...data].sort((a,b) => (b._ltc?.[sortAx]||0) - (a._ltc?.[sortAx]||0))
+      : [...data].sort((a,b) => sceneHits(b).size - sceneHits(a).size);
     const limit = opts.showAll ? sorted.length : Math.min(sorted.length, window._hgjDisplayLimit || 40);
     const visible = sorted.slice(0, limit);
     container.innerHTML = visible.map((d,i) => {
@@ -6619,18 +6930,36 @@ body {
       }).join('');
       const moreLine = hits.size > 6 ? `<div style="font-size:11px;color:#94a3b8;margin-top:3px;">另有 ${hits.size - 6} 份会议命中</div>` : '';
       const topic = hgjTopicOf(d);
-      const bu = hgjBuOf(d);
+
+      // 三轴强度条：活跃轴（≥阈值）实心高亮，非活跃轴淡显
+      const ltcBar = d._ltc ? `
+        <div class="hgj-ltc" title="与法律/税务/资本市场三条专家锚点的语义关系强度（0-10）&#10;主导轴 ${d._lead} · 投影面 ${d._face}">
+          ${HGJ_AXES.map(a=>{
+            const v = d._ltc[a.key], on = v >= HGJ_LTC_CUT;
+            return `<span class="hgj-ltc-item${on?' on':''}" style="--ax:${a.color};">
+              <b>${a.key}</b><span class="barwrap"><i style="width:${v*10}%"></i></span><em>${v.toFixed(1)}</em></span>`;
+          }).join('')}
+          <span class="hgj-face">${d._face}</span>
+        </div>` : '';
+
+      const key      = hgjSceneKey(d);
+      const pushed   = hgjIsPushed(d);
+      const pushedAt = hgjPushedAt(d);
 
       return `
-      <div class="hgj-card" data-cat="${d.cat}" data-novelty="${d.novelty}">
+      <div class="hgj-card${pushed ? ' is-pushed' : ''}" data-cat="${d.cat}" data-novelty="${d.novelty}">
         <div class="hgj-card-header">
-          <span style="font-size:15px;font-weight:800;color:#1e293b;flex:1;cursor:pointer;text-decoration:underline;text-decoration-color:#cbd5e1;text-underline-offset:3px;" onclick="hgjSendToPainGenerate(this.dataset.title)" data-title="${d.title.replace(/"/g,'&quot;')}" title="点击添加为场景">${d.title}</span>
+          <span class="hgj-sid" title="场景编号（固定不变，可用于线下台账对照）">${d._sid || ''}</span>
+          <span style="font-size:15px;font-weight:800;color:#1e293b;flex:1;cursor:pointer;text-decoration:underline;text-decoration-color:#cbd5e1;text-underline-offset:3px;" onclick="hgjSendToPainGenerate(this.dataset.title, this.dataset.key)" data-title="${d.title.replace(/"/g,'&quot;')}" data-key="${key.replace(/"/g,'&quot;')}" title="点击添加为场景（并自动标记已推送）">${d.title}</span>
           <span class="hgj-tag ${noveltyClass(d.novelty)}">${noveltyLabel(d.novelty)}</span>
         </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin:-2px 0 10px;">
-          <span class="hgj-cat-tag">${bu}</span>
+        ${ltcBar}
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:-2px 0 10px;">
           <span class="hgj-cat-tag" style="background:#f1f5f9;color:#475569;">${topic}</span>
           <span class="hgj-cat-tag" style="background:#eff6ff;color:#1d4ed8;">${d.cat}</span>
+          <button class="hgj-push-flag${pushed ? ' on' : ''}" data-key="${key.replace(/"/g,'&quot;')}"
+            onclick="hgjTogglePush(this, this.dataset.key)"
+            title="${pushed ? '已推送于 ' + pushedAt + '，点击取消标记' : '点击标记为已推送'}">${pushed ? '✅ 已推送' : '○ 未推送'}</button>
         </div>
 
         <!-- 出现次数 + 文件索引 -->
@@ -6683,33 +7012,73 @@ body {
     }
   }
 
-  window._hgjActiveBu = 'Tax';
+  window._hgjActiveAxis = 'ALL';        // ALL | L | T | C —— 入口改为三轴强度，不再按业务线硬分类
   window._hgjActiveTopic = '全部';
   window._hgjActiveSubtopic = '全部';
+  window._hgjActivePush = '全部';
   window._hgjDisplayLimit = 40;
 
-  function hgjDataByBu(buId){
-    return ALL_HGJ_DATA.filter(d => hgjBuOf(d) === buId);
+  // 某条场景在该轴上是否「活跃」（分数达到投影面阈值）
+  function hgjAxisActive(d, ax){
+    return !!(d._ltc && d._ltc[ax] >= HGJ_LTC_CUT);
+  }
+  function hgjDataByAxis(ax){
+    if(!ax || ax === 'ALL') return ALL_HGJ_DATA.slice();
+    return ALL_HGJ_DATA.filter(d => hgjAxisActive(d, ax))
+                       .sort((a,b) => b._ltc[ax] - a._ltc[ax]);
   }
 
   function renderBuTabs(){
     const el = document.getElementById('hgjBuTabs');
     if(!el) return;
-    el.innerHTML = HGJ_BU_GROUPS.map(group=>{
-      const count = hgjDataByBu(group.id).length;
-      const active = group.id === window._hgjActiveBu ? ' active' : '';
-      return `<button class="hgj-bu-card${active}" onclick="hgjSelectBu('${group.id}')">
+    const cur = window._hgjActiveAxis || 'ALL';
+
+    const allPushed = ALL_HGJ_DATA.filter(hgjIsPushed).length;
+    const cards = [`
+      <div class="hgj-bu-card${cur==='ALL'?' active':''}" role="button" tabindex="0" onclick="hgjSelectAxis('ALL')">
         <div class="hgj-bu-top">
-          <span class="hgj-bu-name">${group.label}</span>
-          <span class="hgj-bu-count">${count}</span>
+          <span class="hgj-bu-name">全部场景</span>
+          <span class="hgj-bu-count">${ALL_HGJ_DATA.length}</span>
         </div>
-        <div class="hgj-bu-desc">${group.desc}</div>
-      </button>`;
-    }).join('');
+        <div class="hgj-bu-desc">不分轴，按场景在会议中的出现次数排序</div>
+        <div class="hgj-bu-foot">
+          <div class="hgj-bu-prog">
+            <div class="hgj-bu-prog-bar"><i style="width:${ALL_HGJ_DATA.length?Math.round(allPushed/ALL_HGJ_DATA.length*100):0}%"></i></div>
+            <span>已推送 ${allPushed}/${ALL_HGJ_DATA.length}</span>
+          </div>
+          <button class="hgj-bu-export" title="导出全部 ${ALL_HGJ_DATA.length} 个场景"
+            onclick="event.stopPropagation();hgjExportAxis('ALL')">📥 导出</button>
+        </div>
+      </div>`];
+
+    HGJ_AXES.forEach(a=>{
+      const list   = hgjDataByAxis(a.key);
+      const pushed = list.filter(hgjIsPushed).length;
+      const pct    = list.length ? Math.round(pushed/list.length*100) : 0;
+      const lead   = ALL_HGJ_DATA.filter(d=>d._lead===a.key).length;
+      cards.push(`
+      <div class="hgj-bu-card${cur===a.key?' active':''}" role="button" tabindex="0" onclick="hgjSelectAxis('${a.key}')"
+           style="--axis:${a.color};">
+        <div class="hgj-bu-top">
+          <span class="hgj-bu-name"><span class="hgj-axis-code" style="background:${a.soft};color:${a.color};">${a.key}</span>${a.name}强度</span>
+          <span class="hgj-bu-count" style="color:${a.color};">${list.length}</span>
+        </div>
+        <div class="hgj-bu-desc">${a.bu} · 本轴 ≥${HGJ_LTC_CUT} 分；全库另有 ${lead} 个场景以本轴为最强轴</div>
+        <div class="hgj-bu-foot">
+          <div class="hgj-bu-prog">
+            <div class="hgj-bu-prog-bar"><i style="width:${pct}%;background:${a.color};"></i></div>
+            <span>已推送 ${pushed}/${list.length}</span>
+          </div>
+          <button class="hgj-bu-export" title="导出 ${a.name}强度 ≥${HGJ_LTC_CUT} 的 ${list.length} 个场景"
+            onclick="event.stopPropagation();hgjExportAxis('${a.key}')">📥 导出</button>
+        </div>
+      </div>`);
+    });
+    el.innerHTML = cards.join('');
   }
 
-  function getActiveBuData(){
-    return hgjDataByBu(window._hgjActiveBu || 'Tax');
+  function getActiveAxisData(){
+    return hgjDataByAxis(window._hgjActiveAxis || 'ALL');
   }
 
   function renderTopicChips(data){
@@ -6767,9 +7136,27 @@ body {
       }).join('');
   }
 
+  function renderPushChips(data){
+    const el = document.getElementById('hgjPushChips');
+    if(!el) return;
+    const done    = data.filter(hgjIsPushed).length;
+    const pending = data.length - done;
+    const cur     = window._hgjActivePush || '全部';
+    const chip = (label, count) =>
+      `<button class="hgj-topic-chip${label === cur ? ' active' : ''}" onclick="hgjSelectPush('${label}')">${label} ${count}</button>`;
+    el.innerHTML = chip('全部', data.length) + chip('未推送', pending) + chip('已推送', done);
+  }
+
+  function hgjSelectPush(v){
+    window._hgjActivePush = v;
+    window._hgjDisplayLimit = 40;
+    applyHgjFilters();
+  }
+  window.hgjSelectPush = hgjSelectPush;
+
   function applyHgjFilters(){
     renderBuTabs();
-    const buData = getActiveBuData();
+    const buData = getActiveAxisData();
     renderTopicChips(buData);
     let data = buData;
     const topic = window._hgjActiveTopic || '全部';
@@ -6782,6 +7169,11 @@ body {
       data = data.filter(d => hgjSubtopicOf(d) === subtopic);
     }
 
+    renderPushChips(data);
+    const pushFilter = window._hgjActivePush || '全部';
+    if(pushFilter === '未推送') data = data.filter(d => !hgjIsPushed(d));
+    if(pushFilter === '已推送') data = data.filter(d =>  hgjIsPushed(d));
+
     const kw = (document.getElementById('hgjSearchInput')?.value || '').trim().toLowerCase();
     const clearBtn = document.getElementById('hgjSearchClear');
     const hint = document.getElementById('hgjSearchHint');
@@ -6791,8 +7183,29 @@ body {
     if(kw){
       // 支持空格分隔多关键词（AND）
       const terms = kw.split(/\s+/).filter(Boolean);
+      // 强度查询语法：L>7 / T>=8 / C<3 / 法律>7 / 税务>=8 / 资本市场>5
+      const AXKEY = { l:'L', t:'T', c:'C', '法律':'L', '税务':'T', '资本':'C', '资本市场':'C' };
+      const numQ = [], textQ = [];
+      terms.forEach(t=>{
+        const m = t.match(/^(l|t|c|法律|税务|资本市场|资本)(>=|<=|>|<|=)(\d+(?:\.\d+)?)$/);
+        if(m && AXKEY[m[1]]) numQ.push({ ax:AXKEY[m[1]], op:m[2], val:parseFloat(m[3]) });
+        else textQ.push(t);
+      });
+      window._hgjNumQuery = numQ;
+
       data = data.filter(d=>{
+        for(const q of numQ){
+          if(!d._ltc) return false;
+          const v = d._ltc[q.ax];
+          if(q.op === '>'  && !(v >  q.val)) return false;
+          if(q.op === '>=' && !(v >= q.val)) return false;
+          if(q.op === '<'  && !(v <  q.val)) return false;
+          if(q.op === '<=' && !(v <= q.val)) return false;
+          if(q.op === '='  && Math.abs(v - q.val) > 0.5) return false;
+        }
+        if(!textQ.length) return true;
         const blob = [
+          d._sid||'', d._face||'',
           d.title||'',
           (d.tags||[]).join(' '),
           ((d.questions||d.dirs)||[]).join(' '),
@@ -6800,26 +7213,36 @@ body {
           d.cat||'',
           d.source||''
         ].join(' ').toLowerCase();
-        return terms.every(t => blob.includes(t));
+        return textQ.every(t => blob.includes(t));
       });
+      // 强度查询时按该轴分数降序，最强的排最前
+      if(numQ.length) data = data.slice().sort((a,b)=> (b._ltc?.[numQ[0].ax]||0) - (a._ltc?.[numQ[0].ax]||0));
+    } else {
+      window._hgjNumQuery = [];
     }
 
-    const bu = HGJ_BU_GROUPS.find(g=>g.id === (window._hgjActiveBu || 'Tax'));
+    const ax = (window._hgjActiveAxis || 'ALL');
+    const axDef = HGJ_AXES.find(a=>a.key===ax);
+    const scopeName = axDef ? `${axDef.key} ${axDef.name}强度` : '全部场景';
     const totalMeetings = new Set(data.map(d=>d.file)).size;
     if(hint){
-      hint.textContent = kw ? `搜索到 ${data.length} 条` : `${bu?.label || ''} · ${data.length} 个场景`;
+      hint.textContent = kw ? `搜索到 ${data.length} 条` : `${scopeName} · ${data.length} 个场景`;
     }
     if(meta){
       const topicText = topic === '全部' ? '全部细分主题' : topic;
       const subtopicText = subtopic === '全部' ? '' : ` / ${subtopic}`;
       const moreText = data.length > (window._hgjDisplayLimit || 40) ? `，当前展示前 ${window._hgjDisplayLimit || 40} 条` : '';
-      meta.innerHTML = `<strong>${bu?.label || '场景池'}</strong> / ${topicText}${subtopicText}：共 ${data.length} 个可推导业务场景，覆盖 ${totalMeetings} 份会议纪要${moreText}`;
+      const doneText = `，其中已推送 ${data.filter(hgjIsPushed).length} 个`;
+      const avg = axDef && data.length
+        ? `，本轴平均 ${(data.reduce((s,d)=>s+(d._ltc?.[axDef.key]||0),0)/data.length).toFixed(1)} 分` : '';
+      meta.innerHTML = `<strong>${scopeName}</strong> / ${topicText}${subtopicText}：共 ${data.length} 个可推导业务场景，覆盖 ${totalMeetings} 份会议纪要${avg}${doneText}${moreText}`;
     }
+    window._hgjFilteredData = data;   // 供「导出当前筛选结果」使用
     renderCards(data);
   }
 
-  function hgjSelectBu(buId){
-    window._hgjActiveBu = buId;
+  function hgjSelectAxis(ax){
+    window._hgjActiveAxis = ax;
     window._hgjActiveTopic = '全部';
     window._hgjActiveSubtopic = '全部';
     window._hgjDisplayLimit = 40;
@@ -6844,10 +7267,11 @@ body {
     applyHgjFilters();
   }
 
+  // 兼容旧入口：把历史的 BU / 分类参数映射到对应的强度轴
   function hgjFilter(btn, f){
-    const matched = HGJ_BU_GROUPS.find(g=>g.cats.includes(f) || g.id === f);
-    if(matched) hgjSelectBu(matched.id);
-    else applyHgjFilters();
+    const map = { Tax:'T', 税务合规:'T', Legal:'L', 合规诉讼:'L', 资产保护:'L', 财富传承:'L',
+                  CM:'C', 股权架构:'C', Cross:'T', 跨境规划:'T', Family:'L' };
+    hgjSelectAxis(map[f] || 'ALL');
   }
 
   function hgjSearch(){
@@ -6857,17 +7281,145 @@ body {
 
   window.hgjFilter = hgjFilter;
   window.hgjSearch = hgjSearch;
-  window.hgjSelectBu = hgjSelectBu;
+  window.hgjSelectAxis = hgjSelectAxis;
   window.hgjSelectTopic = hgjSelectTopic;
   window.hgjSelectSubtopic = hgjSelectSubtopic;
   window.hgjShowMore = hgjShowMore;
 
-  window.hgjSendToPainGenerate = function(dir){
+  window.hgjSendToPainGenerate = function(dir, key){
+    if(key) hgjMarkPushed(key, true);   // 推送即入台账，避免重复推送
     showPage('pain-generate');
     setTimeout(()=>{
       const sceneInput = document.getElementById('sceneInput') || document.querySelector('#page-pain-generate textarea');
       if(sceneInput){ sceneInput.value = dir; sceneInput.dispatchEvent(new Event('input')); }
     }, 300);
+  };
+
+  // ── 导出 Excel ────────────────────────────────────────────────
+  // 一张「场景清单」sheet（页面全部信息 + 推送台账 + 线下填写列）
+  // 一张「统计概览」sheet（口径、进度、主题分布）
+  function hgjBuildExport(list, scopeLabel){
+    if(typeof XLSX === 'undefined'){ alert('Excel 组件尚未加载完成，请稍后重试'); return; }
+    if(!list.length){ alert('当前筛选结果为空，没有可导出的场景'); return; }
+
+    // 客户问题最多列数（按本批数据实际最大值，封顶 5）
+    const maxQ = Math.min(5, list.reduce((m,d)=>Math.max(m, ((d.questions||d.dirs)||[]).length), 0));
+
+    const rows = list.map((d, i) => {
+      const hits = sceneHits(d);
+      const row = {
+        '场景编号': d._sid || '',
+        'L法律强度': d._ltc ? d._ltc.L : '',
+        'T税务强度': d._ltc ? d._ltc.T : '',
+        'C资本市场强度': d._ltc ? d._ltc.C : '',
+        '主导轴': d._lead || '',
+        '投影面': d._face || '',
+        '建议归口BU': d._lead ? (HGJ_AXES.find(a=>a.key===d._lead)||{}).bu || '' : '',
+        'L轴排名': d._rank ? d._rank.L : '',
+        'T轴排名': d._rank ? d._rank.T : '',
+        'C轴排名': d._rank ? d._rank.C : '',
+        '细分主题': hgjTopicOf(d),
+        '细分方向': hgjSubtopicOf(d),
+        '业务分类': d.cat || '',
+        '场景标题': d.title || '',
+        '新颖度': d.novelty || '',
+      };
+      const qs = (d.questions || d.dirs) || [];
+      for(let k = 0; k < maxQ; k++) row[`客户关注问题${k+1}`] = qs[k] || '';
+      row['标签']       = (d.tags||[]).join(' / ');
+      row['来源渠道']   = d.source || '';
+      row['来源会议文件'] = d.file || '';
+      row['出现会议数'] = hits.size;
+      row['命中会议清单'] = [...hits.keys()].map(f=>f.replace(/-转写结果\.docx|\.docx/g,'')).join(' / ');
+      row['推送状态']   = hgjIsPushed(d) ? '已推送' : '未推送';
+      row['推送时间']   = hgjPushedAt(d);
+      // 以下为线下痛点生成填写列，导出时留空
+      row['已生成痛点标题'] = '';
+      row['痛点说明']   = '';
+      row['负责人']     = '';
+      row['备注']       = '';
+      return row;
+    });
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [
+      {wch:11},{wch:11},{wch:11},{wch:14},{wch:8},{wch:16},{wch:15},{wch:9},{wch:9},{wch:9},
+      {wch:16},{wch:18},{wch:12},{wch:34},{wch:10},
+      ...Array.from({length:maxQ}, ()=>({wch:52})),
+      {wch:30},{wch:10},{wch:28},{wch:10},{wch:46},{wch:10},{wch:20},
+      {wch:30},{wch:44},{wch:12},{wch:24},
+    ];
+    ws['!autofilter'] = { ref: XLSX.utils.encode_range({
+      s:{r:0,c:0}, e:{r:rows.length, c:Object.keys(rows[0]).length-1}
+    })};
+    ws['!freeze'] = { xSplit:0, ySplit:1 };
+
+    // 统计概览
+    const done = list.filter(hgjIsPushed).length;
+    const topicCount = new Map();
+    list.forEach(d=>{ const t = hgjTopicOf(d); topicCount.set(t, (topicCount.get(t)||0)+1); });
+
+    const stat = [
+      { '项目':'导出范围',     '值': scopeLabel },
+      { '项目':'导出时间',     '值': new Date().toLocaleString('zh-CN', { hour12:false }) },
+      { '项目':'场景总数',     '值': list.length },
+      { '项目':'编号区间',     '值': (()=>{
+          const ids = list.map(d=>d._sid).filter(Boolean).sort();
+          return ids.length ? `${ids[0]} ~ ${ids[ids.length-1]}` : '—';
+        })() },
+      { '项目':'覆盖会议纪要', '值': new Set(list.map(d=>d.file)).size },
+      { '项目':'已推送',       '值': done },
+      { '项目':'未推送',       '值': list.length - done },
+      { '项目':'推送进度',     '值': list.length ? Math.round(done/list.length*100) + '%' : '—' },
+      { '项目':'', '值':'' },
+      { '项目':'── 三轴强度分布 ──', '值':'' },
+      ...HGJ_AXES.map(a=>{
+        const g = list.filter(d=>d._ltc);
+        const act = g.filter(d=>d._ltc[a.key] >= HGJ_LTC_CUT).length;
+        const lead = g.filter(d=>d._lead === a.key).length;
+        const avg = g.length ? (g.reduce((s,d)=>s+d._ltc[a.key],0)/g.length).toFixed(2) : '—';
+        return { '项目': `${a.key} ${a.name}强度`, '值': `平均 ${avg} 分 · 活跃(≥${HGJ_LTC_CUT}) ${act} 个 · 本轴主导 ${lead} 个` };
+      }),
+      { '项目':'', '值':'' },
+      { '项目':'── 投影面分布 ──', '值':'' },
+      ...(()=>{ const m=new Map(); list.forEach(d=>{ if(d._face) m.set(d._face,(m.get(d._face)||0)+1); });
+        return [...m.entries()].sort((a,b)=>b[1]-a[1]).map(([f,c])=>({ '项目': f, '值': c })); })(),
+      { '项目':'', '值':'' },
+      { '项目':'── 细分主题分布 ──', '值':'' },
+      ...[...topicCount.entries()].sort((a,b)=>b[1]-a[1]).map(([t,c])=>({ '项目': t, '值': c })),
+      { '项目':'', '值':'' },
+      { '项目':'编号规则', '值':'场景编号为全局连续编号 SC-0001，与业务线彻底解耦。采番基准是场景数据的固定数组顺序，一经生成永不变动；新增场景一律追加在末尾依次向下取号（SC-0632、SC-0633…），任何分类规则调整都不会影响已有编号。可直接作为线下台账的对照主键。' },
+      { '项目':'三轴强度口径', '值':'L/T/C 为该场景与法律、税务、资本市场三条专家锚点的语义关系强度（0-10），由 BGE-M3 离线预计算，与痛点向量模型完全同源：同一套 9 条锚点、同一 P5-P95 分位拉伸基准，故与痛点侧 L/T/C 直接可比。分数≥5.8 视为该轴活跃；主导轴=三轴中最高者；投影面=全部活跃轴的组合。场景不再被硬分到某个 BU，各 BU 按本轴强度自行取用。' },
+      { '项目':'轴排名口径', '值':'L/T/C 轴排名是该场景在全部 631 个场景中按该轴分数的降序位次（1 = 该轴最强）。因场景池整体偏税务，T 轴绝对分数偏高，用排名做「本轴 Top N」筛选比用绝对分数更好区分。' },
+      { '项目':'口径说明', '值':'「推送状态」记录该场景是否已推送去做痛点生成，存于本浏览器；换电脑或清缓存会重置。线下生成痛点后请回填右侧空列。' },
+    ];
+    const sw = XLSX.utils.json_to_sheet(stat);
+    sw['!cols'] = [{wch:22},{wch:80}];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '场景清单');
+    XLSX.utils.book_append_sheet(wb, sw, '统计概览');
+
+    const stamp = new Date().toLocaleDateString('zh-CN').replace(/\//g,'-');
+    const safe  = scopeLabel.replace(/[\\\/:*?"<>|]/g, '_');
+    XLSX.writeFile(wb, `渠道场景_${safe}_${stamp}.xlsx`);
+  }
+
+  window.hgjExportAxis = function(ax){
+    const a = HGJ_AXES.find(x=>x.key===ax);
+    hgjBuildExport(hgjDataByAxis(ax), a ? `${a.key}${a.name}强度` : '全部场景');
+  };
+
+  window.hgjExportCurrent = function(){
+    const a        = HGJ_AXES.find(x=>x.key === (window._hgjActiveAxis || 'ALL'));
+    const topic    = window._hgjActiveTopic || '全部';
+    const subtopic = window._hgjActiveSubtopic || '全部';
+    const push     = window._hgjActivePush || '全部';
+    const parts = [a ? `${a.key}${a.name}强度` : '全部场景'];
+    if(topic    !== '全部') parts.push(topic);
+    if(subtopic !== '全部') parts.push(subtopic);
+    if(push     !== '全部') parts.push(push);
+    hgjBuildExport(window._hgjFilteredData || [], parts.join('-'));
   };
 
   // 初始化渲染（页面切换时触发）
