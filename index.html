@@ -11150,18 +11150,40 @@ function initMgmtPage() {
 
 
 // ── 管理看板 · 关键事件记录表 ──────────────────────────────────
+// 时间范围筛选：all=全部 / 3m=仅近三个月 / 1m=仅近一个月。
+// 基准日取最新一条快照日期（数据相对，不依赖系统时钟），避免跨设备/隔日打开时口径漂移。
+let _mgmtEventRange = 'all';
+let _mgmtEventSnaps = [];
+
+function _mgmtFilterByRange(snaps, range) {
+  if (range === 'all' || !snaps.length) return snaps;
+  const months = range === '1m' ? 1 : 3;
+  const latest = new Date(snaps[snaps.length - 1].date);
+  const cutoff = new Date(latest);
+  cutoff.setMonth(cutoff.getMonth() - months);
+  return snaps.filter(s => new Date(s.date) >= cutoff);
+}
+
+window.mgmtSetEventRange = function(range) {
+  _mgmtEventRange = range;
+  renderMgmtEvents(_mgmtEventSnaps);
+  if (_mgmtEditMode) _mgmtApplyEditState();   // 编辑模式下重渲染后恢复可编辑
+};
+
 function renderMgmtEvents(snaps) {
   const el = document.getElementById('mgmt-events-section');
   if (!el) return;
+  _mgmtEventSnaps = snaps;                     // 供筛选按钮重渲染复用
   const assets = [
     { f: 'noteFactor', lbl: '🧬 因子库', color: '#1d4ed8', bg: '#eff6ff', border: '#bfdbfe' },
     { f: 'noteScene',  lbl: '📡 场景',   color: '#15803d', bg: '#f0fdf4', border: '#bbf7d0' },
     { f: 'notePain',   lbl: '💢 痛点库', color: '#dc2626', bg: '#fef2f2', border: '#fecaca' },
     { f: 'noteSku',    lbl: '🧪 SKU库',  color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe' },
   ];
-  const rows = [...snaps].reverse().map((s, revIdx) => {
-    const origIdx = snaps.length - 1 - revIdx;
-    const isLatest = revIdx === 0;
+  const shown = _mgmtFilterByRange(snaps, _mgmtEventRange);
+  const rows = [...shown].reverse().map((s, revIdx) => {
+    const origIdx = snaps.indexOf(s);          // 用原数组下标，保证编辑映射不因筛选错位
+    const isLatest = origIdx === snaps.length - 1;
     const cells = assets.map(a => {
       const val = (s[a.f] != null ? s[a.f] : (a.f === 'noteFactor' && s.note ? s.note : '')).trim();
       // 带编号的多条事件自动分行：句末标点(；。！？等)+编号"N、"处换行；
@@ -11179,9 +11201,24 @@ function renderMgmtEvents(snaps) {
         (isLatest ? ' <span class="tag tag-new" style="font-size:10px;">最新</span>' : '') +
       '</td>' + cells + '</tr>';
   }).join('');
+  // 时间范围筛选按钮组
+  const btn = (r, txt) => {
+    const on = _mgmtEventRange === r;
+    return '<button type="button" onclick="mgmtSetEventRange(\'' + r + '\')" ' +
+      'style="padding:5px 13px;font-size:12px;font-weight:600;cursor:pointer;border-radius:7px;' +
+      'border:1px solid ' + (on ? '#dc2626' : '#e5e7eb') + ';' +
+      'background:' + (on ? '#fef2f2' : '#fff') + ';color:' + (on ? '#dc2626' : '#6b7280') + ';">' + txt + '</button>';
+  };
+  const total = snaps.length, shownN = shown.length;
+  const toolbar = document.createElement('div');
+  toolbar.style.cssText = 'display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;';
+  toolbar.innerHTML = btn('all', '全部') + btn('3m', '仅近三个月') + btn('1m', '仅近一个月') +
+    '<span style="font-size:11.5px;color:#9ca3af;margin-left:2px;">当前展示 ' + shownN + ' / ' + total + ' 周</span>';
+
   const wrap = document.createElement('div');
   wrap.style.cssText = 'overflow-x:auto;';
   el.innerHTML = "";  // 每次重渲染先清空，避免重复追加
+  el.appendChild(toolbar);
   el.appendChild(wrap);
   wrap.innerHTML = '<table style="width:100%;table-layout:fixed;border-collapse:collapse;">' +
     '<colgroup><col style="width:10%"><col style="width:14%"><col style="width:14%"><col style="width:31%"><col style="width:31%"></colgroup>' +
