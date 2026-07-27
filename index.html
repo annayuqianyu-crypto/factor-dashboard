@@ -11152,7 +11152,7 @@ function initMgmtPage() {
 // ── 管理看板 · 关键事件记录表 ──────────────────────────────────
 // 时间范围筛选：all=全部 / 3m=仅近三个月 / 1m=仅近一个月。
 // 基准日取最新一条快照日期（数据相对，不依赖系统时钟），避免跨设备/隔日打开时口径漂移。
-let _mgmtEventRange = 'all';
+let _mgmtEventRange = '1m';   // 默认只看近一个月，降低人类团队查看噪声；可点「全部」展开
 let _mgmtEventSnaps = [];
 
 function _mgmtFilterByRange(snaps, range) {
