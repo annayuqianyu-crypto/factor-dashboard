@@ -8,7 +8,7 @@
 
 <meta name="viewport" content="width=1200"/>
 
-<meta name="zx-dashboard-build" content="2026-07-27-pain-910"/>
+<meta name="zx-dashboard-build" content="2026-08-03-pain-962"/>
 
 <title>朝曦家办·产品中心 · 数据驾驶舱</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232d6a4f'/%3E%3Cpath d='M9 22 Q9 10 16 8 Q23 10 23 22' stroke='%23b7e4c7' stroke-width='1.5' fill='none'/%3E%3Cpath d='M16 8 L16 24' stroke='%2374c69d' stroke-width='1.5'/%3E%3Cpath d='M16 14 Q11 12 9 15' stroke='%2395d5b2' stroke-width='1.2' fill='none'/%3E%3Cpath d='M16 18 Q21 15 23 18' stroke='%2395d5b2' stroke-width='1.2' fill='none'/%3E%3C/svg%3E"/>
@@ -3076,7 +3076,7 @@ body {
 
   <span class="subtitle">数据驾驶舱</span>
 
-  <span class="badge">数据截至 2026-07-27</span>
+  <span class="badge">数据截至 2026-08-03</span>
 
 </div>
 
@@ -9071,8 +9071,8 @@ const PAIN_BU_DATA = [
   {
     key: 'cm',
     name: 'CM 资本市场',
-    value: 146,
-    delta: 2,
+    value: 172,
+    delta: 26,
     color: '#2563eb',
     soft: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
     fill: 'linear-gradient(90deg, #60a5fa 0%, #2563eb 100%)',
@@ -9081,8 +9081,8 @@ const PAIN_BU_DATA = [
   {
     key: 'tax',
     name: 'Tax 税务',
-    value: 349,
-    delta: 9,
+    value: 374,
+    delta: 25,
     color: '#e11d48',
     soft: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)',
     fill: 'linear-gradient(90deg, #fb7185 0%, #e11d48 100%)',
@@ -9091,8 +9091,8 @@ const PAIN_BU_DATA = [
   {
     key: 'legal',
     name: 'Legal 法律',
-    value: 415,
-    delta: 55,
+    value: 416,
+    delta: 1,
     color: '#9333ea',
     soft: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
     fill: 'linear-gradient(90deg, #c084fc 0%, #9333ea 100%)',
@@ -11003,6 +11003,13 @@ const MGMT_WEEKLY = [
     notePain: '已上线痛点总数910条：本周净增法律+55、税务+9、资本+2。',
     noteScene: '',
     noteSku: '' },
+  { date: '2026-08-03', factors: 1706, pains: 962, scenes: 631, sku: 312,
+    newCM: 26, newLegal: 1, newTax: 25, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
+    note: '已上线小程序痛点同步：总数910 → 962条，本周净增52条，其中资本+26、税务+25、法律+1。',
+    noteFactor: '',
+    notePain: '已上线痛点总数962条：本周净增资本+26、税务+25、法律+1。',
+    noteScene: '',
+    noteSku: '' },
 ];
 
 function _mgmtResolve(snap) {
@@ -11026,7 +11033,7 @@ function _mgmtDeltaBadge(delta, colorPos) {
 // 规则：以 date 为键，当前数据版本内用户编辑版优先；代码固化新口径后自动失效旧缓存。
 const MGMT_WEEKLY_USER_KEY = 'mgmt_weekly_user';
 const MGMT_WEEKLY_USER_VERSION_KEY = 'mgmt_weekly_user_version';
-const MGMT_WEEKLY_DATA_VERSION = '2026-07-27-mgmt-pain-910';
+const MGMT_WEEKLY_DATA_VERSION = '2026-08-03-mgmt-pain-962';
 function _mgmtGetWeekly() {
   let user = null;
   try {
