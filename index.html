@@ -7005,7 +7005,7 @@ body {
 
   // 展示与统计一律走这里，已合并场景不再单独出现
   const HGJ_LIVE = ALL_HGJ_DATA.filter(d => !d._isMerged && !d._isDropped);
-  window._mgmtSceneStats = { scenes: HGJ_LIVE.length, meetings: new Set(HGJ_LIVE.map(d => d.file)).size };
+  window._mgmtSceneStats = { scenes: HGJ_LIVE.length, meetings: new Set(ALL_HGJ_DATA.map(d => d.file)).size };
 
   // 对每个场景卡片，找出全量会议中所有含相同tag的文件（去重）
   const TOTAL_FILES = new Set(HGJ_LIVE.map(d=>d.file)).size;
@@ -7110,7 +7110,10 @@ body {
   }
 
   function updateHgjSummary(){
-    const totalMeetings = new Set(HGJ_LIVE.map(d=>d.file)).size;
+    // 会议总数 = 进过场景库的独立会议纪要份数，按 ALL_HGJ_DATA（含少数只留题目、
+    // 场景已作废的会议）统计 = 302，与去重案例库口径一致；
+    // 场景数/分类数仍按 HGJ_LIVE（展示口径，已排除合并/作废场景）。
+    const totalMeetings = new Set(ALL_HGJ_DATA.map(d=>d.file)).size;
     const counts = {};
     HGJ_LIVE.forEach(d=>{ counts[d.cat] = (counts[d.cat]||0)+1; });
     const noveltyHigh = HGJ_LIVE.filter(d=>d.novelty==='高').length;
@@ -7126,7 +7129,7 @@ body {
     const desc = document.getElementById('hgjPageDesc');
     if(desc){
       const bySource = {};
-      HGJ_LIVE.forEach(d=>{
+      ALL_HGJ_DATA.forEach(d=>{
         if(!bySource[d.source]) bySource[d.source] = new Set();
         bySource[d.source].add(d.file);
       });
