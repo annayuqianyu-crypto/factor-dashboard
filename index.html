@@ -3002,7 +3002,7 @@ body {
     <!-- 表单 -->
     <div style="margin-bottom:16px;">
       <label style="font-size:13px;color:#475569;font-weight:600;display:block;margin-bottom:6px;">企业邮箱</label>
-      <input id="loginEmail" type="email" placeholder="xxx@zxpro.com.cn" autocomplete="username"
+      <input id="loginEmail" type="email" placeholder="xxx@zxpro.com.cn" autocomplete="off" data-lpignore="true" data-1p-ignore
         style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:11px 14px;
                font-size:14px;color:#1e293b;outline:none;transition:border .15s;"
         onfocus="this.style.borderColor='#1a56db'"
@@ -3011,7 +3011,7 @@ body {
     </div>
     <div style="margin-bottom:24px;">
       <label style="font-size:13px;color:#475569;font-weight:600;display:block;margin-bottom:6px;">登录密码</label>
-      <input id="loginPwd" type="password" placeholder="请输入密码" autocomplete="current-password"
+      <input id="loginPwd" type="password" placeholder="请输入密码" autocomplete="new-password" data-lpignore="true" data-1p-ignore
         style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:11px 14px;
                font-size:14px;color:#1e293b;outline:none;transition:border .15s;"
         onfocus="this.style.borderColor='#1a56db'"
@@ -3038,6 +3038,20 @@ body {
 
 <script>
 (function(){
+  const LOGIN_KEY = 'zx_login_last';
+  // 由本页自己记住上次登录的邮箱+密码并回填，不依赖浏览器密码管理器
+  // （同源另有 DeepSeek API Key 输入框，浏览器会把它错填进登录框，故这里改为页面自管）。
+  // 说明：登录是纯前端团队门禁，口令本就明文写在页面源码里，localStorage 记忆不额外增加暴露面。
+  (function prefillLogin(){
+    try {
+      const saved = JSON.parse(localStorage.getItem(LOGIN_KEY) || 'null');
+      if(saved && saved.email){
+        const e = document.getElementById('loginEmail'); if(e) e.value = saved.email;
+        const p = document.getElementById('loginPwd');   if(p && saved.pwd) p.value = saved.pwd;
+      }
+    } catch(e){}
+  })();
+
   // 会话内已登录则直接隐藏遮罩
   if(sessionStorage.getItem('zx_auth')==='ok'){
     document.getElementById('loginMask').style.display='none';
@@ -3057,6 +3071,8 @@ body {
     if(pwd !== 'ZXpro@2026'){
       err.textContent='密码错误，请重新输入'; err.style.display='block'; return;
     }
+    // 登录成功：记住本次账密，供同一浏览器下次自动回填
+    try { localStorage.setItem(LOGIN_KEY, JSON.stringify({ email, pwd })); } catch(e){}
     sessionStorage.setItem('zx_auth','ok');
     const mask = document.getElementById('loginMask');
     mask.style.transition='opacity .3s';
@@ -8113,7 +8129,8 @@ body {
 
           <div style="font-size:11px;color:#374151;font-weight:600;margin-bottom:4px;">DeepSeek API Key（sk-... ，输入后自动保存）</div>
 
-          <input id="apiKeyInput" type="password"
+          <input id="apiKeyInput" type="password" name="deepseek_api_key"
+            autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other"
 
             placeholder="填写 DeepSeek API Key（sk-...）"
 
