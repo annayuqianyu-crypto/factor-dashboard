@@ -11067,7 +11067,7 @@ const MGMT_WEEKLY = [
     notePain: '已上线痛点总数962条：本周净增资本+26、税务+25、法律+1。',
     noteScene: '',
     noteSku: '',
-    noteCase: '慧管家真实咨询脱敏结构化案例库接入：302 例（一会一案，已脱敏/去口水/逻辑重排），四维标签归一至因子库受控节点，与痛点库同一套 L/T/C。' },
+    noteCase: '真实脱敏案例接入 302 例' },
 ];
 
 function _mgmtResolve(snap) {
@@ -11091,7 +11091,7 @@ function _mgmtDeltaBadge(delta, colorPos) {
 // 规则：以 date 为键，当前数据版本内用户编辑版优先；代码固化新口径后自动失效旧缓存。
 const MGMT_WEEKLY_USER_KEY = 'mgmt_weekly_user';
 const MGMT_WEEKLY_USER_VERSION_KEY = 'mgmt_weekly_user_version';
-const MGMT_WEEKLY_DATA_VERSION = '2026-08-03-mgmt-pain-962-factor-1851-case-302';
+const MGMT_WEEKLY_DATA_VERSION = '2026-08-07-mgmt-pain-962-factor-1851-case-302-notecase';
 function _mgmtGetWeekly() {
   let user = null;
   try {
