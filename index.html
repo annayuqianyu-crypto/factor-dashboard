@@ -3355,7 +3355,7 @@ body {
     <div class="three-col" style="grid-template-columns:1fr 1fr 1fr 1fr;">
       <div style="background:#eff6ff;border-radius:8px;padding:13px 15px;">
         <div style="font-size:13px;font-weight:600;color:#1d4ed8;margin-bottom:5px;" data-ek="cal-factor-name">🧬 因子</div>
-        <div style="font-size:12px;color:#374151;line-height:1.65;" data-ek="cal-factor-desc">C端因子库主表行数（当前 202607 / v6.2 月更版，15 个属性维度）。</div>
+        <div style="font-size:12px;color:#374151;line-height:1.65;" data-ek="cal-factor-desc">C端因子库主表行数（当前 202608 / v6.4 清理版，15 个属性维度）。</div>
       </div>
       <div style="background:#f0fdf4;border-radius:8px;padding:13px 15px;">
         <div style="font-size:13px;font-weight:600;color:#15803d;margin-bottom:5px;" data-ek="cal-scene-name">📡 场景</div>
@@ -3398,11 +3398,11 @@ body {
 
     <div class="kpi-card">
 
-      <div class="kpi-value">1706</div>
+      <div class="kpi-value">1851</div>
 
       <div class="kpi-label">因子总数</div>
 
-      <div class="kpi-sub">较 v6.1 月度新增 +298 行</div>
+      <div class="kpi-sub">v6.4 清理版：案例反哺 +145 · 去冗余清理</div>
 
     </div>
 
@@ -8531,9 +8531,9 @@ body {
 
 const DIM_CODES   = ["L1.1A", "L1.1B", "L3.1", "L4.1", "L4.2", "L4.3", "L5.1", "L5.2", "L6.1", "L6.2", "L6.3", "L6.4", "L6.5", "L6.6", "L6.7"];
 
-const DIM_NAMES   = ["商业/职业身份", "家庭角色", "企业资本阶段", "财富标的(一级)", "财富标的(二级)", "财富规模特征", "持有形式", "治理/隐性状态", "资本动作", "税务合规", "身份规划", "架构搭建", "成长动作", "健康状况", "法律风险动作"];
+const DIM_NAMES   = ["商业/职业身份", "家庭角色", "企业资本阶段", "财富标的所在地", "财富标的", "财富量级", "显性持有形式", "治理/隐性状态", "资本动作", "税务合规", "身份规划", "架构搭建", "成长动作", "生活/健康动作", "法律风险动作"];
 
-const DIM_COUNTS  = [161, 73, 38, 13, 172, 7, 38, 62, 166, 299, 431, 129, 12, 32, 73];
+const DIM_COUNTS  = [165, 73, 38, 13, 192, 7, 38, 62, 178, 362, 450, 129, 12, 32, 100];  // 202608 / v6.4 清理版，合计 1851
 
 const DIM_GROUPS  = ["主体", "主体", "资产", "资产", "资产", "资产", "资产", "资产", "动作", "约束", "动作", "动作", "动作", "动作", "约束"];
 
@@ -11023,10 +11023,10 @@ const MGMT_WEEKLY = [
     notePain: '已上线痛点总数910条：本周净增法律+55、税务+9、资本+2。',
     noteScene: '',
     noteSku: '' },
-  { date: '2026-08-03', factors: 1706, pains: 962, scenes: 631, sku: 312,
+  { date: '2026-08-03', factors: 1851, pains: 962, scenes: 631, sku: 312,
     newCM: 26, newLegal: 1, newTax: 25, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
     note: '已上线小程序痛点同步：总数910 → 962条，本周净增52条，其中资本+26、税务+25、法律+1。',
-    noteFactor: '',
+    noteFactor: 'C端因子库升级 v6.4 清理版：1707 → 1851 行（案例反哺 +145、并全库去冗余清理，L4.2 资产类型改为单一级+16二级）。',
     notePain: '已上线痛点总数962条：本周净增资本+26、税务+25、法律+1。',
     noteScene: '',
     noteSku: '' },
@@ -11053,7 +11053,7 @@ function _mgmtDeltaBadge(delta, colorPos) {
 // 规则：以 date 为键，当前数据版本内用户编辑版优先；代码固化新口径后自动失效旧缓存。
 const MGMT_WEEKLY_USER_KEY = 'mgmt_weekly_user';
 const MGMT_WEEKLY_USER_VERSION_KEY = 'mgmt_weekly_user_version';
-const MGMT_WEEKLY_DATA_VERSION = '2026-08-03-mgmt-pain-962';
+const MGMT_WEEKLY_DATA_VERSION = '2026-08-03-mgmt-pain-962-factor-1851';
 function _mgmtGetWeekly() {
   let user = null;
   try {
@@ -11097,7 +11097,7 @@ function initMgmtPage() {
       : _mgmtDeltaBadge(skuLatest - skuPrev, '#7c3aed')) + '<span style="font-size:10px;color:#9ca3af;font-weight:400;"> 月增</span>');
 
   const sceneMeetings = window._mgmtSceneStats ? window._mgmtSceneStats.meetings : '—';
-  set('mgmt-factor-sub', `1706条因子覆盖C端高净值客户 15 个分析维度，按月更新<br>主体/资产/动作/约束 四维链路形成痛点`);
+  set('mgmt-factor-sub', `1851条因子覆盖C端高净值客户 15 个分析维度，按月更新<br>主体/资产/动作/约束 四维链路形成痛点`);
   set('mgmt-pain-sub',   `PLM痛点协作平台持续迭代，痛点持续修改中`);
   set('mgmt-scene-sub',  '覆盖 2025-2026年 302 场HGJ会议纪要，按月更新<br>202606新增慧管家纪要已完成全口径场景蒸馏');
   set('mgmt-sku-sub',    'Tax 197 / Legal 62 / CM 53<br>知识卡片存量数据，BU研发后实时更新');
