@@ -3274,13 +3274,13 @@ body {
       <div id="mgmt-sku-sub" data-ek="kpi-sku-sub" style="font-size:12px;color:#6d28d9;line-height:1.7;"></div>
     </div>
 
-    <div style="background:linear-gradient(135deg,#f0fdfa,#ccfbf1);border:1px solid #99f6e4;border-radius:14px;padding:20px 22px;">
+    <div style="background:linear-gradient(135deg,#fff7ed,#ffedd5);border:1px solid #fed7aa;border-radius:14px;padding:20px 22px;">
       <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div style="font-size:13px;font-weight:700;color:#0f766e;" data-ek="kpi-case-name">📁 案例库</div>
+        <div style="font-size:13px;font-weight:700;color:#ea580c;" data-ek="kpi-case-name">📁 案例库</div>
         <span id="mgmt-case-delta" style="font-size:12px;font-weight:700;"></span>
       </div>
-      <div id="mgmt-case-total" style="font-size:34px;font-weight:800;color:#134e4a;margin:10px 0 4px;">—</div>
-      <div id="mgmt-case-sub" data-ek="kpi-case-sub" style="font-size:12px;color:#0f766e;line-height:1.7;"></div>
+      <div id="mgmt-case-total" style="font-size:34px;font-weight:800;color:#7c2d12;margin:10px 0 4px;">—</div>
+      <div id="mgmt-case-sub" data-ek="kpi-case-sub" style="font-size:12px;color:#ea580c;line-height:1.7;"></div>
     </div>
 
   </div>
@@ -3328,7 +3328,7 @@ body {
           <th colspan="2" style="text-align:center;background:#f0fdf4;color:#15803d;">📡 场景</th>
           <th colspan="5" style="text-align:center;background:#fee2e2;color:#991b1b;border-left:2px solid #fca5a5;border-right:2px solid #fca5a5;">💢 痛点</th>
           <th colspan="5" style="text-align:center;background:#f3e8ff;color:#6b21a8;border-right:2px solid #c4b5fd;">🧪 SKU</th>
-          <th colspan="2" style="text-align:center;background:#f0fdfa;color:#0f766e;border-right:2px solid #99f6e4;">📁 案例</th>
+          <th colspan="2" style="text-align:center;background:#fff7ed;color:#ea580c;border-right:2px solid #fed7aa;">📁 案例</th>
                   </tr>
         <tr>
           <th style="background:#f8fbff;">总数</th><th style="background:#f8fbff;">周增</th>
@@ -3343,8 +3343,8 @@ body {
           <th style="background:#faf5ff;color:#1d4ed8;white-space:nowrap;font-size:11.5px;">CM 新增</th>
           <th style="background:#faf5ff;color:#15803d;white-space:nowrap;font-size:11.5px;">Legal 新增</th>
           <th style="background:#faf5ff;color:#c2410c;white-space:nowrap;font-size:11.5px;border-right:2px solid #c4b5fd;">Tax 新增</th>
-          <th style="background:#f0fdfa;">总数</th>
-          <th style="background:#f0fdfa;border-right:2px solid #99f6e4;">周增</th>
+          <th style="background:#fff7ed;">总数</th>
+          <th style="background:#fff7ed;border-right:2px solid #fed7aa;">周增</th>
         </tr>
       </thead>
       <tbody id="mgmt-week-table"></tbody>
@@ -11141,7 +11141,7 @@ function initMgmtPage() {
   set('mgmt-case-total', caseLatest == null ? '—' : caseLatest.toLocaleString());
   set('mgmt-case-delta', (caseLatest == null ? '' :
       (casePrev == null ? '<span style="color:#9ca3af;">新增资产</span>'
-       : _mgmtDeltaBadge(caseLatest - casePrev, '#0f766e')) + '<span style="font-size:10px;color:#9ca3af;font-weight:400;"> 较上期</span>'));
+       : _mgmtDeltaBadge(caseLatest - casePrev, '#ea580c')) + '<span style="font-size:10px;color:#9ca3af;font-weight:400;"> 较上期</span>'));
   set('mgmt-case-sub', '真实客户脱敏案例<br>按渠道/主导轴/因子节点可分类检索');
 
   const sceneMeetings = window._mgmtSceneStats ? window._mgmtSceneStats.meetings : '—';
@@ -11176,8 +11176,8 @@ function initMgmtPage() {
           itemStyle: { color: '#A855F7' }, lineStyle: { width: 3 }, symbolSize: 8,
           label: { show: true, fontSize: 10, color: '#7c3aed', position: 'bottom', distance: 8 } },
         { name: '案例',     type: 'line', data: snaps.map(s => s.cases != null ? s.cases : null), smooth: true, connectNulls: true,
-          itemStyle: { color: '#14b8a6' }, lineStyle: { width: 3 }, symbolSize: 8,
-          label: { show: true, fontSize: 10, color: '#0f766e', position: 'top', distance: 8 } },
+          itemStyle: { color: '#f97316' }, lineStyle: { width: 3 }, symbolSize: 8,
+          label: { show: true, fontSize: 10, color: '#ea580c', position: 'top', distance: 8 } },
       ],
     });
   }
@@ -11211,8 +11211,8 @@ function initMgmtPage() {
         <td style="background:#faf5ff;"><span class="mgmt-wk" data-idx="${i}" data-f="newSkuCM"    style="color:#1d4ed8;font-weight:600;">${s.newSkuCM    == null ? '—' : s.newSkuCM}</span></td>
         <td style="background:#faf5ff;"><span class="mgmt-wk" data-idx="${i}" data-f="newSkuLegal" style="color:#15803d;font-weight:600;">${s.newSkuLegal == null ? '—' : s.newSkuLegal}</span></td>
         <td style="background:#faf5ff;border-right:2px solid #c4b5fd;"><span class="mgmt-wk" data-idx="${i}" data-f="newSkuTax" style="color:#c2410c;font-weight:600;">${s.newSkuTax == null ? '—' : s.newSkuTax}</span></td>
-        <td style="background:#f0fdfa;"><strong class="mgmt-wk" data-idx="${i}" data-f="cases" style="color:#134e4a;">${s.cases == null ? '—' : s.cases.toLocaleString()}</strong></td>
-        <td style="background:#f0fdfa;border-right:2px solid #99f6e4;">${s.cases == null ? '—' : d(s.cases, (p && p.cases != null) ? p.cases : s.cases)}</td>
+        <td style="background:#fff7ed;"><strong class="mgmt-wk" data-idx="${i}" data-f="cases" style="color:#7c2d12;">${s.cases == null ? '—' : s.cases.toLocaleString()}</strong></td>
+        <td style="background:#fff7ed;border-right:2px solid #fed7aa;">${s.cases == null ? '—' : d(s.cases, (p && p.cases != null) ? p.cases : s.cases)}</td>
 
       </tr>`;
     }).reverse();
@@ -11259,7 +11259,7 @@ function renderMgmtEvents(snaps) {
     { f: 'noteScene',  lbl: '📡 场景',   color: '#15803d', bg: '#f0fdf4', border: '#bbf7d0' },
     { f: 'notePain',   lbl: '💢 痛点库', color: '#dc2626', bg: '#fef2f2', border: '#fecaca' },
     { f: 'noteSku',    lbl: '🧪 SKU库',  color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe' },
-    { f: 'noteCase',   lbl: '📁 案例库', color: '#0f766e', bg: '#f0fdfa', border: '#99f6e4' },
+    { f: 'noteCase',   lbl: '📁 案例库', color: '#ea580c', bg: '#fff7ed', border: '#fed7aa' },
   ];
   const shown = _mgmtFilterByRange(snaps, _mgmtEventRange);
   const rows = [...shown].reverse().map((s, revIdx) => {
