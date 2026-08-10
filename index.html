@@ -11335,8 +11335,16 @@ const MGMT_EDIT_KEY = 'mgmt_copy_overrides';
 let _mgmtEditMode = false;
 
 function _mgmtGetOverrides() {
-  try { return JSON.parse(localStorage.getItem(MGMT_EDIT_KEY) || '{}'); }
+  let ov;
+  try { ov = JSON.parse(localStorage.getItem(MGMT_EDIT_KEY) || '{}'); }
   catch { return {}; }
+  // 自愈：清除历史遗留的 cal-factor-desc「v6.2/202607」旧文案覆盖
+  // （源码已固定为 202608 / v6.4 清理版；旧覆盖会在编辑导出时反复带出 v6.2，此处加载即自动purge）
+  if (ov && typeof ov['cal-factor-desc'] === 'string' && /v6\.2|202607/.test(ov['cal-factor-desc'])) {
+    delete ov['cal-factor-desc'];
+    try { localStorage.setItem(MGMT_EDIT_KEY, JSON.stringify(ov)); } catch {}
+  }
+  return ov;
 }
 
 function mgmtApplyOverrides() {
