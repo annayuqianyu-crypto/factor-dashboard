@@ -11214,7 +11214,7 @@ function initMgmtPage() {
       return `<tr${i === snaps.length - 1 ? ' style="background:#fffbeb;"' : ''}>
         <td style="white-space:nowrap;">
           <button class="mgmt-wk-del" onclick="mgmtDeleteWeek(${i})" title="删除这一周"
-            style="display:none;margin-right:5px;padding:1px 7px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:4px;font-size:11px;cursor:pointer;">✕</button><span class="mgmt-wk" data-idx="${i}" data-f="date">${s.date}</span>${i === snaps.length - 1 ? ' <span class="tag tag-new" style="font-size:10px;">最新</span>' : ''}
+            style="display:none;margin-right:5px;padding:1px 7px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:4px;font-size:11px;cursor:pointer;">✕</button><span class="mgmt-wk" data-idx="${i}" data-f="date">${s.date}</span>${i === snaps.length - 1 ? '<br><span class="tag tag-new" style="font-size:10px;margin-top:3px;display:inline-block;">最新</span>' : ''}
         </td>
         <td><strong class="mgmt-wk" data-idx="${i}" data-f="factors">${s.factors.toLocaleString()}</strong></td><td>${d(s.factors, p?.factors)}</td>
         <td><strong class="mgmt-wk" data-idx="${i}" data-f="scenes">${s.scenes.toLocaleString()}</strong></td><td>${d(s.scenes, p?.scenes)}</td>
