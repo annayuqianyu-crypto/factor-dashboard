@@ -8,7 +8,7 @@
 
 <meta name="viewport" content="width=1200"/>
 
-<meta name="zx-dashboard-build" content="2026-08-03-pain-962"/>
+<meta name="zx-dashboard-build" content="2026-08-10-pain-980"/>
 
 <title>朝曦家办·产品中心 · 数据驾驶舱</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232d6a4f'/%3E%3Cpath d='M9 22 Q9 10 16 8 Q23 10 23 22' stroke='%23b7e4c7' stroke-width='1.5' fill='none'/%3E%3Cpath d='M16 8 L16 24' stroke='%2374c69d' stroke-width='1.5'/%3E%3Cpath d='M16 14 Q11 12 9 15' stroke='%2395d5b2' stroke-width='1.2' fill='none'/%3E%3Cpath d='M16 18 Q21 15 23 18' stroke='%2395d5b2' stroke-width='1.2' fill='none'/%3E%3C/svg%3E"/>
@@ -3103,7 +3103,7 @@ body {
 
   <span class="subtitle">数据驾驶舱</span>
 
-  <span class="badge">数据截至 2026-08-03</span>
+  <span class="badge">数据截至 2026-08-10</span>
 
 </div>
 
@@ -8585,7 +8585,7 @@ const DIM_GROUPS  = ["主体", "主体", "资产", "资产", "资产", "资产",
 
 const PAIN_LABELS = ["税务合规", "身份/海外税务", "境外架构", "股权激励", "综合/其他", "资产保护", "资本市场", "法律架构", "财富传承", "慈善公益"];
 
-const PAIN_VALUES = [52, 75, 78, 139, 0, 42, 225, 46, 71, 9];
+const PAIN_VALUES = [218, 63, 102, 152, 26, 122, 84, 109, 87, 17];
 
 const VER_NEW     = {"L1.1A": 165, "L1.1B": 73, "L3.1": 38, "L4.1": 13, "L4.2": 192, "L4.3": 7, "L5.1": 38, "L5.2": 62, "L6.1": 178, "L6.2": 362, "L6.3": 450, "L6.4": 129, "L6.5": 12, "L6.6": 32, "L6.7": 100};  // 202608 / v6.4 清理版
 
@@ -9137,8 +9137,8 @@ const PAIN_BU_DATA = [
   {
     key: 'cm',
     name: 'CM 资本市场',
-    value: 172,
-    delta: 26,
+    value: 183,
+    delta: 11,
     color: '#2563eb',
     soft: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
     fill: 'linear-gradient(90deg, #60a5fa 0%, #2563eb 100%)',
@@ -9147,8 +9147,8 @@ const PAIN_BU_DATA = [
   {
     key: 'tax',
     name: 'Tax 税务',
-    value: 374,
-    delta: 25,
+    value: 381,
+    delta: 7,
     color: '#e11d48',
     soft: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)',
     fill: 'linear-gradient(90deg, #fb7185 0%, #e11d48 100%)',
@@ -9158,7 +9158,7 @@ const PAIN_BU_DATA = [
     key: 'legal',
     name: 'Legal 法律',
     value: 416,
-    delta: 1,
+    delta: 0,
     color: '#9333ea',
     soft: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
     fill: 'linear-gradient(90deg, #c084fc 0%, #9333ea 100%)',
@@ -11077,6 +11077,14 @@ const MGMT_WEEKLY = [
     noteScene: '',
     noteSku: '',
     noteCase: '真实脱敏案例接入 302 例' },
+  { date: '2026-08-10', factors: 1851, pains: 980, scenes: 631, sku: 312, cases: 302,
+    newCM: 11, newLegal: 0, newTax: 7, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
+    note: '已上线小程序痛点同步：总数962 → 980条，本周净增18条，其中资本+11、税务+7、法律+0。',
+    noteFactor: '',
+    notePain: '已上线痛点总数980条：本周净增资本+11、税务+7、法律+0。',
+    noteScene: '',
+    noteSku: '',
+    noteCase: '' },
 ];
 
 function _mgmtResolve(snap) {
@@ -11100,7 +11108,7 @@ function _mgmtDeltaBadge(delta, colorPos) {
 // 规则：以 date 为键，当前数据版本内用户编辑版优先；代码固化新口径后自动失效旧缓存。
 const MGMT_WEEKLY_USER_KEY = 'mgmt_weekly_user';
 const MGMT_WEEKLY_USER_VERSION_KEY = 'mgmt_weekly_user_version';
-const MGMT_WEEKLY_DATA_VERSION = '2026-08-07-mgmt-pain-962-factor-1851-case-302-notecase';
+const MGMT_WEEKLY_DATA_VERSION = '2026-08-10-mgmt-pain-980-factor-1851-case-302-painvalues';
 function _mgmtGetWeekly() {
   let user = null;
   try {
