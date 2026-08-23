@@ -9141,8 +9141,8 @@ const PAIN_BU_DATA = [
   {
     key: 'cm',
     name: 'CM 资本市场',
-    value: 183,
-    delta: 0,
+    value: 181,
+    delta: -2,
     color: '#2563eb',
     soft: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
     fill: 'linear-gradient(90deg, #60a5fa 0%, #2563eb 100%)',
@@ -9151,8 +9151,8 @@ const PAIN_BU_DATA = [
   {
     key: 'tax',
     name: 'Tax 税务',
-    value: 398,
-    delta: 17,
+    value: 417,
+    delta: 19,
     color: '#e11d48',
     soft: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)',
     fill: 'linear-gradient(90deg, #fb7185 0%, #e11d48 100%)',
@@ -9166,7 +9166,7 @@ const PAIN_BU_DATA = [
     color: '#9333ea',
     soft: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
     fill: 'linear-gradient(90deg, #c084fc 0%, #9333ea 100%)',
-    note: '法律架构、资产保护、财富传承与慈善公益覆盖最深，是当前痛点主库中占比最高的 BU。'
+    note: '法律架构、资产保护、财富传承与慈善公益覆盖稳定，是当前痛点主库中体量最大的核心板块之一。'
   }
 ];
 
@@ -10665,7 +10665,9 @@ function renderPainBuPanel(targetId = 'chart-bu-bar') {
     <div class="pain-bu-grid">
       ${PAIN_BU_DATA.map(item => {
         const pct = (item.value / total * 100).toFixed(1);
-        const deltaText = item.delta > 0 ? `最近一轮新增 +${item.delta} 条。` : '最近一轮无新增。';
+        const deltaText = item.delta > 0
+          ? `最近一轮净增 +${item.delta} 条。`
+          : (item.delta < 0 ? `最近一轮同步口径净减少 ${Math.abs(item.delta)} 条。` : '最近一轮无变化。');
         return `
           <div class="pain-bu-mini" style="background:${item.soft};">
             <div class="pain-bu-mini-top">
@@ -11097,6 +11099,14 @@ const MGMT_WEEKLY = [
     noteScene: '',
     noteSku: '',
     noteCase: '' },
+  { date: '2026-08-24', factors: 1851, pains: 1014, scenes: 631, sku: 312, cases: 302,
+    newCM: -2, newLegal: 0, newTax: 19, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
+    note: '已上线小程序痛点同步：总数997 → 1014条，本周净增17条，其中税务+19、法律持平、资本同步口径净减少2条。',
+    noteFactor: '',
+    notePain: '已上线痛点总数1014条：本周税务净增19条、法律持平，资本因同步口径调整净减少2条，合计净增17条。',
+    noteScene: '',
+    noteSku: '',
+    noteCase: '' },
 ];
 
 function _mgmtResolve(snap) {
@@ -11120,7 +11130,7 @@ function _mgmtDeltaBadge(delta, colorPos) {
 // 规则：以 date 为键，当前数据版本内用户编辑版优先；代码固化新口径后自动失效旧缓存。
 const MGMT_WEEKLY_USER_KEY = 'mgmt_weekly_user';
 const MGMT_WEEKLY_USER_VERSION_KEY = 'mgmt_weekly_user_version';
-const MGMT_WEEKLY_DATA_VERSION = '2026-08-17-mgmt-pain-997-factor-1851-case-302-painvalues';
+const MGMT_WEEKLY_DATA_VERSION = '2026-08-24-mgmt-pain-1014-factor-1851-case-302';
 function _mgmtGetWeekly() {
   let user = null;
   try {
