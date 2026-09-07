@@ -9142,7 +9142,7 @@ const PAIN_BU_DATA = [
     key: 'cm',
     name: 'CM 资本市场',
     value: 183,
-    delta: 2,
+    delta: 0,
     color: '#2563eb',
     soft: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
     fill: 'linear-gradient(90deg, #60a5fa 0%, #2563eb 100%)',
@@ -9151,8 +9151,8 @@ const PAIN_BU_DATA = [
   {
     key: 'tax',
     name: 'Tax 税务',
-    value: 425,
-    delta: 8,
+    value: 435,
+    delta: 10,
     color: '#e11d48',
     soft: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)',
     fill: 'linear-gradient(90deg, #fb7185 0%, #e11d48 100%)',
@@ -11115,6 +11115,14 @@ const MGMT_WEEKLY = [
     noteScene: '',
     noteSku: '',
     noteCase: '' },
+  { date: '2026-09-07', factors: 1851, pains: 1034, scenes: 631, sku: 312, cases: 302,
+    newCM: 0, newLegal: 0, newTax: 10, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
+    note: '已上线小程序痛点同步：总数1024 → 1034条，本周税务净增10条，法律、资本持平。',
+    noteFactor: '',
+    notePain: '已上线痛点总数1034条：本周税务新增10条，法律、资本持平。新增涉及投资税务尽调与退出税负、VIE拆除、并购税务处理、上市前税务规范与股权激励备案、实控人老股转让。',
+    noteScene: '',
+    noteSku: '',
+    noteCase: '' },
 ];
 
 function _mgmtResolve(snap) {
@@ -11138,7 +11146,7 @@ function _mgmtDeltaBadge(delta, colorPos) {
 // 规则：以 date 为键，当前数据版本内用户编辑版优先；代码固化新口径后自动失效旧缓存。
 const MGMT_WEEKLY_USER_KEY = 'mgmt_weekly_user';
 const MGMT_WEEKLY_USER_VERSION_KEY = 'mgmt_weekly_user_version';
-const MGMT_WEEKLY_DATA_VERSION = '2026-08-31-mgmt-pain-1024-factor-1851-case-302';
+const MGMT_WEEKLY_DATA_VERSION = '2026-09-07-mgmt-pain-1034-factor-1851-case-302';
 function _mgmtGetWeekly() {
   let user = null;
   try {
