@@ -11122,7 +11122,7 @@ const MGMT_WEEKLY = [
     notePain: '已上线痛点总数1034条：本周税务新增10条，法律、资本持平。新增涉及投资税务尽调与退出税负、VIE拆除、并购税务处理、上市前税务规范与股权激励备案、实控人老股转让。',
     noteScene: '',
     noteSku: '',
-    noteCase: '' },
+    noteCase: '已完成标签整理和案例脱敏提炼，陪练场训练数据（专家金句、关键转折）整理完毕。' },
 ];
 
 function _mgmtResolve(snap) {
@@ -11146,7 +11146,7 @@ function _mgmtDeltaBadge(delta, colorPos) {
 // 规则：以 date 为键，当前数据版本内用户编辑版优先；代码固化新口径后自动失效旧缓存。
 const MGMT_WEEKLY_USER_KEY = 'mgmt_weekly_user';
 const MGMT_WEEKLY_USER_VERSION_KEY = 'mgmt_weekly_user_version';
-const MGMT_WEEKLY_DATA_VERSION = '2026-09-07-mgmt-pain-1034-factor-1851-case-302';
+const MGMT_WEEKLY_DATA_VERSION = '2026-09-07-mgmt-pain-1034-factor-1851-case-302-training';
 function _mgmtGetWeekly() {
   let user = null;
   try {
