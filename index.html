@@ -3359,7 +3359,7 @@ body {
       <tbody id="mgmt-week-table"></tbody>
     </table>
     </div>
-    <div style="margin-top:8px;font-size:11.5px;color:#9ca3af;" data-ek="week-table-footnote">注：自 2026-06-10 开始统计各 BU 上线痛点 / SKU 数量变化；SKU 本期净变动为确认版本对账差额，不代表本周研发新增或下架；关键事件按五项资产分类填写。</div>
+    <div style="margin-top:8px;font-size:11.5px;color:#9ca3af;" data-ek="week-table-footnote">注：自 2026-06-10 开始统计各 BU 上线痛点 / SKU 数量变化；SKU 本期净变动为清理冗余后的版本差额，数量减少不代表专业能力减少；关键事件按五项资产分类填写。</div>
     <button id="mgmt-add-week-btn" onclick="mgmtAddWeek()"
       style="display:none;margin-top:12px;padding:7px 18px;background:#eff6ff;color:#1d4ed8;border:1px dashed #93c5fd;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;">
       ➕ 新增一周
@@ -11125,11 +11125,11 @@ const MGMT_WEEKLY = [
     noteCase: '已完成标签整理和案例脱敏提炼，陪练场训练数据（专家金句、关键转折）整理完毕。' },
   { date: '2026-09-14', factors: 1851, pains: 1055, scenes: 631, sku: 304, cases: 302,
     newCM: 0, newLegal: 0, newTax: 21, newSkuCM: 0, newSkuLegal: -8, newSkuTax: 0,
-    note: '已上线小程序痛点同步：总数1034 → 1055条，本周税务净增21条，法律、资本持平。SKU按BU确认版核对：312 → 304支，法律净减少8支，税务、资本持平。',
+    note: '已上线小程序痛点同步：总数1034 → 1055条，本周税务净增21条，法律、资本持平。SKU按BU确认版核对：312 → 304支，法律净减少8支，税务、资本持平。主要清理尚未经确认或实操中不显著的SKU，避免冗余，并非专业能力减少。',
     noteFactor: '',
     notePain: '已上线痛点总数1055条：本周税务21条由未同步转为已同步，法律、资本持平。新增涉及基金退出与持股税负、境外持股及外汇登记、企业税务合规与内控、双重税务居民、汇算清缴及返程投资分红协定待遇。',
     noteScene: '',
-    noteSku: 'SKU库更新至BU确认版304支：Tax 197、Legal 54、CM 53。与20260629底表按编号对账，新增收录常年法律顾问1支，旧版9支未在本版收录，净减少8支，均属Legal；其余303支知识卡片内容未变。本次为版本核对，不据此认定SKU下架。',
+    noteSku: 'SKU库完成清理去冗余，更新至BU确认版304支：Tax 197、Legal 54、CM 53。与20260629底表按编号对账，新增收录常年法律顾问1支，旧版9支不再收录，净减少8支，均属Legal；其余303支知识卡片内容未变。减少主要源于剔除尚未经确认或实操中不显著的SKU，避免冗余，并非专业能力减少。',
     noteCase: '' },
 ];
 
@@ -11154,7 +11154,7 @@ function _mgmtDeltaBadge(delta, colorPos) {
 // 规则：以 date 为键，当前数据版本内用户编辑版优先；代码固化新口径后自动失效旧缓存。
 const MGMT_WEEKLY_USER_KEY = 'mgmt_weekly_user';
 const MGMT_WEEKLY_USER_VERSION_KEY = 'mgmt_weekly_user_version';
-const MGMT_WEEKLY_DATA_VERSION = '2026-09-14-mgmt-pain-1055-factor-1851-case-302-sku-304';
+const MGMT_WEEKLY_DATA_VERSION = '2026-09-14-mgmt-pain-1055-factor-1851-case-302-sku-304-cleanup';
 function _mgmtGetWeekly() {
   let user = null;
   try {
