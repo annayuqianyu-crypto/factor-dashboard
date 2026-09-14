@@ -3348,10 +3348,10 @@ body {
           <th style="background:#fef2f2;color:#15803d;white-space:nowrap;font-size:11.5px;">Legal 新增</th>
           <th style="background:#fef2f2;color:#c2410c;white-space:nowrap;font-size:11.5px;border-right:2px solid #fca5a5;">Tax 新增</th>
           <th style="background:#faf5ff;">总数</th>
-          <th style="background:#faf5ff;">周增</th>
-          <th style="background:#faf5ff;color:#1d4ed8;white-space:nowrap;font-size:11.5px;">CM 新增</th>
-          <th style="background:#faf5ff;color:#15803d;white-space:nowrap;font-size:11.5px;">Legal 新增</th>
-          <th style="background:#faf5ff;color:#c2410c;white-space:nowrap;font-size:11.5px;border-right:2px solid #c4b5fd;">Tax 新增</th>
+          <th style="background:#faf5ff;">变动</th>
+          <th style="background:#faf5ff;color:#1d4ed8;white-space:nowrap;font-size:11.5px;">CM 变动</th>
+          <th style="background:#faf5ff;color:#15803d;white-space:nowrap;font-size:11.5px;">Legal 变动</th>
+          <th style="background:#faf5ff;color:#c2410c;white-space:nowrap;font-size:11.5px;border-right:2px solid #c4b5fd;">Tax 变动</th>
           <th style="background:#fff7ed;">总数</th>
           <th style="background:#fff7ed;border-right:2px solid #fed7aa;">周增</th>
         </tr>
@@ -3359,7 +3359,7 @@ body {
       <tbody id="mgmt-week-table"></tbody>
     </table>
     </div>
-    <div style="margin-top:8px;font-size:11.5px;color:#9ca3af;" data-ek="week-table-footnote">注：自 2026-06-10 开始统计各 BU 上线痛点 / SKU 新增数量；关键事件按因子 / 痛点 / 场景 / SKU / 案例 五项资产分类填写</div>
+    <div style="margin-top:8px;font-size:11.5px;color:#9ca3af;" data-ek="week-table-footnote">注：自 2026-06-10 开始统计各 BU 上线痛点 / SKU 数量变化；SKU 本期净变动为确认版本对账差额，不代表本周研发新增或下架；关键事件按五项资产分类填写。</div>
     <button id="mgmt-add-week-btn" onclick="mgmtAddWeek()"
       style="display:none;margin-top:12px;padding:7px 18px;background:#eff6ff;color:#1d4ed8;border:1px dashed #93c5fd;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;">
       ➕ 新增一周
@@ -3391,7 +3391,7 @@ body {
       </div>
       <div style="background:#f5f3ff;border-radius:8px;padding:13px 15px;">
         <div style="font-size:13px;font-weight:600;color:#7c3aed;margin-bottom:5px;" data-ek="cal-sku-name">🧪 SKU库</div>
-        <div style="font-size:12px;color:#374151;line-height:1.65;" data-ek="cal-sku-desc">以PLM中上线SKU为统计标准，BU 研发新增后实时更新。</div>
+        <div style="font-size:12px;color:#374151;line-height:1.65;" data-ek="cal-sku-desc">本期依据《全量SKU知识卡片-BU确认版本-304SKU》，按 SKU 编号去重统计304支；文件不含上线状态，上线数量需以PLM核验。</div>
       </div>
       <div style="background:#fff7ed;border-radius:8px;padding:13px 15px;">
         <div style="font-size:13px;font-weight:600;color:#ea580c;margin-bottom:5px;" data-ek="cal-case-name">📁 案例</div>
@@ -10986,11 +10986,11 @@ function initBusinessCharts() {
 
 // ============================================================
 
-// SKU库各BU分布（起点：全量SKU知识卡片-BU确认版本-20260629，共312支）
-const SKU_BU = { Tax: 197, Legal: 62, CM: 53, total: 312 };
+// SKU库各BU分布（2026-09-14按BU确认版本304SKU核对；编号前缀统一大小写并兼容无连字符）
+const SKU_BU = { Tax: 197, Legal: 54, CM: 53, total: 304 };
 
 // 周度快照（手工维护：每周追加一行；scenes 为 null 时实时读 ALL_HGJ_DATA）
-// 痛点/SKU口径：仅统计人工审核入库数；newXxxCM/Legal/Tax = 各BU当周新增（null=未追踪）
+// 痛点按已同步状态统计；SKU按BU确认版知识卡片统计，newSkuCM/Legal/Tax记录净变动（null=未追踪）。
 // 关键事件按四项数据资产分类：noteFactor 因子 / notePain 痛点 / noteScene 场景 / noteSku SKU
 const MGMT_WEEKLY = [
   { date: '2026-03-22', factors: 1216, pains: 299, scenes: 0, sku: null,
@@ -11123,13 +11123,13 @@ const MGMT_WEEKLY = [
     noteScene: '',
     noteSku: '',
     noteCase: '已完成标签整理和案例脱敏提炼，陪练场训练数据（专家金句、关键转折）整理完毕。' },
-  { date: '2026-09-14', factors: 1851, pains: 1055, scenes: 631, sku: 312, cases: 302,
-    newCM: 0, newLegal: 0, newTax: 21, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
-    note: '已上线小程序痛点同步：总数1034 → 1055条，本周税务净增21条，法律、资本持平。',
+  { date: '2026-09-14', factors: 1851, pains: 1055, scenes: 631, sku: 304, cases: 302,
+    newCM: 0, newLegal: 0, newTax: 21, newSkuCM: 0, newSkuLegal: -8, newSkuTax: 0,
+    note: '已上线小程序痛点同步：总数1034 → 1055条，本周税务净增21条，法律、资本持平。SKU按BU确认版核对：312 → 304支，法律净减少8支，税务、资本持平。',
     noteFactor: '',
     notePain: '已上线痛点总数1055条：本周税务21条由未同步转为已同步，法律、资本持平。新增涉及基金退出与持股税负、境外持股及外汇登记、企业税务合规与内控、双重税务居民、汇算清缴及返程投资分红协定待遇。',
     noteScene: '',
-    noteSku: '',
+    noteSku: 'SKU库更新至BU确认版304支：Tax 197、Legal 54、CM 53。与20260629底表按编号对账，新增收录常年法律顾问1支，旧版9支未在本版收录，净减少8支，均属Legal；其余303支知识卡片内容未变。本次为版本核对，不据此认定SKU下架。',
     noteCase: '' },
 ];
 
@@ -11154,7 +11154,7 @@ function _mgmtDeltaBadge(delta, colorPos) {
 // 规则：以 date 为键，当前数据版本内用户编辑版优先；代码固化新口径后自动失效旧缓存。
 const MGMT_WEEKLY_USER_KEY = 'mgmt_weekly_user';
 const MGMT_WEEKLY_USER_VERSION_KEY = 'mgmt_weekly_user_version';
-const MGMT_WEEKLY_DATA_VERSION = '2026-09-14-mgmt-pain-1055-factor-1851-case-302';
+const MGMT_WEEKLY_DATA_VERSION = '2026-09-14-mgmt-pain-1055-factor-1851-case-302-sku-304';
 function _mgmtGetWeekly() {
   let user = null;
   try {
@@ -11188,14 +11188,14 @@ function initMgmtPage() {
   set('mgmt-pain-delta',   _mgmtDeltaBadge(latest.pains   - prev.pains,   '#dc2626') + '<span style="font-size:10px;color:#9ca3af;font-weight:400;"> 较上期</span>');
   set('mgmt-scene-delta',  _mgmtDeltaBadge(latest.scenes  - prev.scenes,  '#15803d') + '<span style="font-size:10px;color:#9ca3af;font-weight:400;"> 较上期</span>');
 
-  // SKU库：总数 + 月增（找最近两个有 sku 值的快照算增量）
+  // SKU库：总数 + 较上期净变动（找最近两个有 sku 值的快照算差额）
   const skuSnaps = snaps.filter(s => s.sku != null);
   const skuLatest = skuSnaps.length ? skuSnaps[skuSnaps.length - 1].sku : SKU_BU.total;
   const skuPrev   = skuSnaps.length > 1 ? skuSnaps[skuSnaps.length - 2].sku : null;
   set('mgmt-sku-total', skuLatest.toLocaleString());
   set('mgmt-sku-delta', (skuPrev == null
       ? '<span style="color:#9ca3af;">起点基线</span>'
-      : _mgmtDeltaBadge(skuLatest - skuPrev, '#7c3aed')) + '<span style="font-size:10px;color:#9ca3af;font-weight:400;"> 月增</span>');
+      : _mgmtDeltaBadge(skuLatest - skuPrev, '#7c3aed')) + '<span style="font-size:10px;color:#9ca3af;font-weight:400;"> 较上期</span>');
 
   // 案例库：总数 + 增量（找最近两个有 cases 值的快照；案例为新资产，历史多为 null）
   const caseSnaps = snaps.filter(s => s.cases != null);
@@ -11211,7 +11211,7 @@ function initMgmtPage() {
   set('mgmt-factor-sub', `1851条因子覆盖C端高净值客户 15 个分析维度，按月更新<br>主体/资产/动作/约束 四维链路形成痛点`);
   set('mgmt-pain-sub',   `PLM痛点协作平台持续迭代，痛点持续修改中`);
   set('mgmt-scene-sub',  '覆盖 2025-2026年 302 场HGJ会议纪要，按月更新<br>202606新增慧管家纪要已完成全口径场景蒸馏');
-  set('mgmt-sku-sub',    'Tax 197 / Legal 62 / CM 53<br>知识卡片存量数据，BU研发后实时更新');
+  set('mgmt-sku-sub',    `Tax ${SKU_BU.Tax} / Legal ${SKU_BU.Legal} / CM ${SKU_BU.CM}<br>BU确认版知识卡片，2026-09-14核对`);
 
   // ── 趋势折线图（支持数据更新后重渲染）──
   const el = document.getElementById('chart-mgmt-trend');
@@ -11247,7 +11247,7 @@ function initMgmtPage() {
 
   // ── KPI sub 文案默认值（固化用户编辑内容）──
   set('mgmt-scene-sub', '覆盖 2025-2026年 302 场HGJ会议纪要，按月更新<br>202606新增慧管家纪要已完成全口径场景蒸馏');
-  set('mgmt-sku-sub',   'Tax 197 / Legal 62 / CM 53<br>知识卡片存量数据，BU研发后实时更新');
+  set('mgmt-sku-sub',   `Tax ${SKU_BU.Tax} / Legal ${SKU_BU.Legal} / CM ${SKU_BU.CM}<br>BU确认版知识卡片，2026-09-14核对`);
 
   // ── 周度明细表（最新在上；编辑模式下所有数据格可改）──
   const tbody = document.getElementById('mgmt-week-table');
