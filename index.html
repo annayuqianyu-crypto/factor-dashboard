@@ -9151,8 +9151,8 @@ const PAIN_BU_DATA = [
   {
     key: 'tax',
     name: 'Tax 税务',
-    value: 435,
-    delta: 10,
+    value: 456,
+    delta: 21,
     color: '#e11d48',
     soft: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)',
     fill: 'linear-gradient(90deg, #fb7185 0%, #e11d48 100%)',
@@ -11123,6 +11123,14 @@ const MGMT_WEEKLY = [
     noteScene: '',
     noteSku: '',
     noteCase: '已完成标签整理和案例脱敏提炼，陪练场训练数据（专家金句、关键转折）整理完毕。' },
+  { date: '2026-09-14', factors: 1851, pains: 1055, scenes: 631, sku: 312, cases: 302,
+    newCM: 0, newLegal: 0, newTax: 21, newSkuCM: null, newSkuLegal: null, newSkuTax: null,
+    note: '已上线小程序痛点同步：总数1034 → 1055条，本周税务净增21条，法律、资本持平。',
+    noteFactor: '',
+    notePain: '已上线痛点总数1055条：本周税务21条由未同步转为已同步，法律、资本持平。新增涉及基金退出与持股税负、境外持股及外汇登记、企业税务合规与内控、双重税务居民、汇算清缴及返程投资分红协定待遇。',
+    noteScene: '',
+    noteSku: '',
+    noteCase: '' },
 ];
 
 function _mgmtResolve(snap) {
@@ -11146,7 +11154,7 @@ function _mgmtDeltaBadge(delta, colorPos) {
 // 规则：以 date 为键，当前数据版本内用户编辑版优先；代码固化新口径后自动失效旧缓存。
 const MGMT_WEEKLY_USER_KEY = 'mgmt_weekly_user';
 const MGMT_WEEKLY_USER_VERSION_KEY = 'mgmt_weekly_user_version';
-const MGMT_WEEKLY_DATA_VERSION = '2026-09-07-mgmt-pain-1034-factor-1851-case-302-training';
+const MGMT_WEEKLY_DATA_VERSION = '2026-09-14-mgmt-pain-1055-factor-1851-case-302';
 function _mgmtGetWeekly() {
   let user = null;
   try {
