@@ -8,7 +8,7 @@
 
 <meta name="viewport" content="width=1200"/>
 
-<meta name="zx-dashboard-build" content="2026-09-21-pain-1055"/>
+<meta name="zx-dashboard-build" content="2026-10-12-pain-1084"/>
 
 <title>朝曦家办·产品中心 · 数据驾驶舱</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232d6a4f'/%3E%3Cpath d='M9 22 Q9 10 16 8 Q23 10 23 22' stroke='%23b7e4c7' stroke-width='1.5' fill='none'/%3E%3Cpath d='M16 8 L16 24' stroke='%2374c69d' stroke-width='1.5'/%3E%3Cpath d='M16 14 Q11 12 9 15' stroke='%2395d5b2' stroke-width='1.2' fill='none'/%3E%3Cpath d='M16 18 Q21 15 23 18' stroke='%2395d5b2' stroke-width='1.2' fill='none'/%3E%3C/svg%3E"/>
@@ -3103,7 +3103,7 @@ body {
 
   <span class="subtitle">数据驾驶舱</span>
 
-  <span class="badge">数据截至 2026-09-21</span>
+  <span class="badge">数据截至 2026-10-12</span>
 
 </div>
 
@@ -9151,8 +9151,8 @@ const PAIN_BU_DATA = [
   {
     key: 'tax',
     name: 'Tax 税务',
-    value: 456,
-    delta: 0,
+    value: 485,
+    delta: 29,
     color: '#e11d48',
     soft: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)',
     fill: 'linear-gradient(90deg, #fb7185 0%, #e11d48 100%)',
@@ -11139,6 +11139,14 @@ const MGMT_WEEKLY = [
     noteScene: '',
     noteSku: '按9月16日最新知识卡片更新至287支：Tax 180、Legal 54、CM 53。较上期304支净减少17支，均属Tax；另有3支同名SKU更换编号，不计作新增。延续清理未经确认及实操中不显著SKU、避免冗余的口径，数量减少不代表专业能力减少。',
     noteCase: '' },
+  { date: '2026-10-12', factors: 1851, pains: 1084, scenes: 631, sku: 287, cases: 302,
+    newCM: 0, newLegal: 0, newTax: 29, newSkuCM: 0, newSkuLegal: 0, newSkuTax: 0,
+    note: '按10月12日导出核对：已上线痛点1055 → 1084条，较上次9月21日税务净增29条，法律、资本持平。本期增量为两次快照之间的变化，不拆分为中间各周。其他资产沿用上期已核对数据。',
+    noteFactor: '',
+    notePain: '1、较上次9月21日，29条税务痛点由未同步转为已同步，无移出或跨BU调整；已同步1084条，法律416、税务485、资本183。未同步529条不计入上线统计。2、新上线内容涉及个人综合税负、慈善捐赠、移民与留学家庭税务居民身份、新加坡EP及家属安排、CRS与境外所得申报、境外架构和利润回流。3、存量4条痛点已修复预期效果、相关法律法规及标签错位：P-045-1B、P-147-1A、P-147-1B、P-147-1C；修复不计作新增。',
+    noteScene: '',
+    noteSku: '',
+    noteCase: '' },
 ];
 
 function _mgmtResolve(snap) {
@@ -11162,7 +11170,7 @@ function _mgmtDeltaBadge(delta, colorPos) {
 // 规则：以 date 为键，当前数据版本内用户编辑版优先；代码固化新口径后自动失效旧缓存。
 const MGMT_WEEKLY_USER_KEY = 'mgmt_weekly_user';
 const MGMT_WEEKLY_USER_VERSION_KEY = 'mgmt_weekly_user_version';
-const MGMT_WEEKLY_DATA_VERSION = '2026-09-21-mgmt-pain-1055-factor-1851-case-302-sku-287';
+const MGMT_WEEKLY_DATA_VERSION = '2026-10-12-mgmt-pain-1084-factor-1851-case-302-sku-287';
 function _mgmtGetWeekly() {
   let user = null;
   try {
